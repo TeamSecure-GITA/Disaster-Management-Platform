@@ -1,24 +1,68 @@
-# Logs
-logs
-*.log
+
+# Node.js
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
 
-# Editor directories and files
+# Logs
+*.log
+logs/*
+!logs/.gitkeep
+
+# Uploads
+Backend/uploads/*
+!Backend/uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
+
+# Visual Studio project files
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Python environment
+*.egg-info/
+
+# AI/ML generated files
+*.pkl
+*.joblib
+*.h5
+*.keras
+*.onnx
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build files
+dist/
+dist-ssr/
+build/
