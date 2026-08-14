@@ -94,24 +94,40 @@ Client ⇄ Socket.IO ⇄ Socket Handler ⇄ Service / Database
 ## 📁 Project Structure
 
 Backend/
+
 │
+
 ├── config/          # Database, environment and CORS configuration
+
 ├── controllers/     # Request handling
+
 ├── docs/            # API / architecture / database documentation
+
 ├── jobs/            # Scheduled jobs
+
 ├── middleware/      # Authentication, validation and security
+
 ├── models/          # Mongoose models
+
 ├── routes/          # API routes
+
 ├── services/        # Business logic and external services
+
 ├── sockets/         # Socket.IO handlers
+
 ├── tests/           # Automated tests
+
 ├── uploads/         # Uploaded documents, images and videos
+
 ├── utils/           # Helper functions
+
 ├── validators/      # Request validation
-│
+
 ├── .env             # Local configuration (do not commit)
 ├── package.json
+
 ├── package-lock.json
+
 └── server.js        # Backend entry point
 
 ## 🚨 Features
