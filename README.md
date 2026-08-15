@@ -41,20 +41,20 @@ The main goal is to bring different disaster-response features into one backend 
 
 ## 🧰 Tech Stack
 
-### Technology                            Used for
-
-Node.js                               Backend runtime
-Express.js                            REST API
-MongoDB                               Database
-Mongoose                              MongoDB ODM
-JWT                                   Authentication
-bcryptjs                              Password hashing
-Socket.IO                             Real-time communication
-Axios                                 External API requests
-Multer                                File uploads
-Nodemailer                            Email services
-node-cron                             Scheduled jobs
-Jest / Supertest                      Testing
+| Technology | Used for |
+|---|---|
+| Node.js | Backend runtime |
+| Express.js | REST API |
+| MongoDB | Database |
+| Mongoose | MongoDB ODM |
+| JWT | Authentication |
+| bcryptjs | Password hashing |
+| Socket.IO | Real-time communication |
+| Axios | External API requests |
+| Multer | File uploads |
+| Nodemailer | Email services |
+| node-cron | Scheduled jobs |
+| Jest / Supertest | Testing |
 
 ## 🏗️ Backend Flow
 
