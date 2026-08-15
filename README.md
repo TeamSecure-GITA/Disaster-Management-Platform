@@ -124,6 +124,7 @@ Backend/
 ├── validators/      # Request validation
 
 ├── .env             # Local configuration (do not commit)
+
 ├── package.json
 
 ├── package-lock.json
