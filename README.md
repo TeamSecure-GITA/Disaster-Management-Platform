@@ -200,26 +200,26 @@ Socket.IO is included for real-time alerts, notifications, SOS events, sensor up
 
 ## 🌐 API Overview
 
-### ModuleBase                  Endpoint
+| Module | Base Endpoint |
+|---|---|
+| Authentication | `/api/auth` |
+| Users | `/api/users` |
+| Alerts | `/api/alerts` |
+| Disasters | `/api/disasters` |
+| Shelters | `/api/shelters` |
+| Resources | `/api/resources` |
+| Volunteers | `/api/volunteers` |
+| SOS | `/api/sos` |
+| Tasks | `/api/tasks` |
+| Drones | `/api/drones` |
+| Notifications | `/api/notifications` |
+| Predictions | `/api/predictions` |
+| Analytics | `/api/analytics` |
+| Sensors | `/api/sensors` |
+| Satellite | `/api/satellite` |
+| Chat | `/api/chat` |
 
-Authentication                  /api/auth
-Users                           /api/users
-Alerts                          /api/alerts
-Disasters                       /api/disasters
-Shelters                        /api/shelters
-Resources                       /api/resources
-Volunteers                      /api/volunteers
-SOS                             /api/sos
-Tasks                           /api/tasks
-Drones                          /api/drones
-Notifications                   /api/notifications
-Predictions                     /api/predictions
-Analytics                       /api/analytics
-Sensors                         /api/sensors
-Satellite                       /api/satellite
-Chat                            /api/chat
-
-The route files are present in the backend codebase. Complete route registration in the application bootstrap is still part of the integration work.
+> The route files are present in the backend codebase. Complete route registration in the application bootstrap is still part of the integration work.
 
 ## ⚡ Quick Start
 
