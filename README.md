@@ -88,8 +88,8 @@ The main goal is to bring different disaster-response features into one backend 
                             ▼
                        MongoDB
 
-For real-time features:
-Client ⇄ Socket.IO ⇄ Socket Handler ⇄ Service / Database
+> For real-time features:
+>  Client ⇄ Socket.IO ⇄ Socket Handler ⇄ Service / Database
 
 ## 📁 Project Structure
 
