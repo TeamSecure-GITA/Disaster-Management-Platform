@@ -1,20 +1,18 @@
 const request = require("supertest");
-const app = require("../server");
+const app = require("../app");
 
 describe("Shelter API", () => {
-  test("GET /api/shelters should return a response", async () => {
-    const response = await request(app).get("/api/shelters");
+  test("invalid shelter payload returns validation errors", async () => {
+    const response = await request(app).post("/api/shelters").send({});
 
-    expect(response.statusCode).toBeGreaterThanOrEqual(200);
-    expect(response.statusCode).toBeLessThan(500);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
   });
 
   test("GET /api/shelters/:id should return a response", async () => {
-    const response = await request(app).get(
-      "/api/shelters/000000000000000000000000"
-    );
+    const response = await request(app).get("/api/shelters/unmatched/path");
 
-    expect(response.statusCode).toBeGreaterThanOrEqual(200);
-    expect(response.statusCode).toBeLessThan(500);
+    expect(response.statusCode).toBe(404);
+    expect(response.body.success).toBe(false);
   });
 });

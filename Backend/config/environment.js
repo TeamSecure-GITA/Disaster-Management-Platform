@@ -37,6 +37,18 @@ const environment = {
   uploadDirectory:
     process.env.UPLOAD_DIRECTORY || "uploads",
 
+  cloudStorageProvider:
+    process.env.CLOUD_STORAGE_PROVIDER || "local",
+
+  cloudinaryCloudName:
+    process.env.CLOUDINARY_CLOUD_NAME || "",
+
+  cloudinaryApiKey:
+    process.env.CLOUDINARY_API_KEY || "",
+
+  cloudinaryApiSecret:
+    process.env.CLOUDINARY_API_SECRET || "",
+
   maxFileSize:
     Number(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024,
 

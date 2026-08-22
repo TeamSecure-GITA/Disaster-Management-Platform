@@ -3,7 +3,7 @@ const { getIO } = require("./socket");
 const emitDroneLocation = (droneId, location) => {
   const io = getIO();
 
-  io.emit("droneLocation", {
+  io.to("operations").emit("droneLocation", {
     droneId,
     location,
   });
@@ -12,7 +12,7 @@ const emitDroneLocation = (droneId, location) => {
 const emitDroneStatus = (droneId, status) => {
   const io = getIO();
 
-  io.emit("droneStatus", {
+  io.to("operations").emit("droneStatus", {
     droneId,
     status,
   });
@@ -21,7 +21,7 @@ const emitDroneStatus = (droneId, status) => {
 const emitMissionUpdate = (mission) => {
   const io = getIO();
 
-  io.emit("missionUpdate", mission);
+  io.to("operations").emit("missionUpdate", mission);
 };
 
 module.exports = {

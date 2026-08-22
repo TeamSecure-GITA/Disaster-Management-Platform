@@ -1,6 +1,13 @@
 const DamageAssessment = require("../models/DamageAssessment");
+const {
+    uploadFile,
+    deleteFile,
+    removeTemporaryFile,
+} = require("../services/fileStorageService");
 
 const createDamageAssessment = async (req, res, next) => {
+    let uploadedImages = [];
+
     try {
         const assessmentData = {
             ...req.body,
@@ -8,10 +15,21 @@ const createDamageAssessment = async (req, res, next) => {
         };
 
         if (req.files && req.files.length > 0) {
-            assessmentData.images = req.files.map((file) => ({
-                url: `/uploads/images/${file.filename}`,
-                filename: file.filename,
-            }));
+            try {
+                uploadedImages = [];
+                for (const file of req.files) {
+                    const uploadedImage = await uploadFile(file, {
+                        folder: "disaster-management/damage-assessments",
+                    });
+                    uploadedImages.push(uploadedImage);
+                }
+                assessmentData.images = uploadedImages;
+            } catch (uploadError) {
+                await Promise.all(
+                    req.files.map((file) => removeTemporaryFile(file.path))
+                );
+                throw uploadError;
+            }
         }
 
         if (
@@ -40,6 +58,9 @@ const createDamageAssessment = async (req, res, next) => {
             data: assessment,
         });
     } catch (error) {
+        await Promise.all(
+            uploadedImages.map((image) => deleteFile(image))
+        );
         next(error);
     }
 };

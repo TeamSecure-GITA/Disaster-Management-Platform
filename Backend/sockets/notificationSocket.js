@@ -1,18 +1,28 @@
 const { getIO } = require("./socket");
 
 const emitNotification = (userId, notification) => {
-  const io = getIO();
+  let io;
+  try {
+    io = getIO();
+  } catch (error) {
+    return false;
+  }
 
-  io.to(`user_${userId}`).emit(
+  io.to(`user:${userId}`).emit(
     "notification",
     notification
   );
 };
 
 const emitNotificationRead = (userId, notificationId) => {
-  const io = getIO();
+  let io;
+  try {
+    io = getIO();
+  } catch (error) {
+    return false;
+  }
 
-  io.to(`user_${userId}`).emit(
+  io.to(`user:${userId}`).emit(
     "notificationRead",
     {
       notificationId,

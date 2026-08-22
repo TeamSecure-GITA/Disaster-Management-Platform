@@ -2,10 +2,9 @@ const cron = require("node-cron");
 const notificationService = require("../services/notificationService");
 
 const startNotificationJob = () => {
-  // Runs every 5 minutes
   cron.schedule("*/5 * * * *", async () => {
     try {
-      console.log("Processing notifications...");
+      console.log("Processing pending notifications...");
 
       if (
         notificationService &&

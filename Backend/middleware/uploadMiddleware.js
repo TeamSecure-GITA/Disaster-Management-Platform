@@ -201,10 +201,54 @@ const anyFileUpload = multer({
   },
 });
 
+const defaultStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDirectories.documents);
+  },
+
+  filename: (req, file, cb) => {
+    const extension = path.extname(file.originalname);
+    const baseName = path
+      .basename(file.originalname, extension)
+      .replace(/[^a-zA-Z0-9_-]/g, "_");
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${baseName}${extension}`;
+    cb(null, uniqueName);
+  },
+});
+
+const defaultFilter = (_req, _file, cb) => cb(null, true);
+
+const createUploadMiddleware = ({
+  storage = defaultStorage,
+  fileFilter = defaultFilter,
+  limits = { fileSize: 10 * 1024 * 1024 },
+} = {}) => {
+  return multer({ storage, fileFilter, limits });
+};
+
+const array = (fieldName, maxCount, options = {}) => {
+  const upload = createUploadMiddleware(options);
+  return upload.array(fieldName, maxCount);
+};
+
+const single = (fieldName, options = {}) => {
+  const upload = createUploadMiddleware(options);
+  return upload.single(fieldName);
+};
+
+const fields = (fields, options = {}) => {
+  const upload = createUploadMiddleware(options);
+  return upload.fields(fields);
+};
+
 module.exports = {
   imageUpload,
   documentUpload,
   videoUpload,
   anyFileUpload,
   uploadDirectories,
+  array,
+  single,
+  fields,
+  createUploadMiddleware,
 };

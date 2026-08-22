@@ -10,12 +10,16 @@ const {
   createSOSValidator,
 } = require("../validators/sosValidator");
 
-const validationMiddleware = require("../middleware/validationMiddleware");
+const {
+  validate: validationMiddleware,
+} = require("../middleware/validationMiddleware");
+const { sosLimiter } = require("../middleware/rateLimitMiddleware");
 
 const router = express.Router();
 
 router.post(
   "/",
+  sosLimiter,
   createSOSValidator,
   validationMiddleware,
   createSOS

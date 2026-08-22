@@ -18,6 +18,14 @@ const initializeSocket = (server) => {
       console.log(`${socket.id} joined room: ${room}`);
     });
 
+    socket.on("joinUserRoom", (userId) => {
+      if (userId) {
+        const room = `user_${userId}`;
+        socket.join(room);
+        console.log(`${socket.id} joined user room: ${room}`);
+      }
+    });
+
     socket.on("leaveRoom", (room) => {
       socket.leave(room);
       console.log(`${socket.id} left room: ${room}`);

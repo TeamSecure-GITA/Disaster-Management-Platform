@@ -11,7 +11,9 @@ const {
   createAlertValidator,
 } = require("../validators/alertValidator");
 
-const validationMiddleware = require("../middleware/validationMiddleware");
+const {
+  validate: validationMiddleware,
+} = require("../middleware/validationMiddleware");
 
 const router = express.Router();
 

@@ -1,9 +1,12 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const path = require("path");
 
 const corsOptions = require("./config/cors");
-const errorMiddleware = require("./middleware/errorMiddleware");
+const { errorHandler } = require("./middleware/errorMiddleware");
+const requestLogger = require("./middleware/requestLogger");
+const { generalLimiter } = require("./middleware/rateLimitMiddleware");
 
 // Existing routes
 const authRoute = require("./routes/authRoute");
@@ -31,11 +34,17 @@ const evacuationRoutes = require("./routes/evacuationRoutes");
 
 const app = express();
 
+app.disable("x-powered-by");
+app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : false);
+
 // ================================
 // GLOBAL MIDDLEWARE
 // ================================
 
 app.use(cors(corsOptions));
+app.use(helmet());
+app.use(requestLogger);
+app.use(generalLimiter);
 
 app.use(express.json({ limit: "10mb" }));
 
@@ -61,8 +70,7 @@ app.use(
 
 app.get("/", (req, res) => {
     res.status(200).json({
-        success: true,
-        message: "Disaster Management Platform API is running",
+        message: "Disaster Management API is running",
     });
 });
 
@@ -116,6 +124,6 @@ app.use((req, res) => {
 // GLOBAL ERROR HANDLER
 // ================================
 
-app.use(errorMiddleware);
+app.use(errorHandler);
 
 module.exports = app;

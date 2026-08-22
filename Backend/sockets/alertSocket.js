@@ -3,19 +3,19 @@ const { getIO } = require("./socket");
 const emitNewAlert = (alert) => {
   const io = getIO();
 
-  io.emit("newAlert", alert);
+  io.to("alerts").emit("newAlert", alert);
 };
 
 const emitAlertUpdated = (alert) => {
   const io = getIO();
 
-  io.emit("alertUpdated", alert);
+  io.to("alerts").emit("alertUpdated", alert);
 };
 
 const emitAlertDeleted = (alertId) => {
   const io = getIO();
 
-  io.emit("alertDeleted", {
+  io.to("alerts").emit("alertDeleted", {
     alertId,
   });
 };

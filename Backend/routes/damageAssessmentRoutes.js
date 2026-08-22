@@ -8,14 +8,18 @@ const {
     updateDamageAssessmentStatus,
 } = require("../controllers/damageAssessmentController");
 
-const authMiddleware = require("../middleware/authMiddleware");
+const {
+    protect: authMiddleware,
+} = require("../middleware/authMiddleware");
 const uploadMiddleware = require("../middleware/uploadMiddleware");
+const { uploadLimiter } = require("../middleware/rateLimitMiddleware");
 
 const router = express.Router();
 
 router.post(
     "/",
     authMiddleware,
+    uploadLimiter,
     uploadMiddleware.array("images", 10),
     createDamageAssessment
 );

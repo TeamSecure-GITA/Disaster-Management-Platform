@@ -29,7 +29,26 @@ const getPredictions = async (req, res, next) => {
   }
 };
 
+const getPredictionStatus = async (req, res, next) => {
+  try {
+    const status = {
+      aiServiceUrl: process.env.AI_CHATBOT_URL || "http://localhost:8000",
+      hasExternalAi: Boolean(process.env.AI_CHATBOT_URL),
+      modelFallbackEnabled: true,
+      timestamp: new Date().toISOString(),
+    };
+
+    res.status(200).json({
+      success: true,
+      data: status,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createPrediction,
   getPredictions,
+  getPredictionStatus,
 };
