@@ -1,60 +1,92 @@
 const fs = require("fs");
 const path = require("path");
 
+// ============================================================
+// LOG DIRECTORY
+// ============================================================
+
 const logsDirectory = path.join(
   __dirname,
   "..",
   "logs"
 );
 
-// Create logs directory if it does not exist
 if (!fs.existsSync(logsDirectory)) {
   fs.mkdirSync(logsDirectory, {
     recursive: true,
   });
 }
 
-// Log file paths
+// ============================================================
+// LOG FILES
+// ============================================================
+
 const logFiles = {
-  access: path.join(logsDirectory, "access.log"),
-  error: path.join(logsDirectory, "error.log"),
-  combined: path.join(logsDirectory, "combined.log"),
+  access: path.join(
+    logsDirectory,
+    "access.log"
+  ),
+
+  error: path.join(
+    logsDirectory,
+    "error.log"
+  ),
+
+  combined: path.join(
+    logsDirectory,
+    "combined.log"
+  ),
 };
 
-// Format log message
+// ============================================================
+// FORMAT MESSAGE
+// ============================================================
+
 const formatMessage = (
   level,
   message,
   metadata = null
 ) => {
-  const timestamp = new Date().toISOString();
+  const timestamp =
+    new Date().toISOString();
+
+  let formattedMessage = String(message);
 
   let formattedMetadata = "";
 
   if (metadata !== null) {
     try {
-      formattedMetadata = ` ${JSON.stringify(metadata)}`;
-    } catch (error) {
+      formattedMetadata =
+        ` ${JSON.stringify(metadata)}`;
+    } catch (serializationError) {
       formattedMetadata =
         " [Unable to serialize metadata]";
     }
   }
 
-  return `[${timestamp}] [${level}] ${message}${formattedMetadata}\n`;
+  return (
+    `[${timestamp}] [${level}] ` +
+    `${formattedMessage}` +
+    `${formattedMetadata}\n`
+  );
 };
 
-// Write log to file
+// ============================================================
+// WRITE LOG
+// ============================================================
+
 const writeLog = (
   file,
   level,
   message,
   metadata = null
 ) => {
-  const formattedMessage = formatMessage(
-    level,
-    message,
-    metadata
-  );
+  const formattedMessage =
+    formatMessage(
+      level,
+      message,
+      metadata
+    );
 
   try {
     fs.appendFileSync(
@@ -62,17 +94,20 @@ const writeLog = (
       formattedMessage,
       "utf8"
     );
-  } catch (error) {
+  } catch (writeError) {
     console.error(
       "Failed to write log:",
-      error.message
+      writeError.message
     );
   }
 
   return formattedMessage;
 };
 
-// INFO log
+// ============================================================
+// INFO
+// ============================================================
+
 const info = (
   message,
   metadata = null
@@ -89,7 +124,10 @@ const info = (
   return output;
 };
 
-// WARN log
+// ============================================================
+// WARNING
+// ============================================================
+
 const warn = (
   message,
   metadata = null
@@ -106,7 +144,10 @@ const warn = (
   return output;
 };
 
-// ERROR log
+// ============================================================
+// ERROR
+// ============================================================
+
 const error = (
   message,
   metadata = null
@@ -130,7 +171,10 @@ const error = (
   return output;
 };
 
-// ACCESS log
+// ============================================================
+// ACCESS LOG
+// ============================================================
+
 const access = (
   message,
   metadata = null
@@ -152,12 +196,18 @@ const access = (
   return output;
 };
 
-// DEBUG log
+// ============================================================
+// DEBUG
+// ============================================================
+
 const debug = (
   message,
   metadata = null
 ) => {
-  if (process.env.NODE_ENV === "development") {
+  if (
+    process.env.NODE_ENV ===
+    "development"
+  ) {
     const output = writeLog(
       logFiles.combined,
       "DEBUG",
@@ -165,7 +215,9 @@ const debug = (
       metadata
     );
 
-    console.debug(output.trim());
+    console.debug(
+      output.trim()
+    );
 
     return output;
   }
@@ -173,22 +225,141 @@ const debug = (
   return null;
 };
 
-// Logger object
+// ============================================================
+// EXPRESS REQUEST LOGGER
+// ============================================================
+
+const request = (
+  req,
+  statusCode = 200,
+  responseTime = null
+) => {
+  const metadata = {
+    method: req.method,
+    url: req.originalUrl || req.url,
+    ip:
+      req.ip ||
+      req.connection?.remoteAddress ||
+      "unknown",
+    userAgent:
+      req.get?.("user-agent") ||
+      "unknown",
+    statusCode,
+  };
+
+  if (responseTime !== null) {
+    metadata.responseTime =
+      `${responseTime}ms`;
+  }
+
+  return access(
+    "HTTP request",
+    metadata
+  );
+};
+
+// ============================================================
+// DATABASE LOGGER
+// ============================================================
+
+const database = (
+  message,
+  metadata = null
+) => {
+  return info(
+    `Database: ${message}`,
+    metadata
+  );
+};
+
+// ============================================================
+// AUTHENTICATION LOGGER
+// ============================================================
+
+const auth = (
+  message,
+  metadata = null
+) => {
+  return info(
+    `Authentication: ${message}`,
+    metadata
+  );
+};
+
+// ============================================================
+// SECURITY LOGGER
+// ============================================================
+
+const security = (
+  message,
+  metadata = null
+) => {
+  return warn(
+    `Security: ${message}`,
+    metadata
+  );
+};
+
+// ============================================================
+// ERROR OBJECT LOGGER
+// ============================================================
+
+const errorObject = (
+  message,
+  err,
+  metadata = {}
+) => {
+  const errorMetadata = {
+    ...metadata,
+    errorName:
+      err?.name || "Error",
+    errorMessage:
+      err?.message || "Unknown error",
+    stack:
+      err?.stack || null,
+  };
+
+  return error(
+    message,
+    errorMetadata
+  );
+};
+
+// ============================================================
+// LOGGER OBJECT
+// ============================================================
+
 const logger = {
   info,
   warn,
   error,
   access,
   debug,
+  request,
+  database,
+  auth,
+  security,
+  errorObject,
 };
 
-// Export logger
+// ============================================================
+// EXPORTS
+// ============================================================
+
 module.exports = {
   logger,
+
   info,
   warn,
   error,
   access,
   debug,
+
+  request,
+  database,
+  auth,
+  security,
+  errorObject,
+
   logFiles,
 };
