@@ -8,7 +8,9 @@ const {
     deactivateRescueId,
 } = require("../controllers/rescueIdController");
 
-const authMiddleware = require("../middleware/authMiddleware");
+const {
+    protect: authMiddleware,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 

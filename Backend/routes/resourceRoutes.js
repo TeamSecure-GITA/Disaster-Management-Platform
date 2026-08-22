@@ -10,7 +10,9 @@ const {
   createResourceValidator,
 } = require("../validators/resourceValidator");
 
-const validationMiddleware = require("../middleware/validationMiddleware");
+const {
+  validate: validationMiddleware,
+} = require("../middleware/validationMiddleware");
 
 const router = express.Router();
 

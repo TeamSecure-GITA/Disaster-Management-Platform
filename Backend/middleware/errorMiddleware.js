@@ -59,6 +59,14 @@ const errorHandler = (
     message = "Authentication token has expired.";
   }
 
+  if (message === "User already exists") {
+    statusCode = 409;
+  }
+
+  if (message === "Invalid email or password") {
+    statusCode = 401;
+  }
+
   const response = {
     success: false,
     message,

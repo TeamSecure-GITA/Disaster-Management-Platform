@@ -10,7 +10,9 @@ const {
   createShelterValidator,
 } = require("../validators/shelterValidator");
 
-const validationMiddleware = require("../middleware/validationMiddleware");
+const {
+  validate: validationMiddleware,
+} = require("../middleware/validationMiddleware");
 
 const router = express.Router();
 

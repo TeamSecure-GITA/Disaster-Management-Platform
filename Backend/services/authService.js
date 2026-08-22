@@ -8,7 +8,9 @@ const registerUser = async (userData) => {
   const existingUser = await User.findOne({ email });
 
   if (existingUser) {
-    throw new Error("User already exists");
+    const error = new Error("User already exists");
+    error.statusCode = 409;
+    throw error;
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -25,7 +27,7 @@ const registerUser = async (userData) => {
       name: user.name,
       email: user.email,
     },
-    token: generateToken(user._id),
+    token: generateToken({ _id: user._id, role: user.role }),
   };
 };
 
@@ -33,13 +35,17 @@ const loginUser = async (email, password) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new Error("Invalid email or password");
+    const error = new Error("Invalid email or password");
+    error.statusCode = 401;
+    throw error;
   }
 
   const passwordMatch = await bcrypt.compare(password, user.password);
 
   if (!passwordMatch) {
-    throw new Error("Invalid email or password");
+    const error = new Error("Invalid email or password");
+    error.statusCode = 401;
+    throw error;
   }
 
   return {
@@ -48,7 +54,7 @@ const loginUser = async (email, password) => {
       name: user.name,
       email: user.email,
     },
-    token: generateToken(user._id),
+    token: generateToken({ _id: user._id, role: user.role }),
   };
 };
 

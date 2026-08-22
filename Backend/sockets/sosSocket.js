@@ -3,19 +3,19 @@ const { getIO } = require("./socket");
 const emitNewSOS = (sos) => {
   const io = getIO();
 
-  io.emit("newSOS", sos);
+  io.to("operations").emit("newSOS", sos);
 };
 
 const emitSOSUpdated = (sos) => {
   const io = getIO();
 
-  io.emit("sosUpdated", sos);
+  io.to("operations").emit("sosUpdated", sos);
 };
 
 const emitSOSResolved = (sosId) => {
   const io = getIO();
 
-  io.emit("sosResolved", {
+  io.to("operations").emit("sosResolved", {
     sosId,
   });
 };

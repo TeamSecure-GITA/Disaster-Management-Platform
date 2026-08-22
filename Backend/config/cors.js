@@ -1,4 +1,3 @@
-const cors = require("cors");
 const environment = require("./environment");
 
 const allowedOrigins = [
@@ -11,8 +10,6 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests without an Origin header.
-    // This is useful for curl, Postman and server-to-server requests.
     if (!origin) {
       return callback(null, true);
     }
@@ -52,4 +49,4 @@ const corsOptions = {
   maxAge: 86400,
 };
 
-module.exports = cors(corsOptions);
+module.exports = corsOptions;

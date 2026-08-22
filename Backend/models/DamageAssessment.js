@@ -86,6 +86,22 @@ const damageAssessmentSchema = new mongoose.Schema(
                 filename: {
                     type: String,
                 },
+
+                provider: {
+                    type: String,
+                    enum: ["local", "cloudinary"],
+                    default: "local",
+                },
+
+                publicId: {
+                    type: String,
+                    default: null,
+                },
+
+                resourceType: {
+                    type: String,
+                    default: null,
+                },
             },
         ],
 

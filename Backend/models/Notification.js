@@ -47,6 +47,23 @@ const notificationSchema = new mongoose.Schema(
       index: true,
     },
 
+    status: {
+      type: String,
+      enum: ["pending", "sent", "failed"],
+      default: "pending",
+      index: true,
+    },
+
+    sentAt: {
+      type: Date,
+      default: null,
+    },
+
+    readAt: {
+      type: Date,
+      default: null,
+    },
+
     relatedId: {
       type: mongoose.Schema.Types.ObjectId,
       default: null,
@@ -61,6 +78,11 @@ const notificationSchema = new mongoose.Schema(
       type: [String],
       enum: ["in-app", "email", "sms", "push"],
       default: ["in-app"],
+    },
+
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
   },
   {

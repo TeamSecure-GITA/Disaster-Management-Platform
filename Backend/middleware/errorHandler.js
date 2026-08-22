@@ -44,6 +44,7 @@ const errorHandler = (
         req.ip ||
         req.connection?.remoteAddress ||
         "unknown",
+      requestId: req.requestId || null,
     }
   );
 
@@ -84,6 +85,7 @@ const errorHandler = (
         statusCode === 500
           ? "Internal server error"
           : message,
+      requestId: req.requestId || null,
     });
 };
 
