@@ -308,6 +308,32 @@ npm start
 
 npm test
 
+### Offline synchronization
+
+Authenticated clients can upload queued family changes through:
+
+POST /api/sync/batch
+
+The request accepts a `deviceId` and up to 50 allowlisted family operations. Each operation must contain a client-generated `operationId`; resubmitting the same operation for the same user is handled as a duplicate and is not applied twice.
+
+### Docker deployment
+
+Build and run the backend from the `Backend` directory:
+
+```bash
+cp .env.example .env
+docker build -t disaster-management-backend .
+docker run --env-file .env -p 5000:5000 disaster-management-backend
+```
+
+For a local Docker stack with MongoDB and persistent logs/uploads:
+
+```bash
+docker compose up --build -d
+```
+
+Use an externally managed MongoDB instance in production. Configure Cloudinary and Firebase credentials for durable file storage and push notifications. Do not commit `.env`, credentials, logs, or uploads.
+
 If your package.json contains additional scripts, they can be added here later.
 
 ## 🔒 Security
