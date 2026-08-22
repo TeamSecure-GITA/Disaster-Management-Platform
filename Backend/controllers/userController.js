@@ -15,6 +15,16 @@ const getUsers = async (req, res, next) => {
 
 const getUserById = async (req, res, next) => {
   try {
+    const isOwnProfile = req.user?._id?.toString() === req.params.id;
+    const isAdmin = ["admin", "super_admin"].includes(req.user?.role);
+
+    if (!isOwnProfile && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to access this profile",
+      });
+    }
+
     const user = await User.findById(req.params.id).select("-password");
 
     if (!user) {

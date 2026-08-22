@@ -20,7 +20,7 @@ const initializeSocket = (server) => {
 
     socket.on("joinUserRoom", (userId) => {
       if (userId) {
-        const room = `user_${userId}`;
+        const room = `user:${userId}`;
         socket.join(room);
         console.log(`${socket.id} joined user room: ${room}`);
       }
