@@ -25,6 +25,7 @@ const droneRoutes = require("./routes/droneRoutes");
 const satelliteRoutes = require("./routes/satelliteRoutes");
 const predictionRoutes = require("./routes/predictionRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const syncRoutes = require("./routes/syncRoutes");
 
 // New routes
 const familyRoutes = require("./routes/familyRoutes");
@@ -108,6 +109,7 @@ app.use("/api/family", familyRoutes);
 app.use("/api/rescue-id", rescueIdRoutes);
 app.use("/api/damage-assessment", damageAssessmentRoutes);
 app.use("/api/evacuation", evacuationRoutes);
+app.use("/api/sync", syncRoutes);
 
 // ================================
 // 404 HANDLER
