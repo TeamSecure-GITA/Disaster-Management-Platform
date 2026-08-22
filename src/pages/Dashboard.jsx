@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../utils/useAuth";
 import { getOfflineReports, clearOfflineReports, saveOfflineReport } from "../utils/offlineStorage";
 import { requestNotificationPermission, sendLocalEmergencyAlert } from "../utils/pushAlerts";
 
-import EmergencyMap from "../components/EmergencyMap";
-import SirenBeacon from "../components/SirenBeacon";
-import OfflineChatbot from "../components/OfflineChatbot";
-import MedicalCard from "../components/MedicalCard";
-
 export default function Dashboard() {
+  const { user, loading } = useAuth();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
   const [sosActive, setSosActive] = useState(false);
@@ -21,180 +18,233 @@ export default function Dashboard() {
 
   const [checklist, setChecklist] = useState([
     { id: 1, text: "72-Hour Clean Water Supply (3 Gallons)", checked: true },
-    { id: 2, text: "First Aid Kit & Prescription Medicines", checked: true },
-    { id: 3, text: "Flashlight & Spare Batteries", checked: false },
-    { id: 4, text: "Power Bank & Charging Cables", checked: false }
+    { id: 2, text: "First-Aid Kit & Prescription Medicines", checked: true },
+    { id: 3, text: "Emergency Flashlight & Extra Batteries", checked: false },
+    { id: 4, text: "Power Bank & Charging Cables", checked: false },
+    { id: 5, text: "Important Government Documents (In Waterproof Bag)", checked: false }
   ]);
 
-  const familyMembers = [
-    { id: 1, name: "Prafulla Kumar Behera", status: "Safe at Shelter #1", time: "10m ago" },
-    { id: 2, name: "Santilata Behera", status: "Safe at Shelter #1", time: "10m ago" }
-  ];
-
-  const stats = [
-    { title: "Active Alerts", value: "3 High Priority", color: "#ef4444" },
-    { title: "Rescue Operations", value: "12 Ongoing", color: "#38bdf8" },
-    { title: "Safe Shelters Available", value: "48 Open", color: "#22c55e" },
-    { title: "Emergency SOS Requests", value: "5 Pending", color: "#f59e0b" },
-  ];
-
   useEffect(() => {
-    const handleOnline = () => { setIsOnline(true); syncOfflineData(); };
+    const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
-    checkPendingReports();
-
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
-  const checkPendingReports = async () => {
-    const pending = await getOfflineReports();
-    setPendingSyncCount(pending.length);
-  };
-
-  const syncOfflineData = async () => {
-    const pending = await getOfflineReports();
-    if (pending.length > 0) {
-      await clearOfflineReports();
-      setPendingSyncCount(0);
-      alert("⚡ Network restored! Unsynced offline reports submitted to emergency response servers.");
-    }
-  };
-
-  const handleReportSubmit = async (e) => {
-    e.preventDefault();
-    if (!reportInput.trim()) return;
-
-    const newReport = { id: Date.now(), text: reportInput, time: "Just now", status: isOnline ? "Under Review" : "Saved Offline" };
-    
-    if (!isOnline) {
-      await saveOfflineReport(newReport);
-      checkPendingReports();
-    }
-
-    setReports([newReport, ...reports]);
-    setReportInput("");
+  const toggleCheck = (id) => {
+    setChecklist(checklist.map(item => item.id === id ? { ...item, checked: !item.checked } : item));
   };
 
   const handleEnablePush = async () => {
     const granted = await requestNotificationPermission();
     if (granted) {
       setPushEnabled(true);
-      sendLocalEmergencyAlert("🚨 Lock-Screen Alerts Active", "You will receive emergency notifications during evacuations.");
+      sendLocalEmergencyAlert("🔔 Lock-Screen Alerts Active", "You will receive emergency notifications.");
     }
   };
 
   return (
-    <div style={{ backgroundColor: "#0f172a", minHeight: "100vh", color: "#f8fafc", padding: "20px", fontFamily: "sans-serif" }}>
-      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+    <div style={{ backgroundColor: "#0b0f19", minHeight: "100vh", color: "#f8fafc", padding: "24px" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
         
+        {/* Header Title & National Hotline Bar */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "bold" }}>Disaster Management Dashboard</h1>
+            <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.9rem" }}>Real-time monitoring, emergency coordination, and live incident response.</p>
+          </div>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <span style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold", fontSize: "0.85rem" }}>National Emergency: 112</span>
+            <span style={{ backgroundColor: "#2563eb", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold", fontSize: "0.85rem" }}>🚑 Ambulance: 108</span>
+          </div>
+        </div>
+
+        {/* User Banner */}
+        <div style={{ padding: "12px 18px", backgroundColor: "#1e293b", borderRadius: "8px", border: "1px solid #334155" }}>
+          {loading ? (
+            <p style={{ margin: 0, color: "#94a3b8" }}>Loading offline session...</p>
+          ) : (
+            <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "bold", color: "#38bdf8" }}>
+              Welcome back, {user ? user.name || user.email : "Emergency Guest"}
+            </h2>
+          )}
+        </div>
+
+        {/* Offline Warning Bar */}
         {!isOnline && (
-          <div style={{ backgroundColor: "#854d0e", color: "#fef08a", padding: "12px 18px", borderRadius: "8px", marginBottom: "1.25rem", fontWeight: "bold", display: "flex", justifyContent: "space-between" }}>
-            <span>📡 Offline Mode Active: App running entirely from local cache.</span>
+          <div style={{ backgroundColor: "#854d0e", color: "#fef08a", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between" }}>
+            <span>⚠️ Offline Mode Active: App running entirely from local cache.</span>
             <span>Unsynced Offline Reports: {pendingSyncCount}</span>
           </div>
         )}
 
-        <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", padding: "8px 16px", marginBottom: "1rem", display: "flex", justifyContent: "space-between", fontSize: "0.85rem", color: "#94a3b8" }}>
-          <span>🌤️ Local Weather Radar: 28°C | Severe Weather Warning Active</span>
-          <span>Wind: 42 km/h | AQI: 45 (Good)</span>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px", marginBottom: "1.5rem" }}>
+        {/* SLA Callback Banner */}
+        <div style={{ backgroundColor: "#064e3b", border: "1px solid #059669", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <h1 style={{ fontSize: "2rem", fontWeight: "bold", margin: "0 0 6px 0" }}>Disaster Emergency Dashboard</h1>
-            <p style={{ color: "#94a3b8", margin: 0 }}>Offline-ready emergency response & safety coordinator.</p>
+            <strong style={{ color: "#34d399" }}>⚡ Zero-Delay SLA Active: Average Response Time is 42 Seconds</strong>
+            <p style={{ margin: "2px 0 0 0", fontSize: "0.8rem", color: "#a7f3d0" }}>Automated AI dispatch mode active. All help requests are processed immediately with zero queuing delays.</p>
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <a href="tel:112" style={{ backgroundColor: "#dc2626", color: "#fff", padding: "8px 12px", borderRadius: "6px", textDecoration: "none", fontWeight: "bold" }}>📞 112</a>
-            <a href="tel:108" style={{ backgroundColor: "#2563eb", color: "#fff", padding: "8px 12px", borderRadius: "6px", textDecoration: "none", fontWeight: "bold" }}>🚑 108</a>
-          </div>
-        </div>
-
-        {/* --- NEW FRONTEND COMPONENTS --- */}
-        <SirenBeacon />
-        <EmergencyMap />
-        <OfflineChatbot />
-        <MedicalCard />
-
-        {/* --- SLA & SOS BUTTONS --- */}
-        <div style={{ backgroundColor: "#064e3b", border: "1px solid #10b981", borderRadius: "10px", padding: "12px 18px", marginBottom: "1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: "#6ee7b7", fontWeight: "bold", fontSize: "0.9rem" }}>⚡ Emergency SLA: Response Time Under 60 Seconds</span>
-          <button onClick={() => setCallbackRequested(true)} style={{ backgroundColor: callbackRequested ? "#059669" : "#10b981", color: "#064e3b", border: "none", padding: "6px 12px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>
-            {callbackRequested ? "✓ Callback Scheduled" : "📞 Request Auto Callback"}
+          <button onClick={() => setCallbackRequested(true)} style={{ backgroundColor: "#059669", color: "white", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
+            {callbackRequested ? "✓ Callback Requested" : "📞 Request 1-Min Auto Callback"}
           </button>
         </div>
 
-        <div style={{ backgroundColor: sosActive ? "#7f1d1d" : "#450a0a", border: "2px solid #ef4444", borderRadius: "12px", padding: "16px 20px", marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        {/* Immediate Danger SOS Banner */}
+        <div style={{ backgroundColor: "#7f1d1d", border: "1px solid #dc2626", padding: "16px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <span style={{ fontWeight: "bold", fontSize: "1.1rem", color: "#fca5a5" }}>Immediate Danger? Trigger SOS Rescue Signal</span>
-            <div style={{ fontSize: "0.85rem", color: "#fecaca" }}>Dispatches coordinates directly to rescue command units.</div>
+            <strong style={{ color: "#fca5a5", fontSize: "1.05rem" }}>Immediate Danger / Trapped? Send Immediate Rescue Beacon</strong>
+            <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#fecaca" }}>Shares your live GPS location instantly with active NDRF & Local Rescue Units.</p>
           </div>
-          <button onClick={() => setSosActive(true)} style={{ backgroundColor: sosActive ? "#22c55e" : "#ef4444", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
-            {sosActive ? "✓ SOS Active" : "Broadcast SOS"}
+          <button onClick={() => setSosActive(!sosActive)} style={{ backgroundColor: sosActive ? "#450a0a" : "#dc2626", color: "white", border: "none", padding: "10px 20px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
+            {sosActive ? "🚨 SOS Beacon Active!" : "Broadcast SOS Signal"}
           </button>
         </div>
 
-        {/* --- KPI METRICS GRID --- */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "1.5rem" }}>
-          {stats.map((stat, idx) => (
-            <div key={idx} style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "12px", padding: "18px" }}>
-              <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>{stat.title}</span>
-              <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: stat.color, marginTop: "6px" }}>{stat.value}</div>
-            </div>
-          ))}
+        {/* Quick Stats Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+          <div style={{ backgroundColor: "#1e293b", padding: "16px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Active Alerts</span>
+            <h3 style={{ margin: "6px 0 0 0", color: "#f87171", fontSize: "1.5rem" }}>3 High Priority</h3>
+          </div>
+          <div style={{ backgroundColor: "#1e293b", padding: "16px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Rescue Operations</span>
+            <h3 style={{ margin: "6px 0 0 0", color: "#60a5fa", fontSize: "1.5rem" }}>12 Ongoing</h3>
+          </div>
+          <div style={{ backgroundColor: "#1e293b", padding: "16px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Safe Shelters Available</span>
+            <h3 style={{ margin: "6px 0 0 0", color: "#4ade80", fontSize: "1.5rem" }}>48 Open</h3>
+          </div>
+          <div style={{ backgroundColor: "#1e293b", padding: "16px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Emergency SOS Requests</span>
+            <h3 style={{ margin: "6px 0 0 0", color: "#facc15", fontSize: "1.5rem" }}>5 Pending</h3>
+          </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px", marginBottom: "1.5rem" }}>
-          <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "12px", padding: "20px" }}>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: "600", marginBottom: "10px" }}>👨‍👩‍👧‍👦 Family Safety Radar</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {familyMembers.map((member) => (
-                <div key={member.id} style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#0f172a", padding: "10px 14px", borderRadius: "8px" }}>
-                  <div>
-                    <div style={{ fontSize: "0.9rem", color: "#f8fafc" }}>{member.name}</div>
-                    <div style={{ fontSize: "0.75rem", color: "#38bdf8" }}>{member.status}</div>
-                  </div>
-                  <span style={{ fontSize: "0.75rem", color: "#64748b" }}>{member.time}</span>
-                </div>
-              ))}
+        {/* Local Weather Warning Bar */}
+        <div style={{ backgroundColor: "#1e293b", border: "1px solid #0284c7", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <strong style={{ color: "#38bdf8" }}>🌧️ Local Weather Warning: Heavy Rainfall Expected</strong>
+            <p style={{ margin: "2px 0 0 0", fontSize: "0.8rem", color: "#cbd5e1" }}>Temp: 28°C | Wind: 32 km/h | AQI: 42 (Good)</p>
+          </div>
+          <button style={{ backgroundColor: "#0284c7", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", cursor: "pointer" }}>View Radar</button>
+        </div>
+
+        {/* Live Feed & Quick Actions Split */}
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px" }}>
+          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>Live Incident Feed</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ backgroundColor: "#0f172a", padding: "12px", borderRadius: "6px", borderLeft: "4px solid #ef4444" }}>
+                <strong style={{ fontSize: "0.9rem" }}>Flood Warning issued for Coastal Region Sector 4</strong>
+                <p style={{ margin: "4px 0 0 0", fontSize: "0.75rem", color: "#94a3b8" }}>10 mins ago • Critical</p>
+              </div>
+              <div style={{ backgroundColor: "#0f172a", padding: "12px", borderRadius: "6px", borderLeft: "4px solid #3b82f6" }}>
+                <strong style={{ fontSize: "0.9rem" }}>Rescue Team Alpha dispatched to Shelter Station #2</strong>
+                <p style={{ margin: "4px 0 0 0", fontSize: "0.75rem", color: "#94a3b8" }}>25 mins ago • In Progress</p>
+              </div>
             </div>
           </div>
 
-          <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "12px", padding: "20px" }}>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: "600", marginBottom: "10px" }}>🎒 72-Hour Survival Kit Checklist</h2>
+          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>Quick Actions</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <button style={{ backgroundColor: "#dc2626", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>🚨 Dispatch SOS Emergency Team</button>
+              <button style={{ backgroundColor: "#2563eb", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>📢 Broadcast Regional Alert</button>
+              <button style={{ backgroundColor: "#059669", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>📍 Open Shelter Finder Map</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Safety Radar & Offline SMS Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>👨‍👩‍👧 Family & Personnel Safety Radar</h3>
+            <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>Real-time check-ins from registered family members during regional evacuations.</p>
+            <div style={{ backgroundColor: "#0f172a", padding: "10px", borderRadius: "6px", marginBottom: "8px", display: "flex", justifyContent: "space-between" }}>
+              <span>Prafulla Kumar Behera</span>
+              <span style={{ color: "#4ade80", fontSize: "0.85rem" }}>Safe at Shelter #1</span>
+            </div>
+            <div style={{ backgroundColor: "#0f172a", padding: "10px", borderRadius: "6px", display: "flex", justifyContent: "space-between" }}>
+              <span>Sanjibita Behera</span>
+              <span style={{ color: "#4ade80", fontSize: "0.85rem" }}>Safe at Shelter #1</span>
+            </div>
+          </div>
+
+          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>📲 Zero-Internet / Offline SMS Rescue Mode</h3>
+            <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>If cellular internet drops, send an emergency SMS to route your rescue request immediately.</p>
+            <div style={{ backgroundColor: "#0f172a", padding: "12px", borderRadius: "6px", border: "1px dashed #475569" }}>
+              <span style={{ fontSize: "0.85rem", color: "#cbd5e1" }}>Send SMS: <strong>RESCUE [NAME] [LOCATION]</strong> to <strong>56161</strong></span>
+            </div>
+          </div>
+        </div>
+
+        {/* Relief Shelters & Survival Kit Prep */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>🏥 Active Relief Shelters</h3>
+            <div style={{ marginBottom: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "4px" }}>
+                <span>Community Hall #1 (City Center)</span>
+                <span style={{ color: "#4ade80" }}>75% Full (50 Beds Open)</span>
+              </div>
+              <div style={{ backgroundColor: "#334155", height: "8px", borderRadius: "4px" }}>
+                <div style={{ backgroundColor: "#22c55e", width: "75%", height: "100%", borderRadius: "4px" }}></div>
+              </div>
+            </div>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "4px" }}>
+                <span>Central Stadium Shelter</span>
+                <span style={{ color: "#facc15" }}>88% Full (12 Beds Open)</span>
+              </div>
+              <div style={{ backgroundColor: "#334155", height: "8px", borderRadius: "4px" }}>
+                <div style={{ backgroundColor: "#eab308", width: "88%", height: "100%", borderRadius: "4px" }}></div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>🎒 72-Hour Survival Kit Prep</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {checklist.map((item) => (
-                <label key={item.id} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.85rem", color: item.checked ? "#94a3b8" : "#f8fafc", cursor: "pointer", textDecoration: item.checked ? "line-through" : "none" }}>
-                  <input type="checkbox" checked={item.checked} onChange={() => setChecklist(checklist.map(i => i.id === item.id ? { ...i, checked: !i.checked } : i))} style={{ accentColor: "#2563eb" }} />
-                  {item.text}
+              {checklist.map(item => (
+                <label key={item.id} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.85rem", cursor: "pointer" }}>
+                  <input type="checkbox" checked={item.checked} onChange={() => toggleCheck(item.id)} />
+                  <span style={{ textDecoration: item.checked ? "line-through" : "none", color: item.checked ? "#94a3b8" : "#f8fafc" }}>
+                    {item.text}
+                  </span>
                 </label>
               ))}
             </div>
           </div>
         </div>
 
-        {/* --- HAZARD REPORTING --- */}
-        <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "12px", padding: "20px", marginBottom: "1.5rem" }}>
-          <h2 style={{ fontSize: "1.1rem", fontWeight: "600", marginBottom: "6px" }}>📢 Crowdsourced Hazard Reporter</h2>
-          <form onSubmit={handleReportSubmit} style={{ display: "flex", gap: "10px", marginBottom: "1rem" }}>
-            <input type="text" placeholder="Describe hazard in your area..." value={reportInput} onChange={(e) => setReportInput(e.target.value)} style={{ flex: 1, padding: "10px", backgroundColor: "#0f172a", border: "1px solid #334155", borderRadius: "6px", color: "#fff" }} />
-            <button type="submit" style={{ backgroundColor: "#2563eb", color: "#fff", border: "none", padding: "10px 18px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>Submit Report</button>
-          </form>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {reports.map((rep) => (
-              <div key={rep.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0f172a", padding: "10px 14px", borderRadius: "6px" }}>
-                <span style={{ fontSize: "0.85rem" }}>{rep.text}</span>
-                <span style={{ fontSize: "0.75rem", padding: "2px 8px", borderRadius: "10px", backgroundColor: rep.status === "Verified" ? "#166534" : rep.status === "Saved Offline" ? "#854d0e" : "#1e3a8a", color: rep.status === "Verified" ? "#4ade80" : rep.status === "Saved Offline" ? "#fef08a" : "#93c5fd" }}>
-                  {rep.status}
-                </span>
-              </div>
-            ))}
+        {/* Crowdsourced Hazard Reporting */}
+        <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+          <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>📢 Crowdsourced Incident & Hazard Reporting</h3>
+          <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>Report fallen power lines, road blockages, or flooding to alert emergency responders.</p>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <input 
+              type="text" 
+              placeholder="Describe hazard or incident..." 
+              value={reportInput}
+              onChange={(e) => setReportInput(e.target.value)}
+              style={{ flex: 1, backgroundColor: "#0f172a", border: "1px solid #475569", borderRadius: "6px", padding: "10px", color: "white" }}
+            />
+            <button 
+              onClick={() => {
+                if(reportInput.trim()){
+                  setReports([{ id: Date.now(), text: reportInput, time: "Just now", status: "Pending" }, ...reports]);
+                  setReportInput("");
+                }
+              }}
+              style={{ backgroundColor: "#2563eb", color: "white", border: "none", padding: "10px 20px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}
+            >
+              Submit Hazard Report
+            </button>
           </div>
         </div>
 

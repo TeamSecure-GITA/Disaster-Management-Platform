@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { saveOfflineSession } from "../utils/offlineStorage";
 import { useNavigate } from "react-router-dom";
 export default function Login() {
   const navigate = useNavigate();
@@ -6,17 +7,21 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
-const handleSubmit = (e) => {
-  e.preventDefault();
+const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const enteredId = email.trim().toLowerCase();
-  const enteredPassword = password.trim();
+    const enteredId = email.trim().toLowerCase();
+    const enteredPassword = password.trim();
 
-  if (
+    await saveOfflineSession({
+      name: enteredId.split("@")[0],
+      email: enteredId,
+      role: role
+    });
     role === "admin" &&
     enteredId === "admin" &&
     enteredPassword === "admin123"
-  ) {
+  {
     navigate("/admin");
     return;
   }
