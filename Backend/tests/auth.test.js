@@ -24,6 +24,18 @@ describe("Authentication API", () => {
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
   });
 
+  test("CORS never uses wildcard origin with credentials", async () => {
+    const response = await request(app)
+      .get("/api/health")
+      .set("Origin", "http://localhost:3000");
+
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      "http://localhost:3000"
+    );
+    expect(response.headers["access-control-allow-credentials"]).toBe("true");
+    expect(response.headers["access-control-allow-origin"]).not.toBe("*");
+  });
+
   test("invalid registration payload returns validation errors", async () => {
     const response = await request(app)
       .post("/api/auth/register")
