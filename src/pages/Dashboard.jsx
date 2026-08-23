@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/useAuth";
 import { getOfflineReports, clearOfflineReports, saveOfflineReport } from "../utils/offlineStorage";
 import { requestNotificationPermission, sendLocalEmergencyAlert } from "../utils/pushAlerts";
-
+import localforage from 'localforage';
+const translations = {
+  en: { title: "Disaster Management Portal", support: "Need Technical Help?" },
+  hi: { title: "आपदा प्रबंधन पोर्टल", support: "तकनीकी सहायता चाहिए?" },
+  or: { title: "ବିପର୍ଯ୍ୟୟ ପରିଚାଳନା ପୋର୍ଟାଲ୍", support: "କାରିଗରୀ ସହାୟତା ଆବଶ୍ୟକ କି?" }
+};
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -11,7 +16,7 @@ export default function Dashboard() {
   const [callbackRequested, setCallbackRequested] = useState(false);
   const [reportInput, setReportInput] = useState("");
   const [pushEnabled, setPushEnabled] = useState(Notification.permission === "granted");
-
+const [lang, setLang] = useState('en');
   const [reports, setReports] = useState([
     { id: 1, text: "Fallen power line on Sector 3 Main Road", time: "10 mins ago", status: "Verified" }
   ]);
@@ -46,23 +51,80 @@ export default function Dashboard() {
       sendLocalEmergencyAlert("🔔 Lock-Screen Alerts Active", "You will receive emergency notifications.");
     }
   };
+const getCurrentLocation = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => alert(`Lat: ${pos.coords.latitude}, Lng: ${pos.coords.longitude}`),
+      () => alert('Unable to retrieve location')
+    );
+  } else {
+    alert('Geolocation is not supported by your browser.');
+  }
+};
+// --- EMERGENCY NOTIFICATION HANDLER ---
+  const requestNotificationPermission = async () => {
+    if ("Notification" in window) {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        new Notification("⚠️ Emergency Alert", {
+          body: "Severe weather warning in your area. Check shelter map.",
+          icon: "/pwa-192x192.png"
+        });
+      }
+    }
+  };
 
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+  // --- WHATSAPP SOS ALERT HANDLER ---
+  const sendWhatsAppAlert = (issueText) => {
+    const phone = "919876543210"; // Replace with control center number
+    const message = encodeURIComponent(`EMERGENCY REPORT: ${issueText || "Immediate assistance requested!"}`);
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  };
   return (
     <div style={{ backgroundColor: "#0b0f19", minHeight: "100vh", color: "#f8fafc", padding: "24px" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
         
-        {/* Header Title & National Hotline Bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "bold" }}>Disaster Management Dashboard</h1>
-            <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.9rem" }}>Real-time monitoring, emergency coordination, and live incident response.</p>
-          </div>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <span style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold", fontSize: "0.85rem" }}>National Emergency: 112</span>
-            <span style={{ backgroundColor: "#2563eb", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold", fontSize: "0.85rem" }}>🚑 Ambulance: 108</span>
-          </div>
+      {/* Header Title & National Hotline Bar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "bold" }}>
+            {translations[lang]?.title || "Disaster Management Portal "}
+          </h1>
+          <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.9rem" }}>
+            Real-time emergency monitoring and emergency reporting system
+          </p>
         </div>
 
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          {/* --- LANGUAGE DROPDOWN --- */}
+          <select 
+            value={lang} 
+            onChange={(e) => setLang(e.target.value)}
+            style={{ 
+              backgroundColor: '#1e293b', 
+              color: '#fff', 
+              border: '1px solid #334155', 
+              padding: '6px 12px', 
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="en">English</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="or">ଓଡ଼ିଆ (Odia)</option>
+          </select>
+
+          <span style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold" }}>
+            108 (Medical)
+          </span>
+          <span style={{ backgroundColor: "#2563eb", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold" }}>
+            1070 (Disaster)
+          </span>
+        </div>
+      </div>
         {/* User Banner */}
         <div style={{ padding: "12px 18px", backgroundColor: "#1e293b", borderRadius: "8px", border: "1px solid #334155" }}>
           {loading ? (
@@ -245,10 +307,118 @@ export default function Dashboard() {
             >
               Submit Hazard Report
             </button>
-          </div>
-        </div>
+            {/* --- LIVE LOCATION BUTTON --- */}
+          <button 
+            type="button"
+            onClick={getCurrentLocation}
+            style={{ 
+              backgroundColor: '#0284c7', 
+              color: '#ffffff', 
+              fontWeight: 'bold', 
+              border: 'none', 
+              padding: '8px 16px', 
+              borderRadius: '6px', 
+              cursor: 'pointer',
+              marginTop: '10px'
+            }}
+          >
+            📍 Share My Live Location
+          </button>
 
+          {/* --- WHATSAPP SOS BUTTON --- */}
+          <button 
+            type="button"
+            onClick={() => sendWhatsAppAlert(reportInput)}
+            style={{ 
+              backgroundColor: '#16a34a', 
+              color: '#ffffff', 
+              fontWeight: 'bold', 
+              border: 'none', 
+              padding: '8px 16px', 
+              borderRadius: '6px', 
+              cursor: 'pointer',
+              marginTop: '10px',
+              marginLeft: '10px'
+            }}
+          >
+            💬 Send WhatsApp SOS
+          </button>
+
+        </div>
       </div>
-    </div>
-  );
+        <button 
+  type="button"
+  onClick={requestNotificationPermission}
+  style={{ 
+    backgroundColor: '#dc2626', 
+    color: '#ffffff', 
+    fontWeight: 'bold', 
+    border: 'none', 
+    padding: '8px 16px', 
+    borderRadius: '6px', 
+    cursor: 'pointer',
+    marginTop: '10px',
+    marginLeft: '10px'
+  }}
+>
+  🔔 Enable Alert System
+</button>
+    {/* --- TECHNICAL HELP & SUPPORT (ONLINE & OFFLINE CAPABLE) --- */}
+      <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '16px', marginTop: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#f8fafc', marginBottom: '8px' }}>🛠️ Need Technical Help?</h3>
+        <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '12px' }}>
+          Report bugs or access issues. Submissions work online and during network outages!
+        </p>
+        
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          const issueText = e.target.issue.value.trim();
+          if (!issueText) return;
+
+          const supportTicket = {
+            id: Date.now(),
+            text: issueText,
+            timestamp: new Date().toISOString(),
+            status: 'Pending'
+          };
+
+          if (navigator.onLine) {
+            // ONLINE MODE: Send to backend server
+            try {
+              await fetch('http://localhost:5000/api/support', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(supportTicket)
+              });
+              alert('✅ Support ticket sent directly to technical team!');
+            } catch (err) {
+              // Fallback if backend server is down
+              await localforage.setItem(`support_ticket_${supportTicket.id}`, supportTicket);
+              alert('⚠️ Server unreachable. Ticket saved locally and will auto-sync when connected!');
+            }
+          } else {
+            // OFFLINE MODE: Store in IndexedDB
+            await localforage.setItem(`support_ticket_${supportTicket.id}`, supportTicket);
+            alert('📱 Saved offline! Ticket will automatically send when network connection restores.');
+          }
+
+          e.target.reset();
+        }}>
+          <textarea 
+            name="issue"
+            placeholder="Describe the issue you encountered..."
+            required
+            style={{ width: '100%', height: '70px', backgroundColor: '#0f172a', color: '#fff', border: '1px solid #334155', borderRadius: '8px', padding: '8px', fontSize: '0.85rem', marginBottom: '8px' }}
+          />
+          <button 
+            type="submit"
+            style={{ backgroundColor: '#38bdf8', color: '#0f172a', fontWeight: 'bold', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
+          >
+            Submit Support Ticket
+          </button>
+        </form>
+      </div>
+</div>
+  </div>
+ );
 }

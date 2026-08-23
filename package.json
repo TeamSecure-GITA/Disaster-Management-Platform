@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
@@ -14,7 +13,7 @@
     "idb": "^8.0.3",
     "leaflet": "^1.9.4",
     "localforage": "^1.10.0",
-    "lucide-react": "^1.31.0",
+    "lucide-react": "^1.33.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -29,9 +28,5 @@
     "oxlint": "^1.75.0",
     "vite": "^8.2.0",
     "vite-plugin-pwa": "^1.3.0"
-=======
-  "dependencies": {
-    "react-router-dom": "^7.18.2"
->>>>>>> 931a0309389bd815402a8d5292b92f30ec4dbe2c
   }
 }
