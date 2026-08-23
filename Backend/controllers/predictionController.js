@@ -1,4 +1,5 @@
 const predictionService = require("../services/predictionService");
+const environment = require("../config/environment");
 
 const createPrediction = async (req, res, next) => {
   try {
@@ -32,7 +33,7 @@ const getPredictions = async (req, res, next) => {
 const getPredictionStatus = async (req, res, next) => {
   try {
     const status = {
-      aiServiceUrl: process.env.AI_CHATBOT_URL || "http://localhost:8000",
+      aiServiceUrl: environment.aiChatbotUrl,
       hasExternalAi: Boolean(process.env.AI_CHATBOT_URL),
       modelFallbackEnabled: true,
       timestamp: new Date().toISOString(),

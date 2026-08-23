@@ -3,7 +3,7 @@ const satelliteService = require("../services/satelliteService");
 
 const startSatelliteUpdateJob = () => {
   // Runs every 6 hours
-  cron.schedule("0 */6 * * *", async () => {
+  const task = cron.schedule("0 */6 * * *", async () => {
     try {
       console.log("Updating satellite data...");
 
@@ -24,6 +24,7 @@ const startSatelliteUpdateJob = () => {
   });
 
   console.log("Satellite update job started");
+  return task;
 };
 
 module.exports = startSatelliteUpdateJob;

@@ -1,26 +1,29 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const environment = require("../config/environment");
+
+const maxFileSize = environment.maxFileSize;
 
 const uploadDirectories = {
   images: path.join(
     __dirname,
     "..",
-    "uploads",
+    environment.uploadDirectory,
     "images"
   ),
 
   documents: path.join(
     __dirname,
     "..",
-    "uploads",
+    environment.uploadDirectory,
     "documents"
   ),
 
   videos: path.join(
     __dirname,
     "..",
-    "uploads",
+    environment.uploadDirectory,
     "videos"
   ),
 };
@@ -146,7 +149,7 @@ const imageUpload = multer({
   fileFilter: imageFilter,
 
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: Math.min(5 * 1024 * 1024, maxFileSize),
   },
 });
 
@@ -158,7 +161,7 @@ const documentUpload = multer({
   fileFilter: documentFilter,
 
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: maxFileSize,
   },
 });
 
@@ -170,7 +173,7 @@ const videoUpload = multer({
   fileFilter: videoFilter,
 
   limits: {
-    fileSize: 100 * 1024 * 1024,
+    fileSize: Math.min(100 * 1024 * 1024, maxFileSize),
   },
 });
 
@@ -197,7 +200,7 @@ const anyFileUpload = multer({
   }),
 
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: maxFileSize,
   },
 });
 

@@ -2,11 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
+const mongoose = require("mongoose");
+const environment = require("./config/environment");
 
 const corsOptions = require("./config/cors");
 const { errorHandler } = require("./middleware/errorMiddleware");
 const requestLogger = require("./middleware/requestLogger");
 const { generalLimiter } = require("./middleware/rateLimitMiddleware");
+const { protect } = require("./middleware/authMiddleware");
 
 // Existing routes
 const authRoute = require("./routes/authRoute");
@@ -26,6 +29,7 @@ const satelliteRoutes = require("./routes/satelliteRoutes");
 const predictionRoutes = require("./routes/predictionRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const syncRoutes = require("./routes/syncRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // New routes
 const familyRoutes = require("./routes/familyRoutes");
@@ -62,7 +66,8 @@ app.use(
 
 app.use(
     "/uploads",
-    express.static(path.join(__dirname, "uploads"))
+    protect,
+    express.static(path.join(__dirname, environment.uploadDirectory))
 );
 
 // ================================
@@ -76,9 +81,21 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
+    const databaseReady = mongoose.connection.readyState === 1;
     res.status(200).json({
         success: true,
         message: "Backend is healthy",
+        database: databaseReady ? "connected" : "disconnected",
+        timestamp: new Date().toISOString(),
+    });
+});
+
+app.get("/api/ready", (req, res) => {
+    const databaseReady = mongoose.connection.readyState === 1;
+    res.status(databaseReady ? 200 : 503).json({
+        success: databaseReady,
+        message: databaseReady ? "Backend is ready" : "Database is unavailable",
+        database: databaseReady ? "connected" : "disconnected",
         timestamp: new Date().toISOString(),
     });
 });
@@ -110,6 +127,7 @@ app.use("/api/rescue-id", rescueIdRoutes);
 app.use("/api/damage-assessment", damageAssessmentRoutes);
 app.use("/api/evacuation", evacuationRoutes);
 app.use("/api/sync", syncRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // ================================
 // 404 HANDLER

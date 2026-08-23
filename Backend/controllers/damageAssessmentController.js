@@ -41,10 +41,9 @@ const createDamageAssessment = async (req, res, next) => {
                     assessmentData.location
                 );
             } catch (error) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid location format",
-                });
+                const locationError = new Error("Invalid location format");
+                locationError.statusCode = 400;
+                throw locationError;
             }
         }
 
@@ -108,6 +107,15 @@ const getDamageAssessmentById = async (req, res, next) => {
             return res.status(404).json({
                 success: false,
                 message: "Damage assessment not found",
+            });
+        }
+
+        const isOwner = assessment.user?._id?.toString() === req.user._id.toString();
+        const isOperationsUser = ["admin", "operator"].includes(req.user.role);
+        if (!isOwner && !isOperationsUser) {
+            return res.status(403).json({
+                success: false,
+                message: "You do not have permission to view this assessment",
             });
         }
 

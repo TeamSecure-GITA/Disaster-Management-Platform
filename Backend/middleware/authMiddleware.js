@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { logger } = require("../utils/logger");
+const { verifyToken } = require("../utils/generateToken");
 
 const protect = async (req, res, next) => {
   try {
@@ -31,19 +32,30 @@ const protect = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = verifyToken(token);
+
+    if (decoded.type && decoded.type !== "access") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid authentication token.",
+      });
+    }
 
     const user = await User.findById(decoded.id).select(
-      "-password"
+      "-password tokenVersion"
     );
 
     if (!user) {
       return res.status(401).json({
         success: false,
         message: "User associated with this token was not found.",
+      });
+    }
+
+    if (Number(decoded.tokenVersion || 0) !== Number(user.tokenVersion || 0)) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication token has been revoked.",
       });
     }
 
@@ -109,16 +121,17 @@ const optionalAuth = async (req, res, next) => {
       return next();
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = verifyToken(token);
+
+    if (decoded.type && decoded.type !== "access") {
+      return next();
+    }
 
     const user = await User.findById(decoded.id).select(
-      "-password"
+      "-password tokenVersion"
     );
 
-    if (user) {
+    if (user && Number(decoded.tokenVersion || 0) === Number(user.tokenVersion || 0)) {
       req.user = user;
       req.userId = user._id;
     }

@@ -3,7 +3,7 @@ const Alert = require("../models/Alert");
 
 const startAlertExpiryJob = () => {
   // Runs every minute
-  cron.schedule("* * * * *", async () => {
+  const task = cron.schedule("* * * * *", async () => {
     try {
       const now = new Date();
 
@@ -33,6 +33,7 @@ const startAlertExpiryJob = () => {
   });
 
   console.log("Alert expiry job started");
+  return task;
 };
 
 module.exports = startAlertExpiryJob;

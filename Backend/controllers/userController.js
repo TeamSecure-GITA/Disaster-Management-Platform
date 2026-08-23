@@ -43,6 +43,51 @@ const getUserById = async (req, res, next) => {
   }
 };
 
+const updateUser = async (req, res, next) => {
+  try {
+    const isOwnProfile = req.user?._id?.toString() === req.params.id;
+    const isAdmin = ["admin", "super_admin"].includes(req.user?.role);
+
+    if (!isOwnProfile && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this profile",
+      });
+    }
+
+    const allowedFields = ["name", "phone", "profileImage", "address", "city", "state", "country", "preferredLanguage"];
+    const updates = Object.fromEntries(
+      Object.entries(req.body).filter(([field]) => allowedFields.includes(field))
+    );
+
+    const user = await User.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    res.status(200).json({ success: true, message: "User updated successfully", data: user });
+  } catch (error) { next(error); }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const isOwnProfile = req.user?._id?.toString() === req.params.id;
+    const isAdmin = ["admin", "super_admin"].includes(req.user?.role);
+
+    if (!isOwnProfile && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to delete this profile",
+      });
+    }
+
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    res.status(204).send();
+  } catch (error) { next(error); }
+};
+
 const updateFcmToken = async (req, res, next) => {
   try {
     const { fcmToken } = req.body;
@@ -89,5 +134,7 @@ const updateFcmToken = async (req, res, next) => {
 module.exports = {
   getUsers,
   getUserById,
+  updateUser,
+  deleteUser,
   updateFcmToken,
 };

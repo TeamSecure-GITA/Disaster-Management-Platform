@@ -2,7 +2,14 @@ const Shelter = require("../models/Shelter");
 
 const createShelter = async (req, res, next) => {
   try {
-    const shelter = await Shelter.create(req.body);
+    const { latitude, longitude, ...shelterData } = req.body;
+    const shelter = await Shelter.create({
+      ...shelterData,
+      location: {
+        type: "Point",
+        coordinates: [Number(longitude), Number(latitude)],
+      },
+    });
 
     res.status(201).json({
       success: true,
@@ -47,8 +54,30 @@ const getShelterById = async (req, res, next) => {
   }
 };
 
+const updateShelter = async (req, res, next) => {
+  try {
+    const shelter = await Shelter.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!shelter) return res.status(404).json({ success: false, message: "Shelter not found" });
+    res.status(200).json({ success: true, message: "Shelter updated successfully", data: shelter });
+  } catch (error) { next(error); }
+};
+
+const deleteShelter = async (req, res, next) => {
+  try {
+    const shelter = await Shelter.findByIdAndDelete(req.params.id);
+    if (!shelter) return res.status(404).json({ success: false, message: "Shelter not found" });
+    res.status(204).send();
+  } catch (error) { next(error); }
+};
+
 module.exports = {
   createShelter,
   getShelters,
   getShelterById,
+  updateShelter,
+  deleteShelter,
 };

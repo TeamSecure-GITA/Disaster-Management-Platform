@@ -13,6 +13,7 @@ const {
 } = require("../middleware/authMiddleware");
 const uploadMiddleware = require("../middleware/uploadMiddleware");
 const { uploadLimiter } = require("../middleware/rateLimitMiddleware");
+const { operationsOnly } = require("../middleware/adminMiddleware");
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.post(
 router.get(
     "/",
     authMiddleware,
+    operationsOnly,
     getDamageAssessments
 );
 
@@ -45,6 +47,7 @@ router.get(
 router.patch(
     "/:id/status",
     authMiddleware,
+    operationsOnly,
     updateDamageAssessmentStatus
 );
 

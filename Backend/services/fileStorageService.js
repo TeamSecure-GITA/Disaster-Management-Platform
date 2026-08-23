@@ -1,15 +1,16 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { v2: cloudinary } = require("cloudinary");
+const environment = require("../config/environment");
 
 const getProvider = () =>
-    (process.env.CLOUD_STORAGE_PROVIDER || "local").toLowerCase();
+    (environment.cloudStorageProvider || "local").toLowerCase();
 
 const isCloudinaryConfigured = () =>
     Boolean(
-        process.env.CLOUDINARY_CLOUD_NAME &&
-        process.env.CLOUDINARY_API_KEY &&
-        process.env.CLOUDINARY_API_SECRET
+        environment.cloudinaryCloudName &&
+        environment.cloudinaryApiKey &&
+        environment.cloudinaryApiSecret
     );
 
 const configureCloudinary = () => {
@@ -20,9 +21,9 @@ const configureCloudinary = () => {
     }
 
     cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
+        cloud_name: environment.cloudinaryCloudName,
+        api_key: environment.cloudinaryApiKey,
+        api_secret: environment.cloudinaryApiSecret,
         secure: true,
     });
 };
@@ -48,6 +49,7 @@ const uploadFile = async (file, { folder = "disaster-management" } = {}) => {
         return {
             url: `/uploads/${path.basename(path.dirname(file.path))}/${file.filename}`,
             filename: file.filename,
+            storagePath: file.path,
             provider: "local",
             publicId: null,
             resourceType: null,
@@ -68,6 +70,7 @@ const uploadFile = async (file, { folder = "disaster-management" } = {}) => {
         return {
             url: result.secure_url,
             filename: file.filename,
+            storagePath: file.path,
             provider: "cloudinary",
             publicId: result.public_id,
             resourceType: result.resource_type,
@@ -78,7 +81,11 @@ const uploadFile = async (file, { folder = "disaster-management" } = {}) => {
     }
 };
 
-const deleteFile = async ({ provider, publicId, resourceType = "image" } = {}) => {
+const deleteFile = async ({ provider, publicId, resourceType = "image", storagePath } = {}) => {
+    if (provider === "local") {
+        return removeTemporaryFile(storagePath);
+    }
+
     if (provider !== "cloudinary" || !publicId) return;
 
     configureCloudinary();

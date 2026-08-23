@@ -1,5 +1,6 @@
 const SatelliteData = require("../models/SatelliteData");
 const axios = require("axios");
+const environment = require("../config/environment");
 
 const saveSatelliteData = async (data) => {
   return await SatelliteData.create(data);
@@ -31,15 +32,28 @@ const updateProcessingStatus = async (id, processingStatus, analysisResults) => 
 };
 
 const updateSatelliteData = async () => {
-  const providerUrl = process.env.SATELLITE_API_URL;
+  const providerUrl = environment.satelliteApiUrl;
   if (!providerUrl) return { updated: 0, status: "not_configured" };
 
   const response = await axios.get(providerUrl, { timeout: 15000 });
   const records = Array.isArray(response.data) ? response.data : response.data.records;
   if (!Array.isArray(records)) throw new Error("Satellite provider returned an invalid records payload");
   if (!records.length) return { updated: 0, status: "no_data" };
-  const result = await SatelliteData.insertMany(records, { ordered: false });
-  return { updated: result.length, status: "updated" };
+  let updated = 0;
+  for (const record of records) {
+    const externalId = record.externalId || record.id || record.dataId;
+    if (externalId) {
+      await SatelliteData.findOneAndUpdate(
+        { externalId: String(externalId) },
+        { ...record, externalId: String(externalId) },
+        { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
+      );
+    } else {
+      await SatelliteData.create(record);
+    }
+    updated += 1;
+  }
+  return { updated, status: "updated" };
 };
 
 module.exports = {

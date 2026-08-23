@@ -15,6 +15,10 @@ const errorHandler = (
     err.message ||
     "Internal server error.";
 
+  if (statusCode >= 500) {
+    message = "Internal server error.";
+  }
+
   if (err.name === "ValidationError") {
     statusCode = 400;
 

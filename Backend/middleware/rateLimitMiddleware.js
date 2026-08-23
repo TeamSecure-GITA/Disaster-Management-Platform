@@ -36,6 +36,17 @@ const sosLimiter = rateLimit({
   },
 });
 
+const chatLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  limit: 30,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many chatbot requests. Please try again later.",
+  },
+});
+
 const uploadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 50,
@@ -52,5 +63,6 @@ module.exports = {
   generalLimiter,
   authLimiter,
   sosLimiter,
+  chatLimiter,
   uploadLimiter,
 };

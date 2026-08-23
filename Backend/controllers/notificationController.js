@@ -17,7 +17,17 @@ const createNotification = async (req, res, next) => {
 
 const getNotifications = async (req, res, next) => {
   try {
-    const userId = req.params.userId || req.user?._id;
+    const requestedUserId = req.params.userId;
+    const isAdmin = ["admin", "operator"].includes(req.user?.role);
+
+    if (requestedUserId && !isAdmin && requestedUserId !== req.user?._id?.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to view these notifications",
+      });
+    }
+
+    const userId = requestedUserId || req.user?._id;
 
     const notifications =
       await notificationService.getUserNotifications(userId);
@@ -34,7 +44,11 @@ const getNotifications = async (req, res, next) => {
 const markNotificationAsRead = async (req, res, next) => {
   try {
     const notification =
-      await notificationService.markAsRead(req.params.id);
+      await notificationService.markAsRead(
+        req.params.id,
+        req.user?._id,
+        ["admin", "operator"].includes(req.user?.role)
+      );
 
     if (!notification) {
       return res.status(404).json({

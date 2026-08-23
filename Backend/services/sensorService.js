@@ -1,12 +1,15 @@
 const Sensor = require("../models/Sensor");
 const SensorReading = require("../models/SensorReading");
+const { emitSensorReading } = require("../sockets/sensorSocket");
 
 const createSensor = async (sensorData) => {
   return await Sensor.create(sensorData);
 };
 
 const addSensorReading = async (readingData) => {
-  return await SensorReading.create(readingData);
+  const reading = await SensorReading.create(readingData);
+  emitSensorReading(reading);
+  return reading;
 };
 
 const getSensorReadings = async (sensorId) => {

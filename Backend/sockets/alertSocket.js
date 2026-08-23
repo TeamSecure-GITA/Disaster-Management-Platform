@@ -1,23 +1,18 @@
 const { getIO } = require("./socket");
 
 const emitNewAlert = (alert) => {
-  const io = getIO();
-
-  io.to("alerts").emit("newAlert", alert);
+  try { getIO().to("alerts").emit("newAlert", alert); } catch (error) { return false; }
+  return true;
 };
 
 const emitAlertUpdated = (alert) => {
-  const io = getIO();
-
-  io.to("alerts").emit("alertUpdated", alert);
+  try { getIO().to("alerts").emit("alertUpdated", alert); } catch (error) { return false; }
+  return true;
 };
 
 const emitAlertDeleted = (alertId) => {
-  const io = getIO();
-
-  io.to("alerts").emit("alertDeleted", {
-    alertId,
-  });
+  try { getIO().to("alerts").emit("alertDeleted", { alertId }); } catch (error) { return false; }
+  return true;
 };
 
 module.exports = {

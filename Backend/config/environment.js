@@ -1,6 +1,7 @@
 const dotenv = require("dotenv");
+const path = require("path");
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 const requiredVariables = [
   "MONGO_URI",
@@ -15,6 +16,17 @@ if (missingVariables.length > 0) {
   throw new Error(
     `Missing required environment variables: ${missingVariables.join(", ")}`
   );
+}
+
+const weakJwtSecrets = [
+  "CHANGE_ME",
+  "replace-with-a-long-random-secret",
+];
+
+if (weakJwtSecrets.includes(process.env.JWT_SECRET) ||
+  process.env.JWT_SECRET.startsWith("replace-with-") ||
+  process.env.JWT_SECRET.length < 32) {
+  throw new Error("JWT_SECRET must be a unique value of at least 32 characters.");
 }
 
 const environment = {
@@ -33,6 +45,8 @@ const environment = {
 
   aiChatbotUrl:
     process.env.AI_CHATBOT_URL || "http://localhost:8000",
+
+  satelliteApiUrl: process.env.SATELLITE_API_URL || "",
 
   uploadDirectory:
     process.env.UPLOAD_DIRECTORY || "uploads",
