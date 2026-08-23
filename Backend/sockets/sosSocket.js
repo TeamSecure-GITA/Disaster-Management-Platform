@@ -1,23 +1,18 @@
 const { getIO } = require("./socket");
 
 const emitNewSOS = (sos) => {
-  const io = getIO();
-
-  io.to("operations").emit("newSOS", sos);
+  try { getIO().to("operations").emit("newSOS", sos); } catch (error) { return false; }
+  return true;
 };
 
 const emitSOSUpdated = (sos) => {
-  const io = getIO();
-
-  io.to("operations").emit("sosUpdated", sos);
+  try { getIO().to("operations").emit("sosUpdated", sos); } catch (error) { return false; }
+  return true;
 };
 
 const emitSOSResolved = (sosId) => {
-  const io = getIO();
-
-  io.to("operations").emit("sosResolved", {
-    sosId,
-  });
+  try { getIO().to("operations").emit("sosResolved", { sosId }); } catch (error) { return false; }
+  return true;
 };
 
 module.exports = {

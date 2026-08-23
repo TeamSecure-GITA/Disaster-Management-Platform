@@ -1,6 +1,7 @@
 const axios = require("axios");
+const environment = require("../config/environment");
 
-const getAiBaseUrl = () => process.env.AI_CHATBOT_URL || "http://localhost:8000";
+const getAiBaseUrl = () => environment.aiChatbotUrl;
 
 const getChatbotResponse = async (message) => {
   if (!message || !message.trim()) {
@@ -25,17 +26,15 @@ const getChatbotResponse = async (message) => {
 
     return {
       message: response?.data?.response || response?.data?.message || "AI response received",
-      raw: response?.data || null,
+      fallback: false,
     };
   } catch (error) {
-    const fallback = {
+    return {
       message:
         "Emergency chatbot service is ready. AI integration can be connected here.",
       fallback: true,
-      error: error?.response?.data || error.message,
+      degraded: true,
     };
-
-    return fallback;
   }
 };
 

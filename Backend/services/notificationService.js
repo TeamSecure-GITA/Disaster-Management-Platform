@@ -5,6 +5,7 @@ const { sendSMS } = require("./smsService");
 const { emitNotification, emitNotificationRead } = require("../sockets/notificationSocket");
 
 const dispatchNotification = async (notification) => {
+  const recipientId = notification.recipient?._id || notification.recipient;
   const delivery = {
     inApp: false,
     push: false,
@@ -17,7 +18,7 @@ const dispatchNotification = async (notification) => {
     : ["in-app"];
 
   if (channels.includes("in-app")) {
-    emitNotification(String(notification.recipient), {
+    delivery.inApp = emitNotification(String(recipientId), {
       _id: notification._id,
       title: notification.title,
       message: notification.message,
@@ -30,7 +31,7 @@ const dispatchNotification = async (notification) => {
 
   if (channels.includes("push")) {
     const pushResult = await pushNotificationService.sendToUser(
-      notification.recipient,
+      recipientId,
       notification.title,
       notification.message,
       {
@@ -38,7 +39,7 @@ const dispatchNotification = async (notification) => {
         type: notification.type,
       }
     );
-    delivery.push = pushResult.success;
+    delivery.push = Boolean(pushResult?.success);
   }
 
   if (channels.includes("email")) {
@@ -49,20 +50,26 @@ const dispatchNotification = async (notification) => {
       text: notification.message,
       html: `<p>${notification.message}</p>`,
     });
-    delivery.email = Boolean(emailResult && emailResult.messageId);
+    delivery.email = Boolean(emailResult?.messageId);
   }
 
   if (channels.includes("sms")) {
     const user = await notification.populate("recipient");
     const smsResult = await sendSMS(user.recipient?.phone, notification.message);
-    delivery.sms = smsResult.success;
+    delivery.sms = Boolean(smsResult?.success && !smsResult?.simulated);
   }
 
-  const finalStatus = Object.values(delivery).some(Boolean) ? "sent" : "failed";
+  const requestedDeliveries = channels.map((channel) => channel === "in-app" ? "inApp" : channel);
+  const successfulDeliveries = requestedDeliveries.filter((channel) => delivery[channel]).length;
+  const finalStatus = successfulDeliveries === requestedDeliveries.length
+    ? "sent"
+    : successfulDeliveries > 0
+      ? "partial"
+      : "failed";
 
   await Notification.findByIdAndUpdate(notification._id, {
     status: finalStatus,
-    sentAt: finalStatus === "sent" ? new Date() : null,
+    sentAt: successfulDeliveries > 0 ? new Date() : null,
   });
 
   return {
@@ -82,9 +89,12 @@ const getUserNotifications = async (userId) => {
     .sort({ createdAt: -1 });
 };
 
-const markAsRead = async (notificationId) => {
-  const notification = await Notification.findByIdAndUpdate(
-    notificationId,
+const markAsRead = async (notificationId, userId, isAdmin = false) => {
+  const filter = isAdmin
+    ? { _id: notificationId }
+    : { _id: notificationId, recipient: userId };
+  const notification = await Notification.findOneAndUpdate(
+    filter,
     { isRead: true, readAt: new Date() },
     { new: true }
   );

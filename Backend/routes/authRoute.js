@@ -4,12 +4,17 @@ const {
   register,
   login,
   getMe,
+  refresh,
+  logout,
+  changePassword,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 
 const {
   registerValidator,
   loginValidator,
+  refreshTokenValidator,
+  changePasswordValidator,
 } = require("../validators/authValidator");
 
 const {
@@ -35,6 +40,24 @@ router.post(
   loginValidator,
   validationMiddleware,
   login
+);
+
+router.post(
+  "/refresh",
+  authLimiter,
+  refreshTokenValidator,
+  validationMiddleware,
+  refresh
+);
+
+router.post("/logout", protect, logout);
+
+router.patch(
+  "/change-password",
+  protect,
+  changePasswordValidator,
+  validationMiddleware,
+  changePassword
 );
 
 router.get("/me", protect, getMe);

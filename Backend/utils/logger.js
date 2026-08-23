@@ -234,9 +234,10 @@ const request = (
   statusCode = 200,
   responseTime = null
 ) => {
+  const requestUrl = req.originalUrl || req.url || "unknown";
   const metadata = {
     method: req.method,
-    url: req.originalUrl || req.url,
+    url: requestUrl.split("?")[0],
     ip:
       req.ip ||
       req.connection?.remoteAddress ||

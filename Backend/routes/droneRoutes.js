@@ -21,7 +21,8 @@ const {
   missionValidator,
   droneIdValidator,
   missionIdValidator,
-  statusValidator,
+  droneStatusValidator,
+  missionStatusValidator,
   telemetryValidator,
 } = require("../validators/droneValidator");
 
@@ -47,12 +48,13 @@ router.get(
   getMissions
 );
 
+router.get("/missions/:id", missionIdValidator, validate, getMissionById);
+router.patch("/missions/:id/status", operationsOnly, missionIdValidator, missionStatusValidator, validate, updateMissionStatus);
+
 router.get("/:id", droneIdValidator, validate, getDroneById);
 router.patch("/:id", operationsOnly, droneIdValidator, validate, updateDrone);
-router.patch("/:id/status", operationsOnly, droneIdValidator, statusValidator, validate, updateDroneStatus);
-router.patch("/:id/telemetry", operationsOnly, telemetryValidator, validate, updateDroneTelemetry);
+router.patch("/:id/status", operationsOnly, droneIdValidator, droneStatusValidator, validate, updateDroneStatus);
+router.patch("/:id/telemetry", operationsOnly, droneIdValidator, telemetryValidator, validate, updateDroneTelemetry);
 router.delete("/:id", operationsOnly, droneIdValidator, validate, deleteDrone);
-router.get("/missions/:id", missionIdValidator, validate, getMissionById);
-router.patch("/missions/:id/status", operationsOnly, missionIdValidator, statusValidator, validate, updateMissionStatus);
 
 module.exports = router;

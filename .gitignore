@@ -12,12 +12,12 @@ yarn-error.log*
 
 # Logs
 *.log
-01-BACKEND/logs/*
-!01-BACKEND/logs/.gitkeep
+Backend/logs/*
+!Backend/logs/.gitkeep
 
 # Uploads
-01-BACKEND/uploads/*
-!01-BACKEND/uploads/.gitkeep
+Backend/uploads/*
+!Backend/uploads/.gitkeep
 
 # OS files
 .DS_Store

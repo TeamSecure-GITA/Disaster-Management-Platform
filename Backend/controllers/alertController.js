@@ -67,9 +67,31 @@ const deleteAlert = async (req, res, next) => {
   }
 };
 
+const updateAlert = async (req, res, next) => {
+  try {
+    const alert = await alertService.updateAlert(req.params.id, req.body);
+
+    if (!alert) {
+      return res.status(404).json({
+        success: false,
+        message: "Alert not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Alert updated successfully",
+      data: alert,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createAlert,
   getAlerts,
   getAlert,
+  updateAlert,
   deleteAlert,
 };

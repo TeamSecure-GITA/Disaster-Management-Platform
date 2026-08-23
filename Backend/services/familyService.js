@@ -1,5 +1,11 @@
 const Family = require("../models/Family");
 
+const notFound = (message) => {
+    const error = new Error(message);
+    error.statusCode = 404;
+    return error;
+};
+
 const getFamilyByUser = async (userId) => {
     return await Family.findOne({
         user: userId,
@@ -42,7 +48,7 @@ const updateFamilyMember = async (
     memberId,
     memberData
 ) => {
-    return await Family.findOneAndUpdate(
+    const family = await Family.findOneAndUpdate(
         {
             user: userId,
             "members._id": memberId,
@@ -57,10 +63,12 @@ const updateFamilyMember = async (
             runValidators: true,
         }
     );
+    if (!family) throw notFound("Family member not found");
+    return family;
 };
 
 const deleteFamilyMember = async (userId, memberId) => {
-    return await Family.findOneAndUpdate(
+    const family = await Family.findOneAndUpdate(
         { user: userId },
         {
             $pull: {
@@ -73,6 +81,8 @@ const deleteFamilyMember = async (userId, memberId) => {
             new: true,
         }
     );
+    if (!family) throw notFound("Family member not found");
+    return family;
 };
 
 const updateSafetyStatus = async (
@@ -80,20 +90,28 @@ const updateSafetyStatus = async (
     memberId,
     isSafe
 ) => {
-    return await Family.findOneAndUpdate(
+    if (typeof isSafe !== "boolean") {
+        const error = new Error("isSafe must be a boolean");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const family = await Family.findOneAndUpdate(
         {
             user: userId,
             "members._id": memberId,
         },
         {
             $set: {
-                "members.$.isSafe": Boolean(isSafe),
+                "members.$.isSafe": isSafe,
             },
         },
         {
             new: true,
         }
     );
+    if (!family) throw notFound("Family member not found");
+    return family;
 };
 
 module.exports = {

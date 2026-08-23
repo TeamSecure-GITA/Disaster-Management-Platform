@@ -51,13 +51,12 @@ const updateDroneStatus = async (id, status) => {
 };
 
 const updateDroneTelemetry = async (id, telemetry) => {
-  const updates = {
-    location: telemetry.location,
-    batteryLevel: telemetry.batteryLevel,
-    altitude: telemetry.altitude,
-    lastTelemetryAt: new Date(),
-  };
+  const updates = {};
+  ["location", "batteryLevel", "altitude"].forEach((field) => {
+    if (telemetry[field] !== undefined) updates[field] = telemetry[field];
+  });
   if (telemetry.status) updates.status = telemetry.status;
+  updates.lastTelemetryAt = new Date();
   const drone = await Drone.findByIdAndUpdate(id, { $set: updates }, { new: true, runValidators: true });
   if (drone) {
     emitSafely(emitDroneLocation, id, drone.location);
@@ -66,7 +65,15 @@ const updateDroneTelemetry = async (id, telemetry) => {
   return drone;
 };
 
-const deleteDrone = async (id) => Drone.findByIdAndDelete(id);
+const deleteDrone = async (id) => {
+  const missionExists = await DroneMission.exists({ drone: id });
+  if (missionExists) {
+    const error = new Error("Drone cannot be deleted while missions exist");
+    error.statusCode = 409;
+    throw error;
+  }
+  return Drone.findByIdAndDelete(id);
+};
 
 const getMissions = async ({ status, drone, page = 1, limit = 50 } = {}) => {
   const filters = {};

@@ -34,6 +34,14 @@ const createSatelliteValidator = [
   body("location.coordinates")
     .isArray({ min: 2, max: 2 })
     .withMessage("Location coordinates must contain longitude and latitude"),
+  body("location.coordinates").custom((coordinates) => {
+    const [longitude, latitude] = coordinates.map(Number);
+    if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180 ||
+        !Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+      throw new Error("Location coordinates are invalid");
+    }
+    return true;
+  }),
   body("cloudCoverage")
     .optional()
     .isFloat({ min: 0, max: 100 })

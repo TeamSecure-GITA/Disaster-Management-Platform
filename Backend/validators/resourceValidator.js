@@ -15,10 +15,13 @@ const createResourceValidator = [
     .isFloat({ min: 0 })
     .withMessage("Quantity must be zero or greater"),
 
-  body("location")
-    .trim()
-    .notEmpty()
-    .withMessage("Resource location is required"),
+  body("latitude")
+    .isFloat({ min: -90, max: 90 })
+    .withMessage("Valid latitude is required"),
+
+  body("longitude")
+    .isFloat({ min: -180, max: 180 })
+    .withMessage("Valid longitude is required"),
 ];
 
 module.exports = {

@@ -1,21 +1,18 @@
 const { getIO } = require("./socket");
 
 const emitSensorReading = (sensorReading) => {
-  const io = getIO();
-
-  io.to("operations").emit("sensorReading", sensorReading);
+  try { getIO().to("operations").emit("sensorReading", sensorReading); } catch (error) { return false; }
+  return true;
 };
 
 const emitSensorStatus = (sensor) => {
-  const io = getIO();
-
-  io.to("operations").emit("sensorStatus", sensor);
+  try { getIO().to("operations").emit("sensorStatus", sensor); } catch (error) { return false; }
+  return true;
 };
 
 const emitSensorAlert = (data) => {
-  const io = getIO();
-
-  io.to("operations").emit("sensorAlert", data);
+  try { getIO().to("operations").emit("sensorAlert", data); } catch (error) { return false; }
+  return true;
 };
 
 module.exports = {

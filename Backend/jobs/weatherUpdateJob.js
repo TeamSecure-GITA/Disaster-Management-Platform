@@ -3,7 +3,7 @@ const weatherService = require("../services/weatherService");
 
 const startWeatherUpdateJob = () => {
   // Runs every 30 minutes
-  cron.schedule("*/30 * * * *", async () => {
+  const task = cron.schedule("*/30 * * * *", async () => {
     try {
       console.log("Updating weather data...");
 
@@ -24,6 +24,7 @@ const startWeatherUpdateJob = () => {
   });
 
   console.log("Weather update job started");
+  return task;
 };
 
 module.exports = startWeatherUpdateJob;

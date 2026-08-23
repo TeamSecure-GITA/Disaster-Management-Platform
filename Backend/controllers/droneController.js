@@ -16,7 +16,10 @@ const createDrone = async (req, res, next) => {
 
 const createMission = async (req, res, next) => {
   try {
-    const mission = await droneService.createMission(req.body);
+    const mission = await droneService.createMission({
+      ...req.body,
+      assignedBy: req.user._id,
+    });
 
     res.status(201).json({
       success: true,
@@ -30,7 +33,7 @@ const createMission = async (req, res, next) => {
 
 const getDrones = async (req, res, next) => {
   try {
-    const drones = await droneService.getDrones();
+    const drones = await droneService.getDrones(req.query);
 
     res.status(200).json({
       success: true,

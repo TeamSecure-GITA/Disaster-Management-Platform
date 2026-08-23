@@ -7,12 +7,13 @@ const sendSMS = async (phoneNumber, message) => {
     };
   }
 
-  console.log("SMS would be sent to:", phoneNumber);
-  console.log("Message:", message);
+  console.log("SMS delivery requested", { messageLength: message?.length || 0 });
 
   return {
-    success: true,
-    message: "SMS service placeholder executed",
+    success: false,
+    skipped: true,
+    simulated: true,
+    message: "SMS provider is not configured",
     provider: "simulated",
   };
 };

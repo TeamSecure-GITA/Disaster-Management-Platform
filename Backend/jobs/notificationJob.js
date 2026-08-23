@@ -2,7 +2,7 @@ const cron = require("node-cron");
 const notificationService = require("../services/notificationService");
 
 const startNotificationJob = () => {
-  cron.schedule("*/5 * * * *", async () => {
+  const task = cron.schedule("*/5 * * * *", async () => {
     try {
       console.log("Processing pending notifications...");
 
@@ -24,6 +24,7 @@ const startNotificationJob = () => {
   });
 
   console.log("Notification job started");
+  return task;
 };
 
 module.exports = startNotificationJob;

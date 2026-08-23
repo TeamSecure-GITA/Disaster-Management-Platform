@@ -47,8 +47,42 @@ const getDisasterById = async (req, res, next) => {
   }
 };
 
+const updateDisaster = async (req, res, next) => {
+  try {
+    const disaster = await Disaster.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!disaster) {
+      return res.status(404).json({ success: false, message: "Disaster not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Disaster updated successfully", data: disaster });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteDisaster = async (req, res, next) => {
+  try {
+    const disaster = await Disaster.findByIdAndDelete(req.params.id);
+
+    if (!disaster) {
+      return res.status(404).json({ success: false, message: "Disaster not found" });
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createDisaster,
   getDisasters,
   getDisasterById,
+  updateDisaster,
+  deleteDisaster,
 };

@@ -3,7 +3,7 @@ const predictionService = require("../services/predictionService");
 
 const startPredictionJob = () => {
   // Runs every hour
-  cron.schedule("0 * * * *", async () => {
+  const task = cron.schedule("0 * * * *", async () => {
     try {
       console.log("Running disaster predictions...");
 
@@ -24,6 +24,7 @@ const startPredictionJob = () => {
   });
 
   console.log("Prediction job started");
+  return task;
 };
 
 module.exports = startPredictionJob;

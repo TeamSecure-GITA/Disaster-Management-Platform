@@ -1,4 +1,6 @@
 const express = require("express");
+const { protect } = require("../middleware/authMiddleware");
+const { operationsOnly } = require("../middleware/adminMiddleware");
 
 const {
   createSensor,
@@ -8,10 +10,12 @@ const {
 
 const router = express.Router();
 
-router.post("/", createSensor);
+router.post("/", protect, operationsOnly, createSensor);
 
 router.post(
   "/readings",
+  protect,
+  operationsOnly,
   addSensorReading
 );
 

@@ -1,34 +1,82 @@
 const socketIO = require("socket.io");
+const corsOptions = require("../config/cors");
+const User = require("../models/User");
+const { verifyToken } = require("../utils/generateToken");
 
 let io;
 
 const initializeSocket = (server) => {
   io = socketIO(server, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      origin: corsOptions.origin,
+      methods: corsOptions.methods,
+      credentials: corsOptions.credentials,
     },
+  });
+
+  io.use(async (socket, next) => {
+    try {
+      const handshakeToken = socket.handshake.auth?.token;
+      const header = socket.handshake.headers.authorization;
+      const token = handshakeToken || header?.replace(/^Bearer\s+/i, "");
+
+      if (!token) return next(new Error("Authentication required"));
+
+      const decoded = verifyToken(token);
+      if (decoded.type && decoded.type !== "access") {
+        return next(new Error("Invalid authentication token"));
+      }
+
+      const user = await User.findById(decoded.id).select("-password");
+      if (!user || user.isActive === false || user.status === "inactive") {
+        return next(new Error("User is not active"));
+      }
+
+      socket.user = user;
+      next();
+    } catch (error) {
+      next(new Error("Invalid authentication token"));
+    }
   });
 
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+    const userRoom = `user:${socket.user._id}`;
+    socket.join("alerts");
+    socket.join(userRoom);
 
-    socket.on("joinRoom", (room) => {
-      socket.join(room);
-      console.log(`${socket.id} joined room: ${room}`);
-    });
+    if (["admin", "operator"].includes(socket.user.role)) {
+      socket.join("operations");
+    }
 
-    socket.on("joinUserRoom", (userId) => {
-      if (userId) {
-        const room = `user:${userId}`;
-        socket.join(room);
-        console.log(`${socket.id} joined user room: ${room}`);
+    socket.on("joinRoom", (room, acknowledge) => {
+      const allowedRoom = room === "alerts" ||
+        (room === "operations" && ["admin", "operator"].includes(socket.user.role));
+
+      if (!allowedRoom) {
+        return acknowledge?.({ success: false, message: "Room access denied" });
       }
+
+      socket.join(room);
+      acknowledge?.({ success: true, room });
     });
 
-    socket.on("leaveRoom", (room) => {
+    socket.on("joinUserRoom", (acknowledge) => {
+      socket.join(userRoom);
+      acknowledge?.({ success: true, room: userRoom });
+    });
+
+    socket.on("leaveRoom", (room, acknowledge) => {
+      if (!["alerts", "operations"].includes(room)) {
+        return acknowledge?.({ success: false, message: "Room access denied" });
+      }
+
+      if (room === "operations" && !["admin", "operator"].includes(socket.user.role)) {
+        return acknowledge?.({ success: false, message: "Room access denied" });
+      }
+
       socket.leave(room);
-      console.log(`${socket.id} left room: ${room}`);
+      acknowledge?.({ success: true, room });
     });
 
     socket.on("disconnect", () => {

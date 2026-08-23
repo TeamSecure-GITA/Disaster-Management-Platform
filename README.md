@@ -308,6 +308,18 @@ npm start
 
 npm test
 
+#### Run CI checks locally
+
+From the `Backend` directory:
+
+```bash
+npm ci
+npm run check
+npm run test:ci
+```
+
+CI runs these checks automatically through `.github/workflows/backend.yml`.
+
 ### Offline synchronization
 
 Authenticated clients can upload queued family changes through:
@@ -331,6 +343,16 @@ For a local Docker stack with MongoDB and persistent logs/uploads:
 ```bash
 docker compose up --build -d
 ```
+
+The backend readiness check is available at `GET /api/ready` and returns
+`503` until MongoDB is connected. Generate a unique secret before deployment:
+
+```bash
+openssl rand -base64 48
+```
+
+Set the generated value as `JWT_SECRET` in the deployment environment. Do not
+use the example value in production.
 
 Use an externally managed MongoDB instance in production. Configure Cloudinary and Firebase credentials for durable file storage and push notifications. Do not commit `.env`, credentials, logs, or uploads.
 
@@ -366,31 +388,18 @@ These can be expanded as the backend development continues.
 ## 🚧 Development Status
 
 This backend is an active project under development.
-The main modules and supporting files are present, but some parts are still being connected together.
-
-#### For example:
-
-- API route registration is still being integrated into the main server bootstrap.
-- Socket.IO initialization is still being integrated.
-- Scheduled jobs need to be started from the application bootstrap.
-- Database connection logic can be consolidated with the existing database configuration.
-- Additional integration tests can be added as modules are completed.
-
-This README describes the current codebase honestly instead of presenting unfinished modules as production-ready features.
+The Express API, Socket.IO runtime, scheduled jobs, MongoDB connection lifecycle,
+and graceful shutdown are connected through the main server bootstrap.
 
 ## 🛣️ Next Steps
 
 #### Our planned backend improvements include:
 
-- Complete API route integration
-- Complete Socket.IO integration
-- Connect scheduled jobs
-- Improve authorization and validation
+ - Improve authorization and validation
 - Expand automated tests
 - Add Swagger/OpenAPI documentation
 - Improve API error responses
 - Add pagination where required
-- Prepare deployment configuration
 
 ## 👨‍💻 Team
 

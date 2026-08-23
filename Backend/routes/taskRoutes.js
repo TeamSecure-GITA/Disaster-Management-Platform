@@ -1,4 +1,6 @@
 const express = require("express");
+const { protect } = require("../middleware/authMiddleware");
+const { operationsOnly } = require("../middleware/adminMiddleware");
 
 const {
   createTask,
@@ -9,12 +11,12 @@ const {
 
 const router = express.Router();
 
-router.post("/", createTask);
+router.post("/", protect, operationsOnly, createTask);
 
 router.get("/", getTasks);
 
 router.get("/:id", getTaskById);
 
-router.put("/:id", updateTask);
+router.put("/:id", protect, operationsOnly, updateTask);
 
 module.exports = router;

@@ -13,6 +13,13 @@ const satelliteDataSchema = new mongoose.Schema(
       default: "",
     },
 
+    externalId: {
+      type: String,
+      default: null,
+      sparse: true,
+      unique: true,
+    },
+
     dataType: {
       type: String,
       enum: [
