@@ -1,4 +1,8 @@
-# 🌐 Disaster Management Platform — Backend
+# Disaster Management Platform
+
+This repository contains the React frontend and Node.js backend for the Disaster Management Platform, developed by TeamSecure-GITA.
+
+## Backend
 
 <p align="center">
   <b>Backend services for the Disaster Management Platform</b><br>
@@ -230,6 +234,11 @@ cd Disaster-Management-Platform/Backend
 ### 3. Install dependencies
 
 npm install
+<p align="center">
+        <b>Backend services for the Disaster Management Platform</b><br>
+        Built by <b>TeamSecure-GITA</b>
+</p>
+
 
 ### 4. Create .env
 
