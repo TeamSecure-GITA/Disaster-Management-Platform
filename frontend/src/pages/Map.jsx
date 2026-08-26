@@ -24,21 +24,19 @@ function Map() {
       </p>
 
       <div className="map-container">
-        <MapContainer
+       <MapContainer
           center={position}
-          zoom={6}
-          style={{ height: "500px", width: "100%" }}
+          zoom={12}
+          scrollWheelZoom={true}
+          style={{ height: "600px", width: "100%" }}
         >
           <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-
           <Marker position={position}>
             <Popup>
-              📍 Disaster Monitoring Center
-              <br />
-              Bhubaneswar, Odisha
+              <strong>Disaster Control Hub</strong><br /> Location active.
             </Popup>
           </Marker>
         </MapContainer>

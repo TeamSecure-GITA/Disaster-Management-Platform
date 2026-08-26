@@ -5,9 +5,9 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-
+import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
-
+import AdminTickets from './pages/AdminTickets';
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Alerts = lazy(() => import("./pages/Alerts"));
 const Map = lazy(() => import("./pages/Map"));
@@ -43,7 +43,8 @@ function Loading() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
 
       <Suspense fallback={<Loading />}>
 
@@ -153,11 +154,13 @@ export default function App() {
             path="*"
             element={<Navigate to="/" replace />}
           />
+          <Route path="/admin/tickets" element={<AdminTickets />} />
 
         </Routes>
 
       </Suspense>
 
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }

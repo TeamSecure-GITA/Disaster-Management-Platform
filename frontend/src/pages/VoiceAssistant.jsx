@@ -16,26 +16,40 @@ function VoiceAssistant() {
   // -----------------------------------
   // FEMALE / CLEAR VOICE
   // -----------------------------------
-  const speak = (text) => {
-    if (!window.speechSynthesis) {
-      return;
-    }
+const speak = (text) => {
+    if (!('speechSynthesis' in window)) return;
 
     window.speechSynthesis.cancel();
 
-    const voices = window.speechSynthesis.getVoices();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.pitch = 1.1; 
+    utterance.rate = 0.95; 
 
-    const preferredVoice =
-      voices.find((voice) =>
-        /female|zira|samantha|karen|susan|google uk english female|google us english/i.test(
-          voice.name
-        )
-      ) ||
-      voices.find((voice) =>
-        /en-IN|en-US|en-GB/i.test(voice.lang)
-      ) ||
-      voices[0];
+    const setFemaleVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(
+        (v) =>
+          v.name.includes("Google UK English Female") ||
+          v.name.includes("Google US English") ||
+          v.name.includes("Microsoft Zira") ||
+          v.name.includes("Samantha") ||
+          v.name.includes("Victoria") ||
+          (v.lang.startsWith("en") && v.name.toLowerCase().includes("female"))
+      );
 
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    };
+
+    if (window.speechSynthesis.getVoices().length !== 0) {
+      setFemaleVoice();
+    } else {
+      window.speechSynthesis.onvoiceschanged = setFemaleVoice;
+    }
+  };
     const speech = new SpeechSynthesisUtterance(text);
 
     if (preferredVoice) {
@@ -646,6 +660,5 @@ function VoiceAssistant() {
       </div>
     </div>
   );
-}
 
 export default VoiceAssistant;
