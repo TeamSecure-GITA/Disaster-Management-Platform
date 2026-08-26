@@ -65,5 +65,3 @@ coverage/
 dist/
 dist-ssr/
 build/
-*.env
-*.env.example

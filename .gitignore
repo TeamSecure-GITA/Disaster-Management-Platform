@@ -68,3 +68,4 @@ dist-ssr/
 build/
 *.env
 *.env.example
+!Backend/.env.example
