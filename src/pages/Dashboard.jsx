@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../utils/useAuth";
 import { getOfflineReports, clearOfflineReports, saveOfflineReport } from "../utils/offlineStorage";
 import { requestNotificationPermission, sendLocalEmergencyAlert } from "../utils/pushAlerts";
+import { apiUrl } from "../utils/api";
 import localforage from 'localforage';
 const translations = {
   en: { title: "Disaster Management Portal", support: "Need Technical Help?" },
@@ -385,7 +386,7 @@ const getCurrentLocation = () => {
           if (navigator.onLine) {
             // ONLINE MODE: Send to backend server
             try {
-              await fetch('http://localhost:5000/api/support', {
+              await fetch(apiUrl('/support'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(supportTicket)

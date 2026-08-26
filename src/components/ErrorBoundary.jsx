@@ -1,4 +1,5 @@
 import React from 'react';
+import { apiUrl } from '../utils/api';
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
@@ -9,7 +10,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     // Notify team secure immediately
-    fetch('/api/maintenance/notify-error', {
+    fetch(apiUrl('/maintenance/notify-error'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
