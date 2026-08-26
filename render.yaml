@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: disaster-management-api
+    runtime: node
+    rootDir: Backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+
+  - type: web
+    name: disaster-management-frontend
+    runtime: node
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
