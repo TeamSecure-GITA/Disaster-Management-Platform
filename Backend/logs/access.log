@@ -769,3 +769,6 @@
 [2026-08-24T14:50:59.551Z] [ACCESS] HTTP request {"method":"GET","url":"/api/resources/unmatched/path","ip":"::ffff:127.0.0.1","userAgent":"unknown","statusCode":404,"responseTime":"1ms"}
 [2026-08-26T14:04:47.456Z] [ACCESS] HTTP request {"method":"GET","url":"/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0","statusCode":304,"responseTime":"16ms"}
 [2026-08-26T14:04:47.537Z] [ACCESS] HTTP request {"method":"GET","url":"/favicon.ico","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0","statusCode":404,"responseTime":"4ms"}
+[2026-08-27T12:20:01.198Z] [ACCESS] HTTP request {"method":"GET","url":"/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0","statusCode":304,"responseTime":"16ms"}
+[2026-08-27T12:20:01.293Z] [ACCESS] HTTP request {"method":"GET","url":"/favicon.ico","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0","statusCode":404,"responseTime":"3ms"}
+[2026-08-27T12:32:52.317Z] [ACCESS] HTTP request {"method":"GET","url":"/","ip":"::1","userAgent":"curl/8.5.0","statusCode":200,"responseTime":"1ms"}

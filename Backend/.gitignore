@@ -16,6 +16,7 @@ lerna-debug.log*
 *.log
 Backend/logs/*
 !Backend/logs/.gitkeep
+*.log
 
 # Uploads
 Backend/uploads/*
