@@ -1,14 +1,12 @@
 const mongoose = require("mongoose");
+const environment = require("./environment");
 
 const connectDatabase = async () => {
   try {
-    const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
-
-    if (!uri) {
-      throw new Error(
-        "MONGO_URI is not defined. Set MONGO_URI in your environment variables or Render dashboard."
-      );
-    }
+    const uri =
+      process.env.MONGO_URI ||
+      process.env.MONGODB_URI ||
+      environment.mongoUri;
 
     // Connect to MongoDB
     await mongoose.connect(uri, {
