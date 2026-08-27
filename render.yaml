@@ -1,0 +1,31 @@
+services:
+  # ── Backend (Node.js / Express) ──────────────────────────────────────────
+  - type: web
+    name: Disaster-Management-Platform-Backend
+    runtime: node
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        value: mongodb+srv://teamsecureproject_db_user:1ZUmjUV8dPgGD7dp@cluster0.0xz9hc6.mongodb.net/disaster_management?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: 8f6b2d0e9c4a7b1d5e3f6a8c0d2b4e6f9a1c3e5d7b9f2a4c6e8d0b3f5a7c9e1
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+  # ── Frontend (Vite / React) ───────────────────────────────────────────────
+  - type: web
+    name: Disaster-Management-Platform-Frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
