@@ -17,38 +17,47 @@ const getPreferredUri = () => {
   return ATLAS_MONGO_URI;
 };
 
-let isConnecting = false;
-
 const connectDatabase = async () => {
-  if (mongoose.connection.readyState === 1 || isConnecting) {
+  // Already connected — skip
+  if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
 
-  isConnecting = true;
   const uri = getPreferredUri();
 
   try {
-    console.log("Connecting to MongoDB Atlas...");
+    console.log("Connecting to MongoDB...");
     await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 10000,
     });
 
     console.log("MongoDB connected successfully");
     console.log(`Database: ${mongoose.connection.name}`);
-    isConnecting = false;
+
     return mongoose.connection;
   } catch (error) {
-    isConnecting = false;
     console.warn(
-      `MongoDB connection issue (${error.message}). Retrying in 5 seconds...`
+      `Primary connection failed (${error.message}). Retrying with MongoDB Atlas...`
     );
 
-    // Auto-retry in background every 5 seconds
-    setTimeout(() => {
-      connectDatabase().catch(() => {});
-    }, 5000);
+    // Disconnect stale handle before retrying
+    try { await mongoose.disconnect(); } catch (_) {}
 
-    return null;
+    try {
+      await mongoose.connect(ATLAS_MONGO_URI, {
+        serverSelectionTimeoutMS: 15000,
+      });
+
+      console.log("MongoDB connected successfully via Atlas fallback");
+      console.log(`Database: ${mongoose.connection.name}`);
+      return mongoose.connection;
+    } catch (fallbackError) {
+      console.error(
+        "MongoDB Atlas fallback connection failed:",
+        fallbackError.message
+      );
+      throw fallbackError;
+    }
   }
 };
 
@@ -57,8 +66,7 @@ const disconnectDatabase = async () => {
     await mongoose.disconnect();
     console.log("MongoDB disconnected");
   } catch (error) {
-    console.error("MongoDB disconnection failed");
-    console.error(error.message);
+    console.error("MongoDB disconnection failed:", error.message);
   }
 };
 
@@ -73,6 +81,10 @@ mongoose.connection.on("error", (error) => {
 
 mongoose.connection.on("disconnected", () => {
   console.log("MongoDB connection disconnected");
+});
+
+mongoose.connection.on("reconnected", () => {
+  console.log("MongoDB reconnected successfully");
 });
 
 module.exports = {
