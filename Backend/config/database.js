@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
-const environment = require("./environment");
 
 const connectDatabase = async () => {
   try {
-    mongoose.set("strictQuery", true);
+    // Check whether MongoDB URI exists
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is not defined in .env file");
+    }
 
-    await mongoose.connect(environment.mongoUri, {
+    // Connect to MongoDB Atlas
+    await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 5000,
     });
 
@@ -31,6 +34,7 @@ const disconnectDatabase = async () => {
   }
 };
 
+// MongoDB connection events
 mongoose.connection.on("connected", () => {
   console.log("MongoDB connection established");
 });
