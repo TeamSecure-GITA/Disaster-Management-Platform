@@ -16,7 +16,7 @@ function VoiceAssistant() {
   // -----------------------------------
   // FEMALE / CLEAR VOICE
   // -----------------------------------
-const speak = (text) => {
+  const speak = (text) => {
     if (!('speechSynthesis' in window)) return;
 
     window.speechSynthesis.cancel();
@@ -24,6 +24,7 @@ const speak = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.pitch = 1.1; 
     utterance.rate = 0.95; 
+    utterance.lang = "en-IN";
 
     const setFemaleVoice = () => {
       const voices = window.speechSynthesis.getVoices();
@@ -49,19 +50,6 @@ const speak = (text) => {
     } else {
       window.speechSynthesis.onvoiceschanged = setFemaleVoice;
     }
-  };
-    const speech = new SpeechSynthesisUtterance(text);
-
-    if (preferredVoice) {
-      speech.voice = preferredVoice;
-    }
-
-    speech.lang = "en-IN";
-    speech.rate = 0.9;
-    speech.pitch = 1.08;
-    speech.volume = 1;
-
-    window.speechSynthesis.speak(speech);
   };
 
   // -----------------------------------
@@ -660,5 +648,6 @@ const speak = (text) => {
       </div>
     </div>
   );
+}
 
 export default VoiceAssistant;
