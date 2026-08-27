@@ -93,17 +93,9 @@ const start = async () => {
   try {
     console.log("Starting Disaster Management Platform...");
 
-    // Connect MongoDB Atlas
-    await connectDatabase();
-
-    // Start Socket.IO and background jobs
-    startServerRuntime();
-
-    // Start HTTP server
+    // Start HTTP server FIRST so Render immediately sees the port open
     await new Promise((resolve, reject) => {
-
       server.once("error", (error) => {
-
         if (error.code === "EADDRINUSE") {
           console.error(
             `\n❌ Port ${PORT} is already in use by another process.` +
@@ -117,7 +109,6 @@ const start = async () => {
       });
 
       server.listen(PORT, () => {
-
         console.log(
           `Server running on http://localhost:${PORT}`
         );
@@ -126,10 +117,16 @@ const start = async () => {
       });
     });
 
+    // Start Socket.IO and background jobs
+    startServerRuntime();
+
+    // Connect to MongoDB in background with auto-retry
+    connectDatabase().catch((err) => {
+      console.warn("MongoDB initial connection:", err.message);
+    });
+
     return server;
-
   } catch (error) {
-
     console.error(
       "Server startup error:",
       error.message

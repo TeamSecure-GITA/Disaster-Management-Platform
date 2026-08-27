@@ -17,39 +17,38 @@ const getPreferredUri = () => {
   return ATLAS_MONGO_URI;
 };
 
+let isConnecting = false;
+
 const connectDatabase = async () => {
+  if (mongoose.connection.readyState === 1 || isConnecting) {
+    return mongoose.connection;
+  }
+
+  isConnecting = true;
   const uri = getPreferredUri();
 
   try {
-    console.log("Connecting to MongoDB...");
+    console.log("Connecting to MongoDB Atlas...");
     await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 10000,
     });
 
     console.log("MongoDB connected successfully");
     console.log(`Database: ${mongoose.connection.name}`);
-
+    isConnecting = false;
     return mongoose.connection;
   } catch (error) {
+    isConnecting = false;
     console.warn(
-      `Primary connection failed (${error.message}). Retrying with MongoDB Atlas...`
+      `MongoDB connection issue (${error.message}). Retrying in 5 seconds...`
     );
 
-    try {
-      await mongoose.connect(ATLAS_MONGO_URI, {
-        serverSelectionTimeoutMS: 15000,
-      });
+    // Auto-retry in background every 5 seconds
+    setTimeout(() => {
+      connectDatabase().catch(() => {});
+    }, 5000);
 
-      console.log("MongoDB connected successfully via Atlas fallback");
-      console.log(`Database: ${mongoose.connection.name}`);
-      return mongoose.connection;
-    } catch (fallbackError) {
-      console.error(
-        "MongoDB Atlas fallback connection failed:",
-        fallbackError.message
-      );
-      throw fallbackError;
-    }
+    return null;
   }
 };
 
