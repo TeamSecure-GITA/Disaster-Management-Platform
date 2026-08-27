@@ -1,14 +1,27 @@
 const mongoose = require("mongoose");
-const environment = require("./environment");
+
+const ATLAS_MONGO_URI =
+  "mongodb+srv://teamsecureproject_db_user:1ZUmjUV8dPgGD7dp@cluster0.0xz9hc6.mongodb.net/disaster_management?retryWrites=true&w=majority";
+
+const getPreferredUri = () => {
+  const envUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+  if (
+    envUri &&
+    !envUri.includes("127.0.0.1") &&
+    !envUri.includes("localhost")
+  ) {
+    return envUri;
+  }
+
+  return ATLAS_MONGO_URI;
+};
 
 const connectDatabase = async () => {
-  try {
-    const uri =
-      process.env.MONGO_URI ||
-      process.env.MONGODB_URI ||
-      environment.mongoUri;
+  const uri = getPreferredUri();
 
-    // Connect to MongoDB
+  try {
+    console.log("Connecting to MongoDB...");
     await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 10000,
     });
@@ -18,8 +31,25 @@ const connectDatabase = async () => {
 
     return mongoose.connection;
   } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
-    throw error;
+    console.warn(
+      `Primary connection failed (${error.message}). Retrying with MongoDB Atlas...`
+    );
+
+    try {
+      await mongoose.connect(ATLAS_MONGO_URI, {
+        serverSelectionTimeoutMS: 15000,
+      });
+
+      console.log("MongoDB connected successfully via Atlas fallback");
+      console.log(`Database: ${mongoose.connection.name}`);
+      return mongoose.connection;
+    } catch (fallbackError) {
+      console.error(
+        "MongoDB Atlas fallback connection failed:",
+        fallbackError.message
+      );
+      throw fallbackError;
+    }
   }
 };
 
