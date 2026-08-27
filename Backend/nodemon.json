@@ -1,0 +1,26 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    "node_modules/**",
+    "tests/**",
+    "coverage/**",
+    "uploads/**",
+    "logs/**"
+  ],
+  "watch": [
+    "server.js",
+    "app.js",
+    "config",
+    "controllers",
+    "jobs",
+    "middleware",
+    "models",
+    "routes",
+    "services",
+    "sockets",
+    "utils",
+    "validators"
+  ],
+  "ext": "js,json",
+  "delay": 200
+}
