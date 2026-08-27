@@ -3,14 +3,19 @@ const path = require("path");
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
+const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+
 const requiredVariables = [
-  "MONGO_URI",
   "JWT_SECRET",
 ];
 
 const missingVariables = requiredVariables.filter(
   (variable) => !process.env[variable]
 );
+
+if (!mongoUri) {
+  missingVariables.push("MONGO_URI");
+}
 
 if (missingVariables.length > 0) {
   throw new Error(
@@ -34,7 +39,7 @@ const environment = {
 
   port: Number(process.env.PORT) || 5000,
 
-  mongoUri: process.env.MONGO_URI,
+  mongoUri: mongoUri || process.env.MONGO_URI,
 
   jwtSecret: process.env.JWT_SECRET,
 
