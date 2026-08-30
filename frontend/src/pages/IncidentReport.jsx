@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import localforage from 'localforage';
 
 function IncidentReport() {
   const [form, setForm] = useState({
@@ -13,6 +14,14 @@ function IncidentReport() {
   const [submitted, setSubmitted] = useState(false);
 
   const [reports, setReports] = useState([]);
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  // Load persisted reports on mount
+  useEffect(() => {
+    localforage.getItem('incident_reports').then((saved) => {
+      if (saved && Array.isArray(saved)) setReports(saved);
+    }).catch(() => {});
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -45,7 +54,10 @@ function IncidentReport() {
       status: "Submitted",
     };
 
-    setReports([newReport, ...reports]);
+    const updated = [newReport, ...reports];
+    setReports(updated);
+    // Persist to IndexedDB
+    localforage.setItem('incident_reports', updated).catch(() => {});
     setSubmitted(true);
 
     setForm({
@@ -96,13 +108,33 @@ function IncidentReport() {
 
           <label>📍 Location</label>
 
-          <input
-            type="text"
-            name="location"
-            placeholder="Enter incident location"
-            value={form.location}
-            onChange={handleChange}
-          />
+          <div style={{ display: "flex", gap: "8px", alignItems: "stretch" }}>
+            <input
+              type="text"
+              name="location"
+              placeholder="Enter incident location or use GPS"
+              value={form.location}
+              onChange={handleChange}
+              style={{ flex: 1 }}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (!navigator.geolocation) return alert('GPS not supported.');
+                setGpsLoading(true);
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => {
+                    setForm(f => ({ ...f, location: `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}` }));
+                    setGpsLoading(false);
+                  },
+                  () => { alert('Unable to get GPS.'); setGpsLoading(false); }
+                );
+              }}
+              style={{ whiteSpace: 'nowrap', padding: '8px 12px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+            >
+              {gpsLoading ? '📡...' : '📍 GPS'}
+            </button>
+          </div>
 
           <label>⚠️ Severity</label>
 

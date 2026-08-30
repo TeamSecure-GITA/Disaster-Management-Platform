@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
-import AdminTickets from './pages/AdminTickets';
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Alerts = lazy(() => import("./pages/Alerts"));
 const Map = lazy(() => import("./pages/Map"));
@@ -29,6 +28,8 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Settings = lazy(() => import("./pages/Settings"));
 const SOSCenter = lazy(() => import("./pages/SOSCenter"));
 const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 
 function Loading() {
   return (
@@ -50,8 +51,12 @@ export default function App() {
 
         <Routes>
 
-          {/* LOGIN */}
+          {/* AUTH */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* ADMIN — must be BEFORE wildcard */}
+          <Route path="/admin/tickets" element={<AdminTickets />} />
 
           {/* MAIN PLATFORM */}
           <Route element={<DashboardLayout />}>
@@ -60,101 +65,43 @@ export default function App() {
 
             <Route path="/alerts" element={<Alerts />} />
 
+            {/* Map — two route names for compatibility */}
             <Route path="/map" element={<Map />} />
+            <Route path="/disaster-response-map" element={<DisasterResponseMap />} />
 
-            <Route
-              path="/emergency-sos"
-              element={<SOSCenter/>}
-            />
+            <Route path="/emergency-sos" element={<SOSCenter />} />
+            <Route path="/rescue-centers" element={<RescueCenters />} />
+            <Route path="/shelter-finder" element={<ShelterFinder />} />
+            <Route path="/family-safety" element={<FamilySafety />} />
+            <Route path="/evacuation-planner" element={<EvacuationPlanner />} />
 
-            <Route
-              path="/rescue-centers"
-              element={<RescueCenters />}
-            />
+            {/* QR Rescue ID — both route names */}
+            <Route path="/qr-rescue-id" element={<QRRescueID />} />
+            <Route path="/rescue-id" element={<QRRescueID />} />
 
-            <Route
-              path="/shelter-finder"
-              element={<ShelterFinder />}
-            />
+            <Route path="/notifications" element={<Notifications />} />
 
-            <Route
-              path="/family-safety"
-              element={<FamilySafety />}
-            />
+            {/* Chatbot — both route names */}
+            <Route path="/ai-assistant" element={<AIAssistant />} />
+            <Route path="/chatbot" element={<AIAssistant />} />
 
-            <Route
-              path="/evacuation-planner"
-              element={<EvacuationPlanner />}
-            />
+            <Route path="/voice-assistant" element={<VoiceAssistant />} />
+            <Route path="/damage-assessment" element={<DamageAssessment />} />
 
-            <Route
-              path="/qr-rescue-id"
-              element={<QRRescueID />}
-            />
+            {/* Analytics — both route names */}
+            <Route path="/analytics-reports" element={<Analytics />} />
+            <Route path="/analytics" element={<Analytics />} />
 
-            <Route
-              path="/notifications"
-              element={<Notifications />}
-            />
-
-            <Route
-              path="/ai-assistant"
-              element={<AIAssistant />}
-            />
-
-            <Route
-              path="/voice-assistant"
-              element={<VoiceAssistant />}
-            />
-
-            <Route
-              path="/damage-assessment"
-              element={<DamageAssessment />}
-            />
-
-            <Route
-              path="/analytics-reports"
-              element={<Analytics />}
-            />
-
-            <Route
-              path="/safety-guides"
-              element={<SafetyGuides />}
-            />
-
-            <Route
-              path="/statistics"
-              element={<Statistics />}
-            />
-
-            <Route
-              path="/disaster-response-map"
-              element={<DisasterResponseMap />}
-            />
-
-            <Route
-              path="/incident-report"
-              element={<IncidentReport />}
-            />
-
-            <Route
-              path="/profile"
-              element={<Profile />}
-            />
-
-            <Route
-              path="/settings"
-              element={<Settings />}
-            />
+            <Route path="/safety-guides" element={<SafetyGuides />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/incident-report" element={<IncidentReport />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
 
           </Route>
 
-          {/* UNKNOWN URL */}
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
-          />
-          <Route path="/admin/tickets" element={<AdminTickets />} />
+          {/* CATCH-ALL — must be LAST */}
+          <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
 
