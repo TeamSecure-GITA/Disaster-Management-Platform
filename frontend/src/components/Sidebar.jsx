@@ -1,5 +1,6 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { clearOfflineSession } from "../utils/offlineStorage";
 
 const menuItems = [
   {
@@ -103,13 +104,20 @@ const menuItems = [
     path: "/settings",
   },
   {
-    name: "Logout",
-    icon: "🚪",
-    path: "/logout",
+    name: "Login / Switch Account",
+    icon: "🔐",
+    path: "/login",
   },
 ];
 
 function Sidebar({ onNavigate }) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await clearOfflineSession();
+    navigate("/login");
+  };
+
   return (
     <aside style={{
       width: "260px",
@@ -146,9 +154,34 @@ function Sidebar({ onNavigate }) {
             <span>{item.name}</span>
           </NavLink>
         ))}
+
+        {/* Logout Button */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "10px 12px",
+            borderRadius: "8px",
+            fontSize: "0.875rem",
+            color: "#f87171",
+            backgroundColor: "transparent",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left",
+            width: "100%",
+            marginTop: "6px",
+            transition: "background 0.15s"
+          }}
+        >
+          <span>🚪</span>
+          <span>Logout</span>
+        </button>
       </nav>
     </aside>
   );
 }
 
-export default Sidebar;
+export default Sidebar;

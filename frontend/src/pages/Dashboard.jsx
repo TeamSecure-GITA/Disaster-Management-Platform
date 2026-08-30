@@ -403,14 +403,14 @@ export default function Dashboard() {
       <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
           <div>
             <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "bold" }}>
               {t.title}
             </h1>
             <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.9rem" }}>{t.subtitle}</p>
           </div>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
             {/* Language Dropdown */}
             <select
               value={lang}
@@ -423,17 +423,83 @@ export default function Dashboard() {
             </select>
             <span style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold" }}>108 (Medical)</span>
             <span style={{ backgroundColor: "#2563eb", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold" }}>1070 (Disaster)</span>
+
+            {/* Direct Login Button */}
+            <button
+              onClick={() => navigate("/login")}
+              style={{
+                backgroundColor: "#0284c7",
+                color: "#ffffff",
+                border: "none",
+                padding: "6px 16px",
+                borderRadius: "6px",
+                fontWeight: "bold",
+                fontSize: "0.9rem",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+              }}
+            >
+              <span>🔐</span>
+              <span>{user ? "Switch / Login" : "Login"}</span>
+            </button>
           </div>
         </div>
 
         {/* ── User Banner ─────────────────────────────────────────────────── */}
-        <div style={{ padding: "12px 18px", backgroundColor: "#1e293b", borderRadius: "8px", border: "1px solid #334155" }}>
+        <div style={{ padding: "12px 18px", backgroundColor: "#1e293b", borderRadius: "8px", border: "1px solid #334155", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
           {loading
             ? <p style={{ margin: 0, color: "#94a3b8" }}>{t.loadingSession}</p>
-            : <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "bold", color: "#38bdf8" }}>
-                {t.welcomeBack}, {user ? user.name || user.email : t.emergencyGuest}
-              </h2>
+            : (
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#0284c7", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "0.9rem" }}>
+                  {user?.name ? user.name.charAt(0).toUpperCase() : "👤"}
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "bold", color: "#38bdf8" }}>
+                    {t.welcomeBack}, {user ? user.name || user.email : t.emergencyGuest}
+                  </h2>
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#94a3b8" }}>
+                    Role: <strong style={{ color: "#e2e8f0" }}>{user?.role ? user.role.toUpperCase() : "GUEST / CITIZEN"}</strong> • Session active
+                  </p>
+                </div>
+              </div>
+            )
           }
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => navigate("/login")}
+              style={{
+                backgroundColor: "#334155",
+                color: "#f8fafc",
+                border: "1px solid #475569",
+                padding: "6px 14px",
+                borderRadius: "6px",
+                fontSize: "0.82rem",
+                fontWeight: "600",
+                cursor: "pointer"
+              }}
+            >
+              {user ? "🔄 Switch Account" : "🔑 Sign In to Portal"}
+            </button>
+            <button
+              onClick={() => navigate("/register")}
+              style={{
+                backgroundColor: "#1e293b",
+                color: "#38bdf8",
+                border: "1px solid #0284c7",
+                padding: "6px 14px",
+                borderRadius: "6px",
+                fontSize: "0.82rem",
+                fontWeight: "600",
+                cursor: "pointer"
+              }}
+            >
+              📝 Register
+            </button>
+          </div>
         </div>
 
         {/* ── Offline Warning ─────────────────────────────────────────────── */}
