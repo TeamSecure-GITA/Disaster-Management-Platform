@@ -158,7 +158,7 @@ function VoiceAssistant() {
       speak(message);
 
       setTimeout(() => {
-        navigate("/emergency");
+        navigate("/emergency-sos");
       }, 500);
 
       return;
