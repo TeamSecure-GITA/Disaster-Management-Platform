@@ -33,10 +33,10 @@ const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 
 function Loading() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-3">🛡️</div>
-        <p className="text-blue-400">Loading...</p>
+    <div style={{ minHeight: "100vh", backgroundColor: "#020617", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "3rem", marginBottom: "12px" }}>🛡️</div>
+        <p style={{ color: "#60a5fa", fontSize: "1rem" }}>Loading...</p>
       </div>
     </div>
   );

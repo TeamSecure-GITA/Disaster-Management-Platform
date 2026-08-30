@@ -133,83 +133,54 @@ function FeaturePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 md:p-8">
+    <div style={{ padding: "24px 32px", color: "#f8fafc" }}>
 
       {/* Page Header */}
-      <div className="mb-8">
-
-        <div className="text-5xl mb-4">
-          {feature.icon}
-        </div>
-
-        <h1 className="text-3xl md:text-4xl font-bold text-white">
+      <div style={{ marginBottom: "28px" }}>
+        <div style={{ fontSize: "3rem", marginBottom: "12px" }}>{feature.icon}</div>
+        <h1 style={{ margin: "0 0 8px 0", fontSize: "2rem", fontWeight: "800", color: "#fff" }}>
           {feature.title}
         </h1>
-
-        <p className="text-slate-400 mt-2">
-          {feature.description}
-        </p>
-
+        <p style={{ margin: 0, color: "#94a3b8" }}>{feature.description}</p>
       </div>
 
       {/* Main Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
+      <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "16px", padding: "28px" }}>
 
-        <div className="flex items-center gap-3 mb-6">
-
-          <div className="w-3 h-3 rounded-full bg-green-500" />
-
-          <span className="text-green-400 font-semibold">
-            System Ready
-          </span>
-
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+          <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#22c55e" }} />
+          <span style={{ color: "#4ade80", fontWeight: "600" }}>System Ready</span>
         </div>
 
-        <h2 className="text-xl font-bold text-white mb-3">
+        <h2 style={{ margin: "0 0 8px 0", fontSize: "1.2rem", fontWeight: "700", color: "#fff" }}>
           {feature.title}
         </h2>
-
-        <p className="text-slate-400 leading-7">
-          This module is active and ready for integration
-          with the Disaster Management Platform.
+        <p style={{ margin: "0 0 24px 0", color: "#94a3b8", lineHeight: "1.7" }}>
+          This module is active and ready for integration with the Disaster Management Platform.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
 
-          <div className="bg-slate-800 rounded-xl p-5">
-            <div className="text-2xl mb-3">🟢</div>
-            <h3 className="font-semibold text-white">
-              Status
-            </h3>
-            <p className="text-sm text-slate-400 mt-1">
-              Active
-            </p>
+          <div style={{ backgroundColor: "#0f172a", borderRadius: "12px", padding: "20px" }}>
+            <div style={{ fontSize: "1.5rem", marginBottom: "10px" }}>🟢</div>
+            <h3 style={{ margin: "0 0 4px 0", fontWeight: "700", color: "#fff" }}>Status</h3>
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "#94a3b8" }}>Active</p>
           </div>
 
-          <div className="bg-slate-800 rounded-xl p-5">
-            <div className="text-2xl mb-3">⚡</div>
-            <h3 className="font-semibold text-white">
-              Response
-            </h3>
-            <p className="text-sm text-slate-400 mt-1">
-              Ready
-            </p>
+          <div style={{ backgroundColor: "#0f172a", borderRadius: "12px", padding: "20px" }}>
+            <div style={{ fontSize: "1.5rem", marginBottom: "10px" }}>⚡</div>
+            <h3 style={{ margin: "0 0 4px 0", fontWeight: "700", color: "#fff" }}>Response</h3>
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "#94a3b8" }}>Ready</p>
           </div>
 
-          <div className="bg-slate-800 rounded-xl p-5">
-            <div className="text-2xl mb-3">🔐</div>
-            <h3 className="font-semibold text-white">
-              Security
-            </h3>
-            <p className="text-sm text-slate-400 mt-1">
-              Protected
-            </p>
+          <div style={{ backgroundColor: "#0f172a", borderRadius: "12px", padding: "20px" }}>
+            <div style={{ fontSize: "1.5rem", marginBottom: "10px" }}>🔐</div>
+            <h3 style={{ margin: "0 0 4px 0", fontWeight: "700", color: "#fff" }}>Security</h3>
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "#94a3b8" }}>Protected</p>
           </div>
 
         </div>
-
       </div>
-
     </div>
   );
 }
