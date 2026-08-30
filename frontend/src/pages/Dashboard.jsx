@@ -421,8 +421,50 @@ export default function Dashboard() {
               <option value="hi">हिंदी (Hindi)</option>
               <option value="or">ଓଡ଼ିଆ (Odia)</option>
             </select>
-            <span style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold" }}>108 (Medical)</span>
-            <span style={{ backgroundColor: "#2563eb", color: "white", padding: "6px 14px", borderRadius: "6px", fontWeight: "bold" }}>1070 (Disaster)</span>
+            {/* Clickable Emergency Direct Dialers */}
+            <a
+              href="tel:108"
+              title="Call Emergency Medical Ambulance (108)"
+              style={{
+                backgroundColor: "#dc2626",
+                color: "white",
+                padding: "6px 14px",
+                borderRadius: "6px",
+                fontWeight: "bold",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: "0 2px 4px rgba(220,38,38,0.3)",
+                transition: "transform 0.15s, opacity 0.15s",
+                cursor: "pointer"
+              }}
+            >
+              <span>🚑</span>
+              <span>108 (Medical)</span>
+            </a>
+
+            <a
+              href="tel:1070"
+              title="Call State Disaster Management Helpline (1070)"
+              style={{
+                backgroundColor: "#2563eb",
+                color: "white",
+                padding: "6px 14px",
+                borderRadius: "6px",
+                fontWeight: "bold",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: "0 2px 4px rgba(37,99,235,0.3)",
+                transition: "transform 0.15s, opacity 0.15s",
+                cursor: "pointer"
+              }}
+            >
+              <span>📞</span>
+              <span>1070 (Disaster)</span>
+            </a>
 
             {/* Direct Login Button */}
             <button
