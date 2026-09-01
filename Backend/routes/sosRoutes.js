@@ -15,7 +15,7 @@ const {
 const {
   validate: validationMiddleware,
 } = require("../middleware/validationMiddleware");
-const { sosLimiter } = require("../middleware/rateLimitMiddleware");
+const { sosLimiter, threatBlockLimiter } = require("../middleware/rateLimitMiddleware");
 const { protect } = require("../middleware/authMiddleware");
 const { operationsOnly } = require("../middleware/adminMiddleware");
 
@@ -23,7 +23,8 @@ const router = express.Router();
 
 router.post(
   "/",
-  sosLimiter,
+  threatBlockLimiter,   // 403 + blocked:true for burst abuse → frontend redirects to CERT-In
+  sosLimiter,           // 429 for standard rate excess
   createSOSValidator,
   validationMiddleware,
   protect,

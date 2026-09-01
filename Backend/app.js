@@ -3,6 +3,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
 const mongoose = require("mongoose");
+const mongoSanitize = require("express-mongo-sanitize");
+const rateLimit = require("express-rate-limit");
 const environment = require("./config/environment");
 
 const corsOptions = require("./config/cors");
@@ -36,8 +38,32 @@ const familyRoutes = require("./routes/familyRoutes");
 const rescueIdRoutes = require("./routes/rescueIdRoutes");
 const damageAssessmentRoutes = require("./routes/damageAssessmentRoutes");
 const evacuationRoutes = require("./routes/evacuationRoutes");
+const incidentRoutes = require("./routes/incidentRoutes");
 
 const app = express();
+
+// ─── Global security threat-redirect limiter ──────────────────────────────────
+// Any IP that fires > 20 API requests in 15 minutes gets a 403 + blocked JSON
+// response. The frontend sosService.js and sendDataToBackend() detect this shape
+// and redirect the browser to the CERT-In cyber security portal.
+const securityRedirectLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15-minute tracking window
+    limit: 20,                 // block after 20 suspicious requests per IP
+    handler: (req, res) => {
+        console.warn(
+            `[SECURITY VIOLATION] IP ${req.ip} exceeded threshold. Initiating security redirect.`
+        );
+        return res.status(403).json({
+            success: false,
+            blocked: true,
+            redirectUrl: "https://www.cert-in.org.in",
+            message:
+                "Access Denied: Threat detected. Redirecting to Cyber Security Authority.",
+        });
+    },
+});
+
+app.use("/api/", securityRedirectLimiter);
 
 app.disable("x-powered-by");
 app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : false);
@@ -59,6 +85,9 @@ app.use(
         limit: "10mb",
     })
 );
+
+// Sanitise user-supplied data to prevent MongoDB operator injection attacks
+app.use(mongoSanitize());
 
 // ================================
 // STATIC FILES
@@ -126,6 +155,7 @@ app.use("/api/family", familyRoutes);
 app.use("/api/rescue-id", rescueIdRoutes);
 app.use("/api/damage-assessment", damageAssessmentRoutes);
 app.use("/api/evacuation", evacuationRoutes);
+app.use("/api/incidents", incidentRoutes);
 app.use("/api/sync", syncRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 

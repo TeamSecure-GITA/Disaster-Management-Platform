@@ -177,6 +177,48 @@ const videoUpload = multer({
   },
 });
 
+// Mixed media upload — accepts images + short videos (≤ 50 MB).
+// Used exclusively by the incident reporting route so field officers
+// can attach both photos and short video clips of slope cracks / floods.
+const mixedMediaFilter = (req, file, cb) => {
+  const allowedImages = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+  ];
+  const allowedVideos = [
+    "video/mp4",
+    "video/mpeg",
+    "video/webm",
+    "video/quicktime",
+  ];
+
+  if (
+    allowedImages.includes(file.mimetype) ||
+    allowedVideos.includes(file.mimetype)
+  ) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "Only JPEG, PNG, WEBP, GIF images and MP4, WEBM, MOV videos are allowed for incident media."
+      ),
+      false
+    );
+  }
+};
+
+const mixedMediaUpload = multer({
+  storage: createStorage(uploadDirectories.images),
+  fileFilter: mixedMediaFilter,
+  limits: {
+    // 50 MB cap — large enough for a short video clip, safe for bandwidth
+    fileSize: Math.min(50 * 1024 * 1024, maxFileSize),
+  },
+});
+
 const anyFileUpload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
@@ -249,6 +291,7 @@ module.exports = {
   documentUpload,
   videoUpload,
   anyFileUpload,
+  mixedMediaUpload,
   uploadDirectories,
   array,
   single,
