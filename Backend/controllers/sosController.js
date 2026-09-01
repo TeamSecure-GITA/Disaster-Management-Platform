@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const SOS = require("../models/SOS");
 const {
   emitNewSOS,
@@ -6,16 +7,29 @@ const {
 } = require("../sockets/sosSocket");
 
 const createSOS = async (req, res, next) => {
+  // ── Database connectivity guard ─────────────────────────────────────────────
+  // readyState: 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      success: false,
+      message: "Database unavailable. Your SOS has been queued locally and will sync automatically when the service recovers.",
+    });
+  }
+
   try {
     const { latitude, longitude, ...sosData } = req.body;
+
     const sos = await SOS.create({
       ...sosData,
       user: req.user?._id || null,
       location: {
         type: "Point",
+        // GeoJSON: [longitude, latitude]
         coordinates: [Number(longitude), Number(latitude)],
       },
     });
+
+    // Broadcast to operations room — errors here must NOT fail the HTTP response
     emitNewSOS(sos);
 
     res.status(201).json({
@@ -24,6 +38,17 @@ const createSOS = async (req, res, next) => {
       data: sos,
     });
   } catch (error) {
+    // Surface Mongoose validation errors explicitly so the frontend can react
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: Object.values(error.errors).map((e) => ({
+          field: e.path,
+          message: e.message,
+        })),
+      });
+    }
     next(error);
   }
 };

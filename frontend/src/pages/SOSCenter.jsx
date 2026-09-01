@@ -18,6 +18,7 @@ function SOSCenter() {
   const [sosLocation, setSosLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [rateLimited, setRateLimited] = useState(false);
+  const [sosQueued, setSosQueued] = useState(false); // true when saved offline rather than confirmed by server
 
   // ── Flush any queued offline SOS reports on mount ─────────────────────────
   useEffect(() => {
@@ -80,19 +81,25 @@ function SOSCenter() {
     setPhase("locating");
     setErrorMsg("");
     setRateLimited(false);
+    setSosQueued(false);
 
     // 1. Get GPS
     const { lat, lng } = await getCurrentPosition();
-    setSosLocation(lat && lng ? { lat, lng } : null);
+    const hasGPS = Boolean(lat && lng);
+    setSosLocation(hasGPS ? { lat, lng } : null);
 
-    // 2. Build payload — matches backend SOS schema (latitude, longitude, emergencyType, message)
+    // 2. Build payload — only include coordinates when GPS is available.
+    //    BUG FIX: previously always sent latitude:0, longitude:0 when GPS
+    //    was unavailable, recording a bogus "off coast of Africa" location.
     const payload = {
-      latitude:      lat ? Number(lat) : 0,
-      longitude:     lng ? Number(lng) : 0,
       emergencyType: "other",
-      message:       lat
+      message: hasGPS
         ? `SOS from GPS (${lat}, ${lng})`
         : "SOS dispatched — GPS unavailable.",
+      ...(hasGPS && {
+        latitude:  Number(lat),
+        longitude: Number(lng),
+      }),
     };
 
     // 3. Send to backend via Firebase-authenticated sosService
@@ -100,10 +107,17 @@ function SOSCenter() {
     const result = await sendDataToBackend(payload);
 
     // 4. Handle result
-    if (result.success || result.offline) {
-      // Trigger browser notification + WhatsApp regardless of backend status
+    if (result.success) {
       showBrowserNotification(lat, lng);
       sendWhatsAppAlert(lat, lng);
+      setSosQueued(false);
+      setPhase("sent");
+    } else if (result.offline) {
+      // SOS queued locally (offline or DB unavailable) — still trigger
+      // WhatsApp / notification so help can be sought via other channels
+      showBrowserNotification(lat, lng);
+      sendWhatsAppAlert(lat, lng);
+      setSosQueued(true); // show "queued" banner instead of "dispatched"
       setPhase("sent");
     } else if (result.rateLimited) {
       setRateLimited(true);
@@ -115,6 +129,7 @@ function SOSCenter() {
       setErrorMsg(result.error || "Failed to send SOS. Please call 112 directly.");
     }
   };
+
 
   // ─── Button label & disabled state ────────────────────────────────────────
   const buttonLabel =
@@ -142,20 +157,24 @@ function SOSCenter() {
           {buttonLabel}
         </button>
 
-        {/* Success state */}
+        {/* Success / queued state */}
         {phase === "sent" && (
           <div
             className="sos-message"
             style={{
-              backgroundColor: "#450a0a",
-              border: "1px solid #dc2626",
+              backgroundColor: sosQueued ? "#1c1917" : "#450a0a",
+              border: `1px solid ${sosQueued ? "#f97316" : "#dc2626"}`,
               borderRadius: "8px",
               padding: "16px",
               marginTop: "16px",
-              color: "#fca5a5",
+              color: sosQueued ? "#fdba74" : "#fca5a5",
             }}
           >
-            <strong>🚨 SOS DISPATCHED SUCCESSFULLY</strong>
+            <strong>
+              {sosQueued
+                ? "📡 SOS QUEUED — WILL SYNC WHEN SERVICE RESTORES"
+                : "🚨 SOS DISPATCHED SUCCESSFULLY"}
+            </strong>
             <br />
             {sosLocation ? (
               <>
@@ -168,7 +187,9 @@ function SOSCenter() {
             ) : (
               <>⚠️ GPS unavailable — SOS sent without coordinates.<br /></>
             )}
-            Emergency teams notified. WhatsApp alert sent.
+            {sosQueued
+              ? "SOS saved locally. WhatsApp alert sent. Call 112 if urgent."
+              : "Emergency teams notified. WhatsApp alert sent."}
             <div
               style={{
                 marginTop: "12px",
@@ -191,7 +212,7 @@ function SOSCenter() {
                 📞 Call 112
               </a>
               <button
-                onClick={() => setPhase("idle")}
+                onClick={() => { setPhase("idle"); setSosQueued(false); }}
                 style={{
                   backgroundColor: "#334155",
                   color: "white",
@@ -206,6 +227,7 @@ function SOSCenter() {
             </div>
           </div>
         )}
+
 
         {/* Error / rate-limit state */}
         {phase === "error" && (
