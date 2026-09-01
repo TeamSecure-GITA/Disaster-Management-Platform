@@ -14,19 +14,27 @@ const CONTACTS = [
 function SOSCenter() {
   const navigate = useNavigate();
 
-  const [phase, setPhase]       = useState("idle"); // idle | locating | sending | sent | error
+  const [phase, setPhase]             = useState("idle"); // idle | locating | sending | sent | error
   const [sosLocation, setSosLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg]       = useState("");
   const [rateLimited, setRateLimited] = useState(false);
-  const [sosQueued, setSosQueued] = useState(false); // true when saved offline rather than confirmed by server
+  const [sosQueued, setSosQueued]     = useState(false); // true when saved offline rather than confirmed by server
 
   // ── Flush any queued offline SOS reports on mount ─────────────────────────
   useEffect(() => {
-    const handleOnline = () => flushOfflineSOSQueue();
+    const handleOnline = () => {
+      flushOfflineSOSQueue().catch((err) =>
+        console.warn("[SOSCenter] Flush offline SOS error:", err)
+      );
+    };
     window.addEventListener("online", handleOnline);
 
     // Also flush on first load if already online
-    if (navigator.onLine) flushOfflineSOSQueue();
+    if (typeof navigator !== "undefined" && navigator.onLine) {
+      flushOfflineSOSQueue().catch((err) =>
+        console.warn("[SOSCenter] Flush offline SOS error:", err)
+      );
+    }
 
     return () => window.removeEventListener("online", handleOnline);
   }, []);
@@ -34,45 +42,69 @@ function SOSCenter() {
   // ── GPS helper ────────────────────────────────────────────────────────────
   const getCurrentPosition = () =>
     new Promise((resolve) => {
-      if (!navigator.geolocation) return resolve({ lat: null, lng: null });
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        return resolve({ lat: null, lng: null });
+      }
       navigator.geolocation.getCurrentPosition(
-        (pos) =>
-          resolve({
-            lat: pos.coords.latitude.toFixed(5),
-            lng: pos.coords.longitude.toFixed(5),
-          }),
-        () => resolve({ lat: null, lng: null }),
+        (pos) => {
+          if (pos && pos.coords) {
+            resolve({
+              lat: pos.coords.latitude != null ? pos.coords.latitude.toFixed(5) : null,
+              lng: pos.coords.longitude != null ? pos.coords.longitude.toFixed(5) : null,
+            });
+          } else {
+            resolve({ lat: null, lng: null });
+          }
+        },
+        (err) => {
+          console.warn("[SOSCenter] Geolocation error:", err);
+          resolve({ lat: null, lng: null });
+        },
         { timeout: 8000, maximumAge: 30000 }
       );
     });
 
   // ── Browser notification helper ───────────────────────────────────────────
   const showBrowserNotification = (lat, lng) => {
-    if (Notification.permission === "granted") {
-      navigator.serviceWorker?.ready.then((reg) => {
-        reg.showNotification("🚨 SOS ACTIVATED", {
-          body: lat
-            ? `GPS (${lat}, ${lng}) shared with emergency services.`
-            : "SOS dispatched — enable GPS for precise tracking.",
-          icon: "/pwa-192x192.png",
-          vibrate: [300, 100, 300, 100, 300],
-          requireInteraction: true,
-        });
-      });
-    } else {
-      Notification.requestPermission();
+    try {
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "granted") {
+          if ("serviceWorker" in navigator && navigator.serviceWorker.ready) {
+            navigator.serviceWorker.ready
+              .then((reg) => {
+                reg.showNotification("🚨 SOS ACTIVATED", {
+                  body: lat
+                    ? `GPS (${lat}, ${lng}) shared with emergency services.`
+                    : "SOS dispatched — enable GPS for precise tracking.",
+                  icon: "/pwa-192x192.png",
+                  vibrate: [300, 100, 300, 100, 300],
+                  requireInteraction: true,
+                });
+              })
+              .catch((err) => console.warn("[SOSCenter] ServiceWorker notification error:", err));
+          }
+        } else if (Notification.permission !== "denied") {
+          Notification.requestPermission().catch(() => {});
+        }
+      }
+    } catch (err) {
+      console.warn("[SOSCenter] Notification error:", err);
     }
   };
 
   // ── WhatsApp fallback alert ────────────────────────────────────────────────
   const sendWhatsAppAlert = (lat, lng) => {
-    const phone = localStorage.getItem("sos_whatsapp_number") || "911070";
-    const msg = lat
-      ? encodeURIComponent(
-          `🚨 EMERGENCY SOS — I need immediate help!\nGPS: https://maps.google.com/?q=${lat},${lng}`
-        )
-      : encodeURIComponent("🚨 EMERGENCY SOS — I need immediate help! Location unavailable.");
-    window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+    try {
+      const phone = localStorage.getItem("sos_whatsapp_number") || "911070";
+      const msg = lat
+        ? encodeURIComponent(
+            `🚨 EMERGENCY SOS — I need immediate help!\nGPS: https://maps.google.com/?q=${lat},${lng}`
+          )
+        : encodeURIComponent("🚨 EMERGENCY SOS — I need immediate help! Location unavailable.");
+      window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+    } catch (err) {
+      console.warn("[SOSCenter] WhatsApp alert failed:", err);
+    }
   };
 
   // ── Main SOS dispatch ─────────────────────────────────────────────────────

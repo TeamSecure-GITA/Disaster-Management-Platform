@@ -35,7 +35,9 @@ import { saveOfflineReport, getOfflineReports, clearOfflineReports } from "./off
 const CERT_IN_URL = "https://www.cert-in.org.in";
 
 // Backend base URL — reads from Vite env so it works in dev and production.
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 // ─── Timeout helper ────────────────────────────────────────────────────────────
 // AbortSignal.timeout() was introduced in Chrome 103 / Safari 16 / Node 17.3.
@@ -81,9 +83,8 @@ const getAuthToken = async () => {
     } catch (_) {}
 
     // 4. Firebase Auth Token
-    const firebaseUser = auth.currentUser;
-    if (firebaseUser) {
-      return await firebaseUser.getIdToken(/* forceRefresh */ false);
+    if (auth && auth.currentUser) {
+      return await auth.currentUser.getIdToken(/* forceRefresh */ false);
     }
   } catch (err) {
     console.warn("[sosService] Token resolution error:", err.message);

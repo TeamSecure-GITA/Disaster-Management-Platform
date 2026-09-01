@@ -30,19 +30,36 @@ const firebaseConfig = {
 };
 
 // Prevent duplicate initialisation during hot-module reloads
-const app = getApps().length === 0
-  ? initializeApp(firebaseConfig)
-  : getApps()[0];
+let app = null;
+let auth = null;
+let db = null;
 
-export const auth = getAuth(app);
-export const db   = getFirestore(app);
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } else {
+    console.warn("[Firebase] Firebase config missing. Running in standalone mode.");
+  }
+} catch (err) {
+  console.warn("[Firebase] Failed to initialize Firebase:", err);
+}
+
+export { auth, db };
 
 // Firebase Cloud Messaging is not available in all browsers (e.g. Safari < 16.4)
 // Wrap in isSupported() so it never crashes on unsupported platforms.
 export const getMessagingInstance = async () => {
-  const supported = await isSupported();
-  if (!supported) return null;
-  return getMessaging(app);
+  try {
+    if (!app) return null;
+    const supported = await isSupported();
+    if (!supported) return null;
+    return getMessaging(app);
+  } catch (err) {
+    console.warn("[Firebase] Messaging not supported or failed:", err);
+    return null;
+  }
 };
 
 export default app;

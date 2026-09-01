@@ -19,13 +19,19 @@ const createSOS = async (req, res, next) => {
   try {
     const { latitude, longitude, ...sosData } = req.body;
 
+    const hasLat = latitude !== undefined && latitude !== null && !isNaN(Number(latitude));
+    const hasLng = longitude !== undefined && longitude !== null && !isNaN(Number(longitude));
+
     const sos = await SOS.create({
       ...sosData,
       user: req.user?._id || null,
       location: {
         type: "Point",
         // GeoJSON: [longitude, latitude]
-        coordinates: [Number(longitude), Number(latitude)],
+        coordinates: [
+          hasLng ? Number(longitude) : 0,
+          hasLat ? Number(latitude) : 0,
+        ],
       },
     });
 
