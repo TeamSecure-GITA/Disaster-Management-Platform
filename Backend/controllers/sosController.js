@@ -10,7 +10,7 @@ const createSOS = async (req, res, next) => {
     const { latitude, longitude, ...sosData } = req.body;
     const sos = await SOS.create({
       ...sosData,
-      user: req.user._id,
+      user: req.user?._id || null,
       location: {
         type: "Point",
         coordinates: [Number(longitude), Number(latitude)],

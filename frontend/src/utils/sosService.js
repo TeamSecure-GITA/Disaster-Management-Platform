@@ -27,27 +27,34 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ─── Token resolution ─────────────────────────────────────────────────────────
 
-/**
- * Get a fresh Firebase ID token for the currently signed-in Firebase user.
- * Falls back to the JWT stored in localStorage (set by the custom auth flow)
- * so the function works even when the user didn't sign in with Firebase directly.
- *
- * @returns {Promise<string|null>}
- */
 const getAuthToken = async () => {
   try {
+    // 1. Direct JWT stored in localStorage / sessionStorage
+    const directToken =
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token") ||
+      localStorage.getItem("jwtToken");
+    if (directToken) return directToken;
+
+    // 2. JWT in user_session JSON
+    const sessionStr = localStorage.getItem("user_session");
+    if (sessionStr) {
+      try {
+        const session = JSON.parse(sessionStr);
+        if (session?.token) return session.token;
+      } catch (_) {}
+    }
+
+    // 3. Firebase Auth Token
     const firebaseUser = auth.currentUser;
     if (firebaseUser) {
-      // forceRefresh=true ensures an expired token is renewed automatically.
-      return await firebaseUser.getIdToken(/* forceRefresh */ true);
+      return await firebaseUser.getIdToken(/* forceRefresh */ false);
     }
   } catch (err) {
-    console.warn("[sosService] Firebase getIdToken failed:", err.message);
+    console.warn("[sosService] Token resolution error:", err.message);
   }
 
-  // Fallback: JWT from the platform's own login stored in offlineStorage/localStorage
-  const session = JSON.parse(localStorage.getItem("user_session") || "null");
-  return session?.token || null;
+  return null;
 };
 
 // ─── Threat-block handler ─────────────────────────────────────────────────────
@@ -117,6 +124,12 @@ const sendDataToBackend = async (payload, { skipAuth = false } = {}) => {
     });
 
     data = await response.json();
+
+    // ── If backend rejected a stale or unrecognized auth token, retry anonymously ──
+    if (response.status === 401 && !skipAuth) {
+      console.warn("[sosService] Token rejected by backend. Retrying SOS as emergency guest...");
+      return sendDataToBackend(payload, { skipAuth: true });
+    }
   } catch (err) {
     // Network failure mid-flight — queue offline
     console.error("[sosService] Network error:", err);

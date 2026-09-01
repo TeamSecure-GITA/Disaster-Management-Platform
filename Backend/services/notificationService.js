@@ -42,10 +42,15 @@ const dispatchNotification = async (notification) => {
     delivery.push = Boolean(pushResult?.success);
   }
 
+  if (channels.includes("email") || channels.includes("sms")) {
+    if (!notification.populated("recipient") && notification.recipient) {
+      await notification.populate("recipient");
+    }
+  }
+
   if (channels.includes("email")) {
-    const user = await notification.populate("recipient");
     const emailResult = await sendEmail({
-      to: user.recipient?.email,
+      to: notification.recipient?.email,
       subject: notification.title,
       text: notification.message,
       html: `<p>${notification.message}</p>`,
@@ -54,8 +59,7 @@ const dispatchNotification = async (notification) => {
   }
 
   if (channels.includes("sms")) {
-    const user = await notification.populate("recipient");
-    const smsResult = await sendSMS(user.recipient?.phone, notification.message);
+    const smsResult = await sendSMS(notification.recipient?.phone, notification.message);
     delivery.sms = Boolean(smsResult?.success && !smsResult?.simulated);
   }
 
