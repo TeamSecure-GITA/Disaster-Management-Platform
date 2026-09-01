@@ -1,44 +1,41 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// src/firebase.js
-//
-// Single Firebase app instance shared across the whole frontend.
-// Config values are injected via Vite environment variables (.env).
-// Add your project's values to frontend/.env:
-//
-//   VITE_FIREBASE_API_KEY=...
-//   VITE_FIREBASE_AUTH_DOMAIN=...
-//   VITE_FIREBASE_PROJECT_ID=...
-//   VITE_FIREBASE_STORAGE_BUCKET=...
-//   VITE_FIREBASE_MESSAGING_SENDER_ID=...
-//   VITE_FIREBASE_APP_ID=...
-//   VITE_FIREBASE_MEASUREMENT_ID=...   (optional — Analytics)
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getMessaging, isSupported } from "firebase/messaging";
+import { getMessaging, isSupported as isMessagingSupported } from "firebase/messaging";
+import { getAnalytics, isSupported as isAnalyticsSupported } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID, // optional
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCwO7cZ3llc2AQKTFCyIA8bE4VaEvb_I7E",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "disaster-management-plat-cd635.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "disaster-management-plat-cd635",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "disaster-management-plat-cd635.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1048123149571",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1048123149571:web:140cbe32cb0621c06bad36",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-E90RLYGPS2"
 };
 
-// Prevent duplicate initialisation during hot-module reloads
+// Prevent duplicate initialization during hot-module reloads
 let app = null;
 let auth = null;
 let db = null;
+let analytics = null;
 
 try {
   if (firebaseConfig.apiKey && firebaseConfig.projectId) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     auth = getAuth(app);
     db = getFirestore(app);
+
+    // Analytics is only supported in browser environments
+    if (typeof window !== "undefined") {
+      isAnalyticsSupported().then((supported) => {
+        if (supported) {
+          analytics = getAnalytics(app);
+        }
+      }).catch((err) => {
+        console.warn("[Firebase] Analytics initialization error:", err);
+      });
+    }
   } else {
     console.warn("[Firebase] Firebase config missing. Running in standalone mode.");
   }
@@ -46,14 +43,14 @@ try {
   console.warn("[Firebase] Failed to initialize Firebase:", err);
 }
 
-export { auth, db };
+export { auth, db, analytics };
 
 // Firebase Cloud Messaging is not available in all browsers (e.g. Safari < 16.4)
-// Wrap in isSupported() so it never crashes on unsupported platforms.
+// Wrap in isMessagingSupported() so it never crashes on unsupported platforms.
 export const getMessagingInstance = async () => {
   try {
     if (!app) return null;
-    const supported = await isSupported();
+    const supported = await isMessagingSupported();
     if (!supported) return null;
     return getMessaging(app);
   } catch (err) {

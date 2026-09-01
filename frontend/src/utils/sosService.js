@@ -34,10 +34,22 @@ import { saveOfflineReport, getOfflineReports, clearOfflineReports } from "./off
 // official redirect destination when a security threat is detected.
 const CERT_IN_URL = "https://www.cert-in.org.in";
 
-// Backend base URL — reads from Vite env so it works in dev and production.
-const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:5000" : "");
+// Backend base URL — sanitized and stripped of any trailing slashes.
+const getBaseApiUrl = () => {
+  let url = (import.meta.env.VITE_API_URL || "").trim();
+  if (!url && import.meta.env.DEV) {
+    url = "http://localhost:5000";
+  }
+  return url.replace(/\/+$/, "");
+};
+
+const API_BASE = getBaseApiUrl();
+
+const buildApiUrl = (endpoint) => {
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const normalizedEndpoint = cleanEndpoint.replace(/^\/+/, "/");
+  return API_BASE ? `${API_BASE}${normalizedEndpoint}` : normalizedEndpoint;
+};
 
 // ─── Timeout helper ────────────────────────────────────────────────────────────
 // AbortSignal.timeout() was introduced in Chrome 103 / Safari 16 / Node 17.3.
@@ -152,7 +164,8 @@ const sendDataToBackend = async (payload, { skipAuth = false } = {}) => {
   let data;
 
   try {
-    response = await fetch(`${API_BASE}/api/sos`, {
+    const url = buildApiUrl("/api/sos");
+    response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(payload),

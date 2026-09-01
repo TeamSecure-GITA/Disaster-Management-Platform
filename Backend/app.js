@@ -70,6 +70,14 @@ app.use((req, res, next) => {
     next();
 });
 
+// Normalize repeated slashes in URLs (e.g. //api/sos -> /api/sos)
+app.use((req, res, next) => {
+    if (req.url && req.url.includes("//")) {
+        req.url = req.url.replace(/\/+/g, "/");
+    }
+    next();
+});
+
 // ================================
 // STATIC FILES
 // ================================
