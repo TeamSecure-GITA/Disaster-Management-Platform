@@ -43,9 +43,9 @@ const dispatchNotification = async (notification) => {
   }
 
   if (channels.includes("email")) {
-    await notification.populate("recipient");
+    const user = await notification.populate("recipient");
     const emailResult = await sendEmail({
-      to: notification.recipient?.email,
+      to: user.recipient?.email,
       subject: notification.title,
       text: notification.message,
       html: `<p>${notification.message}</p>`,
@@ -54,8 +54,8 @@ const dispatchNotification = async (notification) => {
   }
 
   if (channels.includes("sms")) {
-    await notification.populate("recipient");
-    const smsResult = await sendSMS(notification.recipient?.phone, notification.message);
+    const user = await notification.populate("recipient");
+    const smsResult = await sendSMS(user.recipient?.phone, notification.message);
     delivery.sms = Boolean(smsResult?.success && !smsResult?.simulated);
   }
 
