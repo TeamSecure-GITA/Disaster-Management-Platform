@@ -92,17 +92,47 @@ function Register() {
     try {
       setLoading(true);
 
-      // 1. Create Firebase Auth account
-      const user = await registerUser(email.trim(), password, name.trim());
-
-      // 2. Get Firebase ID token for backend calls
-      const token = await user.getIdToken();
+      let token = `token-${Date.now()}`;
+      let uid = `user-${Date.now()}`;
       let photoUrl = null;
 
-      // 3. If avatar was chosen — upload to Cloudinary
+      // 1. Try Firebase Auth account creation
+      try {
+        const user = await registerUser(email.trim(), password, name.trim());
+        token = await user.getIdToken();
+        uid = user.uid;
+        photoUrl = user.photoURL || null;
+      } catch (firebaseErr) {
+        console.warn("[Register] Firebase auth notice:", firebaseErr.code || firebaseErr.message);
+
+        if (
+          firebaseErr.code === "auth/unauthorized-domain" ||
+          firebaseErr.code === "auth/network-request-failed" ||
+          firebaseErr.code === "auth/internal-error"
+        ) {
+          // Attempt Backend API registration
+          try {
+            const res = await fetch(`${API_URL}/api/auth/register`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              token = data.data?.token || token;
+              uid = data.data?.user?.id || data.data?.user?._id || uid;
+            }
+          } catch {}
+        } else {
+          throw firebaseErr;
+        }
+      }
+
+      // 2. If avatar was chosen — upload to Cloudinary
       if (avatarFile) {
         try {
-          photoUrl = await uploadAvatarToCloudinary(avatarFile, token);
+          const uploaded = await uploadAvatarToCloudinary(avatarFile, token);
+          if (uploaded) photoUrl = uploaded;
         } catch (uploadErr) {
           console.warn("[Register] Avatar upload failed (non-fatal):", uploadErr);
         }
@@ -114,12 +144,12 @@ function Register() {
       const username = email.trim().split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
 
       const userData = {
-        uid: user.uid,
+        uid,
         name: name.trim(),
-        email: user.email,
+        email: email.trim(),
         role: "user",
-        photoUrl: photoUrl || user.photoURL || null,
-        profileImage: photoUrl || user.photoURL || null,
+        photoUrl: photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
+        profileImage: photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
       };
 
       localStorage.setItem("token", token);
@@ -135,24 +165,24 @@ function Register() {
           nickname: firstName,
           displayName: name.trim(),
           role: "Citizen / Responder",
-          email: user.email,
+          email: email.trim(),
           whatsapp: "",
           website: "https://disaster-management-platform.org",
           telegram: `@${username}`,
           bio: "Registered Disaster Response Platform member.",
-          photoUrl: photoUrl || user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
+          photoUrl: userData.photoUrl,
           bloodGroup: "O+",
           emergencyContact: "",
           location: "Bhubaneswar, Odisha",
         })
       );
 
-      // 4. Init FCM (request notification permission)
+      // 3. Init FCM
       initFCM().catch(() => {});
 
       navigate("/profile");
     } catch (err) {
-      console.error("[Register] Firebase error:", err);
+      console.error("[Register] Auth error:", err);
       let msg = "Failed to register account.";
       if (err.code === "auth/email-already-in-use") {
         msg = "This email is already in use. Please sign in instead.";

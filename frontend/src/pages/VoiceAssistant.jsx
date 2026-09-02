@@ -1,34 +1,39 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { askGemini } from "../services/geminiService";
 
 function VoiceAssistant() {
   const navigate = useNavigate();
-
   const recognitionRef = useRef(null);
 
   const [listening, setListening] = useState(false);
   const [voiceAvailable, setVoiceAvailable] = useState(true);
   const [command, setCommand] = useState("");
+  const [processing, setProcessing] = useState(false);
   const [response, setResponse] = useState(
-    "Hello! I am your Disaster Voice Assistant. How can I help you?"
+    "Hello! I am your Gemini-Powered Disaster Voice Assistant. Speak or type any emergency question or navigation command."
   );
 
-  // -----------------------------------
-  // FEMALE / CLEAR VOICE
-  // -----------------------------------
+  // ─── FEMALE / CLEAR VOICE SPEECH SYNTHESIS ──────────────────────────────────
   const speak = (text) => {
-    if (!('speechSynthesis' in window)) return;
+    if (!("speechSynthesis" in window)) return;
 
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = 1.1; 
-    utterance.rate = 0.95; 
+    // Clean markdown asterisks and symbols for cleaner vocalization
+    const cleanSpeech = text
+      .replace(/[*_#`~]/g, "")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/\n+/g, ". ");
+
+    const utterance = new SpeechSynthesisUtterance(cleanSpeech);
+    utterance.pitch = 1.05;
+    utterance.rate = 1.0;
     utterance.lang = "en-IN";
 
     const setFemaleVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      const femaleVoice = voices.find(
+      const preferredVoice = voices.find(
         (v) =>
           v.name.includes("Google UK English Female") ||
           v.name.includes("Google US English") ||
@@ -38,10 +43,9 @@ function VoiceAssistant() {
           (v.lang.startsWith("en") && v.name.toLowerCase().includes("female"))
       );
 
-      if (femaleVoice) {
-        utterance.voice = femaleVoice;
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
       }
-
       window.speechSynthesis.speak(utterance);
     };
 
@@ -52,235 +56,130 @@ function VoiceAssistant() {
     }
   };
 
-  // -----------------------------------
-  // LOAD VOICES
-  // -----------------------------------
   useEffect(() => {
     const loadVoices = () => {
       window.speechSynthesis?.getVoices();
     };
 
     loadVoices();
-
-    window.speechSynthesis?.addEventListener(
-      "voiceschanged",
-      loadVoices
-    );
+    window.speechSynthesis?.addEventListener("voiceschanged", loadVoices);
 
     return () => {
-      window.speechSynthesis?.removeEventListener(
-        "voiceschanged",
-        loadVoices
-      );
-
+      window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices);
       window.speechSynthesis?.cancel();
-
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
     };
   }, []);
 
-  // -----------------------------------
-  // COMMAND PROCESSOR
-  // -----------------------------------
-  const processCommand = (input) => {
+  // ─── COMMAND & GEMINI PROCESSOR ─────────────────────────────────────────────
+  const processCommand = async (input) => {
     const text = input.toLowerCase().trim();
-
-    if (!text) {
-      return;
-    }
+    if (!text) return;
 
     setCommand(input);
 
-    // Dashboard
-    if (
-      text.includes("dashboard") ||
-      text.includes("home")
-    ) {
-      const message = "Opening the disaster management dashboard.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/");
-      }, 500);
-
+    // 1. Direct Page Navigation Commands
+    if (text.includes("dashboard") || text.includes("home")) {
+      const msg = "Opening the disaster management dashboard.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/"), 600);
       return;
     }
 
-    // Alerts
-    if (
-      text.includes("alert") ||
-      text.includes("disaster alert")
-    ) {
-      const message = "Opening disaster alerts.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/alerts");
-      }, 500);
-
+    if (text.includes("alert") || text.includes("disaster alert")) {
+      const msg = "Opening disaster alerts and early warnings.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/alerts"), 600);
       return;
     }
 
-    // Map
-    if (
-      text.includes("map") ||
-      text.includes("disaster map") ||
-      text.includes("response map")
-    ) {
-      const message = "Opening the disaster response map.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/map");
-      }, 500);
-
+    if (text.includes("map") || text.includes("hospital") || text.includes("rescue map")) {
+      const msg = "Opening the Live Disaster Response Map with hospitals and rescue centers.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/map"), 600);
       return;
     }
 
-    // Emergency
-    if (
-      text.includes("emergency") ||
-      text.includes("emergency help") ||
-      text.includes("sos")
-    ) {
-      const message =
-        "Opening Emergency Help. Please stay calm and follow the emergency instructions.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/emergency-sos");
-      }, 500);
-
+    if (text.includes("emergency") || text.includes("sos") || text.includes("danger")) {
+      const msg = "Opening Emergency SOS. Please stay calm, help is being organized.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/emergency-sos"), 600);
       return;
     }
 
-    // Family Safety
-    if (
-      text.includes("family") ||
-      text.includes("family safety")
-    ) {
-      const message = "Opening Family Safety Tracker.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/family-safety");
-      }, 500);
-
+    if (text.includes("shelter") || text.includes("refuge") || text.includes("camp")) {
+      const msg = "Opening the Emergency Shelter Finder.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/shelter-finder"), 600);
       return;
     }
 
-    // Shelter
-    if (
-      text.includes("shelter") ||
-      text.includes("shelter finder")
-    ) {
-      const message = "Opening the Shelter Finder.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/shelter-finder");
-      }, 500);
-
+    if (text.includes("family") || text.includes("family safety")) {
+      const msg = "Opening Family Safety Tracker.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/family-safety"), 600);
       return;
     }
 
-    // Notifications
-    if (
-      text.includes("notification") ||
-      text.includes("notifications")
-    ) {
-      const message = "Opening notifications.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/notifications");
-      }, 500);
-
+    if (text.includes("notification") || text.includes("notifications")) {
+      const msg = "Opening emergency notifications.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/notifications"), 600);
       return;
     }
 
-    // Settings
+    if (text.includes("profile") || text.includes("my profile")) {
+      const msg = "Opening your Disaster Responder Profile.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/profile"), 600);
+      return;
+    }
+
     if (text.includes("settings")) {
-      const message = "Opening settings.";
-
-      setResponse(message);
-      speak(message);
-
-      setTimeout(() => {
-        navigate("/settings");
-      }, 500);
-
+      const msg = "Opening settings.";
+      setResponse(msg);
+      speak(msg);
+      setTimeout(() => navigate("/settings"), 600);
       return;
     }
 
-    // Help
-    if (
-      text.includes("what can you do") ||
-      text.includes("help me")
-    ) {
-      const message =
-        "I can open the dashboard, disaster alerts, disaster map, emergency help, family safety, shelter finder, notifications and settings.";
+    // 2. Query Gemini AI for Disaster Safety Answers
+    setProcessing(true);
+    setResponse("✨ Consulting Gemini AI for disaster response guidance...");
 
-      setResponse(message);
-      speak(message);
-
-      return;
+    try {
+      const geminiAnswer = await askGemini(input);
+      setResponse(geminiAnswer);
+      speak(geminiAnswer);
+    } catch {
+      const fallbackMsg = "For immediate emergencies, please dial 112 or 108. Stay calm and follow official local evacuation guidance.";
+      setResponse(fallbackMsg);
+      speak(fallbackMsg);
+    } finally {
+      setProcessing(false);
     }
-
-    // Greeting
-    if (
-      text === "hi" ||
-      text === "hello" ||
-      text === "hey"
-    ) {
-      const message =
-        "Hello! I am your Disaster Voice Assistant. How can I help you today?";
-
-      setResponse(message);
-      speak(message);
-
-      return;
-    }
-
-    // Unknown command
-    const message =
-      "I could not understand that command. Please use one of the commands shown below.";
-
-    setResponse(message);
-    speak(message);
   };
 
-  // -----------------------------------
-  // MICROPHONE
-  // -----------------------------------
+  // ─── SPEECH RECOGNITION ─────────────────────────────────────────────────────
   const startListening = () => {
     const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       setVoiceAvailable(false);
-
       setResponse(
-        "Voice recognition is not available in this browser. You can type your command below."
+        "Voice recognition is not supported in this browser. You can type your command or question in the box below."
       );
-
       return;
     }
 
@@ -290,7 +189,6 @@ function VoiceAssistant() {
       }
 
       const recognition = new SpeechRecognition();
-
       recognition.lang = "en-IN";
       recognition.continuous = false;
       recognition.interimResults = false;
@@ -298,33 +196,20 @@ function VoiceAssistant() {
 
       recognition.onstart = () => {
         setListening(true);
-        setResponse("🎙️ I am listening. Please speak your command.");
+        setResponse("🎙️ Listening... Ask any disaster question or say a navigation command (e.g. 'Open Map', 'How to prepare for cyclone').");
       };
 
       recognition.onresult = (event) => {
-        const spokenText =
-          event.results[0][0].transcript;
-
+        const spokenText = event.results[0][0].transcript;
         setListening(false);
         setCommand(spokenText);
-
         processCommand(spokenText);
       };
 
       recognition.onerror = (event) => {
-        console.log(
-          "Voice recognition unavailable:",
-          event.error
-        );
-
+        console.warn("Speech recognition notice:", event.error);
         setListening(false);
-
-        // Do NOT show the confusing network error.
-        setVoiceAvailable(false);
-
-        setResponse(
-          "Voice recognition is temporarily unavailable. Please type your command below."
-        );
+        setResponse("🎙️ Did not catch speech clearly. Click to speak again or type below.");
       };
 
       recognition.onend = () => {
@@ -332,43 +217,27 @@ function VoiceAssistant() {
       };
 
       recognitionRef.current = recognition;
-
       recognition.start();
     } catch (error) {
-      console.log(error);
-
+      console.warn("Voice assistant error:", error);
       setListening(false);
-      setVoiceAvailable(false);
-
-      setResponse(
-        "Voice recognition is unavailable. Please use the text command box below."
-      );
+      setResponse("Voice recognition is ready. Click the microphone button to start.");
     }
   };
 
-  // -----------------------------------
-  // STOP MICROPHONE
-  // -----------------------------------
   const stopListening = () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
-
     setListening(false);
   };
 
-  // -----------------------------------
-  // TEXT COMMAND
-  // -----------------------------------
   const handleTextCommand = (event) => {
     event.preventDefault();
-
+    if (!command.trim() || processing) return;
     processCommand(command);
   };
 
-  // -----------------------------------
-  // QUICK COMMAND
-  // -----------------------------------
   const quickCommand = (text) => {
     setCommand(text);
     processCommand(text);
@@ -378,176 +247,149 @@ function VoiceAssistant() {
     <div
       style={{
         minHeight: "100vh",
-        padding: "30px",
-        background:
-          "linear-gradient(135deg, #07111f, #0b1f3a, #123b63)",
+        padding: "30px 20px",
+        background: "linear-gradient(135deg, #07111f, #0b1f3a, #123b63)",
         color: "#ffffff",
-        fontFamily:
-          "Arial, Helvetica, sans-serif",
+        fontFamily: "Arial, Helvetica, sans-serif",
         boxSizing: "border-box",
       }}
     >
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-        }}
-      >
+      <div style={{ maxWidth: "860px", margin: "0 auto" }}>
         {/* HEADER */}
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "30px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "55px",
-              marginBottom: "10px",
-            }}
-          >
-            🎙️
+        <div style={{ textAlign: "center", marginBottom: "26px" }}>
+          <div style={{ fontSize: "50px", marginBottom: "8px" }}>🎙️</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+            <h1 style={{ margin: 0, fontSize: "30px", fontWeight: "800" }}>
+              Gemini AI Voice Assistant
+            </h1>
+            <span
+              style={{
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                fontSize: "0.75rem",
+                fontWeight: "700",
+                padding: "3px 10px",
+                borderRadius: "999px",
+              }}
+            >
+              ✨ Gemini Active
+            </span>
           </div>
-
-          <h1
-            style={{
-              margin: "0",
-              fontSize: "32px",
-              fontWeight: "800",
-            }}
-          >
-            Disaster Voice Assistant
-          </h1>
-
-          <p
-            style={{
-              color: "#c9d8ea",
-              fontSize: "16px",
-            }}
-          >
-            Your intelligent frontend emergency navigation assistant
+          <p style={{ color: "#c9d8ea", fontSize: "15px", marginTop: "8px" }}>
+            Speak naturally to navigate the platform or receive real-time AI emergency instructions
           </p>
         </div>
 
-        {/* ASSISTANT RESPONSE */}
+        {/* ASSISTANT RESPONSE CARD */}
         <div
           style={{
-            background:
-              "rgba(255,255,255,0.08)",
-            border:
-              "1px solid rgba(255,255,255,0.15)",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.18)",
             borderRadius: "18px",
-            padding: "25px",
-            marginBottom: "20px",
-            boxShadow:
-              "0 15px 40px rgba(0,0,0,0.25)",
+            padding: "24px",
+            marginBottom: "22px",
+            boxShadow: "0 15px 40px rgba(0,0,0,0.3)",
           }}
         >
-          <h2
-            style={{
-              marginTop: 0,
-              fontSize: "20px",
-            }}
-          >
-            🤖 Assistant
-          </h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+            <h2 style={{ margin: 0, fontSize: "18px", color: "#38bdf8" }}>
+              🤖 Gemini Assistant Response
+            </h2>
+            {processing && (
+              <span style={{ fontSize: "0.8rem", color: "#60a5fa" }}>
+                ⏳ Generating AI speech...
+              </span>
+            )}
+          </div>
 
-          <p
+          <div
             style={{
-              fontSize: "17px",
+              fontSize: "16px",
               lineHeight: "1.6",
               color: "#e8f1ff",
+              whiteSpace: "pre-wrap",
             }}
           >
             {response}
-          </p>
+          </div>
         </div>
 
         {/* VOICE BUTTON */}
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "25px",
-          }}
-        >
+        <div style={{ textAlign: "center", marginBottom: "25px" }}>
           {!listening ? (
             <button
               onClick={startListening}
+              disabled={processing}
               style={{
-                padding: "16px 30px",
+                padding: "16px 36px",
                 border: "none",
-                borderRadius: "12px",
-                background:
-                  "linear-gradient(135deg, #ff4d5a, #d9263d)",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #ef4444, #dc2626)",
                 color: "#ffffff",
                 fontSize: "17px",
                 fontWeight: "700",
-                cursor: "pointer",
-                boxShadow:
-                  "0 8px 25px rgba(255,60,80,0.35)",
+                cursor: processing ? "wait" : "pointer",
+                boxShadow: "0 8px 25px rgba(239, 68, 68, 0.4)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "10px",
+                transition: "transform 0.1s",
               }}
             >
-              🎤 Start Voice Assistant
+              <span>🎤</span>
+              <span>Start Speaking</span>
             </button>
           ) : (
             <button
               onClick={stopListening}
               style={{
-                padding: "16px 30px",
+                padding: "16px 36px",
                 border: "none",
-                borderRadius: "12px",
+                borderRadius: "14px",
                 background: "#b91c1c",
                 color: "#ffffff",
                 fontSize: "17px",
                 fontWeight: "700",
                 cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "10px",
+                animation: "pulse 1.5s infinite",
               }}
             >
-              🔴 Stop Listening
+              <span>🔴</span>
+              <span>Stop Listening</span>
             </button>
           )}
         </div>
 
-        {/* TEXT FALLBACK */}
+        {/* TEXT COMMAND INPUT */}
         <form
           onSubmit={handleTextCommand}
           style={{
-            background:
-              "rgba(255,255,255,0.06)",
-            padding: "22px",
-            borderRadius: "18px",
-            marginBottom: "25px",
+            background: "rgba(255,255,255,0.06)",
+            padding: "20px",
+            borderRadius: "16px",
+            marginBottom: "24px",
           }}
         >
-          <h3
-            style={{
-              marginTop: 0,
-            }}
-          >
-            💬 Type a command
+          <h3 style={{ marginTop: 0, fontSize: "15px", color: "#93c5fd" }}>
+            💬 Or Type Your Emergency Question / Command:
           </h3>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <input
               type="text"
               value={command}
-              onChange={(e) =>
-                setCommand(e.target.value)
-              }
-              placeholder="Example: Open disaster alerts"
+              onChange={(e) => setCommand(e.target.value)}
+              disabled={processing}
+              placeholder="Example: What are the flood survival steps? or 'Open map'"
               style={{
                 flex: "1",
                 minWidth: "250px",
-                padding: "14px",
+                padding: "13px 16px",
                 borderRadius: "10px",
-                border:
-                  "1px solid #4777a8",
+                border: "1px solid #3b82f6",
                 background: "#08182c",
                 color: "#ffffff",
                 fontSize: "15px",
@@ -557,17 +399,19 @@ function VoiceAssistant() {
 
             <button
               type="submit"
+              disabled={processing || !command.trim()}
               style={{
-                padding: "14px 22px",
+                padding: "13px 24px",
                 border: "none",
                 borderRadius: "10px",
                 background: "#2563eb",
                 color: "#ffffff",
                 fontWeight: "700",
-                cursor: "pointer",
+                fontSize: "15px",
+                cursor: processing ? "wait" : "pointer",
               }}
             >
-              Send
+              {processing ? "Asking..." : "Ask Gemini ➤"}
             </button>
           </div>
         </form>
@@ -575,55 +419,48 @@ function VoiceAssistant() {
         {/* QUICK COMMANDS */}
         <div
           style={{
-            background:
-              "rgba(255,255,255,0.06)",
-            padding: "25px",
-            borderRadius: "18px",
+            background: "rgba(255,255,255,0.06)",
+            padding: "22px",
+            borderRadius: "16px",
           }}
         >
-          <h2
-            style={{
-              marginTop: 0,
-            }}
-          >
-            ⚡ Quick Commands
+          <h2 style={{ marginTop: 0, fontSize: "16px", color: "#93c5fd" }}>
+            ⚡ Voice & Navigation Shortcuts
           </h2>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(190px, 1fr))",
-              gap: "12px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+              gap: "10px",
             }}
           >
             {[
-              ["📊", "Open Dashboard"],
-              ["🚨", "Show Disaster Alerts"],
               ["🗺️", "Open Disaster Map"],
-              ["🆘", "Emergency Help"],
-              ["👨‍👩‍👧", "Family Safety"],
-              ["🏠", "Find Shelter"],
-              ["🔔", "Notifications"],
-              ["⚙️", "Open Settings"],
+              ["🏥", "Find Nearest Hospital"],
+              ["🚨", "Show Disaster Alerts"],
+              ["🆘", "Emergency Help SOS"],
+              ["⛺", "Find Cyclone Shelter"],
+              ["🎒", "Emergency Kit Checklist"],
+              ["🌊", "Flood Survival Steps"],
+              ["🌀", "Cyclone Safety Rules"],
             ].map(([icon, label]) => (
               <button
                 key={label}
-                onClick={() =>
-                  quickCommand(label)
-                }
+                type="button"
+                onClick={() => quickCommand(label)}
+                disabled={processing}
                 style={{
-                  padding: "16px",
-                  borderRadius: "12px",
-                  border:
-                    "1px solid rgba(255,255,255,0.15)",
-                  background:
-                    "rgba(255,255,255,0.08)",
+                  padding: "14px",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "rgba(255,255,255,0.08)",
                   color: "#ffffff",
-                  fontSize: "14px",
-                  fontWeight: "700",
-                  cursor: "pointer",
+                  fontSize: "13.5px",
+                  fontWeight: "600",
+                  cursor: processing ? "wait" : "pointer",
                   textAlign: "left",
+                  transition: "background 0.15s",
                 }}
               >
                 {icon} {label}
@@ -635,15 +472,15 @@ function VoiceAssistant() {
         {/* STATUS */}
         <div
           style={{
-            marginTop: "20px",
+            marginTop: "18px",
             textAlign: "center",
-            color: "#b9c9dc",
+            color: "#94a3b8",
             fontSize: "13px",
           }}
         >
           {voiceAvailable
-            ? "🎙️ Voice mode available"
-            : "💬 Text command mode active"}
+            ? "🎙️ Audio Synthesis & Speech Engine Online"
+            : "💬 Text input mode active"}
         </div>
       </div>
     </div>

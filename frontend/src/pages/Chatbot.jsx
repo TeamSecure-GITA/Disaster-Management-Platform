@@ -1,96 +1,164 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { askGemini } from "../services/geminiService";
+
+const SUGGESTED_QUERIES = [
+  "🌊 What should I do during a sudden flood?",
+  "🌀 Cyclone safety: immediate steps",
+  "🎒 What items should be in my emergency kit?",
+  "🌍 How to survive an earthquake?",
+  "⛺ How to find the nearest cyclone shelter?",
+  "📞 National emergency helpline numbers in India",
+];
 
 function Chatbot() {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hello! 👋 I am your Disaster Management Assistant. Ask me about floods, cyclones, earthquakes, emergency preparedness, or rescue information."
-    }
+      text: "Hello! 👋 I am your Gemini-Powered Disaster Management & Emergency AI Assistant.\n\nAsk me anything about cyclone warnings, flood evacuation, earthquake safety, emergency survival kits, or first-aid guidance.",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    },
   ]);
 
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const getBotResponse = (question) => {
-    const text = question.toLowerCase();
-
-    if (text.includes("flood")) {
-      return "🌊 During a flood, move to higher ground, avoid walking or driving through floodwater, keep your emergency kit ready, and follow official evacuation instructions.";
-    }
-
-    if (text.includes("cyclone")) {
-      return "🌀 During a cyclone, stay indoors away from windows, keep emergency supplies ready, charge essential devices, and follow official evacuation instructions.";
-    }
-
-    if (text.includes("earthquake")) {
-      return "🌍 During an earthquake, Drop, Cover and Hold On. Stay away from windows and do not use elevators during the shaking.";
-    }
-
-    if (text.includes("fire")) {
-      return "🔥 If there is a fire, move away from the danger area, use a safe exit, avoid smoke, and contact emergency services when it is safe to do so.";
-    }
-
-    if (
-      text.includes("emergency") ||
-      text.includes("help") ||
-      text.includes("rescue")
-    ) {
-      return "🚨 For an emergency, use the Emergency Contacts page of this platform or contact your local emergency services. If you are in immediate danger, seek help from a trusted adult or nearby emergency personnel.";
-    }
-
-    if (text.includes("prepare") || text.includes("preparedness")) {
-      return "🎒 Prepare an emergency kit with water, food, a flashlight, basic first-aid supplies, essential medicines, important documents, and a charged phone.";
-    }
-
-    if (text.includes("kit")) {
-      return "🎒 An emergency kit can include drinking water, non-perishable food, flashlight, batteries, first-aid supplies, essential medicines, important documents, and a power bank.";
-    }
-
-    if (text.includes("hello") || text.includes("hi")) {
-      return "Hello! 👋 How can I help you with disaster preparedness today?";
-    }
-
-    return "🤖 I can help with general disaster preparedness and safety information. Try asking: 'What should I do during a flood?', 'How do I prepare for a cyclone?', or 'What should be in an emergency kit?'";
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
-    const userMessage = input.trim();
+  const sendMessage = async (textToSend = null) => {
+    const text = (textToSend || input).trim();
+    if (!text || loading) return;
 
-    setMessages((previous) => [
-      ...previous,
-      {
-        sender: "user",
-        text: userMessage
-      },
-      {
-        sender: "bot",
-        text: getBotResponse(userMessage)
-      }
-    ]);
+    const userMessageObj = {
+      sender: "user",
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
 
+    setMessages((prev) => [...prev, userMessageObj]);
     setInput("");
+    setLoading(true);
+
+    try {
+      const botReply = await askGemini(text, messages);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: botReply,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: "⚠️ I encountered an issue connecting to the AI service. Please call emergency hotline 112 for immediate life-safety assistance.",
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       sendMessage();
     }
+  };
+
+  const clearChat = () => {
+    setMessages([
+      {
+        sender: "bot",
+        text: "Chat cleared. How can I help you with disaster preparedness and emergency response?",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      },
+    ]);
   };
 
   return (
     <div className="chatbot-page">
       <div className="chatbot-header">
         <div>
-          <h1>🤖 AI Disaster Assistant</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <h1 style={{ margin: 0 }}>🤖 Gemini AI Disaster Assistant</h1>
+            <span
+              style={{
+                backgroundColor: "#059669",
+                color: "#ffffff",
+                fontSize: "0.72rem",
+                padding: "2px 8px",
+                borderRadius: "999px",
+                fontWeight: "700",
+              }}
+            >
+              ● Gemini Live
+            </span>
+          </div>
           <p>
-            Ask questions about disaster preparedness and emergency safety.
+            Real-time AI emergency instructions, disaster safety protocols, and preparedness advice.
           </p>
         </div>
+        <button
+          type="button"
+          onClick={clearChat}
+          style={{
+            background: "none",
+            border: "1px solid #334155",
+            color: "#94a3b8",
+            padding: "6px 12px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "0.8rem",
+          }}
+        >
+          🗑️ Clear Chat
+        </button>
+      </div>
+
+      {/* Suggestion Chips */}
+      <div
+        style={{
+          display: "flex",
+          gap: "8px",
+          flexWrap: "wrap",
+          marginBottom: "16px",
+        }}
+      >
+        {SUGGESTED_QUERIES.map((chip, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => sendMessage(chip)}
+            disabled={loading}
+            style={{
+              padding: "6px 12px",
+              backgroundColor: "#1e293b",
+              border: "1px solid #334155",
+              color: "#38bdf8",
+              borderRadius: "999px",
+              fontSize: "0.78rem",
+              cursor: loading ? "wait" : "pointer",
+              transition: "background 0.15s",
+            }}
+          >
+            {chip}
+          </button>
+        ))}
       </div>
 
       <div className="chatbot-box">
-        <div className="chatbot-messages">
+        <div className="chatbot-messages" style={{ minHeight: "380px", maxHeight: "550px", overflowY: "auto" }}>
           {messages.map((message, index) => (
             <div
               key={index}
@@ -99,14 +167,33 @@ function Chatbot() {
                   ? "message user-message"
                   : "message bot-message"
               }
+              style={{ position: "relative" }}
             >
-              <strong>
-                {message.sender === "user" ? "You" : "🤖 Assistant"}
-              </strong>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <strong>
+                  {message.sender === "user" ? "👤 You" : "✨ Gemini Assistant"}
+                </strong>
+                <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
+                  {message.timestamp}
+                </span>
+              </div>
 
-              <p>{message.text}</p>
+              <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.5" }}>
+                {message.text}
+              </div>
             </div>
           ))}
+
+          {loading && (
+            <div className="message bot-message" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <strong>✨ Gemini Assistant:</strong>
+              <span style={{ color: "#38bdf8", fontStyle: "italic" }}>
+                Thinking and retrieving life-safety protocols...
+              </span>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
 
         <div className="chatbot-input-area">
@@ -115,19 +202,18 @@ function Chatbot() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about floods, cyclones, earthquakes..."
+            disabled={loading}
+            placeholder="Ask Gemini about cyclone, flood evacuation, first aid, kit checklist..."
           />
 
-          <button onClick={sendMessage}>
-            Send ➤
+          <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
+            {loading ? "Thinking..." : "Send ➤"}
           </button>
         </div>
       </div>
 
       <div className="chatbot-warning">
-        ⚠️ This assistant provides general safety information. For a
-        real emergency, follow official emergency instructions and seek
-        immediate help from local emergency services.
+        🚨 <strong>Emergency Disclaimer:</strong> For immediate life danger, call <strong>112</strong> (All Emergencies) or <strong>108</strong> (Ambulance). Always obey evacuation orders from local authorities.
       </div>
     </div>
   );
