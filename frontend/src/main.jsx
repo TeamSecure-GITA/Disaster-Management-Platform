@@ -4,6 +4,7 @@ import App from './App.jsx';
 import './index.css';
 import { registerSW } from 'virtual:pwa-register';
 import { setupAutoSync } from './utils/syncService';
+import { initFCM } from './services/fcmService';
 
 // Initialize offline auto-sync listener for queued reports and tickets
 setupAutoSync();
@@ -25,3 +26,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 );
+
+// Initialize Firebase Cloud Messaging after app mounts.
+// Requests notification permission and registers FCM token with backend.
+// Done after render so it doesn't block the initial paint.
+initFCM().catch((err) => {
+  console.warn('[FCM] Background init failed (non-fatal):', err);
+});

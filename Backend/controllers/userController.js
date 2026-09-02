@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { uploadFile } = require("../services/fileStorageService");
 
 const getUsers = async (req, res, next) => {
   try {
@@ -131,10 +132,46 @@ const updateFcmToken = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/users/upload-avatar
+ * Uploads an avatar image to Cloudinary and saves the URL on the User document.
+ * Requires multipart/form-data with field name "avatar".
+ */
+const uploadAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image file provided. Use field name 'avatar'.",
+      });
+    }
+
+    const result = await uploadFile(req.file, {
+      folder: "disaster-management/avatars",
+    });
+
+    // Persist URL on the authenticated user
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { profileImage: result.url },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({
+      success: true,
+      message: "Avatar uploaded successfully",
+      data: { url: result.url, user },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUsers,
   getUserById,
   updateUser,
   deleteUser,
   updateFcmToken,
+  uploadAvatar,
 };

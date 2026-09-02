@@ -1,6 +1,8 @@
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
     signOut,
     onAuthStateChanged,
     sendPasswordResetEmail,
@@ -36,6 +38,21 @@ export async function loginUser(email, password) {
         password
     );
 
+    return result.user;
+}
+
+/**
+ * Sign in with Google OAuth popup.
+ * Returns the Firebase user object on success.
+ */
+export async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("profile");
+    provider.addScope("email");
+    // Force account picker even if the user is already signed in
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    const result = await signInWithPopup(auth, provider);
     return result.user;
 }
 

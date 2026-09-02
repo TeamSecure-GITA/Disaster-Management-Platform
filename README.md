@@ -182,7 +182,7 @@ DISASTER_MANAGEMENT_PLATFORM/
 
 All API endpoints are prefixed with `/api`.
 
-| Endpoint | Description |
+| Endpoint | Description | 
 |---|---|
 | `GET /api/health` | Health check — returns DB connection status |
 | `GET /api/ready` | Readiness probe — returns 503 if DB is down |
