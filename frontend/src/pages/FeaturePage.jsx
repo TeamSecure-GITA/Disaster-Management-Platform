@@ -92,12 +92,6 @@ const features = {
     description: "View disaster statistics.",
   },
 
-  "/disaster-response-map": {
-    icon: "🗺️",
-    title: "Disaster Response Map",
-    description: "Monitor disaster response operations.",
-  },
-
   "/incident-report": {
     icon: "📝",
     title: "Report Disaster",

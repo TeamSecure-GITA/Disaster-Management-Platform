@@ -27,7 +27,6 @@ const DamageAssessment = lazy(() => import("./pages/DamageAssessment"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const SafetyGuides = lazy(() => import("./pages/SafetyGuides"));
 const Statistics = lazy(() => import("./pages/Statistics"));
-const DisasterResponseMap = lazy(() => import("./pages/Map"));
 const IncidentReport = lazy(() => import("./pages/IncidentReport"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -70,9 +69,9 @@ export default function App() {
 
             <Route path="/alerts" element={<Alerts />} />
 
-            {/* Map — two route names for compatibility */}
+            {/* Single consolidated Map route */}
             <Route path="/map" element={<Map />} />
-            <Route path="/disaster-response-map" element={<DisasterResponseMap />} />
+            <Route path="/disaster-response-map" element={<Navigate to="/map" replace />} />
 
             <Route path="/emergency-sos" element={<SOSCenter />} />
             <Route path="/rescue-centers" element={<RescueCenters />} />

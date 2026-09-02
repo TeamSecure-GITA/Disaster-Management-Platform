@@ -84,11 +84,6 @@ const menuItems = [
     path: "/statistics",
   },
   {
-    name: "Disaster Response Map",
-    icon: "🗺️",
-    path: "/disaster-response-map",
-  },
-  {
     name: "Report Disaster",
     icon: "📝",
     path: "/incident-report",
