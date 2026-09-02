@@ -64,6 +64,25 @@ export async function resetPassword(email) {
     await sendPasswordResetEmail(auth, email);
 }
 
+export async function updateUserPassword(newPassword) {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("No authenticated user found. Please sign in again.");
+    }
+    const { updatePassword } = await import("firebase/auth");
+    await updatePassword(user, newPassword);
+}
+
+export async function updateUserProfilePhoto(photoURL, displayName) {
+    const user = auth.currentUser;
+    if (!user) return null;
+    const updates = {};
+    if (photoURL) updates.photoURL = photoURL;
+    if (displayName) updates.displayName = displayName;
+    await updateProfile(user, updates);
+    return user;
+}
+
 export function listenToAuth(callback) {
     return onAuthStateChanged(auth, callback);
 }

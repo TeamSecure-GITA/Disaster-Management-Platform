@@ -36,10 +36,51 @@ export default function Login() {
 
   // ─── After successful login: persist session + navigate ─────────────────────
 
-  const persistAndNavigate = async ({ uid, name, email: userEmail, role: userRole, token }) => {
+  const persistAndNavigate = async ({ uid, name, email: userEmail, role: userRole, token, photoUrl }) => {
+    const effectivePhoto = photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || userEmail)}`;
+    const userData = {
+      uid,
+      name,
+      email: userEmail,
+      role: userRole,
+      photoUrl: effectivePhoto,
+      profileImage: effectivePhoto,
+    };
+
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify({ uid, name, email: userEmail, role: userRole }));
-    await saveOfflineSession({ uid, name, email: userEmail, role: userRole });
+    localStorage.setItem("user", JSON.stringify(userData));
+    await saveOfflineSession(userData);
+
+    // Sync profile data if not already set or update with current session
+    const existing = localStorage.getItem("user_profile_data_v2");
+    if (!existing) {
+      const nameParts = (name || userEmail.split("@")[0]).split(" ");
+      const firstName = nameParts[0] || name;
+      const lastName = nameParts.slice(1).join(" ") || "";
+      const username = userEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
+
+      localStorage.setItem(
+        "user_profile_data_v2",
+        JSON.stringify({
+          username,
+          firstName,
+          lastName,
+          nickname: firstName,
+          displayName: name || userEmail.split("@")[0],
+          role: userRole === "admin" ? "Administrator" : "Citizen / Responder",
+          email: userEmail,
+          whatsapp: "",
+          website: "https://disaster-management-platform.org",
+          telegram: `@${username}`,
+          bio: "Disaster Response Platform member.",
+          photoUrl: effectivePhoto,
+          bloodGroup: "O+",
+          emergencyContact: "",
+          location: "Bhubaneswar, Odisha",
+        })
+      );
+    }
+
     // Kick off FCM token registration in background
     initFCM().catch(() => {});
     navigate(userRole === "admin" ? "/admin/tickets" : "/");
@@ -59,13 +100,27 @@ export default function Login() {
     try {
       // 1. Admin demo shortcut
       if (role === "admin" && (enteredId === "admin" || enteredId === "admin@admin.com") && enteredPassword === "admin123") {
-        await persistAndNavigate({ uid: "admin", name: "Admin", email: "admin@admin.com", role: "admin", token: "demo-admin-token" });
+        await persistAndNavigate({
+          uid: "admin",
+          name: "Admin Commander",
+          email: "admin@admin.com",
+          role: "admin",
+          token: "demo-admin-token",
+          photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+        });
         return;
       }
 
       // 2. User demo shortcut
       if (role === "user" && enteredId === "user" && enteredPassword === "user123") {
-        await persistAndNavigate({ uid: "demo", name: "Demo User", email: "user@demo.com", role: "user", token: "demo-user-token" });
+        await persistAndNavigate({
+          uid: "demo",
+          name: "Demo Responder",
+          email: "user@demo.com",
+          role: "user",
+          token: "demo-user-token",
+          photoUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=600&q=80",
+        });
         return;
       }
 
@@ -79,6 +134,7 @@ export default function Login() {
           email: user.email,
           role,
           token,
+          photoUrl: user.photoURL || null,
         });
         return;
       }
@@ -131,6 +187,7 @@ export default function Login() {
         email: user.email,
         role,
         token,
+        photoUrl: user.photoURL || null,
       });
     } catch (err) {
       console.error("[Login] Google Sign-In error:", err);

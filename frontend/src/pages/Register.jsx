@@ -97,23 +97,60 @@ function Register() {
 
       // 2. Get Firebase ID token for backend calls
       const token = await user.getIdToken();
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify({ uid: user.uid, name: name.trim(), email: user.email, role: "user" }));
+      let photoUrl = null;
 
       // 3. If avatar was chosen — upload to Cloudinary
       if (avatarFile) {
         try {
-          await uploadAvatarToCloudinary(avatarFile, token);
+          photoUrl = await uploadAvatarToCloudinary(avatarFile, token);
         } catch (uploadErr) {
           console.warn("[Register] Avatar upload failed (non-fatal):", uploadErr);
-          // Don't block registration if avatar upload fails
         }
       }
+
+      const nameParts = name.trim().split(" ");
+      const firstName = nameParts[0] || name.trim();
+      const lastName = nameParts.slice(1).join(" ") || "";
+      const username = email.trim().split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
+
+      const userData = {
+        uid: user.uid,
+        name: name.trim(),
+        email: user.email,
+        role: "user",
+        photoUrl: photoUrl || user.photoURL || null,
+        profileImage: photoUrl || user.photoURL || null,
+      };
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Populate user_profile_data_v2 for immediate profile page hydration
+      localStorage.setItem(
+        "user_profile_data_v2",
+        JSON.stringify({
+          username,
+          firstName,
+          lastName,
+          nickname: firstName,
+          displayName: name.trim(),
+          role: "Citizen / Responder",
+          email: user.email,
+          whatsapp: "",
+          website: "https://disaster-management-platform.org",
+          telegram: `@${username}`,
+          bio: "Registered Disaster Response Platform member.",
+          photoUrl: photoUrl || user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
+          bloodGroup: "O+",
+          emergencyContact: "",
+          location: "Bhubaneswar, Odisha",
+        })
+      );
 
       // 4. Init FCM (request notification permission)
       initFCM().catch(() => {});
 
-      navigate("/");
+      navigate("/profile");
     } catch (err) {
       console.error("[Register] Firebase error:", err);
       let msg = "Failed to register account.";
@@ -139,10 +176,47 @@ function Register() {
     try {
       const user  = await loginWithGoogle();
       const token = await user.getIdToken();
+      const fullName = user.displayName || user.email.split("@")[0];
+      const nameParts = fullName.split(" ");
+      const firstName = nameParts[0] || fullName;
+      const lastName = nameParts.slice(1).join(" ") || "";
+      const username = user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
+
+      const userData = {
+        uid: user.uid,
+        name: fullName,
+        email: user.email,
+        role: "user",
+        photoUrl: user.photoURL || null,
+        profileImage: user.photoURL || null,
+      };
+
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify({ uid: user.uid, name: user.displayName || user.email.split("@")[0], email: user.email, role: "user" }));
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      localStorage.setItem(
+        "user_profile_data_v2",
+        JSON.stringify({
+          username,
+          firstName,
+          lastName,
+          nickname: firstName,
+          displayName: fullName,
+          role: "Citizen / Responder",
+          email: user.email,
+          whatsapp: "",
+          website: "https://disaster-management-platform.org",
+          telegram: `@${username}`,
+          bio: "Registered Disaster Response Platform member via Google.",
+          photoUrl: user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
+          bloodGroup: "O+",
+          emergencyContact: "",
+          location: "Bhubaneswar, Odisha",
+        })
+      );
+
       initFCM().catch(() => {});
-      navigate("/");
+      navigate("/profile");
     } catch (err) {
       console.error("[Register] Google Sign-Up error:", err);
       if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
