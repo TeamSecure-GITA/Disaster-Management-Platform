@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser, loginWithGoogle } from "../services/firebaseAuth";
 import { initFCM } from "../services/fcmService";
+import { cleanWhatsAppNumber } from "../utils/phoneUtils";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -49,6 +50,8 @@ function Register() {
 
   const [name, setName]                     = useState("");
   const [email, setEmail]                   = useState("");
+  const [phone, setPhone]                   = useState("");
+  const [emergencyContact, setEmergencyContact] = useState("");
   const [password, setPassword]             = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [avatarFile, setAvatarFile]         = useState(null);
@@ -143,10 +146,15 @@ function Register() {
       const lastName = nameParts.slice(1).join(" ") || "";
       const username = email.trim().split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
 
+      const formattedPhone = cleanWhatsAppNumber(phone) || phone.trim();
+      const formattedEmergency = cleanWhatsAppNumber(emergencyContact) || formattedPhone;
+
       const userData = {
         uid,
         name: name.trim(),
         email: email.trim(),
+        phone: formattedPhone,
+        emergencyContact: formattedEmergency,
         role: "user",
         photoUrl: photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
         profileImage: photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
@@ -154,6 +162,13 @@ function Register() {
 
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(userData));
+      if (formattedPhone) {
+        localStorage.setItem("user_phone", formattedPhone);
+      }
+      if (formattedEmergency) {
+        localStorage.setItem("sos_whatsapp_number", formattedEmergency);
+        localStorage.setItem("emergency_contact_number", formattedEmergency);
+      }
 
       // Populate user_profile_data_v2 for immediate profile page hydration
       localStorage.setItem(
@@ -166,13 +181,14 @@ function Register() {
           displayName: name.trim(),
           role: "Citizen / Responder",
           email: email.trim(),
-          whatsapp: "",
+          phone: formattedPhone,
+          whatsapp: formattedPhone,
+          emergencyContact: formattedEmergency,
           website: "https://disaster-management-platform.org",
           telegram: `@${username}`,
           bio: "Registered Disaster Response Platform member.",
           photoUrl: userData.photoUrl,
           bloodGroup: "O+",
-          emergencyContact: "",
           location: "Bhubaneswar, Odisha",
         })
       );
@@ -401,6 +417,35 @@ function Register() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <label htmlFor="reg-phone" style={{ fontSize: "0.82rem", fontWeight: "600", color: "#38bdf8" }}>
+                📱 Mobile / WhatsApp Number (Required for WhatsApp SOS Alerts)
+              </label>
+              <input
+                id="reg-phone"
+                type="tel"
+                placeholder="e.g. +91 98765 43210 or 9876543210"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                style={{ ...inputStyle, borderColor: "#3b82f6" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <label htmlFor="reg-emergency" style={{ fontSize: "0.82rem", fontWeight: "600", color: "#94a3b8" }}>
+                🆘 Emergency Contact / Guardian Mobile (Optional)
+              </label>
+              <input
+                id="reg-emergency"
+                type="tel"
+                placeholder="e.g. Parent or Guardian Mobile Number"
+                value={emergencyContact}
+                onChange={(e) => setEmergencyContact(e.target.value)}
                 style={inputStyle}
               />
             </div>

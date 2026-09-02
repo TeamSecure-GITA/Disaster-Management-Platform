@@ -17,6 +17,7 @@ import {
 import { QRCodeCanvas } from "qrcode.react";
 import { updateUserPassword, updateUserProfilePhoto } from "../services/firebaseAuth";
 import { saveOfflineSession, getOfflineSession } from "../utils/offlineStorage";
+import { cleanWhatsAppNumber } from "../utils/phoneUtils";
 
 const STORAGE_KEY = "user_profile_data_v2";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -248,6 +249,16 @@ export default function Profile() {
     if (e) e.preventDefault();
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+
+      const cleanPh = cleanWhatsAppNumber(profile.whatsapp) || cleanWhatsAppNumber(profile.phone);
+      const cleanEm = cleanWhatsAppNumber(profile.emergencyContact) || cleanPh;
+      if (cleanPh) {
+        localStorage.setItem("user_phone", cleanPh);
+      }
+      if (cleanEm) {
+        localStorage.setItem("sos_whatsapp_number", cleanEm);
+        localStorage.setItem("emergency_contact_number", cleanEm);
+      }
 
       // Sync with user session
       const userStr = localStorage.getItem("user");

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { sendDataToBackend, flushOfflineSOSQueue } from "../utils/sosService";
+import { getWhatsAppUrl } from "../utils/phoneUtils";
 
 // ─── Emergency contact list ───────────────────────────────────────────────────
 const CONTACTS = [
@@ -95,13 +96,12 @@ function SOSCenter() {
   // ── WhatsApp fallback alert ────────────────────────────────────────────────
   const sendWhatsAppAlert = (lat, lng) => {
     try {
-      const phone = localStorage.getItem("sos_whatsapp_number") || "911070";
-      const msg = lat
-        ? encodeURIComponent(
-            `🚨 EMERGENCY SOS — I need immediate help!\nGPS: https://maps.google.com/?q=${lat},${lng}`
-          )
-        : encodeURIComponent("🚨 EMERGENCY SOS — I need immediate help! Location unavailable.");
-      window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+      const rawText = lat
+        ? `🚨 EMERGENCY SOS — I need immediate help!\nGPS: https://maps.google.com/?q=${lat},${lng}`
+        : "🚨 EMERGENCY SOS — I need immediate help! Location unavailable.";
+
+      const targetUrl = getWhatsAppUrl(rawText);
+      window.open(targetUrl, "_blank");
     } catch (err) {
       console.warn("[SOSCenter] WhatsApp alert failed:", err);
     }

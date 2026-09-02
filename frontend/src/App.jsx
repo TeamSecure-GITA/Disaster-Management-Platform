@@ -7,6 +7,11 @@ import {
 } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
+import { syncPhoneKeysFromProfile } from "./utils/phoneUtils";
+
+// On every page load, re-sync phone localStorage keys from user profile.
+// This guarantees WhatsApp SOS works correctly after page refresh / re-login.
+try { syncPhoneKeysFromProfile(); } catch {}
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Alerts = lazy(() => import("./pages/Alerts"));
 const Map = lazy(() => import("./pages/Map"));

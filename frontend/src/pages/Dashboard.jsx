@@ -4,6 +4,7 @@ import { useAuth } from "../utils/useAuth";
 import { saveOfflineReport } from "../utils/offlineStorage";
 import { requestNotificationPermission, sendLocalEmergencyAlert } from "../utils/pushAlerts";
 import localforage from 'localforage';
+import { getWhatsAppUrl } from "../utils/phoneUtils";
 
 // ─── FULL TRILINGUAL TRANSLATIONS ────────────────────────────────────────────
 const translations = {
@@ -343,9 +344,9 @@ export default function Dashboard() {
 
   // ─── WHATSAPP SOS ─────────────────────────────────────────────────────────
   const sendWhatsAppAlert = (issueText) => {
-    const phone = localStorage.getItem("sos_whatsapp_number") || "911070"; // configurable
-    const message = encodeURIComponent(`EMERGENCY REPORT: ${issueText || "Immediate assistance requested!"}`);
-    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+    const message = `EMERGENCY REPORT: ${issueText || "Immediate assistance requested!"}`;
+    const targetUrl = getWhatsAppUrl(message);
+    window.open(targetUrl, "_blank");
   };
 
   // ─── HAZARD REPORT SUBMISSION (PERSISTED) ────────────────────────────────

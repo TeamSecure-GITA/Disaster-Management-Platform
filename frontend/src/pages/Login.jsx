@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { saveOfflineSession } from "../utils/offlineStorage";
 import { loginUser, loginWithGoogle, resetPassword } from "../services/firebaseAuth";
 import { initFCM } from "../services/fcmService";
+import { cleanWhatsAppNumber } from "../utils/phoneUtils";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -81,6 +82,22 @@ export default function Login() {
         })
       );
     }
+
+    // ── Re-sync phone keys from stored profile on every login ─────────────────
+    // This ensures WhatsApp SOS works even after a page refresh or re-login.
+    try {
+      const savedProfile = localStorage.getItem("user_profile_data_v2");
+      if (savedProfile) {
+        const prof = JSON.parse(savedProfile);
+        const cleanPh = cleanWhatsAppNumber(prof.whatsapp) || cleanWhatsAppNumber(prof.phone);
+        const cleanEm = cleanWhatsAppNumber(prof.emergencyContact) || cleanPh;
+        if (cleanPh) localStorage.setItem("user_phone", cleanPh);
+        if (cleanEm) {
+          localStorage.setItem("sos_whatsapp_number", cleanEm);
+          localStorage.setItem("emergency_contact_number", cleanEm);
+        }
+      }
+    } catch {}
 
     // Kick off FCM token registration in background
     initFCM().catch(() => {});
