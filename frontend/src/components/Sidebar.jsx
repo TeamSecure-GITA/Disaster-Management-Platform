@@ -130,9 +130,25 @@ function Sidebar({ onNavigate }) {
       flexDirection: "column",
       overflowY: "auto"
     }}>
-      <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#38bdf8", marginBottom: "20px" }}>
-        Disaster Platform
-      </h2>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+        <img
+          src="/logo.png"
+          alt="Disaster Management Logo"
+          style={{
+            width: "38px",
+            height: "38px",
+            borderRadius: "50%",
+            objectFit: "contain",
+            boxShadow: "0 0 14px rgba(56, 189, 248, 0.45)",
+            border: "2px solid rgba(56, 189, 248, 0.6)",
+            flexShrink: 0,
+            background: "#0b1f3a",
+          }}
+        />
+        <h2 style={{ fontSize: "1.15rem", fontWeight: "bold", color: "#38bdf8", margin: 0, letterSpacing: "-0.01em" }}>
+          Disaster Platform
+        </h2>
+      </div>
       <nav style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         {menuItems.map((item, index) => (
           <NavLink

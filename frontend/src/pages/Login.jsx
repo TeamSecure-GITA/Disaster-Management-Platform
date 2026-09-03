@@ -317,7 +317,20 @@ export default function Login() {
 
         {/* Header */}
         <div style={{ background: "linear-gradient(135deg, #1d4ed8, #7c3aed)", padding: "28px 32px", textAlign: "center" }}>
-          <div style={{ fontSize: "2.5rem", marginBottom: "8px" }}>🛡️</div>
+          <img
+            src="/logo.png"
+            alt="Disaster Management Logo"
+            style={{
+              width: "72px",
+              height: "72px",
+              borderRadius: "50%",
+              objectFit: "contain",
+              margin: "0 auto 12px",
+              display: "block",
+              boxShadow: "0 0 20px rgba(255,255,255,0.25)",
+              border: "2px solid rgba(255,255,255,0.4)"
+            }}
+          />
           <h1 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "800" }}>Disaster Management Portal</h1>
           <p style={{ margin: "6px 0 0 0", color: "rgba(255,255,255,0.8)", fontSize: "0.85rem" }}>Sign in to access emergency services</p>
         </div>

@@ -8,7 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       // Exclude firebase-messaging-sw.js — it self-manages its own SW lifecycle
-      includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png", "pwa-192x192.png", "pwa-512x512.png"],
+      includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png", "pwa-192x192.png", "pwa-512x512.png", "logo.png"],
       manifest: {
         name: "Disaster Management Platform",
         short_name: "DisasterApp",

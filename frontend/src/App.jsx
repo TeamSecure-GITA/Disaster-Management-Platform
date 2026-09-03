@@ -41,7 +41,18 @@ function Loading() {
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#020617", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "3rem", marginBottom: "12px" }}>🛡️</div>
+        <img
+          src="/logo.png"
+          alt="Loading..."
+          style={{
+            width: "64px",
+            height: "64px",
+            borderRadius: "50%",
+            marginBottom: "14px",
+            boxShadow: "0 0 25px rgba(56, 189, 248, 0.4)",
+            border: "1.5px solid rgba(56, 189, 248, 0.5)",
+          }}
+        />
         <p style={{ color: "#60a5fa", fontSize: "1rem" }}>Loading...</p>
       </div>
     </div>
