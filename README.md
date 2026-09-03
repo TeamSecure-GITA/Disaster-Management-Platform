@@ -39,10 +39,13 @@ The Disaster Management Platform is a comprehensive emergency response tool desi
 - **Emergency Notifications** — Multi-channel delivery via in-app, email, and push (Firebase FCM)
 
 ### 📰 Climate Chronicle & Live News
-- **Automated Disaster & Climate Feed** — Real-time climate change and disaster news scraped and syndicated from reputable sources
-- **Trilingual Support** — Read articles in **English** (Google News), **Hindi** (Google News Hindi), and **Odia** (*Prameya* & *Sambad*)
+- **Automated Disaster & Climate Feed** — Real-time climate change and disaster news aggregated automatically from India's premier national and regional daily newspapers
+- **Trilingual Newspaper Coverage**:
+  - 🇬🇧 **English**: *The Economic Times*, *The Indian Express*, *Hindustan Times*, and *The Times of India*
+  - 🇮🇳 **Hindi (हिंदी)**: *दैनिक जागरण (Dainik Jagran)*, *दैनिक भास्कर (Dainik Bhaskar)*, *हिन्दुस्तान (Hindustan)*, and *अमर उजाला (Amar Ujala)*
+  - 🏳️ **Odia (ଓଡ଼ିଆ)**: *ପ୍ରମେୟ (Prameya)* and *ସମ୍ବାଦ (Sambad)*
 - **Zero-Manual Updates** — Automated backend syndication cron runs every 6 hours with client-side 5-minute live polling (newest articles on top)
-- **Visual Status & Source Attribution** — "NEW" badges for fresh breaking stories (<6 hours), source tags, and direct links to full publications
+- **Visual Status & Source Attribution** — "NEW" badges for fresh breaking stories (<6 hours), customized newspaper color badges, and direct links to full publications
 
 ### 🎨 Brand Identity & UX
 - **WhatsApp-Style Animated Splash Screen** — Elegant branded intro showing official Disaster Management seal with smooth scaling, bounce, and fade-out transition on application startup

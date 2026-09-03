@@ -17,27 +17,78 @@ const parser = new RSSParser({
   },
 });
 
-// RSS feed sources
+// RSS feed sources tailored to requested major national and regional publications
 const RSS_SOURCES = [
+  // ── English Newspapers ──
   {
-    url: "https://news.google.com/rss/search?q=disaster+flood+cyclone+earthquake+climate+change+India&hl=en-IN&gl=IN&ceid=IN:en",
-    source: "Google News",
+    name: "The Economic Times",
+    url: "https://news.google.com/rss/search?q=(disaster+OR+climate+OR+flood+OR+earthquake+OR+cyclone)+site:economictimes.indiatimes.com&hl=en-IN&gl=IN&ceid=IN:en",
+    source: "The Economic Times",
     language: "en",
     isGoogle: true,
   },
   {
-    url: "https://news.google.com/rss/search?q=%E0%A4%86%E0%A4%AA%E0%A4%A6%E0%A4%BE+%E0%A4%AC%E0%A4%BE%E0%A4%A2%E0%A4%BC+%E0%A4%9A%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%B5%E0%A4%BE%E0%A4%A4+%E0%A4%AD%E0%A5%82%E0%A4%95%E0%A4%82%E0%A4%AA+%E0%A4%9C%E0%A4%B2%E0%A4%B5%E0%A4%BE%E0%A4%AF%E0%A5%81+%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%A8&hl=hi-IN&gl=IN&ceid=IN:hi",
-    source: "Google News Hindi",
+    name: "The Indian Express",
+    url: "https://news.google.com/rss/search?q=(disaster+OR+climate+OR+flood+OR+earthquake+OR+cyclone)+site:indianexpress.com&hl=en-IN&gl=IN&ceid=IN:en",
+    source: "The Indian Express",
+    language: "en",
+    isGoogle: true,
+  },
+  {
+    name: "Hindustan Times",
+    url: "https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml",
+    source: "Hindustan Times",
+    language: "en",
+    isGoogle: false,
+  },
+  {
+    name: "The Times of India",
+    url: "https://news.google.com/rss/search?q=(disaster+OR+climate+OR+flood+OR+earthquake+OR+cyclone)+site:timesofindia.indiatimes.com&hl=en-IN&gl=IN&ceid=IN:en",
+    source: "The Times of India",
+    language: "en",
+    isGoogle: true,
+  },
+
+  // ── Hindi Newspapers ──
+  {
+    name: "Dainik Jagran",
+    url: "https://news.google.com/rss/search?q=(%E0%A4%86%E0%A4%AA%E0%A4%A6%E0%A4%BE+OR+%E0%A4%AC%E0%A4%BE%E0%A4%A2%E0%A4%BC+OR+%E0%A4%AD%E0%A5%82%E0%A4%95%E0%A4%82%E0%A4%AA+OR+%E0%A4%9A%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%B5%E0%A4%BE%E0%A4%A4+OR+%E0%A4%9C%E0%A4%B2%E0%A4%B5%E0%A4%BE%E0%A4%AF%E0%A5%81)+Jagran&hl=hi-IN&gl=IN&ceid=IN:hi",
+    source: "Dainik Jagran",
     language: "hi",
     isGoogle: true,
   },
   {
+    name: "Dainik Bhaskar",
+    url: "https://news.google.com/rss/search?q=(%E0%A4%86%E0%A4%AA%E0%A4%A6%E0%A4%BE+OR+%E0%A4%AC%E0%A4%BE%E0%A4%A2%E0%A4%BC+OR+%E0%A4%AD%E0%A5%82%E0%A4%95%E0%A4%82%E0%A4%AA+OR+%E0%A4%9A%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%B5%E0%A4%BE%E0%A4%A4+OR+%E0%A4%9C%E0%A4%B2%E0%A4%B5%E0%A4%BE%E0%A4%AF%E0%A5%81)+%22Dainik+Bhaskar%22&hl=hi-IN&gl=IN&ceid=IN:hi",
+    source: "Dainik Bhaskar",
+    language: "hi",
+    isGoogle: true,
+  },
+  {
+    name: "Hindustan",
+    url: "https://news.google.com/rss/search?q=(%E0%A4%86%E0%A4%AA%E0%A4%A6%E0%A4%BE+OR+%E0%A4%AC%E0%A4%BE%E0%A4%A2%E0%A4%BC+OR+%E0%A4%AD%E0%A5%82%E0%A4%95%E0%A4%82%E0%A4%AA+OR+%E0%A4%9A%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%B5%E0%A4%BE%E0%A4%A4+OR+%E0%A4%9C%E0%A4%B2%E0%A4%B5%E0%A4%BE%E0%A4%AF%E0%A5%81)+Hindustan&hl=hi-IN&gl=IN&ceid=IN:hi",
+    source: "Hindustan",
+    language: "hi",
+    isGoogle: true,
+  },
+  {
+    name: "Amar Ujala",
+    url: "https://news.google.com/rss/search?q=(%E0%A4%86%E0%A4%AA%E0%A4%A6%E0%A4%BE+OR+%E0%A4%AC%E0%A4%BE%E0%A4%A2%E0%A4%BC+OR+%E0%A4%AD%E0%A5%82%E0%A4%95%E0%A4%82%E0%A4%AA+OR+%E0%A4%9A%E0%A4%95%E0%A5%8D%E0%A4%B0%E0%A4%B5%E0%A4%BE%E0%A4%A4+OR+%E0%A4%9C%E0%A4%B2%E0%A4%B5%E0%A4%BE%E0%A4%AF%E0%A5%81)+%22Amar+Ujala%22&hl=hi-IN&gl=IN&ceid=IN:hi",
+    source: "Amar Ujala",
+    language: "hi",
+    isGoogle: true,
+  },
+
+  // ── Odia Newspapers ──
+  {
+    name: "Prameya",
     url: "https://prameya.com/feed/",
     source: "Prameya",
     language: "or",
     isGoogle: false,
   },
   {
+    name: "Sambad",
     url: "https://sambad.in/feed/",
     source: "Sambad",
     language: "or",
@@ -119,10 +170,14 @@ async function fetchSource(source) {
 
       const imageUrl = extractImage(item);
 
-      if (!isRelevant(title, description, source.language, source.isGoogle)) continue;
+      const cleanTitle = source.isGoogle
+        ? title.replace(/\s*-\s*[^-]+$/, "").trim() || title
+        : title;
+
+      if (!isRelevant(cleanTitle, description, source.language, source.isGoogle)) continue;
 
       articles.push({
-        title,
+        title: cleanTitle,
         description,
         url,
         imageUrl,

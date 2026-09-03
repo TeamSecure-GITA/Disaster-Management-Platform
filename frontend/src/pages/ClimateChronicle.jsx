@@ -8,9 +8,24 @@ const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const NEW_BADGE_HOURS = 6;
 
 const LANGUAGES = [
-  { code: "en", label: "English", flag: "🇬🇧", subtitle: "Google News · Reuters · AP" },
-  { code: "hi", label: "हिंदी", flag: "🇮🇳", subtitle: "Google समाचार" },
-  { code: "or", label: "ଓଡ଼ିଆ", flag: "🏳️", subtitle: "ପ୍ରମେୟ · ସମ୍ବାଦ" },
+  {
+    code: "en",
+    label: "English",
+    flag: "🇬🇧",
+    subtitle: "The Economic Times · The Indian Express · Hindustan Times · The Times of India",
+  },
+  {
+    code: "hi",
+    label: "हिंदी",
+    flag: "🇮🇳",
+    subtitle: "दैनिक जागरण · दैनिक भास्कर · हिन्दुस्तान · अमर उजाला",
+  },
+  {
+    code: "or",
+    label: "ଓଡ଼ିଆ",
+    flag: "🏳️",
+    subtitle: "ପ୍ରମେୟ (Prameya) · ସମ୍ବାଦ (Sambad)",
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -43,12 +58,24 @@ function truncate(str, maxLen) {
   return str.length > maxLen ? str.slice(0, maxLen) + "…" : str;
 }
 
-// Source color badges
+// Source color badges tailored to the specific newspapers
 const SOURCE_COLORS = {
+  // English
+  "The Economic Times": "#f59e0b",
+  "The Indian Express": "#dc2626",
+  "Hindustan Times": "#0284c7",
+  "The Times of India": "#b91c1c",
+  // Hindi
+  "Dainik Jagran": "#ea580c",
+  "Dainik Bhaskar": "#eab308",
+  "Hindustan": "#ef4444",
+  "Amar Ujala": "#8b5cf6",
+  // Odia
+  "Prameya": "#ec4899",
+  "Sambad": "#10b981",
+  // Fallbacks
   "Google News": "#4285F4",
   "Google News Hindi": "#34A853",
-  Prameya: "#E91E63",
-  Sambad: "#FF5722",
 };
 
 function getSourceColor(source) {
