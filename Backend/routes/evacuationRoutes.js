@@ -1,6 +1,5 @@
 const express = require("express");
-const { protect } = require("../middleware/authMiddleware");
-const { operationsOnly } = require("../middleware/adminMiddleware");
+const { optionalAuth } = require("../middleware/authMiddleware");
 
 const {
     generateEvacuationPlan,
@@ -10,8 +9,7 @@ const router = express.Router();
 
 router.post(
     "/plan",
-    protect,
-    operationsOnly,
+    optionalAuth,
     generateEvacuationPlan
 );
 
