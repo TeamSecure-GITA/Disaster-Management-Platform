@@ -39,6 +39,7 @@ const rescueIdRoutes = require("./routes/rescueIdRoutes");
 const damageAssessmentRoutes = require("./routes/damageAssessmentRoutes");
 const evacuationRoutes = require("./routes/evacuationRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
+const newsRoutes = require("./routes/newsRoutes");
 
 const app = express();
 
@@ -147,6 +148,7 @@ app.use("/api/evacuation", evacuationRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api/sync", syncRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/news", newsRoutes);
 
 // ================================
 // 404 HANDLER

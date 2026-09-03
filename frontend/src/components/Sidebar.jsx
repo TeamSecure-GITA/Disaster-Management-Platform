@@ -14,6 +14,11 @@ const menuItems = [
     path: "/alerts",
   },
   {
+    name: "Climate Chronicle",
+    icon: "📰",
+    path: "/climate-chronicle",
+  },
+  {
     name: "Live Map",
     icon: "🗺️",
     path: "/map",

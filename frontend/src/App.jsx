@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
+import SplashScreen from "./components/SplashScreen";
 import { syncPhoneKeysFromProfile } from "./utils/phoneUtils";
 
 // On every page load, re-sync phone localStorage keys from user profile.
@@ -34,6 +35,7 @@ const SOSCenter = lazy(() => import("./pages/SOSCenter"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const AdminTickets = lazy(() => import("./pages/AdminTickets"));
+const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 
 function Loading() {
   return (
@@ -47,8 +49,11 @@ function Loading() {
 }
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
+
   return (
     <ErrorBoundary>
+      {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
       <BrowserRouter>
 
       <Suspense fallback={<Loading />}>
@@ -97,6 +102,7 @@ export default function App() {
             <Route path="/analytics" element={<Analytics />} />
 
             <Route path="/safety-guides" element={<SafetyGuides />} />
+            <Route path="/climate-chronicle" element={<ClimateChronicle />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/incident-report" element={<IncidentReport />} />
             <Route path="/profile" element={<Profile />} />

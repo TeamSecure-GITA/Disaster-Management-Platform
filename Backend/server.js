@@ -17,6 +17,7 @@ const startAlertExpiryJob = require("./jobs/alertExpiryJob");
 const startSatelliteUpdateJob = require("./jobs/satelliteUpdateJob");
 const startWeatherUpdateJob = require("./jobs/weatherUpdateJob");
 const startGovtDisasterAlertJob = require("./jobs/govtDisasterAlertJob");
+const { startNewsFetcherJob } = require("./jobs/newsFetcher");
 
 const PORT = process.env.PORT || 5000;
 
@@ -42,6 +43,9 @@ const startServerRuntime = () => {
     startWeatherUpdateJob(),
     startGovtDisasterAlertJob(),
   ];
+
+  // Start news RSS fetcher (runs every 6h + immediately on startup)
+  startNewsFetcherJob();
 };
 
 
