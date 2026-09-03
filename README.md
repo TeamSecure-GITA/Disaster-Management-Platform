@@ -38,6 +38,15 @@ The Disaster Management Platform is a comprehensive emergency response tool desi
 - **Real-time Alerts** — Push disaster alerts categorized by severity and type
 - **Emergency Notifications** — Multi-channel delivery via in-app, email, and push (Firebase FCM)
 
+### 📰 Climate Chronicle & Live News
+- **Automated Disaster & Climate Feed** — Real-time climate change and disaster news scraped and syndicated from reputable sources
+- **Trilingual Support** — Read articles in **English** (Google News), **Hindi** (Google News Hindi), and **Odia** (*Prameya* & *Sambad*)
+- **Zero-Manual Updates** — Automated backend syndication cron runs every 6 hours with client-side 5-minute live polling (newest articles on top)
+- **Visual Status & Source Attribution** — "NEW" badges for fresh breaking stories (<6 hours), source tags, and direct links to full publications
+
+### 🎨 Brand Identity & UX
+- **WhatsApp-Style Animated Splash Screen** — Elegant branded intro showing official Disaster Management seal with smooth scaling, bounce, and fade-out transition on application startup
+
 ### 🗺️ Mapping & Navigation
 - **Interactive Map** — Live disaster overlay using Leaflet & React-Leaflet
 - **Shelter Finder** — Locate and navigate to nearest safe shelters
@@ -89,6 +98,7 @@ The Disaster Management Platform is a comprehensive emergency response tool desi
 | Push Notifications | Firebase Admin SDK |
 | Email | Nodemailer |
 | Scheduling | node-cron |
+| News & RSS Syndication | rss-parser |
 | Security | Helmet, CORS, express-rate-limit |
 | Testing | Jest + Supertest |
 
@@ -104,6 +114,7 @@ The Disaster Management Platform is a comprehensive emergency response tool desi
 | QR Codes | qrcode.react |
 | Offline DB | IndexedDB (idb) + localforage |
 | PWA | vite-plugin-pwa |
+| Animations | CSS3 Keyframe Transitions (WhatsApp Splash Screen) |
 | Linting | OXLint |
 
 ---
@@ -124,9 +135,9 @@ DISASTER_MANAGEMENT_PLATFORM/
 │   ├── config/                  # DB connection, CORS, environment config
 │   ├── controllers/             # Route handler logic
 │   ├── middleware/              # Auth, rate limiting, upload, error handlers
-│   ├── models/                  # Mongoose schemas (23 models)
-│   ├── routes/                  # Express route definitions (22 route files)
-│   ├── services/                # Business logic layer (21 service modules)
+│   ├── models/                  # Mongoose schemas (24 models including NewsArticle)
+│   ├── routes/                  # Express route definitions (23 route files including newsRoutes)
+│   ├── services/                # Business logic layer (22 service modules including newsService)
 │   ├── sockets/                 # Socket.IO event handlers
 │   │   ├── socket.js            # Main socket initializer
 │   │   ├── alertSocket.js
@@ -136,6 +147,8 @@ DISASTER_MANAGEMENT_PLATFORM/
 │   │   └── notificationSocket.js
 │   ├── jobs/                    # Scheduled cron jobs
 │   │   ├── alertExpiryJob.js
+│   │   ├── govtDisasterAlertJob.js
+│   │   ├── newsFetcher.js       # Auto-aggregates RSS feeds every 6 hours
 │   │   ├── predictionJob.js
 │   │   ├── satelliteUpdateJob.js
 │   │   └── weatherUpdateJob.js
@@ -149,11 +162,18 @@ DISASTER_MANAGEMENT_PLATFORM/
     ├── vercel.json              # Vercel SPA rewrite config
     └── src/
         ├── main.jsx
-        ├── App.jsx              # Root router with lazy-loaded pages
+        ├── App.jsx              # Root router with lazy-loaded pages & splash screen
         ├── index.css            # Global styles
+        ├── assets/              # Logo & static media assets
+        │   └── logo.png         # Official Disaster Management emblem
         ├── components/          # Shared UI components
-        ├── pages/               # 27 page-level components
+        │   ├── DashboardLayout.jsx
+        │   ├── Sidebar.jsx      # Navigation drawer with Climate Chronicle
+        │   ├── SplashScreen.jsx # WhatsApp-style animated logo splash screen
+        │   └── ...
+        ├── pages/               # 28 page-level components
         │   ├── Dashboard.jsx
+        │   ├── ClimateChronicle.jsx # Trilingual (EN/HI/OR) live disaster news feed
         │   ├── Alerts.jsx
         │   ├── Map.jsx
         │   ├── SOSCenter.jsx
@@ -190,6 +210,9 @@ All API endpoints are prefixed with `/api`.
 | `GET/PUT /api/users/*` | User profile management |
 | `GET/POST /api/alerts/*` | Disaster alerts CRUD |
 | `GET/POST /api/disasters/*` | Disaster event management |
+| `GET /api/news` | Get paginated climate & disaster news (`?lang=en\|hi\|or&page=1&limit=20`) |
+| `GET /api/news/stats` | Aggregated news counts & latest publication timestamp per language |
+| `POST /api/news/refresh` | Trigger background re-syndication from RSS sources |
 | `GET/POST /api/shelters/*` | Shelter registry |
 | `GET/POST /api/resources/*` | Resource tracking |
 | `GET/POST /api/volunteers/*` | Volunteer enrollment & dispatch |
