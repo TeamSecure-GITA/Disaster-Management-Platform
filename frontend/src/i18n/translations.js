@@ -257,7 +257,7 @@ export const translations = {
 
     // ── AI Assistant ──────────────────────────────────────────────────────
     ai_title: "AI Disaster Assistant",
-    ai_subtitle: "Powered by Gemini AI — Get instant guidance.",
+    ai_subtitle: "Instant AI emergency guidance and safety protocols.",
     ai_placeholder: "Ask about disaster preparedness, first aid, evacuation...",
     ai_send: "Send",
     ai_thinking: "AI is thinking...",
@@ -616,7 +616,7 @@ export const translations = {
 
     // ── AI Assistant ──────────────────────────────────────────────────────
     ai_title: "AI आपदा सहायक",
-    ai_subtitle: "Gemini AI द्वारा संचालित — तत्काल मार्गदर्शन प्राप्त करें।",
+    ai_subtitle: "तत्काल आपातकालीन मार्गदर्शन और सुरक्षा प्रोटोकॉल प्राप्त करें।",
     ai_placeholder: "आपदा तैयारी, प्राथमिक चिकित्सा, निकासी के बारे में पूछें...",
     ai_send: "भेजें",
     ai_thinking: "AI सोच रहा है...",
@@ -975,7 +975,7 @@ export const translations = {
 
     // ── AI Assistant ──────────────────────────────────────────────────────
     ai_title: "AI ବିପର୍ଯ୍ୟୟ ସହାୟକ",
-    ai_subtitle: "Gemini AI ଦ୍ୱାରା ଚାଳିତ — ତୁରନ୍ତ ମାର୍ଗଦର୍ଶନ।",
+    ai_subtitle: "ତୁରନ୍ତ ଜରୁରୀକାଳୀନ ମାର୍ଗଦର୍ଶନ ଏବଂ ସୁରକ୍ଷା ନିର୍ଦ୍ଦେଶନାମା।",
     ai_placeholder: "ବିପର୍ଯ୍ୟୟ ପ୍ରସ୍ତୁତି, ପ୍ରଥମ ସହାୟ, ଖାଲି ଯିବା ବିଷୟରେ ପଚାରନ୍ତୁ...",
     ai_send: "ପଠାନ୍ତୁ",
     ai_thinking: "AI ଭାବୁଛି...",

@@ -29,6 +29,7 @@ Key Guidelines:
    - 1091: Women Safety & Distress Helpline
 4. Remind users to stay tuned to local official alerts, follow official evacuation orders, and avoid fake news.
 5. If the user asks general questions, provide helpful, well-structured, professional responses tailored to disaster preparedness, survival kits, and emergency recovery.
+6. Identity Directive: Never identify yourself as Gemini, Google Gemini, or mention any Google/Gemini branding in your answers. If asked who you are or what system you use, always identify yourself strictly as the "Disaster Management & Emergency AI Assistant".
 `;
 
 // ─── Local Knowledge Base Fallback ──────────────────────────────────────────
@@ -48,7 +49,7 @@ const LOCAL_DISASTER_KNOWLEDGE = {
 };
 
 /**
- * Send a message to Google Gemini API or Backend Proxy
+ * Send a message to AI Engine (Gemini API or Backend Proxy)
  * @param {string} userMessage - User query
  * @param {Array} history - Previous messages array [{ sender: 'user'|'bot', text: string }]
  * @returns {Promise<string>}
@@ -75,11 +76,14 @@ export async function askGemini(userMessage, history = []) {
       }
     }
   } catch {
-    // Backend unavailable, proceed to direct client Gemini or local fallback
+    // Backend unavailable, proceed to direct client API or local fallback
   }
 
-  // 2. Direct Google Gemini REST API call
-  const keyToUse = GEMINI_API_KEY || localStorage.getItem("custom_gemini_api_key");
+  // 2. Direct Gemini REST API call (runs internally)
+  const keyToUse =
+    GEMINI_API_KEY ||
+    localStorage.getItem("custom_gemini_api_key") ||
+    localStorage.getItem("gemini_api_key");
 
   if (keyToUse) {
     try {
@@ -100,9 +104,9 @@ export async function askGemini(userMessage, history = []) {
         formattedContents.unshift(...historyParts);
       }
 
-      // Try gemini-2.5-flash / gemini-1.5-flash
+      // Try gemini-2.0-flash / gemini-1.5-flash
       const endpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyToUse}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyToUse}`,
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${keyToUse}`,
       ];
 
@@ -131,7 +135,7 @@ export async function askGemini(userMessage, history = []) {
         } catch {}
       }
     } catch (err) {
-      console.warn("[Gemini AI] Direct API call error:", err);
+      console.warn("[AI Assistant] Direct API call error:", err);
     }
   }
 

@@ -14,7 +14,7 @@ function Chatbot() {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hello! 👋 I am your Gemini-Powered Disaster Management & Emergency AI Assistant.\n\nAsk me anything about cyclone warnings, flood evacuation, earthquake safety, emergency survival kits, or first-aid guidance.",
+      text: "Hello! 👋 I am your Disaster Management & Emergency AI Assistant.\n\nAsk me anything about cyclone warnings, flood evacuation, earthquake safety, emergency survival kits, or first-aid guidance.",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -91,7 +91,7 @@ function Chatbot() {
       <div className="chatbot-header">
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <h1 style={{ margin: 0 }}>🤖 Gemini AI Disaster Assistant</h1>
+            <h1 style={{ margin: 0 }}>🤖 AI Disaster Assistant</h1>
             <span
               style={{
                 backgroundColor: "#059669",
@@ -102,7 +102,7 @@ function Chatbot() {
                 fontWeight: "700",
               }}
             >
-              ● Gemini Live
+              ● AI Live
             </span>
           </div>
           <p>
@@ -171,7 +171,7 @@ function Chatbot() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                 <strong>
-                  {message.sender === "user" ? "👤 You" : "✨ Gemini Assistant"}
+                  {message.sender === "user" ? "👤 You" : "✨ AI Assistant"}
                 </strong>
                 <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
                   {message.timestamp}
@@ -186,7 +186,7 @@ function Chatbot() {
 
           {loading && (
             <div className="message bot-message" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <strong>✨ Gemini Assistant:</strong>
+              <strong>✨ AI Assistant:</strong>
               <span style={{ color: "#38bdf8", fontStyle: "italic" }}>
                 Thinking and retrieving life-safety protocols...
               </span>
@@ -203,7 +203,7 @@ function Chatbot() {
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
             disabled={loading}
-            placeholder="Ask Gemini about cyclone, flood evacuation, first aid, kit checklist..."
+            placeholder="Ask AI Assistant about cyclone, flood evacuation, first aid, kit checklist..."
           />
 
           <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>

@@ -11,7 +11,7 @@ function VoiceAssistant() {
   const [command, setCommand] = useState("");
   const [processing, setProcessing] = useState(false);
   const [response, setResponse] = useState(
-    "Hello! I am your Gemini-Powered Disaster Voice Assistant. Speak or type any emergency question or navigation command."
+    "Hello! I am your Disaster Voice Assistant. Speak or type any emergency question or navigation command."
   );
 
   // ─── FEMALE / CLEAR VOICE SPEECH SYNTHESIS ──────────────────────────────────
@@ -153,14 +153,14 @@ function VoiceAssistant() {
       return;
     }
 
-    // 2. Query Gemini AI for Disaster Safety Answers
+    // 2. Query AI for Disaster Safety Answers
     setProcessing(true);
-    setResponse("✨ Consulting Gemini AI for disaster response guidance...");
+    setResponse("✨ Consulting AI Assistant for disaster response guidance...");
 
     try {
-      const geminiAnswer = await askGemini(input);
-      setResponse(geminiAnswer);
-      speak(geminiAnswer);
+      const answer = await askGemini(input);
+      setResponse(answer);
+      speak(answer);
     } catch {
       const fallbackMsg = "For immediate emergencies, please dial 112 or 108. Stay calm and follow official local evacuation guidance.";
       setResponse(fallbackMsg);
@@ -260,7 +260,7 @@ function VoiceAssistant() {
           <div style={{ fontSize: "50px", marginBottom: "8px" }}>🎙️</div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
             <h1 style={{ margin: 0, fontSize: "30px", fontWeight: "800" }}>
-              Gemini AI Voice Assistant
+              AI Voice Assistant
             </h1>
             <span
               style={{
@@ -272,7 +272,7 @@ function VoiceAssistant() {
                 borderRadius: "999px",
               }}
             >
-              ✨ Gemini Active
+              ✨ Voice Active
             </span>
           </div>
           <p style={{ color: "#c9d8ea", fontSize: "15px", marginTop: "8px" }}>
@@ -293,7 +293,7 @@ function VoiceAssistant() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
             <h2 style={{ margin: 0, fontSize: "18px", color: "#38bdf8" }}>
-              🤖 Gemini Assistant Response
+              🤖 AI Assistant Response
             </h2>
             {processing && (
               <span style={{ fontSize: "0.8rem", color: "#60a5fa" }}>
@@ -411,7 +411,7 @@ function VoiceAssistant() {
                 cursor: processing ? "wait" : "pointer",
               }}
             >
-              {processing ? "Asking..." : "Ask Gemini ➤"}
+              {processing ? "Asking..." : "Ask Assistant ➤"}
             </button>
           </div>
         </form>

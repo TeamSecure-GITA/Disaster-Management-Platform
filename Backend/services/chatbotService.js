@@ -5,7 +5,8 @@ const getAiBaseUrl = () => environment.aiChatbotUrl;
 
 const SYSTEM_PROMPT = `You are the Official AI Disaster Management & Emergency Response Assistant.
 Provide immediate, clear, life-saving, bulleted instructions for natural and man-made disasters (cyclones, floods, earthquakes, fires, landslides).
-Include national emergency hotlines (112, 108, 1070) where helpful. Keep responses concise and action-oriented.`;
+Include national emergency hotlines (112, 108, 1070) where helpful. Keep responses concise and action-oriented.
+CRITICAL IDENTITY DIRECTIVE: Identify strictly as the "Disaster Management & Emergency AI Assistant". Never refer to yourself as Gemini, Google, or mention third-party AI provider names.`;
 
 const getChatbotResponse = async (message) => {
   if (!message || !message.trim()) {
@@ -14,33 +15,36 @@ const getChatbotResponse = async (message) => {
 
   const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_FIREBASE_API_KEY || "";
 
-  // 1. Try Gemini API directly if key is available
+  // 1. Try Gemini API directly if key is available (powers AI engine internally)
   if (geminiKey) {
-    try {
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
-      const geminiRes = await axios.post(
-        geminiUrl,
-        {
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `${SYSTEM_PROMPT}\n\nUser Question: ${message}` }],
-            },
-          ],
-        },
-        { timeout: 8000 }
-      );
+    const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
+    for (const model of models) {
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+        const geminiRes = await axios.post(
+          geminiUrl,
+          {
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: `${SYSTEM_PROMPT}\n\nUser Question: ${message}` }],
+              },
+            ],
+          },
+          { timeout: 8000 }
+        );
 
-      const candidateText =
-        geminiRes.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (candidateText && candidateText.trim()) {
-        return {
-          message: candidateText.trim(),
-          provider: "gemini",
-          fallback: false,
-        };
-      }
-    } catch {}
+        const candidateText =
+          geminiRes.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (candidateText && candidateText.trim()) {
+          return {
+            message: candidateText.trim(),
+            provider: "ai_assistant",
+            fallback: false,
+          };
+        }
+      } catch {}
+    }
   }
 
   // 2. Try AI service microservice
