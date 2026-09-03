@@ -5,8 +5,33 @@ const notificationSchema = new mongoose.Schema(
     recipient: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
+      default: null,
       index: true,
+    },
+
+    isBroadcast: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    sourceUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    sourceAgency: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    externalId: {
+      type: String,
+      index: true,
+      sparse: true,
     },
 
     title: {

@@ -20,32 +20,43 @@ const initializeSocket = (server) => {
       const header = socket.handshake.headers.authorization;
       const token = handshakeToken || header?.replace(/^Bearer\s+/i, "");
 
-      if (!token) return next(new Error("Authentication required"));
+      if (!token || token.startsWith("demo-") || token.startsWith("local-") || token === "guest") {
+        socket.user = { _id: "guest", role: "guest" };
+        return next();
+      }
 
       const decoded = verifyToken(token);
       if (decoded.type && decoded.type !== "access") {
-        return next(new Error("Invalid authentication token"));
+        // Fallback to guest rather than dropping emergency broadcast connection
+        socket.user = { _id: "guest", role: "guest" };
+        return next();
       }
 
       const user = await User.findById(decoded.id).select("-password");
       if (!user || user.isActive === false || user.status === "inactive") {
-        return next(new Error("User is not active"));
+        socket.user = { _id: "guest", role: "guest" };
+        return next();
       }
 
       socket.user = user;
       next();
     } catch (error) {
-      next(new Error("Invalid authentication token"));
+      // Allow connection as guest so users still receive life-saving disaster alerts
+      socket.user = { _id: "guest", role: "guest" };
+      next();
     }
   });
 
   io.on("connection", (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
-    const userRoom = `user:${socket.user._id}`;
+    console.log(`Socket connected: ${socket.id} (user: ${socket.user?._id})`);
     socket.join("alerts");
-    socket.join(userRoom);
 
-    if (["admin", "operator"].includes(socket.user.role)) {
+    if (socket.user && socket.user._id && socket.user._id !== "guest") {
+      const userRoom = `user:${socket.user._id}`;
+      socket.join(userRoom);
+    }
+
+    if (["admin", "operator"].includes(socket.user?.role)) {
       socket.join("operations");
     }
 

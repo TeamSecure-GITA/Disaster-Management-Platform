@@ -88,10 +88,53 @@ const updateAlert = async (req, res, next) => {
   }
 };
 
+const govtAlertService = require("../services/govtAlertService");
+
+const getLiveGovtAlerts = async (req, res, next) => {
+  try {
+    const alerts = await govtAlertService.getLiveGovtAlerts();
+    res.status(200).json({
+      success: true,
+      count: alerts.length,
+      data: alerts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const syncGovtAlerts = async (req, res, next) => {
+  try {
+    const result = await govtAlertService.fetchAndSyncGovtAlerts();
+    res.status(200).json({
+      success: true,
+      message: "Official government alerts synchronized successfully",
+      ...result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getGovtPortals = async (req, res, next) => {
+  try {
+    const portals = govtAlertService.getOfficialGovtPortals();
+    res.status(200).json({
+      success: true,
+      data: portals,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createAlert,
   getAlerts,
   getAlert,
   updateAlert,
   deleteAlert,
+  getLiveGovtAlerts,
+  syncGovtAlerts,
+  getGovtPortals,
 };

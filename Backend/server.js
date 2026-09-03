@@ -16,6 +16,7 @@ const startPredictionJob = require("./jobs/predictionJob");
 const startAlertExpiryJob = require("./jobs/alertExpiryJob");
 const startSatelliteUpdateJob = require("./jobs/satelliteUpdateJob");
 const startWeatherUpdateJob = require("./jobs/weatherUpdateJob");
+const startGovtDisasterAlertJob = require("./jobs/govtDisasterAlertJob");
 
 const PORT = process.env.PORT || 5000;
 
@@ -39,6 +40,7 @@ const startServerRuntime = () => {
     startAlertExpiryJob(),
     startSatelliteUpdateJob(),
     startWeatherUpdateJob(),
+    startGovtDisasterAlertJob(),
   ];
 };
 

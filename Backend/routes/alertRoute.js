@@ -8,6 +8,9 @@ const {
   getAlert,
   updateAlert,
   deleteAlert,
+  getLiveGovtAlerts,
+  syncGovtAlerts,
+  getGovtPortals,
 } = require("../controllers/alertController");
 
 const {
@@ -19,6 +22,11 @@ const {
 } = require("../middleware/validationMiddleware");
 
 const router = express.Router();
+
+// Live official government feeds & portals (publicly accessible)
+router.get("/live-govt", getLiveGovtAlerts);
+router.get("/portals", getGovtPortals);
+router.post("/sync-govt", syncGovtAlerts);
 
 router.post(
   "/",

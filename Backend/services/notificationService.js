@@ -89,21 +89,34 @@ const createNotification = async (notificationData) => {
 };
 
 const getUserNotifications = async (userId) => {
-  return await Notification.find({ recipient: userId })
-    .sort({ createdAt: -1 });
+  const query = userId
+    ? {
+        $or: [
+          { recipient: userId },
+          { isBroadcast: true },
+        ],
+      }
+    : { isBroadcast: true };
+
+  return await Notification.find(query)
+    .sort({ createdAt: -1 })
+    .limit(100);
 };
 
 const markAsRead = async (notificationId, userId, isAdmin = false) => {
-  const filter = isAdmin
+  const filter = isAdmin || !userId
     ? { _id: notificationId }
-    : { _id: notificationId, recipient: userId };
+    : {
+        _id: notificationId,
+        $or: [{ recipient: userId }, { isBroadcast: true }],
+      };
   const notification = await Notification.findOneAndUpdate(
     filter,
     { isRead: true, readAt: new Date() },
     { new: true }
   );
 
-  if (notification) {
+  if (notification && notification.recipient) {
     emitNotificationRead(String(notification.recipient), String(notification._id));
   }
 

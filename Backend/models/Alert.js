@@ -67,7 +67,38 @@ const alertSchema = new mongoose.Schema(
     issuedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
+      default: null,
+    },
+
+    isGovtOfficial: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    sourceAgency: {
+      type: String,
+      default: "Internal",
+      trim: true,
+    },
+
+    sourceUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    externalId: {
+      type: String,
+      index: true,
+      sparse: true,
+    },
+
+    country: {
+      type: String,
+      default: "India",
+      trim: true,
     },
 
     expiresAt: {
