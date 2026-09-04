@@ -399,6 +399,7 @@ export default function Rescue() {
             const isLimited = freeSpots > 0 && freeSpots < 100;
 
             const lat = center.lat || center.location?.coordinates?.[1] || 20.3;
+            const lng = center.lng || center.location?.coordinates?.[0] || 85.8;
             const mapUrl = `/map?lat=${lat}&lng=${lng}&name=${encodeURIComponent(center.name || "Rescue Center")}`;
             const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
 

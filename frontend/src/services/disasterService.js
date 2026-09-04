@@ -243,6 +243,9 @@ export async function fetchShelters(userCoords = null) {
 
 // ─── FAMILY SAFETY ───────────────────────────────────────────────────────────
 const LOCAL_FAMILY_KEY = "family_safety_members_v2";
+// Tracks whether we have already seeded fallback members at least once.
+// Once set, an empty list means the user deleted all members intentionally.
+const FAMILY_INITIALIZED_KEY = "family_safety_initialized_v2";
 
 const INITIAL_FALLBACK_MEMBERS = [
   {
@@ -311,6 +314,8 @@ export async function getFamilyMembers() {
               minute: "2-digit",
             }),
           }));
+          // Mark as initialized so we never re-seed fallback members
+          localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
           localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(mapped));
           return mapped;
         }
@@ -318,8 +323,12 @@ export async function getFamilyMembers() {
     }
   } catch {}
 
-  if (localMembers.length === 0) {
+  // Only seed fallback members the very first time (never initialized before).
+  // If the user has deleted all members intentionally, respect that empty state.
+  const hasInitialized = localStorage.getItem(FAMILY_INITIALIZED_KEY);
+  if (localMembers.length === 0 && !hasInitialized) {
     localMembers = INITIAL_FALLBACK_MEMBERS;
+    localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
     localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(localMembers));
   }
 
@@ -340,9 +349,16 @@ export async function addFamilyMember(memberData) {
     lastUpdated: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   };
 
-  // 1. Update local storage
-  const existing = await getFamilyMembers();
+  // 1. Update local storage — read current members directly to avoid re-seed race
+  let existing = [];
+  try {
+    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
+    if (raw) existing = JSON.parse(raw);
+  } catch {}
+
   const updated = [newMember, ...existing];
+  // Mark as initialized so fallback seed is never triggered again
+  localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
   localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
 
   // 2. Sync with Backend
@@ -409,8 +425,16 @@ export async function toggleMemberSafety(memberId, newStatus) {
 }
 
 export async function removeFamilyMember(memberId) {
-  const existing = await getFamilyMembers();
+  // Read directly from localStorage to avoid re-seed triggering
+  let existing = [];
+  try {
+    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
+    if (raw) existing = JSON.parse(raw);
+  } catch {}
+
   const updated = existing.filter((m) => m.id !== memberId && m._id !== memberId);
+  // Always mark initialized so an empty list stays empty after deletion
+  localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
   localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
 
   // Sync to Backend

@@ -1,16 +1,34 @@
 /**
  * Administrator Authentication & Permission Management Utility
- * Head Administrator: Debasish N. (debasishn185@gmail.com)
+ * Head Administrators:
+ *   Primary  — Debasish N.     (debasishn185@gmail.com)
+ *   Secondary — TeamSecure Ops (teamsecure.project@gmail.com)
  */
 
 export const HEAD_ADMIN_EMAIL = "debasishn185@gmail.com";
+export const HEAD_ADMIN_EMAIL_2 = "teamsecure.project@gmail.com";
 
-// Default authorized admins — ONLY the Head Admin is seeded by default.
-// Additional admins must be explicitly granted by debasishn185@gmail.com.
+// Both emails are treated as co-equal root Head Administrators.
+export const HEAD_ADMIN_EMAILS = [
+  "debasishn185@gmail.com",
+  "teamsecure.project@gmail.com",
+];
+
+// Default authorized admins — ONLY the Head Admins are seeded by default.
+// Additional admins must be explicitly granted by a Head Admin.
 const DEFAULT_AUTHORIZED_ADMINS = [
   {
     email: "debasishn185@gmail.com",
-    name: "Debasish N.",
+    name: "Debasish Nayak",
+    roleTitle: "Head Administrator",
+    isHeadAdmin: true,
+    grantedAt: "2026-09-01T00:00:00.000Z",
+    grantedBy: "System (Root)",
+    clearance: "Level 1 (Full Root Privileges)"
+  },
+  {
+    email: "teamsecure.project@gmail.com",
+    name: "TeamSecure Operations",
     roleTitle: "Head Administrator",
     isHeadAdmin: true,
     grantedAt: "2026-09-01T00:00:00.000Z",
@@ -24,7 +42,7 @@ const SEED_LOGIN_LOGS = [
   {
     id: "LOG-1001",
     email: "debasishn185@gmail.com",
-    name: "Debasish N.",
+    name: "Debasish Nayak",
     role: "admin",
     roleTitle: "Head Administrator",
     loginTime: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
@@ -95,7 +113,8 @@ const SEED_PERMISSION_REQUESTS = [
 
 export function isHeadAdmin(email) {
   if (!email) return false;
-  return email.trim().toLowerCase() === HEAD_ADMIN_EMAIL.toLowerCase();
+  const clean = email.trim().toLowerCase();
+  return HEAD_ADMIN_EMAILS.some(h => h.toLowerCase() === clean);
 }
 
 export function getAuthorizedAdmins() {
@@ -104,15 +123,17 @@ export function getAuthorizedAdmins() {
     if (raw) {
       let parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Guarantee Head Admin is always present
-        if (!parsed.some(a => a.email.toLowerCase() === HEAD_ADMIN_EMAIL.toLowerCase())) {
-          parsed.unshift(DEFAULT_AUTHORIZED_ADMINS[0]);
+        // Guarantee BOTH Head Admins are always present in the list
+        for (const defaultAdmin of DEFAULT_AUTHORIZED_ADMINS) {
+          if (!parsed.some(a => a.email.toLowerCase() === defaultAdmin.email.toLowerCase())) {
+            parsed.unshift(defaultAdmin);
+          }
         }
         // Purge legacy demo backdoor account from any stale cached list
         const PURGE_LIST = ["admin@admin.com", "admin"];
         const cleaned = parsed.filter(a => !PURGE_LIST.includes(a.email.toLowerCase()));
-        // If purge changed the list, persist the cleaned version
-        if (cleaned.length !== parsed.length) {
+        // If anything changed, persist the cleaned version
+        if (cleaned.length !== JSON.parse(raw).length) {
           localStorage.setItem("admin_authorized_members_v2", JSON.stringify(cleaned));
         }
         return cleaned;
@@ -125,12 +146,12 @@ export function getAuthorizedAdmins() {
   return DEFAULT_AUTHORIZED_ADMINS;
 }
 
+
 export function isAuthorizedAdmin(email) {
   if (!email) return false;
   const cleanEmail = email.trim().toLowerCase();
-  // Only Head Admin and explicitly granted admins are authorized.
-  // The old demo backdoor (admin@admin.com) is intentionally removed.
-  if (cleanEmail === HEAD_ADMIN_EMAIL.toLowerCase()) return true;
+  // Both Head Admins are always authorized.
+  if (isHeadAdmin(cleanEmail)) return true;
 
   const admins = getAuthorizedAdmins();
   return admins.some(a => a.email.toLowerCase() === cleanEmail);
@@ -142,20 +163,19 @@ export function isAuthorizedAdmin(email) {
  * allowed to add new admin members. Any call from a non-head-admin
  * grantor is rejected.
  */
-export function grantAdminPermission(memberEmail, roleTitle = "Administrator", grantedBy = "Debasish N. (Head Admin)", grantorEmail = "") {
-  // Enforce Head Admin exclusivity
+export function grantAdminPermission(memberEmail, roleTitle = "Administrator", grantedBy = "Head Admin", grantorEmail = "") {
+  // Enforce Head Admin exclusivity — only a Head Admin can grant permissions.
   const grantorClean = (grantorEmail || "").trim().toLowerCase();
-  // If a grantor email was provided and it is NOT the head admin, reject.
-  if (grantorClean && grantorClean !== HEAD_ADMIN_EMAIL.toLowerCase()) {
-    return { success: false, message: "Only the Head Administrator can grant admin permissions." };
+  if (grantorClean && !isHeadAdmin(grantorClean)) {
+    return { success: false, message: "Only a Head Administrator can grant admin permissions." };
   }
 
   if (!memberEmail) return { success: false, message: "Email is required" };
   const cleanEmail = memberEmail.trim().toLowerCase();
 
-  // Prevent granting to the head admin themselves (already permanent)
-  if (cleanEmail === HEAD_ADMIN_EMAIL.toLowerCase()) {
-    return { success: false, message: "Head Administrator is already a permanent root admin." };
+  // Prevent granting to either head admin (already permanent root)
+  if (isHeadAdmin(cleanEmail)) {
+    return { success: false, message: "Head Administrators are already permanent root admins." };
   }
 
   const admins = getAuthorizedAdmins();
@@ -169,7 +189,7 @@ export function grantAdminPermission(memberEmail, roleTitle = "Administrator", g
     roleTitle,
     isHeadAdmin: false,
     grantedAt: new Date().toISOString(),
-    grantedBy: grantedBy || "Debasish N. (Head Admin)",
+    grantedBy: grantedBy || "Head Admin",
     clearance: "Level 2 (Delegated by Head Admin)"
   };
 
@@ -181,7 +201,7 @@ export function grantAdminPermission(memberEmail, roleTitle = "Administrator", g
 export function revokeAdminPermission(memberEmail) {
   if (!memberEmail) return { success: false, message: "Email is required" };
   const cleanEmail = memberEmail.trim().toLowerCase();
-  if (cleanEmail === HEAD_ADMIN_EMAIL.toLowerCase()) {
+  if (isHeadAdmin(cleanEmail)) {
     return { success: false, message: "Head Administrator permission cannot be revoked." };
   }
 
@@ -200,8 +220,8 @@ export function recordLoginEvent({ email, name, role }) {
     const roleTitle = isHeadAdmin(cleanEmail)
       ? "Head Administrator"
       : isAdmin
-      ? "Administrator"
-      : "Citizen / Responder";
+        ? "Administrator"
+        : "Citizen / Responder";
 
     const newLog = {
       id: `LOG-${Date.now().toString().slice(-4)}`,
@@ -218,7 +238,7 @@ export function recordLoginEvent({ email, name, role }) {
     let logs = [];
     const rawLogs = localStorage.getItem("admin_login_audit_logs");
     if (rawLogs) {
-      try { logs = JSON.parse(rawLogs); } catch {}
+      try { logs = JSON.parse(rawLogs); } catch { }
     }
     if (!Array.isArray(logs) || logs.length === 0) {
       logs = SEED_LOGIN_LOGS;
@@ -239,7 +259,7 @@ export function getLoginAuditLogs() {
       const parsed = JSON.parse(rawLogs);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
-  } catch {}
+  } catch { }
   localStorage.setItem("admin_login_audit_logs", JSON.stringify(SEED_LOGIN_LOGS));
   return SEED_LOGIN_LOGS;
 }
@@ -273,7 +293,7 @@ export function getPermissionRequests() {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed;
     }
-  } catch {}
+  } catch { }
   localStorage.setItem("admin_permission_requests", JSON.stringify(SEED_PERMISSION_REQUESTS));
   return SEED_PERMISSION_REQUESTS;
 }

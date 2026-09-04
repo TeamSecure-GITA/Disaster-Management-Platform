@@ -41,6 +41,7 @@ const evacuationRoutes = require("./routes/evacuationRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
 const newsRoutes = require("./routes/newsRoutes");
 const nerLandslideRoutes = require("./routes/nerLandslideRoutes");
+const maintenanceRoutes = require("./routes/maintenanceRoutes");
 
 const app = express();
 
@@ -151,6 +152,7 @@ app.use("/api/sync", syncRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/ner", nerLandslideRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 
 // ================================
 // 404 HANDLER

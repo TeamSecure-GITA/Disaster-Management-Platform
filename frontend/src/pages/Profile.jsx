@@ -121,6 +121,10 @@ export default function Profile() {
   useEffect(() => {
     async function loadRealSession() {
       try {
+        // If user has a saved profile in localStorage, respect those edits.
+        // Only hydrate from session for fields that haven't been saved yet.
+        const hasSavedProfile = Boolean(localStorage.getItem(STORAGE_KEY));
+
         const offlineSession = await getOfflineSession();
         const userStr = localStorage.getItem("user");
         const activeUser = offlineSession || (userStr ? JSON.parse(userStr) : null);
@@ -128,9 +132,24 @@ export default function Profile() {
         if (activeUser && activeUser.email) {
           setProfile((prev) => {
             const nameParts = (activeUser.name || prev.displayName || "").split(" ");
-            const firstName = prev.firstName || nameParts[0] || "Responder";
-            const lastName = prev.lastName || nameParts.slice(1).join(" ") || "";
-            const username = prev.username || activeUser.email.split("@")[0].toLowerCase();
+
+            // If user has a previously saved profile, only update auth-bound fields
+            // (email, photo) and never overwrite user-edited name/phone/etc.
+            if (hasSavedProfile) {
+              return {
+                ...prev,
+                email: activeUser.email,
+                // Only update photo if user hasn't set a custom one yet
+                photoUrl: prev.photoUrl && !prev.photoUrl.includes("dicebear")
+                  ? prev.photoUrl
+                  : (activeUser.photoUrl || activeUser.profileImage || prev.photoUrl),
+              };
+            }
+
+            // First-ever load: populate from session
+            const firstName = nameParts[0] || "Responder";
+            const lastName = nameParts.slice(1).join(" ") || "";
+            const username = activeUser.email.split("@")[0].toLowerCase();
             const photoUrl = activeUser.photoUrl || activeUser.profileImage || prev.photoUrl;
 
             return {
@@ -279,16 +298,18 @@ export default function Profile() {
       // Try updating backend profile
       const authToken = localStorage.getItem("token");
       if (authToken && !authToken.startsWith("demo-") && !authToken.startsWith("local-")) {
-        const userObj = userStr ? JSON.parse(userStr) : null;
-        if (userObj?.uid || userObj?.id) {
-          fetch(`${API_URL}/api/users/${userObj.uid || userObj.id}`, {
+        const freshUserStr = localStorage.getItem("user");
+        const freshUser = freshUserStr ? JSON.parse(freshUserStr) : null;
+        const userId = freshUser?._id || freshUser?.uid || freshUser?.id;
+        if (userId) {
+          fetch(`${API_URL}/api/users/${userId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${authToken}`,
             },
             body: JSON.stringify({
-              name: profile.displayName,
+              name: profile.displayName || `${profile.firstName} ${profile.lastName}`.trim(),
               phone: profile.phone,
               profileImage: profile.photoUrl,
               address: profile.location,
