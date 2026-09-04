@@ -23,7 +23,7 @@ import {
   subscribeToAuthChange,
 } from "../services/authService";
 
-export default function HeaderTopBar() {
+export default function HeaderTopBar({ onOpenNav, navOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -100,8 +100,56 @@ export default function HeaderTopBar() {
         backdropFilter: "blur(12px)",
       }}
     >
-      {/* Left: Quick Status & Emergency Map Shortcut */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      {/* ─────────────── LEFT: Nav hamburger + status chips ─────────────── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+
+        {/* ── NAV HAMBURGER BUTTON (opens left drawer) ── */}
+        <button
+          id="nav-hamburger-btn"
+          type="button"
+          onClick={onOpenNav}
+          aria-label="Open navigation menu"
+          aria-expanded={navOpen}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "40px",
+            height: "40px",
+            backgroundColor: navOpen ? "#2563eb" : "#1e293b",
+            border: `1.5px solid ${navOpen ? "#60a5fa" : "#334155"}`,
+            borderRadius: "10px",
+            color: "#ffffff",
+            cursor: "pointer",
+            flexShrink: 0,
+            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+            boxShadow: navOpen ? "0 0 14px rgba(37,99,235,0.5)" : "none",
+          }}
+          onMouseEnter={e => { if (!navOpen) e.currentTarget.style.borderColor = "#60a5fa"; }}
+          onMouseLeave={e => { if (!navOpen) e.currentTarget.style.borderColor = "#334155"; }}
+        >
+          {/* Animated 3-bar → X icon */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "5px", width: "18px" }}>
+            <span style={{
+              display: "block", height: "2px", backgroundColor: "#fff", borderRadius: "2px",
+              transition: "all 0.25s",
+              transform: navOpen ? "rotate(45deg) translate(5px, 5px)" : "none",
+            }} />
+            <span style={{
+              display: "block", height: "2px", backgroundColor: "#fff", borderRadius: "2px",
+              transition: "all 0.25s",
+              opacity: navOpen ? 0 : 1,
+              transform: navOpen ? "scaleX(0)" : "none",
+            }} />
+            <span style={{
+              display: "block", height: "2px", backgroundColor: "#fff", borderRadius: "2px",
+              transition: "all 0.25s",
+              transform: navOpen ? "rotate(-45deg) translate(5px, -5px)" : "none",
+            }} />
+          </div>
+        </button>
+
+        {/* ── LIVE STATUS CHIP ── */}
         <div
           style={{
             display: "flex",
@@ -115,19 +163,11 @@ export default function HeaderTopBar() {
             fontWeight: "700",
             color: isOnline ? "#34d399" : "#fca5a5",
           }}
-          title={isOnline ? "Connected to Disaster Alert Network" : "PWA Offline Mode - Cached Maps & Local Storage Active"}
+          title={isOnline ? "Connected to Disaster Alert Network" : "PWA Offline Mode"}
         >
           {isOnline ? (
             <>
-              <span
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#10b981",
-                  boxShadow: "0 0 8px #10b981",
-                }}
-              />
+              <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981" }} />
               <span>LIVE SATELLITE NETWORK</span>
             </>
           ) : (
@@ -138,6 +178,7 @@ export default function HeaderTopBar() {
           )}
         </div>
 
+        {/* ── MAP SHORTCUT ── */}
         <Link
           to="/map"
           style={{
@@ -152,7 +193,6 @@ export default function HeaderTopBar() {
             padding: "4px 10px",
             borderRadius: "6px",
             border: "1px solid rgba(56, 189, 248, 0.25)",
-            transition: "all 0.2s",
           }}
         >
           <span>🗺️</span>
