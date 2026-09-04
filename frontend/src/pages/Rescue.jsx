@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { fetchShelters } from "../services/disasterService";
 
 export default function Rescue() {
@@ -399,8 +399,7 @@ export default function Rescue() {
             const isLimited = freeSpots > 0 && freeSpots < 100;
 
             const lat = center.lat || center.location?.coordinates?.[1] || 20.3;
-            const lng = center.lng || center.location?.coordinates?.[0] || 85.8;
-
+            const mapUrl = `/map?lat=${lat}&lng=${lng}&name=${encodeURIComponent(center.name || "Rescue Center")}`;
             const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
 
             return (
@@ -564,10 +563,8 @@ export default function Rescue() {
                 {/* Card Action Buttons */}
                 <div style={{ borderTop: "1px solid #334155", paddingTop: "16px", marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <a
-                      href={googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      to={mapUrl}
                       style={{
                         flex: 1,
                         display: "inline-flex",
@@ -585,8 +582,8 @@ export default function Rescue() {
                       }}
                     >
                       <span>🗺️</span>
-                      <span>Live Route</span>
-                    </a>
+                      <span>Disaster Map Route</span>
+                    </Link>
 
                     <a
                       href={`tel:${center.phone || center.contactNumber || "112"}`}
@@ -774,10 +771,8 @@ export default function Rescue() {
             </div>
 
             <div style={{ display: "flex", gap: "10px" }}>
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${activeModalCenter.lat},${activeModalCenter.lng}&travelmode=driving`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to={`/map?lat=${activeModalCenter.lat}&lng=${activeModalCenter.lng}&name=${encodeURIComponent(activeModalCenter.name || "Rescue Center")}`}
                 style={{
                   flex: 1,
                   display: "inline-flex",
@@ -793,8 +788,8 @@ export default function Rescue() {
                   textDecoration: "none",
                 }}
               >
-                🗺️ Navigate on Maps
-              </a>
+                🗺️ Navigate on Disaster Map
+              </Link>
               <button
                 onClick={() => {
                   const c = activeModalCenter;

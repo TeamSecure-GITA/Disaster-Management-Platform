@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   getFamilyMembers,
   addFamilyMember,
@@ -501,9 +502,10 @@ export default function FamilySafety() {
           <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
             {members.map((member) => {
               const isSafe = member.status === "Safe";
-              const mapCoordUrl = member.coordinates
-                ? `https://www.google.com/maps?q=${member.coordinates}`
-                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(member.location || "")}`;
+              const coordParts = member.coordinates && member.coordinates.includes(",") ? member.coordinates.split(",") : null;
+              const inAppMapUrl = coordParts && coordParts.length === 2
+                ? `/map?lat=${coordParts[0].trim()}&lng=${coordParts[1].trim()}&name=${encodeURIComponent(member.name)}`
+                : `/map?name=${encodeURIComponent(member.location || member.name)}`;
 
               return (
                 <div
@@ -560,14 +562,12 @@ export default function FamilySafety() {
                     <div style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "12px" }}>
                       <span>
                         📍 Location:{" "}
-                        <a
-                          href={mapCoordUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: "#38bdf8", textDecoration: "underline" }}
+                        <Link
+                          to={inAppMapUrl}
+                          style={{ color: "#38bdf8", textDecoration: "underline", fontWeight: "600" }}
                         >
-                          {member.location || "View on Map"}
-                        </a>
+                          {member.location || "View on Disaster Map"}
+                        </Link>
                       </span>
                       {member.phone && (
                         <span>

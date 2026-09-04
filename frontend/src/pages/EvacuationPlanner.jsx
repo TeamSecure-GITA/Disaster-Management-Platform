@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -694,14 +694,12 @@ export default function EvacuationPlanner() {
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", fontSize: "0.8rem" }}>
                       <span style={{ color: "#38bdf8" }}>📏 {alt.distanceKm} km away</span>
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(location)}&destination=${alt.latitude},${alt.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        to={`/map?lat=${alt.latitude}&lng=${alt.longitude}&name=${encodeURIComponent(alt.name)}`}
                         style={{ color: "#60a5fa", textDecoration: "underline", fontWeight: "600" }}
                       >
-                        Directions ↗
-                      </a>
+                        Disaster Map ↗
+                      </Link>
                     </div>
                   </div>
                 ))}

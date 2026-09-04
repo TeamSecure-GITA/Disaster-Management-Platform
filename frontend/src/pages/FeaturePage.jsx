@@ -10,8 +10,8 @@ const features = {
 
   "/map": {
     icon: "🗺️",
-    title: "Live Map",
-    description: "Monitor disaster locations and emergency areas.",
+    title: "Disaster Response Map",
+    description: "Monitor disaster locations, weather hazards, and emergency areas.",
   },
 
   "/emergency-sos": {

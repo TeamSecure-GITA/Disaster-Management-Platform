@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchShelters } from "../services/disasterService";
 
 function ShelterFinder() {
+  const navigate = useNavigate();
   const [shelters, setShelters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -24,18 +26,21 @@ function ShelterFinder() {
   };
 
   const detectGPS = () => {
-    if (!navigator.geolocation) return alert("Geolocation not supported.");
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
     setGpsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const coords = [pos.coords.latitude, pos.coords.longitude];
         setUserCoords(coords);
-        loadData(coords);
         setGpsLoading(false);
+        loadData(coords);
       },
       () => {
-        alert("Unable to get current GPS location.");
         setGpsLoading(false);
+        alert("Location access denied or unavailable.");
       },
       { timeout: 8000 }
     );
@@ -44,8 +49,8 @@ function ShelterFinder() {
   const filtered = shelters.filter((s) => {
     const matchSearch =
       s.name.toLowerCase().includes(search.toLowerCase()) ||
-      (s.city && s.city.toLowerCase().includes(search.toLowerCase())) ||
-      (s.address && s.address.toLowerCase().includes(search.toLowerCase()));
+      (s.address && s.address.toLowerCase().includes(search.toLowerCase())) ||
+      (s.city && s.city.toLowerCase().includes(search.toLowerCase()));
 
     const matchType =
       type === "All" ||
@@ -55,11 +60,10 @@ function ShelterFinder() {
     return matchSearch && matchType;
   });
 
-  const openGoogleMaps = (shelter) => {
+  const openDisasterMap = (shelter) => {
     const lat = shelter.lat || shelter.location?.coordinates?.[1] || 20.29;
     const lng = shelter.lng || shelter.location?.coordinates?.[0] || 85.82;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-    window.open(url, "_blank");
+    navigate(`/map?lat=${lat}&lng=${lng}&name=${encodeURIComponent(shelter.name)}`);
   };
 
   return (
@@ -184,7 +188,7 @@ function ShelterFinder() {
 
                 <div style={{ display: "flex", gap: "8px", marginTop: "14px" }}>
                   <button
-                    onClick={() => openGoogleMaps(shelter)}
+                    onClick={() => openDisasterMap(shelter)}
                     style={{
                       flex: 1,
                       padding: "8px 12px",
@@ -197,7 +201,7 @@ function ShelterFinder() {
                       cursor: "pointer",
                     }}
                   >
-                    🗺️ Get Directions
+                    🗺️ Disaster Map Route
                   </button>
 
                   <a

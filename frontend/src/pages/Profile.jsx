@@ -71,7 +71,7 @@ const PinterestIcon = () => (
 );
 
 export default function Profile() {
-  const [activeNav, setActiveNav] = useState("all-users");
+  const [activeNav, setActiveNav] = useState("personal");
   const [profile, setProfile] = useState(() => {
     try {
       const savedProfile = localStorage.getItem(STORAGE_KEY);
@@ -217,6 +217,7 @@ export default function Profile() {
         userObj.profileImage = uploadedUrl;
         localStorage.setItem("user", JSON.stringify(userObj));
         await saveOfflineSession(userObj);
+        window.dispatchEvent(new CustomEvent("auth-change", { detail: { loggedIn: true, user: userObj } }));
       }
 
       showToast("Profile photo updated & uploaded to Cloudinary successfully!", "success");
@@ -241,6 +242,7 @@ export default function Profile() {
       userObj.profileImage = defaultAvatar;
       localStorage.setItem("user", JSON.stringify(userObj));
       await saveOfflineSession(userObj);
+      window.dispatchEvent(new CustomEvent("auth-change", { detail: { loggedIn: true, user: userObj } }));
     }
     showToast("Photo removed and reset to initials avatar.");
   };
@@ -262,14 +264,16 @@ export default function Profile() {
 
       // Sync with user session
       const userStr = localStorage.getItem("user");
+      let userObj = null;
       if (userStr) {
-        const userObj = JSON.parse(userStr);
+        userObj = JSON.parse(userStr);
         userObj.name = profile.displayName || `${profile.firstName} ${profile.lastName}`.trim();
         userObj.email = profile.email;
         userObj.photoUrl = profile.photoUrl;
         userObj.profileImage = profile.photoUrl;
         localStorage.setItem("user", JSON.stringify(userObj));
         await saveOfflineSession(userObj);
+        window.dispatchEvent(new CustomEvent("auth-change", { detail: { loggedIn: true, user: userObj } }));
       }
 
       // Try updating backend profile
@@ -478,23 +482,43 @@ export default function Profile() {
           <div style={styles.tabsWrap}>
             <button
               type="button"
-              onClick={() => setActiveNav("all-users")}
+              onClick={() => setActiveNav("personal")}
               style={{
                 ...styles.tabBtn,
-                ...(activeNav === "all-users" ? styles.tabBtnActive : styles.tabBtnInactive),
+                ...(activeNav === "personal" ? styles.tabBtnActive : styles.tabBtnInactive),
               }}
             >
-              All Users
+              👤 Profile & Identity
             </button>
             <button
               type="button"
-              onClick={() => setActiveNav("settings")}
+              onClick={() => setActiveNav("medical")}
               style={{
                 ...styles.tabBtn,
-                ...(activeNav === "settings" ? styles.tabBtnActive : styles.tabBtnInactive),
+                ...(activeNav === "medical" ? styles.tabBtnActive : styles.tabBtnInactive),
               }}
             >
-              Settings
+              🚨 Emergency & Medical
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveNav("security")}
+              style={{
+                ...styles.tabBtn,
+                ...(activeNav === "security" ? styles.tabBtnActive : styles.tabBtnInactive),
+              }}
+            >
+              🔒 Security & Keys
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveNav("preferences")}
+              style={{
+                ...styles.tabBtn,
+                ...(activeNav === "preferences" ? styles.tabBtnActive : styles.tabBtnInactive),
+              }}
+            >
+              ⚙️ Preferences
             </button>
           </div>
 
@@ -649,240 +673,375 @@ export default function Profile() {
             </form>
           </div>
 
-          {/* ════════ RIGHT COLUMN: Profile Information ════════ */}
+          {/* ════════ RIGHT COLUMN: Tab Content ════════ */}
           <div style={styles.rightCol}>
-            <form onSubmit={handleSaveProfile}>
-              {/* Profile Information Group */}
-              <h3 style={styles.sectionHeading}>Profile Information</h3>
+            {/* TAB 1: PERSONAL & IDENTITY */}
+            {activeNav === "personal" && (
+              <form onSubmit={handleSaveProfile}>
+                <h3 style={styles.sectionHeading}>👤 Profile Information & Identity</h3>
 
-              <div style={styles.twoColGrid}>
+                <div style={styles.twoColGrid}>
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Username</label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={profile.username}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="responder.user"
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>First Name</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={profile.firstName}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="First name"
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Nickname / Call Sign</label>
+                    <input
+                      type="text"
+                      name="nickname"
+                      value={profile.nickname}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="Call sign / radio name"
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Role in Platform</label>
+                    <select
+                      name="role"
+                      value={profile.role}
+                      onChange={handleChange}
+                      style={styles.select}
+                    >
+                      <option value="Citizen / Responder">Citizen / Responder</option>
+                      <option value="Volunteer">Volunteer</option>
+                      <option value="First Responder">First Responder</option>
+                      <option value="Administrator">Administrator</option>
+                      <option value="Emergency Officer">Emergency Officer</option>
+                      <option value="Shelter Coordinator">Shelter Coordinator</option>
+                    </select>
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Last Name</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={profile.lastName}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="Last name"
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Display Name Publicly as</label>
+                    <input
+                      type="text"
+                      name="displayName"
+                      value={profile.displayName}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="Public display name"
+                    />
+                  </div>
+                </div>
+
+                {/* Contact & Website Info Group */}
+                <h3 style={{ ...styles.sectionHeading, marginTop: "28px" }}>
+                  Contact & Dispatch Details
+                </h3>
+
+                <div style={styles.twoColGrid}>
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Email (required)</label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      value={profile.email}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="user@example.com"
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>WhatsApp / Phone</label>
+                    <input
+                      type="text"
+                      name="whatsapp"
+                      value={profile.whatsapp}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="+91 98765 43210"
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Website / Agency URL</label>
+                    <input
+                      type="text"
+                      name="website"
+                      value={profile.website}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="https://disaster-management-platform.org"
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Telegram Handle</label>
+                    <input
+                      type="text"
+                      name="telegram"
+                      value={profile.telegram}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="@disaster_dispatch"
+                    />
+                  </div>
+                </div>
+
+                {/* Biographical Info */}
+                <h3 style={{ ...styles.sectionHeading, marginTop: "28px" }}>
+                  About the User & Disaster Skills
+                </h3>
+
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Username</label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={profile.username}
+                  <label style={styles.label}>Biographical & Response Skills</label>
+                  <textarea
+                    name="bio"
+                    rows={4}
+                    value={profile.bio}
                     onChange={handleChange}
-                    style={styles.input}
-                    placeholder="responder.user"
+                    placeholder="Mention your certifications, specialized emergency skills, languages spoken, or relief qualifications..."
+                    style={styles.textarea}
                   />
                 </div>
 
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>First Name</label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={profile.firstName}
+                {/* Action Buttons */}
+                <div style={{ marginTop: "28px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                      type="button"
+                      onClick={handleExportProfile}
+                      style={styles.secondaryActionBtn}
+                    >
+                      <Download size={16} />
+                      Export Portable Card
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowQrModal(true)}
+                      style={styles.secondaryActionBtn}
+                    >
+                      <QrCode size={16} />
+                      View QR ID
+                    </button>
+                  </div>
+
+                  <button type="submit" style={styles.saveBtn}>
+                    Save Profile Changes
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* TAB 2: MEDICAL & EMERGENCY */}
+            {activeNav === "medical" && (
+              <form onSubmit={handleSaveProfile}>
+                <h3 style={styles.sectionHeading}>🚨 Disaster Safety & Field Medical ID</h3>
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "-6px 0 20px 0" }}>
+                  Critical life-safety information used by emergency medical technicians and rescue dispatch teams during triage.
+                </p>
+
+                <div style={styles.twoColGrid}>
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Blood Group</label>
+                    <select
+                      name="bloodGroup"
+                      value={profile.bloodGroup}
+                      onChange={handleChange}
+                      style={styles.select}
+                    >
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Emergency SOS Contact (Family / Lead)</label>
+                    <input
+                      type="text"
+                      name="emergencyContact"
+                      value={profile.emergencyContact}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="+91 91234 56789"
+                    />
+                  </div>
+
+                  <div style={{ ...styles.fieldGroup, gridColumn: "span 2" }}>
+                    <label style={styles.label}>Base Station / Evacuation Zone</label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={profile.location}
+                      onChange={handleChange}
+                      style={styles.input}
+                      placeholder="City, State, Region (e.g. Bhubaneswar, Odisha)"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ ...styles.fieldGroup, marginTop: "16px" }}>
+                  <label style={styles.label}>Allergies, Medical Conditions, or Dietary Needs</label>
+                  <textarea
+                    name="medicalNotes"
+                    rows={3}
+                    value={profile.medicalNotes || ""}
                     onChange={handleChange}
-                    style={styles.input}
-                    placeholder="First name"
+                    placeholder="E.g., Asthmatic (inhaler required), Penicillin allergy, Diabetic..."
+                    style={styles.textarea}
                   />
                 </div>
 
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Nickname / Call Sign</label>
-                  <input
-                    type="text"
-                    name="nickname"
-                    value={profile.nickname}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="Call sign / radio name"
-                  />
-                </div>
-
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Role in Platform</label>
-                  <select
-                    name="role"
-                    value={profile.role}
-                    onChange={handleChange}
-                    style={styles.select}
+                <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowQrModal(true)}
+                    style={{ ...styles.secondaryActionBtn, backgroundColor: "#eff6ff", color: "#1d4ed8" }}
                   >
-                    <option value="Citizen / Responder">Citizen / Responder</option>
-                    <option value="Volunteer">Volunteer</option>
-                    <option value="First Responder">First Responder</option>
-                    <option value="Administrator">Administrator</option>
-                    <option value="Emergency Officer">Emergency Officer</option>
-                    <option value="Shelter Coordinator">Shelter Coordinator</option>
-                  </select>
-                </div>
-
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Last Name</label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={profile.lastName}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="Last name"
-                  />
-                </div>
-
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Display Name Publicly as</label>
-                  <input
-                    type="text"
-                    name="displayName"
-                    value={profile.displayName}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="Public display name"
-                  />
-                </div>
-              </div>
-
-              {/* Contact & Website Info Group */}
-              <h3 style={{ ...styles.sectionHeading, marginTop: "28px" }}>
-                Contact & Website Information
-              </h3>
-
-              <div style={styles.twoColGrid}>
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Email (required)</label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={profile.email}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="user@example.com"
-                  />
-                </div>
-
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>WhatsApp / Emergency Phone</label>
-                  <input
-                    type="text"
-                    name="whatsapp"
-                    value={profile.whatsapp}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
-
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Website / Organization URL</label>
-                  <input
-                    type="text"
-                    name="website"
-                    value={profile.website}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="https://disaster-management-platform.org"
-                  />
-                </div>
-
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Telegram / Dispatch Handle</label>
-                  <input
-                    type="text"
-                    name="telegram"
-                    value={profile.telegram}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="@disaster_dispatch"
-                  />
-                </div>
-              </div>
-
-              {/* Field Emergency & Medical Details */}
-              <h3 style={{ ...styles.sectionHeading, marginTop: "28px" }}>
-                Disaster Safety & Field Medical Info
-              </h3>
-
-              <div style={styles.twoColGrid}>
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Blood Group</label>
-                  <select
-                    name="bloodGroup"
-                    value={profile.bloodGroup}
-                    onChange={handleChange}
-                    style={styles.select}
-                  >
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-
-                <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Emergency SOS Contact</label>
-                  <input
-                    type="text"
-                    name="emergencyContact"
-                    value={profile.emergencyContact}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="+91 91234 56789 (Relative / Team Lead)"
-                  />
-                </div>
-
-                <div style={{ ...styles.fieldGroup, gridColumn: "span 2" }}>
-                  <label style={styles.label}>Base Station / Deployment City</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={profile.location}
-                    onChange={handleChange}
-                    style={styles.input}
-                    placeholder="City, State, Region (e.g. Bhubaneswar, Odisha)"
-                  />
-                </div>
-              </div>
-
-              {/* About the User & Disaster Skills */}
-              <h3 style={{ ...styles.sectionHeading, marginTop: "28px" }}>
-                About the User & Disaster Skills
-              </h3>
-
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Biographical & Response Skills</label>
-                <textarea
-                  name="bio"
-                  rows={4}
-                  value={profile.bio}
-                  onChange={handleChange}
-                  placeholder="Mention your certifications, specialized emergency skills, languages spoken, or relief qualifications..."
-                  style={styles.textarea}
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div style={{ marginTop: "28px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                <div style={{ display: "flex", gap: "10px" }}>
+                    <QrCode size={16} /> Open Portable QR Rescue Badge
+                  </button>
                   <button
                     type="button"
                     onClick={handleExportProfile}
                     style={styles.secondaryActionBtn}
                   >
-                    <Download size={16} />
-                    Export Portable Card
+                    <Download size={16} /> Download Offline Identity JSON
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowQrModal(true)}
-                    style={styles.secondaryActionBtn}
-                  >
-                    <QrCode size={16} />
-                    View QR ID
+                  <button type="submit" style={{ ...styles.saveBtn, marginLeft: "auto" }}>
+                    Save Emergency Details
                   </button>
                 </div>
+              </form>
+            )}
 
-                <button type="submit" style={styles.saveBtn}>
-                  Save Profile Changes
-                </button>
+            {/* TAB 3: SECURITY & KEYS */}
+            {activeNav === "security" && (
+              <div>
+                <h3 style={styles.sectionHeading}>🔒 Security & Access Credentials</h3>
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "-6px 0 20px 0" }}>
+                  Manage account passwords, active authentication session, and offline cryptographic identity.
+                </p>
+
+                <div style={{ backgroundColor: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", marginBottom: "24px" }}>
+                  <div style={{ fontWeight: "700", color: "#0f172a", fontSize: "0.9rem", marginBottom: "6px" }}>
+                    Active Responder Session
+                  </div>
+                  <div style={{ fontSize: "0.8rem", color: "#64748b", display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div><strong>Identifier:</strong> {profile.email}</div>
+                    <div><strong>Role Level:</strong> {profile.role}</div>
+                    <div><strong>Offline Storage:</strong> IndexedDB (LocalForage) Encrypted & Active</div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleChangePassword}>
+                  <h4 style={{ margin: "0 0 12px 0", fontSize: "0.92rem", fontWeight: "700", color: "#334155" }}>
+                    Update Account Password
+                  </h4>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Old Password</label>
+                    <input
+                      type="password"
+                      placeholder="Current password"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.label}>New Password</label>
+                    <input
+                      type="password"
+                      placeholder="Minimum 6 characters"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+
+                  <button type="submit" style={{ ...styles.saveBtn, marginTop: "12px" }}>
+                    Update Password
+                  </button>
+                </form>
               </div>
-            </form>
+            )}
+
+            {/* TAB 4: PREFERENCES */}
+            {activeNav === "preferences" && (
+              <div>
+                <h3 style={styles.sectionHeading}>⚙️ Application Preferences</h3>
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "-6px 0 20px 0" }}>
+                  Quick platform configuration shortcuts. For advanced settings, visit the full settings panel.
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "24px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px", backgroundColor: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                    <div>
+                      <div style={{ fontWeight: "700", color: "#0f172a", fontSize: "0.9rem" }}>Language Preference</div>
+                      <div style={{ fontSize: "0.78rem", color: "#64748b" }}>Display interface language</div>
+                    </div>
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      style={{ ...styles.select, width: "180px" }}
+                    >
+                      <option value="English Language">English</option>
+                      <option value="Hindi Language">Hindi (हिन्दी)</option>
+                      <option value="Odia Language">Odia (ଓଡ଼ିଆ)</option>
+                      <option value="Spanish Language">Spanish</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px", backgroundColor: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                    <div>
+                      <div style={{ fontWeight: "700", color: "#0f172a", fontSize: "0.9rem" }}>Full System Settings</div>
+                      <div style={{ fontSize: "0.78rem", color: "#64748b" }}>Manage map satellite layers, sirens, and storage cache</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => window.location.href = "/settings"}
+                      style={{ padding: "8px 16px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontWeight: "700", fontSize: "0.82rem", cursor: "pointer" }}
+                    >
+                      Open Full Settings →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

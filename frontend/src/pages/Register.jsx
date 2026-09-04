@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser, loginWithGoogle } from "../services/firebaseAuth";
 import { initFCM } from "../services/fcmService";
 import { cleanWhatsAppNumber } from "../utils/phoneUtils";
+import { loginSession, isUserLoggedIn, logoutSession, getCurrentUser } from "../services/authService";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -48,6 +49,8 @@ function Register() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
+  const [alreadyLoggedIn, setAlreadyLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser]         = useState(null);
   const [name, setName]                     = useState("");
   const [email, setEmail]                   = useState("");
   const [phone, setPhone]                   = useState("");
@@ -60,6 +63,13 @@ function Register() {
   const [googleLoading, setGoogleLoading]   = useState(false);
   const [error, setError]                   = useState("");
   const [showPassword, setShowPassword]     = useState(false);
+
+  useEffect(() => {
+    if (isUserLoggedIn()) {
+      setAlreadyLoggedIn(true);
+      setCurrentUser(getCurrentUser());
+    }
+  }, []);
 
   // ─── Avatar picker ──────────────────────────────────────────────────────────
   const handleAvatarChange = (e) => {
@@ -160,8 +170,7 @@ function Register() {
         profileImage: photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`,
       };
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      await loginSession(userData, token);
       if (formattedPhone) {
         localStorage.setItem("user_phone", formattedPhone);
       }
@@ -237,8 +246,7 @@ function Register() {
         profileImage: user.photoURL || null,
       };
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      await loginSession(userData, token);
 
       localStorage.setItem(
         "user_profile_data_v2",
@@ -303,6 +311,46 @@ function Register() {
         </div>
 
         <div style={{ padding: "28px 32px" }}>
+
+          {/* Already logged in banner */}
+          {alreadyLoggedIn && (
+            <div style={{ backgroundColor: "#172554", border: "1px solid #3b82f6", borderRadius: "12px", padding: "16px", marginBottom: "20px", textAlign: "center" }}>
+              <div style={{ fontSize: "1.4rem", marginBottom: "4px" }}>👋</div>
+              <div style={{ fontWeight: "700", color: "#93c5fd", fontSize: "0.95rem" }}>
+                You already have an active account session
+              </div>
+              <div style={{ fontSize: "0.82rem", color: "#cbd5e1", marginTop: "4px", marginBottom: "12px" }}>
+                Logged in as: <strong>{currentUser?.name || currentUser?.email || "Responder"}</strong>
+              </div>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => navigate("/profile")}
+                  style={{ padding: "8px 14px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  👤 My Profile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/map")}
+                  style={{ padding: "8px 14px", backgroundColor: "#0284c7", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  🗺️ Disaster Response Map
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await logoutSession();
+                    setAlreadyLoggedIn(false);
+                    setCurrentUser(null);
+                  }}
+                  style={{ padding: "8px 14px", backgroundColor: "#dc2626", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  🚪 Logout / Switch
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Error banner */}
           {error && (

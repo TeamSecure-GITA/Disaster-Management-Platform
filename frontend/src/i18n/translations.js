@@ -18,7 +18,7 @@ export const translations = {
     // ── Navigation ────────────────────────────────────────────────────────
     nav_dashboard: "Dashboard",
     nav_alerts: "Disaster Alerts",
-    nav_map: "Live Map",
+    nav_map: "Disaster Response Map",
     nav_sos: "Emergency SOS",
     nav_rescue: "Rescue Centers",
     nav_shelter: "Shelter Finder",
@@ -93,7 +93,7 @@ export const translations = {
     dash_request_callback: "Request Callback",
     dash_quick_actions: "Quick Actions",
     dash_emergency_contacts: "Emergency Contacts",
-    dash_view_map: "View Live Map",
+    dash_view_map: "View Disaster Response Map",
     dash_weather: "Weather Status",
     dash_air_quality: "Air Quality",
     dash_support_ticket: "Support Ticket",

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from "react-router-dom";
 import { saveOfflineSession } from "../utils/offlineStorage";
 import { loginUser, loginWithGoogle, resetPassword } from "../services/firebaseAuth";
 import { initFCM } from "../services/fcmService";
 import { cleanWhatsAppNumber } from "../utils/phoneUtils";
+import { loginSession, isUserLoggedIn, logoutSession, getCurrentUser } from "../services/authService";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -23,6 +24,8 @@ const inputStyle = {
 export default function Login() {
   const navigate = useNavigate();
 
+  const [alreadyLoggedIn, setAlreadyLoggedIn]     = useState(false);
+  const [currentUser, setCurrentUser]             = useState(null);
   const [email, setEmail]                         = useState("");
   const [password, setPassword]                   = useState("");
   const [role, setRole]                           = useState("user");
@@ -33,6 +36,13 @@ export default function Login() {
   const [googleLoading, setGoogleLoading]         = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
   const [showPassword, setShowPassword]           = useState(false);
+
+  useEffect(() => {
+    if (isUserLoggedIn()) {
+      setAlreadyLoggedIn(true);
+      setCurrentUser(getCurrentUser());
+    }
+  }, []);
 
   // Current domain hostname for helpful Firebase whitelisting hint
   const currentDomain = typeof window !== "undefined" ? window.location.hostname : "your-domain.vercel.app";
@@ -49,9 +59,7 @@ export default function Login() {
       profileImage: effectivePhoto,
     };
 
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
-    await saveOfflineSession(userData);
+    await loginSession(userData, token);
 
     // Sync profile data
     const existing = localStorage.getItem("user_profile_data_v2");
@@ -337,6 +345,46 @@ export default function Login() {
 
         {/* Form body */}
         <div style={{ padding: "28px 32px" }}>
+
+          {/* Already logged in banner */}
+          {alreadyLoggedIn && (
+            <div style={{ backgroundColor: "#172554", border: "1px solid #3b82f6", borderRadius: "12px", padding: "16px", marginBottom: "20px", textAlign: "center" }}>
+              <div style={{ fontSize: "1.4rem", marginBottom: "4px" }}>👋</div>
+              <div style={{ fontWeight: "700", color: "#93c5fd", fontSize: "0.95rem" }}>
+                You are currently logged in
+              </div>
+              <div style={{ fontSize: "0.82rem", color: "#cbd5e1", marginTop: "4px", marginBottom: "12px" }}>
+                Active responder: <strong>{currentUser?.name || currentUser?.email || "Responder"}</strong>
+              </div>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => navigate("/profile")}
+                  style={{ padding: "8px 14px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  👤 My Profile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/map")}
+                  style={{ padding: "8px 14px", backgroundColor: "#0284c7", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  🗺️ Disaster Response Map
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await logoutSession();
+                    setAlreadyLoggedIn(false);
+                    setCurrentUser(null);
+                  }}
+                  style={{ padding: "8px 14px", backgroundColor: "#dc2626", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  🚪 Logout / Switch
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Domain Authorization Info Banner */}
           {domainWarning && (
