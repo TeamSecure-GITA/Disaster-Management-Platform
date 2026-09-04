@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../utils/useAuth";
 import { saveOfflineReport } from "../utils/offlineStorage";
 import { requestNotificationPermission, sendLocalEmergencyAlert } from "../utils/pushAlerts";
@@ -584,6 +584,53 @@ export default function Dashboard() {
           >
             {sosActive ? t.sosActive : t.sosBroadcast}
           </button>
+        </div>
+
+        {/* ── NER Landslide Early Warning Banner ────────────────────────────── */}
+        <div style={{
+          background: "linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)",
+          border: "1.5px solid #6366f1",
+          borderRadius: "10px",
+          padding: "16px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
+          boxShadow: "0 4px 15px rgba(99, 102, 241, 0.2)"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <span style={{ fontSize: "2rem" }}>⛰️</span>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(239, 68, 68, 0.25)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.72rem", color: "#fca5a5", fontWeight: "700" }}>
+                SPECIALIZED MODULE · NORTH EASTERN REGION (NER)
+              </div>
+              <h4 style={{ margin: "4px 0 2px 0", color: "#e0e7ff", fontSize: "1.05rem", fontWeight: "700" }}>
+                AI-Powered Landslide & Slope Risk Monitoring Engine
+              </h4>
+              <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8" }}>
+                Real-time IMD rainfall triggers, soil saturation %, road blockage tracking & isolated habitations response for 8 NER states.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/ner-landslide-monitor"
+            style={{
+              backgroundColor: "#4f46e5",
+              color: "#ffffff",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              fontWeight: "700",
+              fontSize: "0.88rem",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              boxShadow: "0 2px 10px rgba(79, 70, 229, 0.4)"
+            }}
+          >
+            Launch NER Monitor ➔
+          </Link>
         </div>
 
         {/* ── Quick Stats Grid ────────────────────────────────────────────── */}

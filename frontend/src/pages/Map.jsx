@@ -463,6 +463,64 @@ const SATELLITE_WEATHER_RISK_ZONES = [
     action: "Evacuate hillside dwellings to designated safe base camps.",
   },
 
+  // ── NER LANDSLIDE & MOUNTAIN CORRIDORS (NORTH EASTERN REGION) ──
+  {
+    id: "risk-ner-landslide-1",
+    name: "NH-10 Teesta Valley Corridor (29th Mile / Birik Dara, Sikkim)",
+    category: "landslide",
+    categoryLabel: "⛰️ Landslide & Slope Instability (NER)",
+    riskPercent: 94,
+    color: "#dc2626",
+    lat: 27.0654,
+    lng: 88.4612,
+    radius: 7500,
+    weather: { shearStrain: "Extreme Structural Failure", soilMoisture: "94%", rainfall: "164 mm/24h", slopeAngle: "54°" },
+    advisory: "NH-10 Severed at 29th Mile. Massive debris accumulation. High-risk rockfall active across Teesta gorge.",
+    action: "BRO clearance active. Light vehicles routed via Lava-Algarah-Gorubathan. Seek bedrock shelters.",
+  },
+  {
+    id: "risk-ner-landslide-2",
+    name: "NH-29 Dzüdza & Phesama Mudslide Sector (Kohima-Dimapur, Nagaland)",
+    category: "landslide",
+    categoryLabel: "⛰️ Landslide & Slope Instability (NER)",
+    riskPercent: 88,
+    color: "#dc2626",
+    lat: 25.6741,
+    lng: 94.0256,
+    radius: 6000,
+    weather: { shearStrain: "Critical Creep", soilMoisture: "88%", rainfall: "98 mm/24h", slopeAngle: "48°" },
+    advisory: "Active slope deformation & mud runoff. NH-29 single-lane alternating movement with severe hazard.",
+    action: "Strictly avoid nighttime transit. Standby emergency vehicles pre-positioned at Phesama checkpost.",
+  },
+  {
+    id: "risk-ner-landslide-3",
+    name: "NH-6 Sonapur Tunnel Mudslide Zone (East Jaintia Hills, Meghalaya)",
+    category: "landslide",
+    categoryLabel: "⛰️ Landslide & Slope Instability (NER)",
+    riskPercent: 91,
+    color: "#dc2626",
+    lat: 25.1120,
+    lng: 92.3680,
+    radius: 6500,
+    weather: { shearStrain: "Torrential Surcharge", soilMoisture: "96%", rainfall: "212 mm/24h", slopeAngle: "42°" },
+    advisory: "Heavy siltation and mudslide plume spilling over Sonapur tunnel approach. Barak Valley lifeline imperiled.",
+    action: "Convoy movement restricted to daytime with heavy machinery escorts. Follow Meghalaya SDRF advisories.",
+  },
+  {
+    id: "risk-ner-landslide-4",
+    name: "Jatinga Railway Bypass & Slope Failure (Dima Hasao, Assam)",
+    category: "landslide",
+    categoryLabel: "⛰️ Landslide & Slope Instability (NER)",
+    riskPercent: 82,
+    color: "#dc2626",
+    lat: 25.1321,
+    lng: 92.9867,
+    radius: 5500,
+    weather: { shearStrain: "High Infiltration", soilMoisture: "86%", rainfall: "128 mm/24h", slopeAngle: "38°" },
+    advisory: "Continuous hill track slippage and embankment erosion reported along Lumding-Badarpur hill railway.",
+    action: "Rail patrolling teams deployed. Road vehicles follow diversion via Umrangso.",
+  },
+
   // ── SOIL MOISTURE SATURATION ──
   {
     id: "risk-moisture-1",
@@ -802,6 +860,31 @@ export default function Map() {
               </button>
             );
           })}
+
+          <button
+            type="button"
+            onClick={() => {
+              setRiskCategoryFilter("landslide");
+              setMapCenter([26.2006, 92.9376]);
+              setMapZoom(7);
+            }}
+            style={{
+              padding: "5px 12px",
+              borderRadius: "20px",
+              border: "1.5px solid #ef4444",
+              backgroundColor: "rgba(239, 68, 68, 0.25)",
+              color: "#fca5a5",
+              fontSize: "0.78rem",
+              fontWeight: "700",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              boxShadow: "0 2px 8px rgba(239, 68, 68, 0.3)"
+            }}
+          >
+            ⛰️ Focus NER Landslides
+          </button>
 
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: "700" }}>MIN RISK:</span>

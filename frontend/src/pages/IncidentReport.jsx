@@ -149,6 +149,79 @@ function IncidentReport() {
             <option>Critical</option>
           </select>
 
+          {/* Specialized NER Landslide & Slope Movement Section */}
+          {form.type === "Landslide" && (
+            <div style={{
+              background: "rgba(30, 41, 59, 0.7)",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              borderRadius: "10px",
+              padding: "16px",
+              marginTop: "12px",
+              marginBottom: "16px"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                <span style={{ fontSize: "1.1rem" }}>⛰️</span>
+                <strong style={{ color: "#38bdf8", fontSize: "0.95rem" }}>NER Slope Movement & Geotechnical Observations</strong>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>Crack Width (approx cm)</label>
+                  <input
+                    type="number"
+                    name="crackWidth"
+                    placeholder="e.g. 5 cm"
+                    value={form.crackWidth || ""}
+                    onChange={handleChange}
+                    style={{ width: "100%", marginTop: "4px" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>Crack Length (meters)</label>
+                  <input
+                    type="number"
+                    name="crackLength"
+                    placeholder="e.g. 12 m"
+                    value={form.crackLength || ""}
+                    onChange={handleChange}
+                    style={{ width: "100%", marginTop: "4px" }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>Road Connectivity / Blockage Status</label>
+                <select
+                  name="roadStatus"
+                  value={form.roadStatus || "Clear"}
+                  onChange={handleChange}
+                  style={{ width: "100%", marginTop: "4px" }}
+                >
+                  <option value="Clear">Road Fully Open</option>
+                  <option value="Caution">Caution - Single Lane Traffic</option>
+                  <option value="Partially Blocked">Partially Blocked (Light vehicles only)</option>
+                  <option value="Completely Blocked">Completely Blocked (Debris on Highway)</option>
+                  <option value="Culvert/Bridge Washed">Culvert or Bridge Damaged</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>Slope Displacement Trend</label>
+                <select
+                  name="slopeTrend"
+                  value={form.slopeTrend || "Stationary"}
+                  onChange={handleChange}
+                  style={{ width: "100%", marginTop: "4px" }}
+                >
+                  <option value="Stationary">Stationary - Surface cracks only</option>
+                  <option value="Slow Creep">Slow Creep - Tilting trees/poles</option>
+                  <option value="Active Rapid Movement">Active Rapid Movement / Mud run</option>
+                  <option value="Rockfall">Falling Boulders / Rockfall Active</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           <label>👥 Number of Affected People</label>
 
           <input

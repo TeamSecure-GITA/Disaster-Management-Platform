@@ -36,6 +36,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
+const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
 
 function Loading() {
   return (
@@ -82,6 +83,9 @@ export default function App() {
           <Route element={<DashboardLayout />}>
 
             <Route path="/" element={<Dashboard />} />
+
+            <Route path="/ner-landslide-monitor" element={<NERLandslideMonitor />} />
+            <Route path="/landslide-monitor" element={<Navigate to="/ner-landslide-monitor" replace />} />
 
             <Route path="/alerts" element={<Alerts />} />
 

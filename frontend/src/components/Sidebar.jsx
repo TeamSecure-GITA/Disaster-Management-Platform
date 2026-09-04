@@ -8,6 +8,11 @@ const menuItems = [
     path: "/",
   },
   {
+    name: "NER Landslide Monitor",
+    icon: "⛰️",
+    path: "/ner-landslide-monitor",
+  },
+  {
     name: "Disaster Alerts",
     icon: "🚨",
     path: "/alerts",

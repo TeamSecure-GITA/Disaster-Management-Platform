@@ -1,33 +1,42 @@
-# 🛡️ Disaster Management Platform
+# 🛡️ AI-Based Early Warning & Landslide Risk Monitoring System in NER
+### *(Comprehensive Disaster Management & Climate Resilience Platform)*
 
-A full-stack, real-time disaster management system built for emergency response, crisis coordination, and community safety. The platform empowers responders and citizens with live alerts, SOS signaling, resource tracking, drone/satellite monitoring, AI-powered assistance, and offline-first capabilities.
+A state-of-the-art, full-stack disaster management and geotechnical early warning platform engineered for the **North Eastern Region (NER) of India** (Assam, Meghalaya, Sikkim, Arunachal Pradesh, Nagaland, Manipur, Mizoram, Tripura) and emergency response nationwide.
+
+The platform unites **real-time IoT slope sensors, IMD rainfall threshold analytics, satellite remote sensing, AI-driven Landslide Susceptibility Index (LSI) modeling, road connectivity & blockage tracking, geotagged citizen crowdsourcing, and offline-first PWA architecture** with multilingual emergency broadcasting.
+
+> 📄 **Complete Problem Statement Submission & Dossier:** See [NER_LANDSLIDE_SOLUTION_PROPOSAL.md](file:///home/deba/Desktop/DISASTER_MANAGEMENT_PLATFORM/NER_LANDSLIDE_SOLUTION_PROPOSAL.md) for full technical mapping, formulas, and architecture diagrams.
 
 ---
 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [NER Landslide Early Warning Engine](#-ner-ai-landslide--slope-risk-monitoring)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [API Reference](#api-reference)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Environment Variables](#environment-variables)
-  - [Local Development](#local-development)
-  - [Docker (Recommended)](#docker-recommended)
-- [Deployment](#deployment)
-  - [Backend — Render](#backend--render)
-  - [Frontend — Vercel](#frontend--vercel)
-- [Testing](#testing)
-- [Contributing](#contributing)
+- [Testing & Verification](#testing)
 - [License](#license)
 
 ---
 
 ## Overview
 
-The Disaster Management Platform is a comprehensive emergency response tool designed to coordinate disaster relief efforts. It provides real-time data sharing between field responders, administrators, and affected citizens through WebSocket connections, push notifications, and an offline-first PWA architecture.
+The Disaster Management Platform addresses critical climate and geotechnical vulnerabilities in high-risk mountainous terrains like the North Eastern Region. By transforming reactive emergency response into predictive intelligence, it prevents loss of life, protects infrastructure, and coordinates relief across isolated habitations.
+
+---
+
+## ⛰️ NER AI Landslide & Slope Risk Monitoring
+
+- **Real-Time Geotechnical Dashboard (`/ner-landslide-monitor`)** — Live risk monitoring across all 8 North Eastern states with soil saturation %, 24h rainfall vs. IMD threshold, slope incline, and automated alerts.
+- **Highway & Corridor Connectivity Tracker** — Real-time blockage tracking for NH-10 (Sevoke-Gangtok), NH-29 (Dimapur-Kohima), NH-6 (Shillong-Silchar), NH-13, and NH-54, complete with debris volume estimates and alternate bypass routes.
+- **Field Geo-Tagged Crack & Slope Movement Reporter** — Field geologists and citizens report surface tension cracks (width in cm, length in m), slope creep, and road status with 1-click GPS locking and photo evidence.
+- **AI Landslide Susceptibility Index (LSI) Calculator** — Dynamic geotechnical stability and Factor of Safety (FoS) computation engine.
+- **Emergency Response Prioritization Matrix** — Algorithmic ranking of vulnerable districts based on LSI, number of isolated villages, and rainfall excess to optimize SDRF/NDRF resource allocation.
+- **Multilingual Emergency Warnings** — Vernacular broadcast alerts in **English, Hindi, Assamese (অসমীয়া), Bengali (বাংলা), Nepali (नेपाली), and Odia (ଓଡ଼ିଆ)**.
 
 ---
 
