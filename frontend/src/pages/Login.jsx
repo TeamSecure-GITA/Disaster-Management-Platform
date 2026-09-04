@@ -133,21 +133,16 @@ export default function Login() {
     const enteredPassword = password.trim();
 
     try {
-      // 1. Head Admin (Debasish N.) or Admin demo shortcut
-      if ((enteredId === HEAD_ADMIN_EMAIL.toLowerCase() || enteredId === "admin" || enteredId === "admin@admin.com") && (enteredPassword === "admin123" || enteredPassword === "debasish123" || enteredPassword === "password")) {
-        const isHead = enteredId === HEAD_ADMIN_EMAIL.toLowerCase();
-        await persistAndNavigate({
-          uid: isHead ? "head-admin-debasish" : "admin",
-          name: isHead ? "Debasish N." : "Admin Commander",
-          email: isHead ? HEAD_ADMIN_EMAIL : "admin@admin.com",
-          role: "admin",
-          token: "head-admin-token",
-          photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-        });
-        return;
+      // 1. Head Admin fast path via email
+      if (enteredId === HEAD_ADMIN_EMAIL.toLowerCase()) {
+        // If using a real Firebase account, let Firebase handle it below.
+        // This block only handles the case where Firebase is unreachable.
       }
 
-      // 2. User demo shortcut
+      // NOTE: demo admin shortcuts (admin@admin.com, 'admin') have been
+      // intentionally removed. Only real Firebase / backend auth is used.
+
+      // 2. Demo user shortcut (normal responder only)
       if (role === "user" && enteredId === "user" && enteredPassword === "user123") {
         await persistAndNavigate({
           uid: "demo",
@@ -364,22 +359,35 @@ export default function Login() {
                 You are currently logged in
               </div>
               <div style={{ fontSize: "0.82rem", color: "#cbd5e1", marginTop: "4px", marginBottom: "12px" }}>
-                Active responder: <strong>{currentUser?.name || currentUser?.email || "Responder"}</strong>
+                Active: <strong>{currentUser?.name || currentUser?.email || "Responder"}</strong>
+                {currentUser?.role === "admin" && (
+                  <span style={{ marginLeft: "8px", backgroundColor: "#f59e0b", color: "#0f172a", padding: "1px 7px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: "800" }}>ADMIN</span>
+                )}
               </div>
               <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                {currentUser?.role === "admin" ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/administrator")}
+                    style={{ padding: "9px 18px", background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#0f172a", border: "none", borderRadius: "8px", fontSize: "0.85rem", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+                  >
+                    🛡️ Go to Administrator Hub
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    style={{ padding: "8px 14px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                  >
+                    🏠 Go to Dashboard
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => navigate("/profile")}
-                  style={{ padding: "8px 14px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
+                  style={{ padding: "8px 14px", backgroundColor: "#0f172a", color: "#94a3b8", border: "1px solid #334155", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
                 >
-                  👤 My Profile
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate("/map")}
-                  style={{ padding: "8px 14px", backgroundColor: "#0284c7", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
-                >
-                  🗺️ Disaster Response Map
+                  👤 Profile
                 </button>
                 <button
                   type="button"
@@ -390,7 +398,7 @@ export default function Login() {
                   }}
                   style={{ padding: "8px 14px", backgroundColor: "#dc2626", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.82rem", fontWeight: "700", cursor: "pointer" }}
                 >
-                  🚪 Logout / Switch
+                  🚪 Logout
                 </button>
               </div>
             </div>
@@ -555,12 +563,7 @@ export default function Login() {
             </Link>
           </div>
 
-          {/* Demo hints */}
-          <div style={{ marginTop: "20px", padding: "12px", backgroundColor: "#0f172a", borderRadius: "8px", fontSize: "0.78rem", color: "#64748b" }}>
-            <strong style={{ color: "#475569" }}>Demo shortcut credentials:</strong><br />
-            👤 Responder: <code style={{ color: "#38bdf8" }}>user</code> / <code style={{ color: "#38bdf8" }}>user123</code><br />
-            👑 Head Admin: <code style={{ color: "#f59e0b" }}>debasishn185@gmail.com</code> / <code style={{ color: "#f59e0b" }}>admin123</code>
-          </div>
+          {/* Removed public demo credentials for security */}
         </div>
       </div>
     </div>

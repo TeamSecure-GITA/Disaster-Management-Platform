@@ -8,6 +8,7 @@ import {
 import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
 import SplashScreen from "./components/SplashScreen";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import { syncPhoneKeysFromProfile } from "./utils/phoneUtils";
 
 // On every page load, re-sync phone localStorage keys from user profile.
@@ -85,8 +86,15 @@ export default function App() {
 
             <Route path="/" element={<Dashboard />} />
 
-            {/* Administrator Hub — visible/accessible only to Debasish & authorized admins */}
-            <Route path="/administrator" element={<AdministratorHub />} />
+            {/* Administrator Hub — locked to Head Admin + explicitly authorized admins ONLY */}
+            <Route
+              path="/administrator"
+              element={
+                <AdminProtectedRoute>
+                  <AdministratorHub />
+                </AdminProtectedRoute>
+              }
+            />
             <Route path="/admin" element={<Navigate to="/administrator" replace />} />
 
             <Route path="/ner-landslide-monitor" element={<NERLandslideMonitor />} />

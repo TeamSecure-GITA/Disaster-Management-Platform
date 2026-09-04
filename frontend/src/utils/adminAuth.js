@@ -5,7 +5,8 @@
 
 export const HEAD_ADMIN_EMAIL = "debasishn185@gmail.com";
 
-// Default authorized admins
+// Default authorized admins — ONLY the Head Admin is seeded by default.
+// Additional admins must be explicitly granted by debasishn185@gmail.com.
 const DEFAULT_AUTHORIZED_ADMINS = [
   {
     email: "debasishn185@gmail.com",
@@ -15,15 +16,6 @@ const DEFAULT_AUTHORIZED_ADMINS = [
     grantedAt: "2026-09-01T00:00:00.000Z",
     grantedBy: "System (Root)",
     clearance: "Level 1 (Full Root Privileges)"
-  },
-  {
-    email: "admin@admin.com",
-    name: "Demo Admin",
-    roleTitle: "System Operator",
-    isHeadAdmin: false,
-    grantedAt: "2026-09-01T00:00:00.000Z",
-    grantedBy: "System",
-    clearance: "Level 2"
   }
 ];
 
@@ -110,13 +102,20 @@ export function getAuthorizedAdmins() {
   try {
     const raw = localStorage.getItem("admin_authorized_members_v2");
     if (raw) {
-      const parsed = JSON.parse(raw);
+      let parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         // Guarantee Head Admin is always present
         if (!parsed.some(a => a.email.toLowerCase() === HEAD_ADMIN_EMAIL.toLowerCase())) {
           parsed.unshift(DEFAULT_AUTHORIZED_ADMINS[0]);
         }
-        return parsed;
+        // Purge legacy demo backdoor account from any stale cached list
+        const PURGE_LIST = ["admin@admin.com", "admin"];
+        const cleaned = parsed.filter(a => !PURGE_LIST.includes(a.email.toLowerCase()));
+        // If purge changed the list, persist the cleaned version
+        if (cleaned.length !== parsed.length) {
+          localStorage.setItem("admin_authorized_members_v2", JSON.stringify(cleaned));
+        }
+        return cleaned;
       }
     }
   } catch (e) {
@@ -129,20 +128,39 @@ export function getAuthorizedAdmins() {
 export function isAuthorizedAdmin(email) {
   if (!email) return false;
   const cleanEmail = email.trim().toLowerCase();
+  // Only Head Admin and explicitly granted admins are authorized.
+  // The old demo backdoor (admin@admin.com) is intentionally removed.
   if (cleanEmail === HEAD_ADMIN_EMAIL.toLowerCase()) return true;
-  if (cleanEmail === "admin" || cleanEmail === "admin@admin.com") return true;
 
   const admins = getAuthorizedAdmins();
   return admins.some(a => a.email.toLowerCase() === cleanEmail);
 }
 
-export function grantAdminPermission(memberEmail, roleTitle = "Administrator", grantedBy = "Debasish N. (Head Admin)") {
+/**
+ * Grant administrator permission.
+ * SECURITY: Only the Head Administrator (debasishn185@gmail.com) is
+ * allowed to add new admin members. Any call from a non-head-admin
+ * grantor is rejected.
+ */
+export function grantAdminPermission(memberEmail, roleTitle = "Administrator", grantedBy = "Debasish N. (Head Admin)", grantorEmail = "") {
+  // Enforce Head Admin exclusivity
+  const grantorClean = (grantorEmail || "").trim().toLowerCase();
+  // If a grantor email was provided and it is NOT the head admin, reject.
+  if (grantorClean && grantorClean !== HEAD_ADMIN_EMAIL.toLowerCase()) {
+    return { success: false, message: "Only the Head Administrator can grant admin permissions." };
+  }
+
   if (!memberEmail) return { success: false, message: "Email is required" };
   const cleanEmail = memberEmail.trim().toLowerCase();
-  const admins = getAuthorizedAdmins();
 
+  // Prevent granting to the head admin themselves (already permanent)
+  if (cleanEmail === HEAD_ADMIN_EMAIL.toLowerCase()) {
+    return { success: false, message: "Head Administrator is already a permanent root admin." };
+  }
+
+  const admins = getAuthorizedAdmins();
   if (admins.some(a => a.email.toLowerCase() === cleanEmail)) {
-    return { success: false, message: "User is already an authorized administrator" };
+    return { success: false, message: "This email is already an authorized administrator." };
   }
 
   const newAdmin = {
@@ -151,8 +169,8 @@ export function grantAdminPermission(memberEmail, roleTitle = "Administrator", g
     roleTitle,
     isHeadAdmin: false,
     grantedAt: new Date().toISOString(),
-    grantedBy,
-    clearance: "Level 2 (Delegated Administrator)"
+    grantedBy: grantedBy || "Debasish N. (Head Admin)",
+    clearance: "Level 2 (Delegated by Head Admin)"
   };
 
   const updated = [...admins, newAdmin];

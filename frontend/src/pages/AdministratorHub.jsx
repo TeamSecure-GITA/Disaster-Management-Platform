@@ -54,18 +54,27 @@ export default function AdministratorHub() {
 
   const handleGrantPermission = (e) => {
     e.preventDefault();
+
+    // SECURITY: Only the Head Admin can grant permissions
+    if (!isHeadAdmin(currentUser?.email)) {
+      setActionNotice("⛔ Only the Head Administrator (debasishn185@gmail.com) can grant administrator permissions.");
+      return;
+    }
+
     if (!newAdminEmail || !newAdminEmail.includes("@")) {
       setActionNotice("⚠️ Please enter a valid member email address.");
       return;
     }
 
-    const grantedByName = isHeadAdmin(currentUser?.email)
-      ? "Debasish N. (Head Administrator)"
-      : (currentUser?.name || "Authorized Admin");
-
-    const res = grantAdminPermission(newAdminEmail.trim(), newAdminRole, grantedByName);
+    const grantedByName = "Debasish N. (Head Administrator)";
+    const res = grantAdminPermission(
+      newAdminEmail.trim(),
+      newAdminRole,
+      grantedByName,
+      currentUser?.email  // grantorEmail — enforced in adminAuth.js
+    );
     if (res.success) {
-      setActionNotice(`✅ Success: Granted ${newAdminRole} permissions to ${newAdminEmail}.`);
+      setActionNotice(`✅ Success: Granted ${newAdminRole} permissions to ${newAdminEmail}. They will see the Administrator menu on next login.`);
       setNewAdminEmail("");
       refreshData();
     } else {
@@ -82,17 +91,23 @@ export default function AdministratorHub() {
   };
 
   const handleApproveRequest = (reqId) => {
-    const reviewerName = isHeadAdmin(currentUser?.email)
-      ? "Debasish N. (Head Administrator)"
-      : (currentUser?.name || "Administrator");
-
+    // Only Head Admin can approve permission requests
+    if (!isHeadAdmin(currentUser?.email)) {
+      setActionNotice("⛔ Only the Head Administrator can approve access requests.");
+      return;
+    }
+    const reviewerName = "Debasish N. (Head Administrator)";
     updatePermissionRequest(reqId, "Approved", reviewerName);
     setActionNotice(`✅ Request ${reqId} approved and administrator access provisioned.`);
     refreshData();
   };
 
   const handleRejectRequest = (reqId) => {
-    updatePermissionRequest(reqId, "Rejected", currentUser?.name || "Administrator");
+    if (!isHeadAdmin(currentUser?.email)) {
+      setActionNotice("⛔ Only the Head Administrator can reject access requests.");
+      return;
+    }
+    updatePermissionRequest(reqId, "Rejected", currentUser?.name || "Head Administrator");
     setActionNotice(`❌ Request ${reqId} rejected.`);
     refreshData();
   };
@@ -165,7 +180,11 @@ export default function AdministratorHub() {
             🛡️ Administrator Command & Permission Hub
           </h1>
           <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.9rem" }}>
-            Logged in as: <strong style={{ color: "#38bdf8" }}>{currentUser?.name || "Debasish N."}</strong> ({userEmail}) · Full permission to manage roles, inspect real-time user logins, and approve access requests.
+            Logged in as: <strong style={{ color: "#38bdf8" }}>{currentUser?.name || "Debasish N."}</strong> ({userEmail})
+            {isHead
+              ? " · Full root access: manage roles, inspect logins, approve requests."
+              : " · View-only access. Contact Head Admin to modify member list."
+            }
           </p>
         </div>
 
@@ -361,60 +380,76 @@ export default function AdministratorHub() {
       {activeTab === "members" && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
           
-          {/* Form: Add / Grant New Admin */}
-          <div style={{ backgroundColor: "rgba(15, 23, 42, 0.85)", borderRadius: "14px", border: "1px solid #334155", padding: "20px" }}>
+          {/* Form: Add / Grant New Admin — HEAD ADMIN ONLY */}
+          <div style={{ backgroundColor: "rgba(15, 23, 42, 0.85)", borderRadius: "14px", border: `1px solid ${isHead ? "#334155" : "#7c3aed"}`, padding: "20px" }}>
             <h3 style={{ margin: "0 0 8px 0", fontSize: "1.15rem", fontWeight: "700" }}>
               ➕ Grant Administrator Permission
             </h3>
-            <p style={{ color: "#94a3b8", fontSize: "0.82rem", margin: "0 0 16px 0" }}>
-              Only you ({HEAD_ADMIN_EMAIL}) or authorized admins can grant elevated permissions. Once added, this member will also see the Administrator menu.
-            </p>
 
-            <form onSubmit={handleGrantPermission}>
-              <div style={{ marginBottom: "14px" }}>
-                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px" }}>Member Email Address</label>
-                <input
-                  type="email"
-                  placeholder="e.g. officer.assam@sdrf.gov.in"
-                  value={newAdminEmail}
-                  onChange={(e) => setNewAdminEmail(e.target.value)}
-                  required
-                  style={{ width: "100%", padding: "10px 12px", backgroundColor: "#0f172a", border: "1px solid #334155", borderRadius: "8px", color: "#fff", fontSize: "0.9rem" }}
-                />
+            {!isHead ? (
+              /* Non-head admin: read-only notice */
+              <div style={{ backgroundColor: "rgba(124, 58, 237, 0.15)", border: "1px solid rgba(124, 58, 237, 0.5)", borderRadius: "10px", padding: "16px", textAlign: "center" }}>
+                <div style={{ fontSize: "1.5rem", marginBottom: "6px" }}>🔐</div>
+                <div style={{ color: "#c4b5fd", fontWeight: "700", fontSize: "0.9rem", marginBottom: "4px" }}>Head Administrator Exclusive</div>
+                <div style={{ color: "#94a3b8", fontSize: "0.82rem", lineHeight: "1.5" }}>
+                  Only <strong style={{ color: "#f59e0b" }}>debasishn185@gmail.com</strong> can add or remove administrators.
+                  You have view access to this panel because you are an authorized member.
+                </div>
               </div>
+            ) : (
+              /* Head admin: full form */
+              <>
+                <p style={{ color: "#94a3b8", fontSize: "0.82rem", margin: "0 0 16px 0" }}>
+                  Add a trusted member by email. Once added, they will see the Administrator menu after their next login.
+                </p>
 
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px" }}>Permission / Role Level</label>
-                <select
-                  value={newAdminRole}
-                  onChange={(e) => setNewAdminRole(e.target.value)}
-                  style={{ width: "100%", padding: "10px 12px", backgroundColor: "#0f172a", border: "1px solid #334155", borderRadius: "8px", color: "#fff", fontSize: "0.9rem" }}
-                >
-                  <option value="Regional Administrator">Regional Administrator (Level 2)</option>
-                  <option value="Geotechnical Control Officer">Geotechnical Control Officer</option>
-                  <option value="Incident Dispatch Lead">Incident Dispatch Lead</option>
-                  <option value="System Security Manager">System Security Manager</option>
-                </select>
-              </div>
+                <form onSubmit={handleGrantPermission}>
+                  <div style={{ marginBottom: "14px" }}>
+                    <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px" }}>Member Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="e.g. officer.assam@sdrf.gov.in"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      required
+                      style={{ width: "100%", padding: "10px 12px", backgroundColor: "#0f172a", border: "1px solid #334155", borderRadius: "8px", color: "#fff", fontSize: "0.9rem", boxSizing: "border-box" }}
+                    />
+                  </div>
 
-              <button
-                type="submit"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  backgroundColor: "#4f46e5",
-                  color: "#fff",
-                  fontWeight: "700",
-                  fontSize: "0.9rem",
-                  border: "none",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 12px rgba(79, 70, 229, 0.4)"
-                }}
-              >
-                Grant Administrator Access ➔
-              </button>
-            </form>
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px" }}>Permission / Role Level</label>
+                    <select
+                      value={newAdminRole}
+                      onChange={(e) => setNewAdminRole(e.target.value)}
+                      style={{ width: "100%", padding: "10px 12px", backgroundColor: "#0f172a", border: "1px solid #334155", borderRadius: "8px", color: "#fff", fontSize: "0.9rem" }}
+                    >
+                      <option value="Regional Administrator">Regional Administrator (Level 2)</option>
+                      <option value="Geotechnical Control Officer">Geotechnical Control Officer</option>
+                      <option value="Incident Dispatch Lead">Incident Dispatch Lead</option>
+                      <option value="System Security Manager">System Security Manager</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                      color: "#fff",
+                      fontWeight: "700",
+                      fontSize: "0.9rem",
+                      border: "none",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 12px rgba(79, 70, 229, 0.4)"
+                    }}
+                  >
+                    👑 Grant Administrator Access →
+                  </button>
+                </form>
+              </>
+            )}
           </div>
 
           {/* List of Authorized Administrators */}
@@ -422,17 +457,22 @@ export default function AdministratorHub() {
             <h3 style={{ margin: "0 0 12px 0", fontSize: "1.15rem", fontWeight: "700" }}>
               👥 Current Authorized Administrators ({authorizedAdmins.length})
             </h3>
+            {!isHead && (
+              <div style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px", fontSize: "0.8rem", color: "#fde68a" }}>
+                🔐 Only <strong>debasishn185@gmail.com</strong> can add or revoke admin members.
+              </div>
+            )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {authorizedAdmins.map((admin) => {
-                const isHead = admin.email.toLowerCase() === HEAD_ADMIN_EMAIL.toLowerCase();
+                const adminIsHead = admin.email.toLowerCase() === HEAD_ADMIN_EMAIL.toLowerCase();
 
                 return (
                   <div
                     key={admin.email}
                     style={{
                       backgroundColor: "rgba(30, 41, 59, 0.6)",
-                      border: `1px solid ${isHead ? "#f59e0b" : "#334155"}`,
+                      border: `1px solid ${adminIsHead ? "#f59e0b" : "#334155"}`,
                       borderRadius: "10px",
                       padding: "12px 14px",
                       display: "flex",
@@ -444,9 +484,14 @@ export default function AdministratorHub() {
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <strong style={{ color: "#f8fafc", fontSize: "0.95rem" }}>{admin.name || admin.email}</strong>
-                        {isHead && (
+                        {adminIsHead && (
                           <span style={{ backgroundColor: "rgba(245, 158, 11, 0.25)", color: "#fde68a", padding: "2px 6px", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "800" }}>
-                            HEAD ADMIN
+                            👑 HEAD ADMIN
+                          </span>
+                        )}
+                        {!adminIsHead && (
+                          <span style={{ backgroundColor: "rgba(99, 102, 241, 0.2)", color: "#a5b4fc", padding: "2px 6px", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "700" }}>
+                            DELEGATED
                           </span>
                         )}
                       </div>
@@ -456,11 +501,12 @@ export default function AdministratorHub() {
                       </div>
                     </div>
 
-                    {isHead ? (
+                    {adminIsHead ? (
                       <span style={{ fontSize: "0.75rem", color: "#f59e0b", fontStyle: "italic" }}>
                         Permanent Root
                       </span>
-                    ) : (
+                    ) : isHead ? (
+                      /* Only Head Admin sees Revoke button */
                       <button
                         onClick={() => handleRevokePermission(admin.email)}
                         style={{
@@ -476,6 +522,8 @@ export default function AdministratorHub() {
                       >
                         Revoke
                       </button>
+                    ) : (
+                      <span style={{ fontSize: "0.72rem", color: "#64748b", fontStyle: "italic" }}>View only</span>
                     )}
                   </div>
                 );
@@ -537,7 +585,8 @@ export default function AdministratorHub() {
                   </p>
                 </div>
 
-                {req.status === "Pending" && (
+                {/* Only Head Admin can approve/reject */}
+                {req.status === "Pending" && isHead && (
                   <div style={{ display: "flex", gap: "8px" }}>
                     <button
                       onClick={() => handleApproveRequest(req.id)}
@@ -570,6 +619,9 @@ export default function AdministratorHub() {
                       ✕ Reject
                     </button>
                   </div>
+                )}
+                {req.status === "Pending" && !isHead && (
+                  <span style={{ fontSize: "0.78rem", color: "#64748b", fontStyle: "italic", alignSelf: "center" }}>Only Head Admin can action</span>
                 )}
               </div>
             ))}
