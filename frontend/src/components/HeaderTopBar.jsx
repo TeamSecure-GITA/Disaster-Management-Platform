@@ -8,13 +8,8 @@ import {
   LogOut,
   LogIn,
   UserPlus,
-  Shield,
   MapPin,
-  Wifi,
   WifiOff,
-  Bell,
-  Radio,
-  ExternalLink,
 } from "lucide-react";
 import {
   isUserLoggedIn,
@@ -23,7 +18,7 @@ import {
   subscribeToAuthChange,
 } from "../services/authService";
 
-export default function HeaderTopBar({ onOpenNav, navOpen }) {
+export default function HeaderTopBar() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -100,54 +95,8 @@ export default function HeaderTopBar({ onOpenNav, navOpen }) {
         backdropFilter: "blur(12px)",
       }}
     >
-      {/* ─────────────── LEFT: Nav hamburger + status chips ─────────────── */}
+      {/* ─────────────── LEFT: Status chips ─────────────── */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-
-        {/* ── NAV HAMBURGER BUTTON (opens left drawer) ── */}
-        <button
-          id="nav-hamburger-btn"
-          type="button"
-          onClick={onOpenNav}
-          aria-label="Open navigation menu"
-          aria-expanded={navOpen}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "40px",
-            height: "40px",
-            backgroundColor: navOpen ? "#2563eb" : "#1e293b",
-            border: `1.5px solid ${navOpen ? "#60a5fa" : "#334155"}`,
-            borderRadius: "10px",
-            color: "#ffffff",
-            cursor: "pointer",
-            flexShrink: 0,
-            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-            boxShadow: navOpen ? "0 0 14px rgba(37,99,235,0.5)" : "none",
-          }}
-          onMouseEnter={e => { if (!navOpen) e.currentTarget.style.borderColor = "#60a5fa"; }}
-          onMouseLeave={e => { if (!navOpen) e.currentTarget.style.borderColor = "#334155"; }}
-        >
-          {/* Animated 3-bar → X icon */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "5px", width: "18px" }}>
-            <span style={{
-              display: "block", height: "2px", backgroundColor: "#fff", borderRadius: "2px",
-              transition: "all 0.25s",
-              transform: navOpen ? "rotate(45deg) translate(5px, 5px)" : "none",
-            }} />
-            <span style={{
-              display: "block", height: "2px", backgroundColor: "#fff", borderRadius: "2px",
-              transition: "all 0.25s",
-              opacity: navOpen ? 0 : 1,
-              transform: navOpen ? "scaleX(0)" : "none",
-            }} />
-            <span style={{
-              display: "block", height: "2px", backgroundColor: "#fff", borderRadius: "2px",
-              transition: "all 0.25s",
-              transform: navOpen ? "rotate(-45deg) translate(5px, -5px)" : "none",
-            }} />
-          </div>
-        </button>
 
         {/* ── LIVE STATUS CHIP ── */}
         <div
