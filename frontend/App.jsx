@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Alerts from "./pages/Alerts";
 import Map from "./pages/Map";
 import Rescue from "./pages/Rescue";

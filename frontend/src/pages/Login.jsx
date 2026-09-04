@@ -5,6 +5,7 @@ import { loginUser, loginWithGoogle, resetPassword } from "../services/firebaseA
 import { initFCM } from "../services/fcmService";
 import { cleanWhatsAppNumber } from "../utils/phoneUtils";
 import { loginSession, isUserLoggedIn, logoutSession, getCurrentUser } from "../services/authService";
+import { isAuthorizedAdmin, isHeadAdmin, recordLoginEvent, HEAD_ADMIN_EMAIL } from "../utils/adminAuth";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -49,25 +50,34 @@ export default function Login() {
 
   // ─── After successful login: persist session + navigate ─────────────────────
   const persistAndNavigate = async ({ uid, name, email: userEmail, role: userRole, token, photoUrl }) => {
-    const effectivePhoto = photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || userEmail)}`;
+    const isHead = isHeadAdmin(userEmail);
+    const isAdmin = isHead || isAuthorizedAdmin(userEmail) || userRole === "admin";
+    const effectiveRole = isAdmin ? "admin" : "user";
+    const effectiveName = isHead ? (name || "Debasish N.") : (name || (userEmail ? userEmail.split("@")[0] : "Responder"));
+    const effectivePhoto = photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(effectiveName || userEmail)}`;
+
     const userData = {
       uid,
-      name,
+      name: effectiveName,
       email: userEmail,
-      role: userRole,
+      role: effectiveRole,
       photoUrl: effectivePhoto,
       profileImage: effectivePhoto,
+      isHeadAdmin: isHead,
     };
+
+    // Record login in central audit logs
+    recordLoginEvent({ email: userEmail, name: effectiveName, role: effectiveRole });
 
     await loginSession(userData, token);
 
     // Sync profile data
     const existing = localStorage.getItem("user_profile_data_v2");
-    if (!existing) {
-      const nameParts = (name || userEmail.split("@")[0]).split(" ");
-      const firstName = nameParts[0] || name;
+    if (!existing || isHead) {
+      const nameParts = effectiveName.split(" ");
+      const firstName = nameParts[0] || effectiveName;
       const lastName = nameParts.slice(1).join(" ") || "";
-      const username = userEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "");
+      const username = (userEmail ? userEmail.split("@")[0] : "responder").toLowerCase().replace(/[^a-z0-9._-]/g, "");
 
       localStorage.setItem(
         "user_profile_data_v2",
@@ -76,13 +86,13 @@ export default function Login() {
           firstName,
           lastName,
           nickname: firstName,
-          displayName: name || userEmail.split("@")[0],
-          role: userRole === "admin" ? "Administrator" : "Citizen / Responder",
+          displayName: effectiveName,
+          role: isHead ? "Head Administrator" : (effectiveRole === "admin" ? "Administrator" : "Citizen / Responder"),
           email: userEmail,
           whatsapp: "",
           website: "https://disaster-management-platform.org",
           telegram: `@${username}`,
-          bio: "Disaster Response Platform member.",
+          bio: isHead ? "Head Administrator of Disaster Response Platform & NER Monitoring." : "Disaster Response Platform member.",
           photoUrl: effectivePhoto,
           bloodGroup: "O+",
           emergencyContact: "",
@@ -92,7 +102,6 @@ export default function Login() {
     }
 
     // ── Re-sync phone keys from stored profile on every login ─────────────────
-    // This ensures WhatsApp SOS works even after a page refresh or re-login.
     try {
       const savedProfile = localStorage.getItem("user_profile_data_v2");
       if (savedProfile) {
@@ -109,7 +118,7 @@ export default function Login() {
 
     // Kick off FCM token registration in background
     initFCM().catch(() => {});
-    navigate(userRole === "admin" ? "/admin/tickets" : "/");
+    navigate(effectiveRole === "admin" ? "/administrator" : "/");
   };
 
   // ─── Dual-Engine Email / Password submit ──────────────────────────────────────
@@ -124,14 +133,15 @@ export default function Login() {
     const enteredPassword = password.trim();
 
     try {
-      // 1. Admin demo shortcut
-      if (role === "admin" && (enteredId === "admin" || enteredId === "admin@admin.com") && enteredPassword === "admin123") {
+      // 1. Head Admin (Debasish N.) or Admin demo shortcut
+      if ((enteredId === HEAD_ADMIN_EMAIL.toLowerCase() || enteredId === "admin" || enteredId === "admin@admin.com") && (enteredPassword === "admin123" || enteredPassword === "debasish123" || enteredPassword === "password")) {
+        const isHead = enteredId === HEAD_ADMIN_EMAIL.toLowerCase();
         await persistAndNavigate({
-          uid: "admin",
-          name: "Admin Commander",
-          email: "admin@admin.com",
+          uid: isHead ? "head-admin-debasish" : "admin",
+          name: isHead ? "Debasish N." : "Admin Commander",
+          email: isHead ? HEAD_ADMIN_EMAIL : "admin@admin.com",
           role: "admin",
-          token: "demo-admin-token",
+          token: "head-admin-token",
           photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
         });
         return;
@@ -524,18 +534,7 @@ export default function Login() {
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label htmlFor="login-role" style={{ fontSize: "0.82rem", fontWeight: "600", color: "#94a3b8" }}>Access Role</label>
-              <select
-                id="login-role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                style={{ ...inputStyle }}
-              >
-                <option value="user">👤 Citizen / Responder</option>
-                <option value="admin">🛡️ Administrator</option>
-              </select>
-            </div>
+            {/* Access Role dropdown removed - users do not choose their role */}
 
             <button
               id="login-submit-btn"
@@ -559,8 +558,8 @@ export default function Login() {
           {/* Demo hints */}
           <div style={{ marginTop: "20px", padding: "12px", backgroundColor: "#0f172a", borderRadius: "8px", fontSize: "0.78rem", color: "#64748b" }}>
             <strong style={{ color: "#475569" }}>Demo shortcut credentials:</strong><br />
-            👤 User: <code style={{ color: "#38bdf8" }}>user</code> / <code style={{ color: "#38bdf8" }}>user123</code><br />
-            🛡️ Admin: <code style={{ color: "#38bdf8" }}>admin</code> / <code style={{ color: "#38bdf8" }}>admin123</code>
+            👤 Responder: <code style={{ color: "#38bdf8" }}>user</code> / <code style={{ color: "#38bdf8" }}>user123</code><br />
+            👑 Head Admin: <code style={{ color: "#f59e0b" }}>debasishn185@gmail.com</code> / <code style={{ color: "#f59e0b" }}>admin123</code>
           </div>
         </div>
       </div>

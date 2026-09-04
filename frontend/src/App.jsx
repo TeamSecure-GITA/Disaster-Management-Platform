@@ -37,6 +37,7 @@ const Register = lazy(() => import("./pages/Register"));
 const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
+const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 
 function Loading() {
   return (
@@ -83,6 +84,10 @@ export default function App() {
           <Route element={<DashboardLayout />}>
 
             <Route path="/" element={<Dashboard />} />
+
+            {/* Administrator Hub — visible/accessible only to Debasish & authorized admins */}
+            <Route path="/administrator" element={<AdministratorHub />} />
+            <Route path="/admin" element={<Navigate to="/administrator" replace />} />
 
             <Route path="/ner-landslide-monitor" element={<NERLandslideMonitor />} />
             <Route path="/landslide-monitor" element={<Navigate to="/ner-landslide-monitor" replace />} />

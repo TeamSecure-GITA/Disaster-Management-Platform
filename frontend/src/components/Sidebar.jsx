@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { isAuthorizedAdmin, isHeadAdmin } from "../utils/adminAuth";
 
 const menuItems = [
   {
@@ -100,6 +101,45 @@ const menuItems = [
 ];
 
 function Sidebar({ onNavigate }) {
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isHead, setIsHead] = React.useState(false);
+
+  React.useEffect(() => {
+    async function checkAdminStatus() {
+      try {
+        // Read offline session
+        const rawLocal = localStorage.getItem("user_session");
+        const rawProfile = localStorage.getItem("user_profile_data_v2");
+        let email = "";
+        let role = "";
+
+        if (rawLocal) {
+          try {
+            const parsed = JSON.parse(rawLocal);
+            email = parsed?.email || "";
+            role = parsed?.role || "";
+          } catch {}
+        }
+        if (!email && rawProfile) {
+          try {
+            const parsed = JSON.parse(rawProfile);
+            email = parsed?.email || "";
+            role = parsed?.role || "";
+          } catch {}
+        }
+
+        if (email) {
+          const authorized = isAuthorizedAdmin(email) || role === "admin";
+          setIsAdmin(authorized);
+          setIsHead(isHeadAdmin(email));
+        }
+      } catch (e) {
+        console.error("Sidebar auth check error:", e);
+      }
+    }
+    checkAdminStatus();
+  }, []);
+
   return (
     <aside style={{
       width: "260px",
@@ -131,7 +171,45 @@ function Sidebar({ onNavigate }) {
           Disaster Platform
         </h2>
       </div>
+
       <nav style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        {/* ── ADMINISTRATOR MENU (Hidden from all standard users) ── */}
+        {isAdmin && (
+          <NavLink
+            to="/administrator"
+            onClick={onNavigate}
+            style={({ isActive }) => ({
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              fontSize: "0.875rem",
+              color: isActive ? "#ffffff" : "#fde68a",
+              backgroundColor: isActive ? "#4f46e5" : "rgba(245, 158, 11, 0.15)",
+              border: `1.5px solid ${isActive ? "#6366f1" : "rgba(245, 158, 11, 0.4)"}`,
+              fontWeight: "700",
+              boxShadow: "0 2px 8px rgba(245, 158, 11, 0.2)",
+              marginBottom: "8px"
+            })}
+          >
+            <span style={{ fontSize: "1.1rem" }}>🛡️</span>
+            <span>Administrator</span>
+            <span style={{
+              marginLeft: "auto",
+              fontSize: "0.65rem",
+              backgroundColor: isHead ? "#f59e0b" : "#6366f1",
+              color: isHead ? "#0f172a" : "#ffffff",
+              padding: "2px 6px",
+              borderRadius: "4px",
+              fontWeight: "800"
+            }}>
+              {isHead ? "HEAD" : "ADMIN"}
+            </span>
+          </NavLink>
+        )}
+
         {menuItems.map((item, index) => (
           <NavLink
             key={index}

@@ -32,10 +32,12 @@ const registerUser = async (userData) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  const isHeadAdmin = email.toLowerCase() === "debasishn185@gmail.com";
   const user = await User.create({
     name,
     email,
     password: hashedPassword,
+    role: isHeadAdmin ? "admin" : (userData.role || "user"),
   });
 
   return buildAuthResponse(user);
@@ -64,6 +66,9 @@ const loginUser = async (email, password) => {
     throw error;
   }
 
+  if (user.email.toLowerCase() === "debasishn185@gmail.com" && user.role !== "admin") {
+    user.role = "admin";
+  }
   user.lastLogin = new Date();
   await user.save();
 
