@@ -1,27 +1,49 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { isAuthorizedAdmin, isHeadAdmin } from "../utils/adminAuth";
+import {
+  LayoutDashboard,
+  Mountain,
+  AlertTriangle,
+  Newspaper,
+  MapPin,
+  Siren,
+  Hospital,
+  Tent,
+  Users,
+  Route,
+  QrCode,
+  Bell,
+  Bot,
+  Mic,
+  Wrench,
+  BarChart3,
+  ShieldCheck,
+  TrendingUp,
+  FileWarning,
+  Shield,
+} from "lucide-react";
 
 const menuItems = [
-  { name: "Dashboard",              icon: "🏠",  path: "/" },
-  { name: "NER Landslide Monitor",  icon: "⛰️",  path: "/ner-landslide-monitor" },
-  { name: "Disaster Alerts",        icon: "🚨",  path: "/alerts" },
-  { name: "Climate Chronicle",      icon: "📰",  path: "/climate-chronicle" },
-  { name: "Disaster Response Map",  icon: "🗺️",  path: "/map" },
-  { name: "Emergency SOS",          icon: "🆘",  path: "/emergency-sos" },
-  { name: "Rescue Centers",         icon: "📍",  path: "/rescue-centers" },
-  { name: "Shelter Finder",         icon: "🏕️",  path: "/shelter-finder" },
-  { name: "Family Safety",          icon: "👥",  path: "/family-safety" },
-  { name: "Evacuation Planner",     icon: "⏱️",  path: "/evacuation-planner" },
-  { name: "QR Rescue ID",           icon: "🪪",  path: "/qr-rescue-id" },
-  { name: "Notifications",          icon: "🔔",  path: "/notifications" },
-  { name: "AI Assistant",           icon: "🤖",  path: "/ai-assistant" },
-  { name: "Voice Assistant",        icon: "🎙️",  path: "/voice-assistant" },
-  { name: "Damage Assessment",      icon: "🛠️",  path: "/damage-assessment" },
-  { name: "Analytics & Reports",    icon: "📊",  path: "/analytics-reports" },
-  { name: "Safety Guides",          icon: "🛡️",  path: "/safety-guides" },
-  { name: "Statistics",             icon: "📈",  path: "/statistics" },
-  { name: "Report Disaster",        icon: "📝",  path: "/incident-report" },
+  { name: "Dashboard",              icon: LayoutDashboard,  path: "/" },
+  { name: "NER Landslide Monitor",  icon: Mountain,         path: "/ner-landslide-monitor" },
+  { name: "Disaster Alerts",        icon: AlertTriangle,    path: "/alerts" },
+  { name: "Climate Chronicle",      icon: Newspaper,        path: "/climate-chronicle" },
+  { name: "Disaster Response Map",  icon: MapPin,           path: "/map" },
+  { name: "Emergency SOS",          icon: Siren,            path: "/emergency-sos" },
+  { name: "Rescue Centers",         icon: Hospital,         path: "/rescue-centers" },
+  { name: "Shelter Finder",         icon: Tent,             path: "/shelter-finder" },
+  { name: "Family Safety",          icon: Users,            path: "/family-safety" },
+  { name: "Evacuation Planner",     icon: Route,            path: "/evacuation-planner" },
+  { name: "QR Rescue ID",           icon: QrCode,           path: "/qr-rescue-id" },
+  { name: "Notifications",          icon: Bell,             path: "/notifications" },
+  { name: "AI Assistant",           icon: Bot,              path: "/ai-assistant" },
+  { name: "Voice Assistant",        icon: Mic,              path: "/voice-assistant" },
+  { name: "Damage Assessment",      icon: Wrench,           path: "/damage-assessment" },
+  { name: "Analytics & Reports",    icon: BarChart3,        path: "/analytics-reports" },
+  { name: "Safety Guides",          icon: ShieldCheck,      path: "/safety-guides" },
+  { name: "Statistics",             icon: TrendingUp,       path: "/statistics" },
+  { name: "Report Disaster",        icon: FileWarning,      path: "/incident-report" },
 ];
 
 function Sidebar() {
@@ -128,7 +150,7 @@ function Sidebar() {
               transition: "all 0.15s",
             })}
           >
-            <span style={{ fontSize: "1.1rem" }}>🛡️</span>
+            <Shield size={18} color="currentColor" />
             <span style={{ flex: 1 }}>Administrator</span>
             <span style={{
               fontSize: "0.62rem",
@@ -184,8 +206,8 @@ function Sidebar() {
                 e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            <span style={{ fontSize: "1.05rem", width: "22px", textAlign: "center", flexShrink: 0 }}>
-              {item.icon}
+            <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <item.icon size={18} />
             </span>
             <span>{item.name}</span>
           </NavLink>

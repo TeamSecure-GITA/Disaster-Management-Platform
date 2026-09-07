@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState } from "react";
+import React, { Suspense, lazy, useState, useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -10,6 +10,8 @@ import DashboardLayout from "./components/DashboardLayout";
 import SplashScreen from "./components/SplashScreen";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import { syncPhoneKeysFromProfile } from "./utils/phoneUtils";
+import { LanguageProvider } from "./i18n/LanguageContext";
+import { initDevToolsGuard } from "./utils/devToolsGuard";
 
 // On every page load, re-sync phone localStorage keys from user profile.
 // This guarantees WhatsApp SOS works correctly after page refresh / re-login.
@@ -65,8 +67,15 @@ function Loading() {
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
 
+  // Initialize DevTools protection (blocks inspect for non-admin users)
+  useEffect(() => {
+    const cleanup = initDevToolsGuard();
+    return cleanup;
+  }, []);
+
   return (
     <ErrorBoundary>
+      <LanguageProvider>
       {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
       <BrowserRouter>
 
@@ -146,6 +155,7 @@ export default function App() {
       </Suspense>
 
     </BrowserRouter>
+    </LanguageProvider>
     </ErrorBoundary>
   );
 }

@@ -19,6 +19,7 @@ import {
   Eye,
 } from "lucide-react";
 import localforage from "localforage";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const SETTINGS_STORAGE_KEY = "user_preferences_21";
 
@@ -47,6 +48,7 @@ const DEFAULT_SETTINGS = {
 };
 
 export default function Settings() {
+  const { setLangByDisplayName } = useLanguage();
   const [settings, setSettings] = useState(() => {
     try {
       const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
@@ -87,6 +89,10 @@ export default function Settings() {
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updated));
       localforage.setItem(SETTINGS_STORAGE_KEY, updated).catch(() => {});
     } catch {}
+    // Sync language changes to global context so all pages update
+    if (key === "language") {
+      setLangByDisplayName(value);
+    }
   };
 
   const handleSaveAll = async () => {
@@ -529,6 +535,16 @@ export default function Settings() {
               <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
               <option value="Bengali">Bengali (বাংলা)</option>
               <option value="Spanish">Spanish (Español)</option>
+              <option disabled>── North-Eastern India ──</option>
+              <option value="Assamese">Assamese (অসমীয়া)</option>
+              <option value="Manipuri">Manipuri (মৈতৈলোন্)</option>
+              <option value="Mizo">Mizo (Mizo ṭawng)</option>
+              <option value="Bodo">Bodo (बड़ो)</option>
+              <option value="Khasi">Khasi (Ka Ktien Khasi)</option>
+              <option value="Nagamese">Nagamese (Nagamese Creole)</option>
+              <option value="Nepali">Nepali (नेपाली)</option>
+              <option value="Garo">Garo (Achik)</option>
+              <option value="Santali">Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
             </select>
           </div>
         </div>

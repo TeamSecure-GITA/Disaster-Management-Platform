@@ -12,6 +12,7 @@ const { errorHandler } = require("./middleware/errorMiddleware");
 const requestLogger = require("./middleware/requestLogger");
 const { generalLimiter } = require("./middleware/rateLimitMiddleware");
 const { protect } = require("./middleware/authMiddleware");
+const { firewallMiddleware } = require("./middleware/firewallMiddleware");
 
 // Existing routes
 const authRoute = require("./routes/authRoute");
@@ -54,6 +55,7 @@ app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : false);
 
 app.use(cors(corsOptions));
 app.use(helmet());
+app.use(firewallMiddleware);
 app.use(requestLogger);
 app.use(generalLimiter);
 
