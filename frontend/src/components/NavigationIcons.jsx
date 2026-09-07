@@ -77,15 +77,38 @@ export function IconClimate({ size = 22 }) {
 
 export function IconMap({ size = 22 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 4px rgba(16,185,129,0.35))" }}>
-      <polygon points="2 6 8 3 16 7 22 4 22 18 16 21 8 17 2 20" fill="url(#map-folds)" />
-      <polygon points="8 3 16 7 16 21 8 17" fill="url(#map-center)" />
-      <circle cx="12" cy="10" r="3.2" fill="#ef4444" />
-      <circle cx="12" cy="10" r="1.4" fill="#ffffff" />
-      <path d="M12 13.2v2" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 3px 6px rgba(14,165,233,0.5))" }}>
+      {/* Tactical Map Grid Tile */}
+      <polygon points="2 6 8.5 3 15.5 6.5 22 3.5 22 17.5 15.5 20.5 8.5 17 2 20" fill="url(#map-tactical-mesh)" />
+      
+      {/* Topographic Relief Lines */}
+      <path d="M2 11c3.5-1.5 5.5.5 6.5 0s4-2 7 0 4.5-.5 6.5-1" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" fill="none" />
+      <path d="M2 15c3-1 6 1 6.5.5s4-1.5 7 .5 4.5 0 6.5-.5" stroke="#34d399" strokeWidth="0.8" opacity="0.8" fill="none" />
+      
+      {/* Radar Target Rings */}
+      <circle cx="12" cy="11.5" r="5" stroke="#38bdf8" strokeWidth="0.9" strokeDasharray="1.5 1.5" opacity="0.75" />
+      <circle cx="12" cy="11.5" r="2.2" stroke="#f43f5e" strokeWidth="0.8" opacity="0.6" />
+
+      {/* 3D Ruby Geo-Pin with Pulsing Drop Shadow */}
+      <ellipse cx="12" cy="16.2" rx="2.5" ry="1" fill="#000000" opacity="0.35" />
+      <path d="M12 4.5C9.8 4.5 8 6.3 8 8.5c0 3.2 4 7.2 4 7.2s4-4 4-7.2c0-2.2-1.8-4-4-4z" fill="url(#pin-ruby-3d)" />
+      
+      {/* Glowing Inner Core & Gloss */}
+      <circle cx="12" cy="8.5" r="1.6" fill="#ffffff" />
+      <circle cx="12" cy="8.5" r="0.8" fill="#fbbf24" />
+      <path d="M10 6.2a2 2 0 0 1 2-1" stroke="#ffffff" strokeWidth="0.6" strokeLinecap="round" opacity="0.8" />
+
       <defs>
-        <linearGradient id="map-folds" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#10b981"/><stop offset="100%" stopColor="#047857"/></linearGradient>
-        <linearGradient id="map-center" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#34d399"/><stop offset="100%" stopColor="#059669"/></linearGradient>
+        <linearGradient id="map-tactical-mesh" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#0284c7" />
+          <stop offset="50%" stopColor="#0f766e" />
+          <stop offset="100%" stopColor="#064e3b" />
+        </linearGradient>
+        <linearGradient id="pin-ruby-3d" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ff2a55" />
+          <stop offset="60%" stopColor="#e11d48" />
+          <stop offset="100%" stopColor="#9f1239" />
+        </linearGradient>
       </defs>
     </svg>
   );
@@ -93,14 +116,42 @@ export function IconMap({ size = 22 }) {
 
 export function IconSos({ size = 22 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 7px rgba(239,68,68,0.6))" }}>
-      <circle cx="12" cy="12" r="9.5" fill="url(#sos-outer)" />
-      <circle cx="12" cy="12" r="6.2" fill="#ffffff" />
-      <circle cx="12" cy="12" r="4.6" fill="url(#sos-inner)" />
-      <path d="M11 7l-2 5h3l-1 5 4-6h-3l2-4h-3z" fill="#fef08a" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 3px 8px rgba(239,68,68,0.7))" }}>
+      {/* Radial Distress Signal Waves */}
+      <path d="M2.5 8.5C1.5 10.5 1.5 13.5 2.5 15.5" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" opacity="0.85" />
+      <path d="M21.5 8.5c1 2 1 5 0 7" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" opacity="0.85" />
+      
+      {/* Outer Rotating Hazard Beacon Ring */}
+      <rect x="3.5" y="3.5" width="17" height="17" rx="6" fill="url(#sos-beacon-grad)" />
+      <rect x="4.2" y="4.2" width="15.6" height="15.6" rx="5.2" stroke="#fef08a" strokeWidth="0.8" opacity="0.7" />
+      
+      {/* Emergency Beacon Core Shield */}
+      <rect x="5.2" y="6" width="13.6" height="12" rx="3.5" fill="#0f172a" />
+      
+      {/* Bold Crisp "SOS" Lettering with Emergency Yellow Dot */}
+      <text
+        x="12"
+        y="14.2"
+        textAnchor="middle"
+        fill="#ffffff"
+        fontWeight="900"
+        fontSize="6.2"
+        fontFamily="system-ui, -apple-system, sans-serif"
+        letterSpacing="0.6"
+      >
+        SOS
+      </text>
+
+      {/* Beacon Light Alert Flash on Top */}
+      <circle cx="12" cy="3.5" r="1.8" fill="#facc15" />
+      <circle cx="12" cy="3.5" r="0.9" fill="#ffffff" />
+      
       <defs>
-        <linearGradient id="sos-outer" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#dc2626"/><stop offset="100%" stopColor="#7f1d1d"/></linearGradient>
-        <linearGradient id="sos-inner" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ef4444"/><stop offset="100%" stopColor="#b91c1c"/></linearGradient>
+        <linearGradient id="sos-beacon-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ff1e1e" />
+          <stop offset="50%" stopColor="#dc2626" />
+          <stop offset="100%" stopColor="#7f1d1d" />
+        </linearGradient>
       </defs>
     </svg>
   );
@@ -313,3 +364,41 @@ export function IconAdmin({ size = 22 }) {
     </svg>
   );
 }
+
+export function IconFaq({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 3px 6px rgba(139,92,246,0.55))" }}>
+      {/* Intelligent AI / Knowledge Rounded Badge */}
+      <rect x="2.5" y="3.5" width="19" height="17" rx="5.5" fill="url(#faq-bg-grad)" />
+      <rect x="3.2" y="4.2" width="17.6" height="15.6" rx="4.8" stroke="#a78bfa" strokeWidth="0.8" opacity="0.6" />
+      
+      {/* Bold Crisp "FAQ" Typography */}
+      <text
+        x="12"
+        y="14.6"
+        textAnchor="middle"
+        fill="#ffffff"
+        fontWeight="900"
+        fontSize="6.8"
+        fontFamily="system-ui, -apple-system, sans-serif"
+        letterSpacing="0.6"
+      >
+        FAQ
+      </text>
+
+      {/* Sparkling Knowledge Star (Glitter AI Sparkle) */}
+      <circle cx="18" cy="5.5" r="1.5" fill="#38bdf8" />
+      <circle cx="18" cy="5.5" r="0.7" fill="#ffffff" />
+      <circle cx="6" cy="18.5" r="1.2" fill="#fbbf24" />
+
+      <defs>
+        <linearGradient id="faq-bg-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#8b5cf6" />
+          <stop offset="60%" stopColor="#6366f1" />
+          <stop offset="100%" stopColor="#4338ca" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+

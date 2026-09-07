@@ -41,6 +41,7 @@ const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
+const FAQ = lazy(() => import("./pages/FAQ"));
 
 function Loading() {
   return (
@@ -142,6 +143,7 @@ export default function App() {
             <Route path="/climate-chronicle" element={<ClimateChronicle />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/incident-report" element={<IncidentReport />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
 

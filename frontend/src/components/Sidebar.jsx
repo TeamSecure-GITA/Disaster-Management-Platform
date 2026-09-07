@@ -30,6 +30,7 @@ import {
   IconStatistics,
   IconReport,
   IconAdmin,
+  IconFaq,
 } from "./NavigationIcons";
 
 const menuItems = [
@@ -52,6 +53,7 @@ const menuItems = [
   { key: "nav_safety",             fallback: "Safety Guides",          icon: IconSafety,        path: "/safety-guides" },
   { key: "nav_statistics",         fallback: "Statistics",             icon: IconStatistics,    path: "/statistics" },
   { key: "nav_incident",           fallback: "Report Disaster",        icon: IconReport,        path: "/incident-report" },
+  { key: "nav_faq",                fallback: "FAQ",                    icon: IconFaq,           path: "/faq" },
 ];
 
 function Sidebar() {

@@ -321,7 +321,6 @@ export default function Settings() {
                 {[
                   { id: "satellite", title: "🛰️ Satellite Imagery", desc: "High-resolution satellite topography (Esri World Imagery)" },
                   { id: "streets", title: "🗺️ Standard Streets", desc: "OpenStreetMap terrain & roads (offline pre-cached in PWA)" },
-                  { id: "dark", title: "🌙 Dark Tactical", desc: "CartoDB Dark Matter with high-contrast emergency overlays" },
                 ].map((lyr) => (
                   <button
                     key={lyr.id}
