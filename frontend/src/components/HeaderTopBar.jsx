@@ -22,7 +22,7 @@ import {
 } from "../services/authService";
 import { subscribeToDisasterAlerts } from "../services/socketService";
 
-export default function HeaderTopBar() {
+export default function HeaderTopBar({ onToggleSidebar }) {
   const { langDisplayName, setLangByDisplayName, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -173,6 +173,7 @@ export default function HeaderTopBar() {
 
   return (
     <header
+      className="header-container"
       style={{
         display: "flex",
         alignItems: "center",
@@ -187,8 +188,31 @@ export default function HeaderTopBar() {
         backdropFilter: "blur(12px)",
       }}
     >
-      {/* ─────────────── LEFT: Status chips ─────────────── */}
+      {/* ─────────────── LEFT: Drawer Toggle + Status chips ─────────────── */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+
+        {/* ── MOBILE SIDEBAR DRAWER TOGGLE ── */}
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label="Toggle navigation menu"
+          className="mobile-sidebar-toggle-btn"
+          style={{
+            display: "none",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "36px",
+            height: "36px",
+            backgroundColor: "#1e293b",
+            border: "1px solid #334155",
+            borderRadius: "8px",
+            color: "#38bdf8",
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          <Menu size={20} />
+        </button>
 
         {/* ── LIVE STATUS CHIP ── */}
         <div
@@ -203,25 +227,29 @@ export default function HeaderTopBar() {
             fontSize: "0.75rem",
             fontWeight: "700",
             color: isOnline ? "#34d399" : "#fca5a5",
+            flexShrink: 0,
           }}
           title={isOnline ? "Connected to Disaster Alert Network" : "PWA Offline Mode"}
         >
           {isOnline ? (
             <>
-              <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981" }} />
-              <span>LIVE SATELLITE NETWORK</span>
+              <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981", flexShrink: 0 }} />
+              <span className="header-status-chip-text">LIVE SATELLITE NETWORK</span>
+              <span className="header-status-chip-mobile" style={{ display: "none" }}>LIVE</span>
             </>
           ) : (
             <>
               <WifiOff size={12} color="#ef4444" />
-              <span>OFFLINE PWA MODE</span>
+              <span className="header-status-chip-text">OFFLINE PWA MODE</span>
+              <span className="header-status-chip-mobile" style={{ display: "none" }}>OFFLINE</span>
             </>
           )}
         </div>
 
-        {/* ── MAP SHORTCUT ── */}
+        {/* ── MAP SHORTCUT (Hidden on small mobile) ── */}
         <Link
           to="/map"
+          className="header-map-shortcut"
           style={{
             display: "flex",
             alignItems: "center",
@@ -234,6 +262,7 @@ export default function HeaderTopBar() {
             padding: "4px 10px",
             borderRadius: "6px",
             border: "1px solid rgba(56, 189, 248, 0.25)",
+            flexShrink: 0,
           }}
         >
           <span>🗺️</span>
@@ -247,15 +276,17 @@ export default function HeaderTopBar() {
             alignItems: "center",
             gap: "6px",
             backgroundColor: "#1e293b",
-            padding: "4px 10px",
+            padding: "4px 8px",
             borderRadius: "6px",
             border: "1px solid #334155",
+            flexShrink: 0,
           }}
         >
           <Globe size={14} color="#38bdf8" />
           <select
             value={langDisplayName}
             onChange={(e) => setLangByDisplayName(e.target.value)}
+            className="header-lang-select"
             style={{
               backgroundColor: "transparent",
               color: "#f8fafc",
@@ -560,6 +591,7 @@ export default function HeaderTopBar() {
               top: "48px",
               right: 0,
               width: "300px",
+              maxWidth: "calc(100vw - 24px)",
               backgroundColor: "#0f172a",
               border: "1px solid #334155",
               borderRadius: "14px",

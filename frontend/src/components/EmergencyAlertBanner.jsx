@@ -111,7 +111,7 @@ export default function EmergencyAlertBanner() {
         }}
       >
         {/* Left: Icon & Alert Agency Badge */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 500px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 280px", minWidth: 0 }}>
           <div
             style={{
               backgroundColor: "rgba(255,255,255,0.2)",
@@ -127,7 +127,7 @@ export default function EmergencyAlertBanner() {
           >
             🚨
           </div>
-          <div>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <span
                 style={{
@@ -160,14 +160,14 @@ export default function EmergencyAlertBanner() {
                 {activeAlert.affectedAreas?.[0] || activeAlert.country || "Active Region"}
               </span>
             </div>
-            <div style={{ fontWeight: "600", fontSize: "0.92rem", marginTop: "3px", textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}>
+            <div style={{ fontWeight: "600", fontSize: "0.92rem", marginTop: "3px", textShadow: "0 1px 2px rgba(0,0,0,0.4)", wordBreak: "break-word" }}>
               {activeAlert.title}
             </div>
           </div>
         </div>
 
         {/* Right: Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <a
             href={officialUrl}
             target="_blank"

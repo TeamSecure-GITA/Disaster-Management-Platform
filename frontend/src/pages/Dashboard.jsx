@@ -400,7 +400,7 @@ export default function Dashboard() {
 
   // ─── RENDER ───────────────────────────────────────────────────────────────
   return (
-    <div style={{ backgroundColor: "#0b1329", minHeight: "100vh", color: "#f8fafc", padding: "24px" }}>
+    <div style={{ backgroundColor: "#0b1329", minHeight: "100%", color: "#f8fafc", padding: "clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
@@ -547,14 +547,14 @@ export default function Dashboard() {
 
         {/* ── Offline Warning ─────────────────────────────────────────────── */}
         {!isOnline && (
-          <div style={{ backgroundColor: "#854d0e", color: "#fef08a", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between" }}>
+          <div style={{ backgroundColor: "#854d0e", color: "#fef08a", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
             <span>{t.offlineMode}</span>
             <span>{t.unsyncedReports}: {pendingSyncCount}</span>
           </div>
         )}
 
         {/* ── SLA Callback Banner ─────────────────────────────────────────── */}
-        <div style={{ backgroundColor: "#064e3b", border: "1px solid #059669", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ backgroundColor: "#064e3b", border: "1px solid #059669", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
           <div>
             <strong style={{ color: "#34d399" }}>{t.slaActive}</strong>
             <p style={{ margin: "2px 0 0 0", fontSize: "0.8rem", color: "#a7f3d0" }}>{t.slaDesc}</p>
@@ -568,7 +568,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── SOS Beacon Banner ───────────────────────────────────────────── */}
-        <div style={{ backgroundColor: "#7f1d1d", border: "1px solid #dc2626", padding: "16px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ backgroundColor: "#7f1d1d", border: "1px solid #dc2626", padding: "16px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
           <div>
             <strong style={{ color: "#fca5a5", fontSize: "1.05rem" }}>{t.dangerTitle}</strong>
             <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#fecaca" }}>{t.dangerDesc}</p>
@@ -633,8 +633,8 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* ── Quick Stats Grid ────────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+        {/* ── Quick Stats Grid (Responsive 4 -> 2 -> 1) ────────────────────── */}
+        <div className="responsive-stat-grid">
           {[
             { label: t.activeAlerts, value: "3 High Priority", color: "#f87171" },
             { label: t.rescueOps, value: "12 Ongoing", color: "#60a5fa" },
@@ -649,7 +649,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── Live Weather (Open-Meteo API) ───────────────────────────────── */}
-        <div style={{ backgroundColor: "#1e293b", border: "1px solid #0284c7", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ backgroundColor: "#1e293b", border: "1px solid #0284c7", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
           <div>
             {weatherLoading ? (
               <strong style={{ color: "#38bdf8" }}>⏳ {t.weatherLoading}</strong>
@@ -672,8 +672,8 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* ── Live Feed & Quick Actions ────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px" }}>
+        {/* ── Live Feed & Quick Actions (Responsive 2fr 1fr -> 1 col) ─────── */}
+        <div className="responsive-split-grid">
 
           {/* Live Incident Feed */}
           <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
@@ -717,8 +717,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Safety Radar & Offline SMS ──────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+        {/* ── Safety Radar & Offline SMS (Responsive 1fr 1fr -> 1 col) ───── */}
+        <div className="responsive-two-col-grid">
           <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
             <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>{t.familySafety}</h3>
             <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>{t.familySafetyDesc}</p>
@@ -756,8 +756,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Active Shelters & Survival Kit ──────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+        {/* ── Active Shelters & Survival Kit (Responsive 1fr 1fr -> 1 col) ── */}
+        <div className="responsive-two-col-grid">
           <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
             <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>{t.activeShelters}</h3>
             {[

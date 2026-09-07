@@ -56,7 +56,7 @@ const menuItems = [
   { key: "nav_faq",                fallback: "FAQ",                    icon: IconFaq,           path: "/faq" },
 ];
 
-function Sidebar() {
+function Sidebar({ isOpen = false, onClose }) {
   const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [isHead, setIsHead]   = React.useState(false);
@@ -83,9 +83,16 @@ function Sidebar() {
     }
   }, []);
 
+  const handleNavClick = () => {
+    if (typeof onClose === "function") {
+      onClose();
+    }
+  };
+
   return (
     <aside
       aria-label="Main Navigation"
+      className={`app-sidebar-responsive ${isOpen ? "drawer-open" : ""}`}
       style={{
         width: "260px",
         minWidth: "260px",
@@ -129,14 +136,39 @@ function Sidebar() {
             flexShrink: 0,
           }}
         />
-        <div>
-          <div style={{ fontWeight: "800", fontSize: "0.95rem", color: "#38bdf8", lineHeight: "1.2", letterSpacing: "-0.01em" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: "800", fontSize: "0.95rem", color: "#38bdf8", lineHeight: "1.2", letterSpacing: "-0.01em", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
             {t.app_name_short || "Disaster Platform"}
           </div>
           <div style={{ fontSize: "0.68rem", color: "#64748b", fontWeight: "600", letterSpacing: "0.03em" }}>
             Emergency Response System
           </div>
         </div>
+
+        {/* Mobile close button */}
+        <button
+          type="button"
+          className="mobile-drawer-close-btn"
+          onClick={handleNavClick}
+          aria-label="Close navigation"
+          style={{
+            background: "rgba(255, 255, 255, 0.08)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            color: "#94a3b8",
+            borderRadius: "8px",
+            width: "32px",
+            height: "32px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            fontSize: "1rem",
+            marginLeft: "auto",
+            flexShrink: 0,
+          }}
+        >
+          ✕
+        </button>
       </div>
 
       {/* ── Navigation Links ─────────────────────── */}
@@ -146,6 +178,7 @@ function Sidebar() {
         {isAdmin && (
           <NavLink
             to="/administrator"
+            onClick={handleNavClick}
             style={({ isActive }) => ({
               display: "flex",
               alignItems: "center",
@@ -198,6 +231,7 @@ function Sidebar() {
             key={item.path}
             to={item.path}
             end={item.path === "/"}
+            onClick={handleNavClick}
             style={({ isActive }) => ({
               display: "flex",
               alignItems: "center",

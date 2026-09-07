@@ -593,8 +593,8 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* ── Content Grid: 2 Columns ── */}
-        <div style={styles.contentGrid}>
+        {/* ── Content Grid: Responsive 2 Columns -> 1 Column ── */}
+        <div className="responsive-profile-grid">
           {/* ════════ LEFT COLUMN: Account Management ════════ */}
           <div style={styles.leftCol}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
@@ -701,7 +701,7 @@ export default function Profile() {
               <form onSubmit={handleSaveProfile}>
                 <h3 style={styles.sectionHeading}>👤 Profile Information & Identity</h3>
 
-                <div style={styles.twoColGrid}>
+                <div className="responsive-two-col-grid" style={{ gap: "16px 20px" }}>
                   <div style={styles.fieldGroup}>
                     <label style={styles.label}>Username</label>
                     <input
@@ -785,7 +785,7 @@ export default function Profile() {
                   Contact & Dispatch Details
                 </h3>
 
-                <div style={styles.twoColGrid}>
+                <div className="responsive-two-col-grid" style={{ gap: "16px 20px" }}>
                   <div style={styles.fieldGroup}>
                     <label style={styles.label}>Email (required)</label>
                     <input
@@ -889,7 +889,7 @@ export default function Profile() {
                   Critical life-safety information used by emergency medical technicians and rescue dispatch teams during triage.
                 </p>
 
-                <div style={styles.twoColGrid}>
+                <div className="responsive-two-col-grid" style={{ gap: "16px 20px" }}>
                   <div style={styles.fieldGroup}>
                     <label style={styles.label}>Blood Group</label>
                     <select
@@ -1381,11 +1381,7 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 2px 6px rgba(29, 78, 216, 0.2)",
   },
-  contentGrid: {
-    display: "grid",
-    gridTemplateColumns: "300px 1fr",
-    gap: "36px",
-  },
+  contentGrid: {},
   leftCol: {
     display: "flex",
     flexDirection: "column",
@@ -1492,11 +1488,7 @@ const styles = {
     fontSize: "0.88rem",
     cursor: "pointer",
   },
-  twoColGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "16px 20px",
-  },
+  twoColGrid: {},
   fieldGroup: {
     display: "flex",
     flexDirection: "column",

@@ -325,7 +325,7 @@ export default function Login() {
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100vw", backgroundColor: "#0f172a", padding: "20px", boxSizing: "border-box" }}>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", width: "100%", maxWidth: "100vw", backgroundColor: "#0f172a", padding: "clamp(12px, 3vw, 20px)", boxSizing: "border-box" }}>
       <div style={{ width: "100%", maxWidth: "440px", backgroundColor: "#1e293b", borderRadius: "16px", boxShadow: "0 25px 50px rgba(0,0,0,0.6)", color: "#fff", overflow: "hidden" }}>
 
         {/* Header */}

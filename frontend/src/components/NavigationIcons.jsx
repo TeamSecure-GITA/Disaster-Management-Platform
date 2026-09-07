@@ -116,41 +116,45 @@ export function IconMap({ size = 22 }) {
 
 export function IconSos({ size = 22 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 3px 8px rgba(239,68,68,0.7))" }}>
-      {/* Radial Distress Signal Waves */}
-      <path d="M2.5 8.5C1.5 10.5 1.5 13.5 2.5 15.5" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" opacity="0.85" />
-      <path d="M21.5 8.5c1 2 1 5 0 7" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" opacity="0.85" />
-      
-      {/* Outer Rotating Hazard Beacon Ring */}
-      <rect x="3.5" y="3.5" width="17" height="17" rx="6" fill="url(#sos-beacon-grad)" />
-      <rect x="4.2" y="4.2" width="15.6" height="15.6" rx="5.2" stroke="#fef08a" strokeWidth="0.8" opacity="0.7" />
-      
-      {/* Emergency Beacon Core Shield */}
-      <rect x="5.2" y="6" width="13.6" height="12" rx="3.5" fill="#0f172a" />
-      
-      {/* Bold Crisp "SOS" Lettering with Emergency Yellow Dot */}
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(225,29,72,0.65))" }}>
+      {/* ── Emergency Red Phone Handset (Bottom-Left) ── */}
+      <path
+        d="M2.5 12.6c1.6 3.4 4.3 6.1 7.7 7.7l2.5-2.5c.4-.4 1-.5 1.5-.3 1.5.5 3.1.8 4.8.8.6 0 1.2-.5 1.2-1.2v-2.8c0-.6-.5-1.2-1.2-1.2-1.2 0-2.4-.2-3.5-.6-.5-.2-1.1 0-1.5.4l-1.9 1.9c-2.4-1.3-4.3-3.2-5.6-5.6l1.9-1.9c.4-.4.5-1 .4-1.5-.4-1.1-.6-2.3-.6-3.5 0-.6-.5-1.2-1.2-1.2H4c-.6 0-1.2.5-1.2 1.2 0 1.7.3 3.3.8 4.8.2.5.1 1.1-.3 1.5L2.5 12.6z"
+        fill="url(#sos-red-fill)"
+      />
+
+      {/* ── Red Circular SOS Speech Callout Bubble (Top-Right) ── */}
+      <path
+        d="M14.2 1.8c4.3 0 7.8 3.4 7.8 7.6 0 4.2-3.5 7.6-7.8 7.6-1.4 0-2.8-.4-3.9-1.1l-3.8 2.3 1.1-3.6c-1-1.3-1.6-3-1.6-4.8 0-4.2 3.5-7.6 7.8-7.6z"
+        fill="url(#sos-red-fill)"
+      />
+
+      {/* ── Top Glossy Reflection Arc ── */}
+      <path
+        d="M10.8 4.2c2.2-1.3 5.4-1.1 7.3.3.3.2.2.6-.2.4-1.7-.8-4.4-.9-6.7.1-.4.2-.5-.1-.4-.4z"
+        fill="#ffffff"
+        opacity="0.9"
+      />
+
+      {/* ── Bold White "SOS" Text ── */}
       <text
-        x="12"
-        y="14.2"
+        x="14.2"
+        y="11.8"
         textAnchor="middle"
         fill="#ffffff"
         fontWeight="900"
-        fontSize="6.2"
+        fontSize="5.2"
         fontFamily="system-ui, -apple-system, sans-serif"
-        letterSpacing="0.6"
+        letterSpacing="0.4"
       >
         SOS
       </text>
 
-      {/* Beacon Light Alert Flash on Top */}
-      <circle cx="12" cy="3.5" r="1.8" fill="#facc15" />
-      <circle cx="12" cy="3.5" r="0.9" fill="#ffffff" />
-      
       <defs>
-        <linearGradient id="sos-beacon-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#ff1e1e" />
-          <stop offset="50%" stopColor="#dc2626" />
-          <stop offset="100%" stopColor="#7f1d1d" />
+        <linearGradient id="sos-red-fill" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ff2442" />
+          <stop offset="50%" stopColor="#e11d48" />
+          <stop offset="100%" stopColor="#be123c" />
         </linearGradient>
       </defs>
     </svg>

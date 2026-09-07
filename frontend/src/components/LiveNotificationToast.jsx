@@ -45,10 +45,10 @@ export default function LiveNotificationToast() {
       style={{
         position: "fixed",
         top: "70px",
-        right: "24px",
+        right: "16px",
         zIndex: 99999,
-        maxWidth: "420px",
-        width: "calc(100vw - 48px)",
+        maxWidth: "min(420px, calc(100vw - 32px))",
+        width: "100%",
         backgroundColor: "#0f172a",
         border: `2px solid ${borderColor}`,
         borderRadius: "14px",
