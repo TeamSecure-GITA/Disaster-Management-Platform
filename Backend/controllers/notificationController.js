@@ -15,6 +15,8 @@ const createNotification = async (req, res, next) => {
   }
 };
 
+const Alert = require("../models/Alert");
+
 const getNotifications = async (req, res, next) => {
   try {
     const requestedUserId = req.params.userId;
@@ -27,14 +29,36 @@ const getNotifications = async (req, res, next) => {
       });
     }
 
-    const userId = requestedUserId || req.user?._id;
+    const userId = requestedUserId || req.user?._id || null;
 
-    const notifications =
-      await notificationService.getUserNotifications(userId);
+    let notifications = await notificationService.getUserNotifications(userId);
+
+    // If notifications collection is empty or fresh, populate from live active alerts
+    if (!notifications || notifications.length === 0) {
+      const activeAlerts = await Alert.find({ status: "active" })
+        .sort({ createdAt: -1 })
+        .limit(25)
+        .lean();
+
+      if (activeAlerts && activeAlerts.length > 0) {
+        notifications = activeAlerts.map((a) => ({
+          _id: a._id,
+          title: a.title,
+          message: a.message,
+          type: "disaster_alert",
+          priority: a.severity || "high",
+          sourceAgency: a.sourceAgency || "Official Disaster Management Portal",
+          sourceUrl: a.sourceUrl || "https://sachet.ndma.gov.in/",
+          isBroadcast: true,
+          isRead: false,
+          createdAt: a.createdAt,
+        }));
+      }
+    }
 
     res.status(200).json({
       success: true,
-      data: notifications,
+      data: notifications || [],
     });
   } catch (error) {
     next(error);

@@ -1,5 +1,4 @@
 const express = require("express");
-
 const {
   createNotification,
   getNotifications,
@@ -11,23 +10,50 @@ const {
   createNotificationValidator,
 } = require("../validators/notificationValidator");
 const { validate } = require("../middleware/validationMiddleware");
+const { verifyToken } = require("../utils/generateToken");
+const User = require("../models/User");
 
 const router = express.Router();
 
-router.use(protect);
+/**
+ * Optional auth: populates req.user if a valid Bearer token is passed,
+ * but does not reject unauthenticated/guest users so live alerts & broadcast
+ * notifications can be fetched by anyone without 401 error.
+ */
+const optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      if (token && token !== "guest" && token !== "null" && token !== "undefined") {
+        const decoded = verifyToken(token);
+        if (decoded && (decoded.id || decoded._id)) {
+          const userId = decoded.id || decoded._id;
+          req.user = await User.findById(userId).select("-password");
+        }
+      }
+    }
+  } catch (_) {
+    // Ignore invalid token and continue as guest
+  }
+  next();
+};
 
-router.post("/", operationsOnly, createNotificationValidator, validate, createNotification);
+// ── Public / Broadcast & User Notifications ──────────────────────
+router.get("/", optionalAuth, getNotifications);
+router.get("/mine", optionalAuth, getNotifications);
+router.get("/user/:userId", optionalAuth, getNotifications);
 
-router.get(
-  "/user/:userId",
-  getNotifications
+// ── Protected Actions ────────────────────────────────────────────
+router.post(
+  "/",
+  protect,
+  operationsOnly,
+  createNotificationValidator,
+  validate,
+  createNotification
 );
 
-router.get("/mine", getNotifications);
-
-router.patch(
-  "/:id/read",
-  markNotificationAsRead
-);
+router.patch("/:id/read", protect, markNotificationAsRead);
 
 module.exports = router;

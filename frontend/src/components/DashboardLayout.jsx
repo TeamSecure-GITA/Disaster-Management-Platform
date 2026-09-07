@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import HeaderTopBar from "./HeaderTopBar";
 import EmergencyAlertBanner from "./EmergencyAlertBanner";
+import LiveNotificationToast from "./LiveNotificationToast";
 
 export default function DashboardLayout() {
   return (
@@ -14,6 +15,7 @@ export default function DashboardLayout() {
       <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
         <HeaderTopBar />
         <EmergencyAlertBanner />
+        <LiveNotificationToast />
         <main style={{ flex: 1, overflowY: "auto", padding: "24px", color: "#f8fafc" }}>
           <Outlet />
         </main>

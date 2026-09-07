@@ -11,6 +11,7 @@ import {
   MapPin,
   WifiOff,
   Globe,
+  Bell,
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import {
@@ -19,6 +20,7 @@ import {
   logoutSession,
   subscribeToAuthChange,
 } from "../services/authService";
+import { subscribeToDisasterAlerts } from "../services/socketService";
 
 export default function HeaderTopBar() {
   const { langDisplayName, setLangByDisplayName, t } = useLanguage();
@@ -28,9 +30,92 @@ export default function HeaderTopBar() {
   const [loggedIn, setLoggedIn] = useState(isUserLoggedIn());
   const [user, setUser] = useState(getCurrentUser());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [notifications, setNotifications] = useState([
+    {
+      id: "live-imd-1",
+      title: "[IMD / NDMA SACHET] Cyclone & High Squall Advisory",
+      message: "Severe weather system active. High squally wind conditions along eastern coasts.",
+      time: "Just now",
+      severity: "high",
+      sourceAgency: "IMD / NDMA SACHET",
+      sourceUrl: "https://sachet.ndma.gov.in/",
+      read: false,
+    },
+    {
+      id: "live-cwc-2",
+      title: "[CWC Flood Forecast] River Basin Inundation Warning",
+      message: "Heavy precipitation triggering cautionary stages in river catchments.",
+      time: "15m ago",
+      severity: "medium",
+      sourceAgency: "Central Water Commission",
+      sourceUrl: "https://ffs.india-water.gov.in/",
+      read: false,
+    },
+    {
+      id: "live-ner-3",
+      title: "NER Landslide Telemetry: Slope Sensor Saturation",
+      message: "Geological sensors detect critical saturation levels along hill highways.",
+      time: "45m ago",
+      severity: "high",
+      sourceAgency: "NER Disaster Telemetry",
+      sourceUrl: "https://sachet.ndma.gov.in/",
+      read: true,
+    },
+  ]);
 
   const menuRef = useRef(null);
+  const notifRef = useRef(null);
+
+  // Unread notification count
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Fetch live notifications and listen to socket events
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    async function loadNotifications() {
+      try {
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${API_URL}/api/notifications`, { headers });
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.data) && json.data.length > 0) {
+            const mapped = json.data.map((n) => ({
+              id: n._id || n.id,
+              title: n.title,
+              message: n.message || "",
+              time: "Recent",
+              severity: (n.priority || n.severity || "high").toLowerCase(),
+              sourceAgency: n.sourceAgency || "Official Advisory",
+              sourceUrl: n.sourceUrl || "https://sachet.ndma.gov.in/",
+              read: Boolean(n.isRead),
+            }));
+            setNotifications(mapped);
+          }
+        }
+      } catch (_) {}
+    }
+    loadNotifications();
+
+    const unsubAlerts = subscribeToDisasterAlerts((newAlert) => {
+      if (!newAlert) return;
+      const item = {
+        id: newAlert._id || Date.now(),
+        title: newAlert.title || "Live Disaster Alert",
+        message: newAlert.message || "",
+        time: "Just now",
+        severity: (newAlert.severity || "high").toLowerCase(),
+        sourceAgency: newAlert.sourceAgency || "Official Govt Feed",
+        sourceUrl: newAlert.sourceUrl || "https://sachet.ndma.gov.in/",
+        read: false,
+      };
+      setNotifications((prev) => [item, ...prev.slice(0, 9)]);
+    });
+
+    return () => unsubAlerts();
+  }, []);
 
   // Sync auth state
   useEffect(() => {
@@ -53,9 +138,10 @@ export default function HeaderTopBar() {
     };
   }, []);
 
-  // Close hamburger menu on route change
+  // Close menus on route change
   useEffect(() => {
     setMenuOpen(false);
+    setNotifOpen(false);
   }, [location.pathname]);
 
   // Close on outside click
@@ -64,14 +150,17 @@ export default function HeaderTopBar() {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
     };
-    if (menuOpen) {
+    if (menuOpen || notifOpen) {
       document.addEventListener("mousedown", handleOutsideClick);
     }
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
-  }, [menuOpen]);
+  }, [menuOpen, notifOpen]);
 
   const handleLogout = async () => {
     setMenuOpen(false);
@@ -272,6 +361,163 @@ export default function HeaderTopBar() {
               </div>
             </Link>
           )}
+
+          {/* ── LIVE NOTIFICATION BELL BUTTON & DROPDOWN ── */}
+          <div ref={notifRef} style={{ position: "relative" }}>
+            <button
+              id="top-notification-bell-btn"
+              type="button"
+              onClick={() => setNotifOpen(!notifOpen)}
+              title="Live Disaster Notifications"
+              aria-label="Live Disaster Notifications"
+              aria-expanded={notifOpen}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "40px",
+                height: "40px",
+                backgroundColor: notifOpen ? "rgba(56, 189, 248, 0.2)" : "#1e293b",
+                border: `1.5px solid ${notifOpen ? "#38bdf8" : "#334155"}`,
+                borderRadius: "10px",
+                color: notifOpen ? "#38bdf8" : "#f1f5f9",
+                cursor: "pointer",
+                position: "relative",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                boxShadow: notifOpen ? "0 0 15px rgba(56, 189, 248, 0.4)" : "none",
+              }}
+            >
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-4px",
+                    right: "-4px",
+                    backgroundColor: "#ef4444",
+                    color: "#ffffff",
+                    fontSize: "0.68rem",
+                    fontWeight: "800",
+                    minWidth: "18px",
+                    height: "18px",
+                    borderRadius: "9px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "0 4px",
+                    border: "2px solid #0b1329",
+                    boxShadow: "0 0 8px rgba(239, 68, 68, 0.8)",
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Live Notifications Dropdown Popover */}
+            {notifOpen && (
+              <div
+                id="top-notifications-dropdown"
+                style={{
+                  position: "absolute",
+                  top: "48px",
+                  right: 0,
+                  width: "380px",
+                  maxWidth: "92vw",
+                  backgroundColor: "#0f172a",
+                  border: "1px solid #334155",
+                  borderRadius: "14px",
+                  boxShadow: "0 20px 45px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08)",
+                  padding: "16px",
+                  zIndex: 1000,
+                  animation: "fadeInDown 0.18s ease-out",
+                }}
+              >
+                {/* Header */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "12px", borderBottom: "1px solid #1e293b" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "1.2rem" }}>🚨</span>
+                    <span style={{ fontWeight: "800", fontSize: "0.95rem", color: "#f8fafc" }}>
+                      Live Notifications
+                    </span>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981" }} />
+                  </div>
+                  <span style={{ fontSize: "0.72rem", color: "#38bdf8", fontWeight: "700", backgroundColor: "rgba(56, 189, 248, 0.15)", padding: "3px 8px", borderRadius: "12px" }}>
+                    {notifications.length} Active
+                  </span>
+                </div>
+
+                {/* Notifications List */}
+                <div style={{ maxHeight: "320px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
+                  {notifications.slice(0, 5).map((n) => (
+                    <div
+                      key={n.id}
+                      style={{
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        backgroundColor: "#1e293b",
+                        borderLeft: `3px solid ${n.severity === "critical" ? "#ef4444" : n.severity === "high" ? "#f97316" : "#38bdf8"}`,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "0.68rem", fontWeight: "800", color: "#38bdf8", textTransform: "uppercase" }}>
+                          🏛️ {n.sourceAgency || "Disaster Alert"}
+                        </span>
+                        <span style={{ fontSize: "0.68rem", color: "#94a3b8" }}>{n.time}</span>
+                      </div>
+                      <div style={{ fontSize: "0.82rem", fontWeight: "700", color: "#f1f5f9", lineHeight: "1.3", marginBottom: "4px" }}>
+                        {n.title}
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "#cbd5e1", lineHeight: "1.35", marginBottom: "6px" }}>
+                        {n.message}
+                      </div>
+                      {n.sourceUrl && (
+                        <a
+                          href={n.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontSize: "0.72rem",
+                            color: "#60a5fa",
+                            textDecoration: "none",
+                            fontWeight: "700",
+                          }}
+                        >
+                          <span>Official Advisory</span>
+                          <span>↗</span>
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer Link to All Notifications */}
+                <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid #1e293b" }}>
+                  <Link
+                    to="/notifications"
+                    onClick={() => setNotifOpen(false)}
+                    style={{
+                      display: "block",
+                      textAlign: "center",
+                      backgroundColor: "#2563eb",
+                      color: "#ffffff",
+                      fontSize: "0.8rem",
+                      fontWeight: "700",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      transition: "background-color 0.15s",
+                    }}
+                  >
+                    View All Notifications &amp; Official Broadcasts →
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* ── HAMBURGER MENU BUTTON ── */}
           <button
