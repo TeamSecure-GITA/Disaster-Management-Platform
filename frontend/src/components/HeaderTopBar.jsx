@@ -10,7 +10,9 @@ import {
   UserPlus,
   MapPin,
   WifiOff,
+  Globe,
 } from "lucide-react";
+import { useLanguage } from "../i18n/LanguageContext";
 import {
   isUserLoggedIn,
   getCurrentUser,
@@ -19,6 +21,7 @@ import {
 } from "../services/authService";
 
 export default function HeaderTopBar() {
+  const { langDisplayName, setLangByDisplayName, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -145,8 +148,51 @@ export default function HeaderTopBar() {
           }}
         >
           <span>🗺️</span>
-          <span style={{ display: "inline-block" }}>Disaster Response Map</span>
+          <span style={{ display: "inline-block" }}>{t.nav_map || "Disaster Response Map"}</span>
         </Link>
+
+        {/* ── QUICK LANGUAGE SWITCHER ── */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            backgroundColor: "#1e293b",
+            padding: "4px 10px",
+            borderRadius: "6px",
+            border: "1px solid #334155",
+          }}
+        >
+          <Globe size={14} color="#38bdf8" />
+          <select
+            value={langDisplayName}
+            onChange={(e) => setLangByDisplayName(e.target.value)}
+            style={{
+              backgroundColor: "transparent",
+              color: "#f8fafc",
+              border: "none",
+              fontSize: "0.78rem",
+              fontWeight: "700",
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            <option value="English" style={{ background: "#0f172a" }}>English</option>
+            <option value="Hindi" style={{ background: "#0f172a" }}>Hindi (हिन्दी)</option>
+            <option value="Odia" style={{ background: "#0f172a" }}>Odia (ଓଡ଼ିଆ)</option>
+            <option value="Bengali" style={{ background: "#0f172a" }}>Bengali (বাংলা)</option>
+            <option value="Assamese" style={{ background: "#0f172a" }}>Assamese (অসমীয়া)</option>
+            <option value="Manipuri" style={{ background: "#0f172a" }}>Manipuri (মৈতৈলোন্)</option>
+            <option value="Mizo" style={{ background: "#0f172a" }}>Mizo (Mizo ṭawng)</option>
+            <option value="Bodo" style={{ background: "#0f172a" }}>Bodo (बड़ो)</option>
+            <option value="Khasi" style={{ background: "#0f172a" }}>Khasi</option>
+            <option value="Nagamese" style={{ background: "#0f172a" }}>Nagamese</option>
+            <option value="Nepali" style={{ background: "#0f172a" }}>Nepali (नेपाली)</option>
+            <option value="Spanish" style={{ background: "#0f172a" }}>Spanish (Español)</option>
+            <option value="Garo" style={{ background: "#0f172a" }}>Garo (Achik)</option>
+            <option value="Santali" style={{ background: "#0f172a" }}>Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
+          </select>
+        </div>
       </div>
 
       {/* Right Top Controls: Profile Icon (if logged in) and Hamburger Menu */}

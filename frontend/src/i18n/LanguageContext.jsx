@@ -2,10 +2,13 @@
 // src/i18n/LanguageContext.jsx
 //
 // Global language context for the entire platform.
-// Provides: { lang, setLang, t } where t is the resolved translation object.
-// Persists language choice to localStorage (same key as Settings page).
+// Provides: { lang, langDisplayName, setLang, setLangByDisplayName, t }
+// Features:
+// 1. Full dictionary translations across all supported languages (including all North-Eastern India languages).
+// 2. Full-Page Vernacular Translation Engine: instantly converts the entire DOM across all pages and features.
+// 3. Auto-sync with localStorage across tabs and settings.
 // ─────────────────────────────────────────────────────────────────────────────
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { translations } from "./translations";
 
 const SETTINGS_STORAGE_KEY = "user_preferences_21";
@@ -51,7 +54,6 @@ function getPersistedLangCode() {
     if (raw) {
       const parsed = JSON.parse(raw);
       const langValue = parsed?.language || "English";
-      // Could be a display name ("Hindi") or already a code ("hi")
       return DISPLAY_NAME_TO_CODE[langValue] || langValue;
     }
   } catch {}
@@ -70,6 +72,77 @@ function persistLang(displayName) {
   } catch {}
 }
 
+/**
+ * Full-page DOM translation engine:
+ * Sets translation cookies and connects with Google Translate engine
+ * so every page, component, table, card, and button is translated.
+ */
+function applyFullPageTranslation(targetCode) {
+  try {
+    const host = window.location.hostname;
+    if (targetCode === "en") {
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${host};`;
+      const select = document.querySelector(".goog-te-combo");
+      if (select) {
+        select.value = "en";
+        select.dispatchEvent(new Event("change"));
+      }
+      return;
+    }
+
+    // Set cookie for automatic full-page translation
+    document.cookie = `googtrans=/en/${targetCode}; path=/;`;
+    document.cookie = `googtrans=/en/${targetCode}; path=/; domain=${host};`;
+
+    // Ensure hidden Google Translate element exists
+    if (!document.getElementById("google_translate_element")) {
+      const container = document.createElement("div");
+      container.id = "google_translate_element";
+      container.style.display = "none";
+      document.body.appendChild(container);
+    }
+
+    // Load Google Translate script if not loaded
+    if (!document.getElementById("google-translate-script")) {
+      window.googleTranslateElementInit = function () {
+        try {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              autoDisplay: false,
+              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+            },
+            "google_translate_element"
+          );
+          setTimeout(() => {
+            const select = document.querySelector(".goog-te-combo");
+            if (select) {
+              select.value = targetCode;
+              select.dispatchEvent(new Event("change"));
+            }
+          }, 400);
+        } catch {}
+      };
+
+      const script = document.createElement("script");
+      script.id = "google-translate-script";
+      script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      document.body.appendChild(script);
+    } else {
+      // Script already loaded, trigger combo
+      const select = document.querySelector(".goog-te-combo");
+      if (select) {
+        select.value = targetCode;
+        select.dispatchEvent(new Event("change"));
+      }
+    }
+  } catch (e) {
+    console.warn("[i18n] Full-page translation engine notice:", e);
+  }
+}
+
 export function LanguageProvider({ children }) {
   const [langCode, setLangCode] = useState(getPersistedLangCode);
 
@@ -78,31 +151,42 @@ export function LanguageProvider({ children }) {
     const base = translations.en;
     const target = translations[langCode];
     if (!target || langCode === "en") return base;
-    // Merge: target overrides base, so missing keys fall back to English
     return { ...base, ...target };
   }, [langCode]);
 
   const langDisplayName = CODE_TO_DISPLAY[langCode] || "English";
 
   // Set language by locale code (e.g., "hi")
-  const setLang = (code) => {
+  const setLang = useCallback((code) => {
     setLangCode(code);
     const displayName = CODE_TO_DISPLAY[code] || "English";
     persistLang(displayName);
-  };
+    applyFullPageTranslation(code);
+  }, []);
 
-  // Set language by display name (e.g., "Hindi") — used by Settings page select
-  const setLangByDisplayName = (displayName) => {
+  // Set language by display name (e.g., "Odia")
+  const setLangByDisplayName = useCallback((displayName) => {
     const code = DISPLAY_NAME_TO_CODE[displayName] || "en";
     setLangCode(code);
     persistLang(displayName);
-  };
+    applyFullPageTranslation(code);
+  }, []);
+
+  // Sync on initial mount
+  useEffect(() => {
+    const initialCode = getPersistedLangCode();
+    if (initialCode && initialCode !== "en") {
+      applyFullPageTranslation(initialCode);
+    }
+  }, []);
 
   // Listen for localStorage changes from other tabs / Settings page
   useEffect(() => {
     const handleStorage = (e) => {
       if (e.key === SETTINGS_STORAGE_KEY) {
-        setLangCode(getPersistedLangCode());
+        const newCode = getPersistedLangCode();
+        setLangCode(newCode);
+        applyFullPageTranslation(newCode);
       }
     };
     window.addEventListener("storage", handleStorage);

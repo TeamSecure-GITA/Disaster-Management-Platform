@@ -48,7 +48,7 @@ const DEFAULT_SETTINGS = {
 };
 
 export default function Settings() {
-  const { setLangByDisplayName } = useLanguage();
+  const { langDisplayName, setLangByDisplayName } = useLanguage();
   const [settings, setSettings] = useState(() => {
     try {
       const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
@@ -58,6 +58,13 @@ export default function Settings() {
     } catch {}
     return DEFAULT_SETTINGS;
   });
+
+  // Keep settings.language synchronized with global language context
+  useEffect(() => {
+    if (langDisplayName && settings.language !== langDisplayName) {
+      setSettings((prev) => ({ ...prev, language: langDisplayName }));
+    }
+  }, [langDisplayName]);
 
   const [toastMsg, setToastMsg] = useState("");
   const [clearingCache, setClearingCache] = useState(false);

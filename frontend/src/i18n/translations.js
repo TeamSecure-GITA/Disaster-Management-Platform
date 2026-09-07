@@ -13,11 +13,16 @@ export const translations = {
   en: {
     // ── App / Brand ───────────────────────────────────────────────────────
     app_name: "Disaster Management Platform",
+    app_name_short: "Disaster Platform",
     app_tagline: "Stay Safe. Stay Informed.",
 
     // ── Navigation ────────────────────────────────────────────────────────
+    nav_header: "Navigation",
+    nav_admin: "Administrator",
     nav_dashboard: "Dashboard",
+    nav_ner_landslide: "NER Landslide Monitor",
     nav_alerts: "Disaster Alerts",
+    nav_climate_chronicle: "Climate Chronicle",
     nav_map: "Disaster Response Map",
     nav_sos: "Emergency SOS",
     nav_rescue: "Rescue Centers",
@@ -372,12 +377,17 @@ export const translations = {
   hi: {
     // ── App / Brand ───────────────────────────────────────────────────────
     app_name: "आपदा प्रबंधन मंच",
+    app_name_short: "आपदा मंच",
     app_tagline: "सुरक्षित रहें। सूचित रहें।",
 
     // ── Navigation ────────────────────────────────────────────────────────
+    nav_header: "नेविगेशन",
+    nav_admin: "प्रशासक (Admin)",
     nav_dashboard: "डैशबोर्ड",
+    nav_ner_landslide: "पूर्वोत्तर भूस्खलन मॉनिटर",
     nav_alerts: "आपदा अलर्ट",
-    nav_map: "लाइव मानचित्र",
+    nav_climate_chronicle: "जलवायु समाचार",
+    nav_map: "आपदा प्रतिक्रिया मानचित्र",
     nav_sos: "आपातकालीन SOS",
     nav_rescue: "बचाव केंद्र",
     nav_shelter: "आश्रय खोजक",
@@ -731,12 +741,17 @@ export const translations = {
   or: {
     // ── App / Brand ───────────────────────────────────────────────────────
     app_name: "ବିପର୍ଯ୍ୟୟ ପ୍ରବନ୍ଧନ ମଞ୍ଚ",
+    app_name_short: "ବିପର୍ଯ୍ୟୟ ପ୍ଲାଟଫର୍ମ",
     app_tagline: "ସୁରକ୍ଷିତ ରୁହନ୍ତୁ। ସୂଚିତ ରୁହନ୍ତୁ।",
 
     // ── Navigation ────────────────────────────────────────────────────────
+    nav_header: "ନେଭିଗେସନ୍",
+    nav_admin: "ପ୍ରଶାସକ (Admin)",
     nav_dashboard: "ଡ୍ୟାଶବୋର୍ଡ",
+    nav_ner_landslide: "ପୂର୍ବୋତ୍ତର ଭୂସ୍ଖଳନ ମନିଟର",
     nav_alerts: "ବିପର୍ଯ୍ୟୟ ସତର୍କତା",
-    nav_map: "ଲାଇଭ ମ୍ୟାପ",
+    nav_climate_chronicle: "ଜଳବାୟୁ ଖବର",
+    nav_map: "ବିପର୍ଯ୍ୟୟ ପ୍ରତିକ୍ରିୟା ମ୍ୟାପ",
     nav_sos: "ଜରୁରୀ SOS",
     nav_rescue: "ଉଦ୍ଧାର କେନ୍ଦ୍ର",
     nav_shelter: "ଆଶ୍ରୟ ଖୋଜ",

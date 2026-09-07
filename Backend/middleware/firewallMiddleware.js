@@ -14,14 +14,16 @@ const { sendSecurityAlert } = require("../services/securityEmailService");
 const violations = new Map();
 // Map<ip, { blockedAt, expiresAt, reason }>
 const blockedIPs = new Map();
+// Map<userId, { blockedAt, expiresAt, reason, ip }>
+const blockedUserIds = new Map();
 
 // ─── Configuration ───────────────────────────────────────────────────────────
-const MAX_VIOLATIONS = 10;            // block after 10 violations
-const BLOCK_DURATION_MS = 30 * 60 * 1000;  // 30 minutes
-const VIOLATION_WINDOW_MS = 15 * 60 * 1000; // 15 minute rolling window
+const MAX_VIOLATIONS = 3;             // block quickly after 3 violations or immediately on severe attacks
+const BLOCK_DURATION_MS = 24 * 60 * 60 * 1000;  // 24 hours block
+const VIOLATION_WINDOW_MS = 30 * 60 * 1000; // 30 minute rolling window
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;  // clean expired entries every 5 min
 
-// ─── Suspicious patterns (SQL injection, NoSQL injection, path traversal) ────
+// ─── Suspicious patterns (SQL injection, NoSQL injection, path traversal, XSS) ────
 const SUSPICIOUS_PATTERNS = [
   /(\b(union|select|insert|update|delete|drop|alter|create|exec|execute)\b.*\b(from|into|table|database|where)\b)/i,
   /(\$gt|\$lt|\$ne|\$eq|\$regex|\$where|\$exists)/i,
@@ -37,7 +39,7 @@ const HEAD_ADMIN_EMAILS = [
 ];
 
 /**
- * Get the real client IP, respecting proxy headers.
+ * Get client IP respecting proxies.
  */
 function getClientIP(req) {
   const forwarded = req.headers["x-forwarded-for"];
@@ -45,6 +47,19 @@ function getClientIP(req) {
     return forwarded.split(",")[0].trim();
   }
   return req.ip || req.connection?.remoteAddress || "unknown";
+}
+
+/**
+ * Extract User ID from request if available.
+ */
+function getRequestUserId(req) {
+  return (
+    req.user?.id ||
+    req.user?._id?.toString?.() ||
+    req.body?.userId ||
+    req.headers["x-user-id"] ||
+    null
+  );
 }
 
 /**
@@ -72,15 +87,14 @@ function scanObject(obj) {
 }
 
 /**
- * Record a violation for an IP. Returns true if the IP is now blocked.
+ * Record a violation for an IP and optional userId. Returns true if blocked.
  */
-function recordViolation(ip, reason) {
+function recordViolation(ip, reason, userId = null, forceBlock = false) {
   const now = Date.now();
   let entry = violations.get(ip);
 
   if (!entry || (now - entry.firstViolation) > VIOLATION_WINDOW_MS) {
-    // Start fresh window
-    entry = { count: 0, firstViolation: now, lastViolation: now, reasons: [] };
+    entry = { count: 0, firstViolation: now, lastViolation: now, reasons: [], userIds: [] };
   }
 
   entry.count += 1;
@@ -88,54 +102,91 @@ function recordViolation(ip, reason) {
   if (!entry.reasons.includes(reason)) {
     entry.reasons.push(reason);
   }
+  if (userId && !entry.userIds.includes(userId)) {
+    entry.userIds.push(userId);
+  }
   violations.set(ip, entry);
 
-  if (entry.count >= MAX_VIOLATIONS) {
-    blockIP(ip, entry);
+  if (forceBlock || entry.count >= MAX_VIOLATIONS) {
+    blockTarget(ip, entry, userId);
     return true;
   }
   return false;
 }
 
 /**
- * Block an IP and send security alert email.
+ * Block an IP and user ID, and send immediate security alert email.
  */
-function blockIP(ip, violationEntry) {
+function blockTarget(ip, violationEntry, userId = null) {
   const now = Date.now();
+  const reasonText = violationEntry?.reasons?.join("; ") || "Repeated security violations";
+
   blockedIPs.set(ip, {
     blockedAt: now,
     expiresAt: now + BLOCK_DURATION_MS,
-    reason: violationEntry.reasons.join("; "),
+    reason: reasonText,
+    userId: userId || violationEntry?.userIds?.[0] || null,
   });
 
-  // Clear violations since IP is now blocked
+  if (userId) {
+    blockedUserIds.set(userId, {
+      blockedAt: now,
+      expiresAt: now + BLOCK_DURATION_MS,
+      reason: reasonText,
+      ip,
+    });
+  }
+
   violations.delete(ip);
 
-  console.error(`[FIREWALL] 🚫 BLOCKED IP: ${ip} — Reason: ${violationEntry.reasons.join("; ")} — Violations: ${violationEntry.count}`);
+  console.error(
+    `[FIREWALL] 🚫 BLOCKED: IP=${ip} UserID=${userId || "N/A"} — Reason: ${reasonText}`
+  );
 
-  // Send email alert (non-blocking)
+  // Send email alert to teamsecure.project@gmail.com
   sendSecurityAlert({
     ip,
-    reason: violationEntry.reasons.join("; "),
-    endpoint: "Multiple endpoints",
-    method: "Various",
-    violations: violationEntry.count,
+    userId: userId || "Anonymous / Unauthenticated",
+    reason: reasonText,
+    endpoint: "Security Firewall Barrier",
+    method: "BLOCKED",
+    violations: violationEntry?.count || 1,
     timestamp: new Date().toISOString(),
-  }).catch(() => {});
+    recipient: "teamsecure.project@gmail.com",
+  }).catch((err) => {
+    console.error("[FIREWALL] Failed to send security email alert:", err?.message);
+  });
 }
 
 /**
- * Check if an IP is currently blocked.
+ * Check if an IP or User ID is currently blocked.
  */
-function isBlocked(ip) {
-  const block = blockedIPs.get(ip);
-  if (!block) return false;
+function isBlocked(ip, userId = null) {
+  const now = Date.now();
 
-  if (Date.now() > block.expiresAt) {
-    blockedIPs.delete(ip);
-    return false;
+  // Check IP block
+  const ipBlock = blockedIPs.get(ip);
+  if (ipBlock) {
+    if (now > ipBlock.expiresAt) {
+      blockedIPs.delete(ip);
+    } else {
+      return { blocked: true, type: "IP", data: ipBlock };
+    }
   }
-  return true;
+
+  // Check User ID block
+  if (userId) {
+    const userBlock = blockedUserIds.get(userId);
+    if (userBlock) {
+      if (now > userBlock.expiresAt) {
+        blockedUserIds.delete(userId);
+      } else {
+        return { blocked: true, type: "USER_ID", data: userBlock };
+      }
+    }
+  }
+
+  return { blocked: false };
 }
 
 // ─── Periodic cleanup of expired entries ─────────────────────────────────────
@@ -147,7 +198,11 @@ setInterval(() => {
       blockedIPs.delete(ip);
     }
   }
-
+  for (const [uid, block] of blockedUserIds.entries()) {
+    if (now > block.expiresAt) {
+      blockedUserIds.delete(uid);
+    }
+  }
   for (const [ip, entry] of violations.entries()) {
     if ((now - entry.lastViolation) > VIOLATION_WINDOW_MS) {
       violations.delete(ip);
@@ -161,41 +216,58 @@ setInterval(() => {
 
 /**
  * Main firewall middleware — runs on every request.
- * 1. Checks if IP is blocked → 403
- * 2. Scans request for injection patterns → records violation
- * 3. Hooks into response to detect auth failures → records violation
  */
 function firewallMiddleware(req, res, next) {
   const ip = getClientIP(req);
+  const userId = getRequestUserId(req);
 
-  // ── 1. Check if IP is currently blocked ──────────────────────────────────
-  if (isBlocked(ip)) {
-    const block = blockedIPs.get(ip);
-    const remainingMs = block ? block.expiresAt - Date.now() : 0;
-    const remainingMin = Math.ceil(remainingMs / 60000);
+  // ── 1. Check if IP or User ID is blocked ─────────────────────────────────
+  const blockCheck = isBlocked(ip, userId);
+  if (blockCheck.blocked) {
+    const remainingMs = blockCheck.data.expiresAt - Date.now();
+    const remainingHours = Math.ceil(remainingMs / (60 * 60 * 1000));
 
     return res.status(403).json({
       success: false,
       blocked: true,
-      message: `Your IP has been blocked due to suspicious activity. Block expires in ~${remainingMin} minute(s). Contact the Head Administrator if you believe this is an error.`,
+      blockType: blockCheck.type,
+      message: `Access permanently restricted by TeamSecure Cyber Firewall. Your ${blockCheck.type === "USER_ID" ? "User Account ID" : "IP Address"} is blocked for ${remainingHours} hour(s) due to detected security violations.`,
       contact: "teamsecure.project@gmail.com",
     });
   }
 
-  // ── 2. Scan request for suspicious patterns (injection attempts) ─────────
+  // ── 2. Scan request for suspicious patterns (SQLi, XSS, Path Traversal) ─
   let suspiciousDetected = false;
   let suspiciousReason = "";
+  let isSevere = false;
 
-  // Scan URL / query string
   if (containsSuspiciousPatterns(req.originalUrl)) {
     suspiciousDetected = true;
-    suspiciousReason = "Suspicious URL pattern (possible injection)";
+    suspiciousReason = "Malicious URL pattern / SQLi / Path traversal detected";
+    isSevere = true;
+  } else if (req.body && scanObject(req.body)) {
+    suspiciousDetected = true;
+    suspiciousReason = "Malicious payload / SQL injection / Script tag in body";
+    isSevere = true;
+  } else if (req.query && scanObject(req.query)) {
+    suspiciousDetected = true;
+    suspiciousReason = "Malicious query parameters (Injection attempt)";
+    isSevere = true;
   }
 
-  // Scan request body
-  if (!suspiciousDetected && req.body && scanObject(req.body)) {
-    suspiciousDetected = true;
-    suspiciousReason = "Suspicious request body (possible injection)";
+  if (suspiciousDetected) {
+    // Severe attacks trigger immediate block on 1st/2nd try
+    const nowBlocked = recordViolation(ip, suspiciousReason, userId, isSevere);
+    console.warn(`[FIREWALL] 🚨 ${suspiciousReason} from IP=${ip} User=${userId || "N/A"} on ${req.method} ${req.originalUrl}`);
+
+    if (nowBlocked) {
+      return res.status(403).json({
+        success: false,
+        blocked: true,
+        message: "Your IP and Account ID have been blocked by TeamSecure Cyber Firewall. A security incident alert has been dispatched to teamsecure.project@gmail.com.",
+        contact: "teamsecure.project@gmail.com",
+      });
+    }
   }
 
   // Scan query parameters

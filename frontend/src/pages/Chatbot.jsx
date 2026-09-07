@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { askGemini } from "../services/geminiService";
 
 const SUGGESTED_QUERIES = [
+  "🤖 What is your name?",
   "🌊 What should I do during a sudden flood?",
   "🌀 Cyclone safety: immediate steps",
   "🎒 What items should be in my emergency kit?",
   "🌍 How to survive an earthquake?",
-  "⛺ How to find the nearest cyclone shelter?",
+  "💡 What can you do to help me?",
   "📞 National emergency helpline numbers in India",
 ];
 
@@ -203,7 +204,7 @@ function Chatbot() {
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
             disabled={loading}
-            placeholder="Ask AI Assistant about cyclone, flood evacuation, first aid, kit checklist..."
+            placeholder="Ask anything in any language (e.g., 'What is your name?', 'Cyclone safety', '25 * 4')..."
           />
 
           <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
