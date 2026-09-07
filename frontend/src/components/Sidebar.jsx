@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import React from "react";
 import { NavLink } from "react-router-dom";
+import logoImg from "../assets/logo.png";
 import { isAuthorizedAdmin, isHeadAdmin } from "../utils/adminAuth";
 import { useLanguage } from "../i18n/LanguageContext";
 import {
@@ -108,22 +109,26 @@ function Sidebar() {
         top: 0,
         zIndex: 10,
       }}>
-        <div style={{
-          width: "38px",
-          height: "38px",
-          borderRadius: "10px",
-          background: "linear-gradient(135deg, #2563eb, #06b6d4)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "20px",
-          flexShrink: 0,
-          boxShadow: "0 0 16px rgba(37,99,235,0.45)",
-        }}>
-          🌐
-        </div>
+        <img
+          src={logoImg || "/logo.png"}
+          alt="Disaster Management Logo"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/logo.png";
+          }}
+          style={{
+            width: "38px",
+            height: "38px",
+            borderRadius: "50%",
+            objectFit: "contain",
+            boxShadow: "0 0 12px rgba(56,189,248,0.5)",
+            border: "2px solid rgba(56,189,248,0.5)",
+            background: "#0b1f3a",
+            flexShrink: 0,
+          }}
+        />
         <div>
-          <div style={{ fontWeight: "800", fontSize: "0.95rem", color: "#f8fafc", lineHeight: "1.2" }}>
+          <div style={{ fontWeight: "800", fontSize: "0.95rem", color: "#38bdf8", lineHeight: "1.2", letterSpacing: "-0.01em" }}>
             {t.app_name_short || "Disaster Platform"}
           </div>
           <div style={{ fontSize: "0.68rem", color: "#64748b", fontWeight: "600", letterSpacing: "0.03em" }}>
