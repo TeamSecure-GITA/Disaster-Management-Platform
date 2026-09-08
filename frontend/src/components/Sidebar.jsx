@@ -56,7 +56,7 @@ const menuItems = [
   { key: "nav_faq",                fallback: "FAQ",                    icon: IconFaq,           path: "/faq" },
 ];
 
-function Sidebar({ isOpen = false, onClose }) {
+function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
   const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [isHead, setIsHead]   = React.useState(false);
@@ -84,7 +84,7 @@ function Sidebar({ isOpen = false, onClose }) {
   }, []);
 
   const handleNavClick = () => {
-    if (typeof onClose === "function") {
+    if (!isDesktopMode && typeof onClose === "function") {
       onClose();
     }
   };
@@ -92,7 +92,7 @@ function Sidebar({ isOpen = false, onClose }) {
   return (
     <aside
       aria-label="Main Navigation"
-      className={`app-sidebar-responsive ${isOpen ? "drawer-open" : ""}`}
+      className={`app-sidebar-responsive ${isDesktopMode ? "desktop-docked" : (isOpen ? "drawer-open" : "")}`}
       style={{
         width: "260px",
         minWidth: "260px",
@@ -145,30 +145,32 @@ function Sidebar({ isOpen = false, onClose }) {
           </div>
         </div>
 
-        {/* Mobile close button */}
-        <button
-          type="button"
-          className="mobile-drawer-close-btn"
-          onClick={handleNavClick}
-          aria-label="Close navigation"
-          style={{
-            background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            color: "#94a3b8",
-            borderRadius: "8px",
-            width: "32px",
-            height: "32px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            fontSize: "1rem",
-            marginLeft: "auto",
-            flexShrink: 0,
-          }}
-        >
-          ✕
-        </button>
+        {/* Mobile close button (only in mobile drawer mode) */}
+        {!isDesktopMode && (
+          <button
+            type="button"
+            className="mobile-drawer-close-btn"
+            onClick={handleNavClick}
+            aria-label="Close navigation"
+            style={{
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              color: "#94a3b8",
+              borderRadius: "8px",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontSize: "1rem",
+              marginLeft: "auto",
+              flexShrink: 0,
+            }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* ── Navigation Links ─────────────────────── */}

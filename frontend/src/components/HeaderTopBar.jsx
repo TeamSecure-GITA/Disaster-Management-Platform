@@ -22,7 +22,7 @@ import {
 } from "../services/authService";
 import { subscribeToDisasterAlerts } from "../services/socketService";
 
-export default function HeaderTopBar({ onToggleSidebar }) {
+export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false }) {
   const { langDisplayName, setLangByDisplayName, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -191,28 +191,30 @@ export default function HeaderTopBar({ onToggleSidebar }) {
       {/* ─────────────── LEFT: Drawer Toggle + Status chips ─────────────── */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
 
-        {/* ── MOBILE SIDEBAR DRAWER TOGGLE ── */}
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          aria-label="Toggle navigation menu"
-          className="mobile-sidebar-toggle-btn"
-          style={{
-            display: "none",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "36px",
-            height: "36px",
-            backgroundColor: "#1e293b",
-            border: "1px solid #334155",
-            borderRadius: "8px",
-            color: "#38bdf8",
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
-        >
-          <Menu size={20} />
-        </button>
+        {/* ── MOBILE SIDEBAR DRAWER TOGGLE (only shown when not in desktop mode) ── */}
+        {!isDesktopMode && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            aria-label="Toggle navigation menu"
+            className="mobile-sidebar-toggle-btn"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "36px",
+              height: "36px",
+              backgroundColor: "#1e293b",
+              border: "1px solid #334155",
+              borderRadius: "8px",
+              color: "#38bdf8",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            <Menu size={20} />
+          </button>
+        )}
 
         {/* ── LIVE STATUS CHIP ── */}
         <div

@@ -2573,9 +2573,9 @@ img, svg, video, canvas, iframe {
   pointer-events: auto;
 }
 
-/* Smooth Drawer on Mobile/Tablet */
-@media (max-width: 1023px) {
-  .app-sidebar-responsive {
+/* ── Smooth Drawer on Mobile Phone (Normal Mode) ── */
+@media (max-width: 768px) {
+  html:not([data-desktop-mode="true"]) .app-sidebar-responsive:not(.desktop-docked) {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -2590,18 +2590,71 @@ img, svg, video, canvas, iframe {
     box-shadow: 0 0 35px rgba(0, 0, 0, 0.8) !important;
   }
 
-  .app-sidebar-responsive.drawer-open {
+  html:not([data-desktop-mode="true"]) .app-sidebar-responsive.drawer-open {
     transform: translateX(0) !important;
+  }
+
+  html:not([data-desktop-mode="true"]) .mobile-sidebar-toggle-btn {
+    display: flex !important;
   }
 }
 
-@media (min-width: 1024px) {
+/* ── Desktop Screens (width >= 769px, including standard 980px mobile Desktop site) ── */
+@media (min-width: 769px) {
+  .app-sidebar-responsive {
+    position: static !important;
+    transform: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    width: 260px !important;
+    min-width: 260px !important;
+  }
   .mobile-sidebar-backdrop {
     display: none !important;
   }
   .mobile-drawer-close-btn {
     display: none !important;
   }
+  .mobile-sidebar-toggle-btn {
+    display: none !important;
+  }
+}
+
+/* ── Explicit Desktop Mode Overrides (when Desktop Site is toggled on a mobile browser) ── */
+html[data-desktop-mode="true"] .app-sidebar-responsive,
+.force-desktop-layout .app-sidebar-responsive,
+.app-sidebar-responsive.desktop-docked {
+  position: static !important;
+  transform: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  width: 260px !important;
+  min-width: 260px !important;
+}
+
+html[data-desktop-mode="true"] .mobile-sidebar-backdrop,
+.force-desktop-layout .mobile-sidebar-backdrop {
+  display: none !important;
+}
+
+html[data-desktop-mode="true"] .mobile-drawer-close-btn,
+.force-desktop-layout .mobile-drawer-close-btn {
+  display: none !important;
+}
+
+html[data-desktop-mode="true"] .mobile-sidebar-toggle-btn,
+.force-desktop-layout .mobile-sidebar-toggle-btn {
+  display: none !important;
+}
+
+html[data-desktop-mode="true"] .mobile-bottom-nav,
+.force-desktop-layout .mobile-bottom-nav {
+  display: none !important;
+}
+
+html[data-desktop-mode="true"] .app-main-content-scroll,
+.force-desktop-layout .app-main-content-scroll {
+  padding-bottom: 24px !important;
 }
 
 /* ── Mobile Bottom Navigation Bar ── */
@@ -2620,15 +2673,15 @@ img, svg, video, canvas, iframe {
   box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.6);
 }
 
-@media (max-width: 767px) {
-  .mobile-bottom-nav {
+@media (max-width: 768px) {
+  html:not([data-desktop-mode="true"]) .mobile-bottom-nav {
     display: flex;
     justify-content: space-around;
     align-items: center;
   }
 
-  /* Ensure bottom nav doesn't obscure content */
-  .app-main-content-scroll {
+  /* Ensure bottom nav doesn't obscure content in normal mobile mode */
+  html:not([data-desktop-mode="true"]) .app-main-content-scroll {
     padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }

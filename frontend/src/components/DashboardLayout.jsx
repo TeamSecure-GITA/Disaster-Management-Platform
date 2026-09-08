@@ -5,15 +5,41 @@ import HeaderTopBar from "./HeaderTopBar";
 import EmergencyAlertBanner from "./EmergencyAlertBanner";
 import LiveNotificationToast from "./LiveNotificationToast";
 import MobileBottomNav from "./MobileBottomNav";
+import { detectDesktopMode } from "../utils/browserMode";
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDesktopMode, setIsDesktopMode] = useState(() => detectDesktopMode());
   const location = useLocation();
 
-  // Close mobile drawer on route navigation
+  // Close mobile drawer on route navigation (only in mobile drawer mode)
   useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
+    if (!isDesktopMode) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname, isDesktopMode]);
+
+  // Handle desktop mode detection (e.g. mobile browser Desktop site vs normal mode, resize, orientation)
+  useEffect(() => {
+    const updateMode = () => {
+      const desktop = detectDesktopMode();
+      setIsDesktopMode(desktop);
+      if (desktop) {
+        document.documentElement.setAttribute("data-desktop-mode", "true");
+        setSidebarOpen(false); // No drawer overlay needed in desktop mode
+      } else {
+        document.documentElement.setAttribute("data-desktop-mode", "false");
+      }
+    };
+
+    updateMode();
+    window.addEventListener("resize", updateMode);
+    window.addEventListener("orientationchange", updateMode);
+    return () => {
+      window.removeEventListener("resize", updateMode);
+      window.removeEventListener("orientationchange", updateMode);
+    };
+  }, []);
 
   // Close mobile drawer when pressing Escape
   useEffect(() => {
@@ -28,6 +54,7 @@ export default function DashboardLayout() {
 
   return (
     <div
+      className={isDesktopMode ? "force-desktop-layout" : "normal-layout"}
       style={{
         display: "flex",
         width: "100%",
@@ -39,16 +66,19 @@ export default function DashboardLayout() {
         position: "relative",
       }}
     >
-      {/* ── Mobile Sidebar Backdrop Overlay ── */}
-      <div
-        className={`mobile-sidebar-backdrop ${sidebarOpen ? "active" : ""}`}
-        onClick={() => setSidebarOpen(false)}
-        aria-hidden="true"
-      />
+      {/* ── Mobile Sidebar Backdrop Overlay (only in mobile drawer mode) ── */}
+      {!isDesktopMode && (
+        <div
+          className={`mobile-sidebar-backdrop ${sidebarOpen ? "active" : ""}`}
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* ── Left Navigation Bar (Desktop fixed, Mobile/Tablet slide-in drawer) ── */}
       <Sidebar
-        isOpen={sidebarOpen}
+        isOpen={isDesktopMode || sidebarOpen}
+        isDesktopMode={isDesktopMode}
         onClose={() => setSidebarOpen(false)}
       />
 
@@ -63,7 +93,10 @@ export default function DashboardLayout() {
           position: "relative",
         }}
       >
-        <HeaderTopBar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        <HeaderTopBar
+          isDesktopMode={isDesktopMode}
+          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        />
         <EmergencyAlertBanner />
         <LiveNotificationToast />
 
@@ -81,8 +114,10 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
 
-        {/* ── Mobile Quick Bottom Navigation Bar (< 768px) ── */}
-        <MobileBottomNav onOpenMenu={() => setSidebarOpen(true)} />
+        {/* ── Mobile Quick Bottom Navigation Bar (< 768px, hidden in desktop mode) ── */}
+        {!isDesktopMode && (
+          <MobileBottomNav onOpenMenu={() => setSidebarOpen(true)} />
+        )}
       </div>
     </div>
   );
