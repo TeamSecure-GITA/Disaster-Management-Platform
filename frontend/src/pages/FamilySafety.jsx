@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   getFamilyMembers,
+  subscribeToFamilyMembers,
   addFamilyMember,
+  updateFamilyMember,
   toggleMemberSafety,
   removeFamilyMember,
   ACTIVE_DANGER_ZONES,
@@ -44,319 +46,319 @@ export default function FamilySafety() {
   const [submitting, setSubmitting] = useState(false);
   const [broadcastMsg, setBroadcastMsg] = useState("");
 
-  // Disaster State: Default is FALSE so all members are ALWAYS SAFE when no disaster happens!
-  const [disasterHappened, setDisasterHappened] = useState(false);
-  const [selectedDisasterId, setSelectedDisasterId] = useState("danger-flood-bhubaneswar");
+  // Edit Member Modal States (Permanent sync across all users)
+  const [editingMember, setEditingMember] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editRelation, setEditRelation] = useState("Parent");
+  const [editPhone, setEditPhone] = useState("");
+  const [editBloodGroup, setEditBloodGroup] = useState("Unknown");
+  const [editLocation, setEditLocation] = useState("");
+  const [editCoordinates, setEditCoordinates] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
-  // Siren Buzzer ("syrol") States
-  const [sirenSoundType, setSirenSoundType] = useState("wail"); // "wail" (Realistic Electronic) | "air-raid" | "eas-alert" | "hilo" | "pulse"
-  const [sirenVolume, setSirenVolume] = useState(0.22); // 0.12 (Low), 0.22 (Med), 0.35 (Loud)
+  // Disaster Alert & Siren Buzzer States
+  // By default, disaster tracking alert is standby (FALSE) so the siren does NOT buzz by default!
+  const [disasterAlertActive, setDisasterAlertActive] = useState(false);
+  const [selectedDisasterId, setSelectedDisasterId] = useState("danger-flood-bhubaneswar");
   const [sirenPlaying, setSirenPlaying] = useState(false);
   const [sirenMuted, setSirenMuted] = useState(false);
-  const [audioPromptNeeded, setAudioPromptNeeded] = useState(false);
+  const [sirenSoundType, setSirenSoundType] = useState("wail"); // 'wail' | 'yelp' | 'hilo' | 'klaxon'
 
-  // Web Audio Refs
+  // Web Audio Refs for Siren Buzzer
   const audioCtxRef = useRef(null);
-  const oscRefs = useRef([]);
+  const osc1Ref = useRef(null);
+  const osc2Ref = useRef(null);
   const lfoRef = useRef(null);
-  const gainRef = useRef(null);
-  const sirenIntervalRef = useRef(null);
+  const masterGainRef = useRef(null);
+  const pulseTimerRef = useRef(null);
 
-  // Load family members on mount
+  // Default-Silent Guard Refs: Siren MUST NOT buzz on initial page load
+  const isInitialLoadRef = useRef(true);
+  const prevUnsafeCountRef = useRef(0);
+
+  // Real-Time Permanent Cloud Sync for all users:
+  // When ANY user adds, removes, or modifies a name, it updates live for every user!
   useEffect(() => {
-    loadMembers();
+    setLoading(true);
+    const unsubscribe = subscribeToFamilyMembers((updatedMembers) => {
+      setMembers(updatedMembers);
+      setLoading(false);
+    });
+
     return () => {
+      unsubscribe();
       stopSiren();
     };
   }, []);
 
-  const loadMembers = async () => {
-    setLoading(true);
-    try {
-      const data = await getFamilyMembers();
-      // Ensure all members default to Safe when peacetime
-      const sanitized = (data || []).map((m) => ({
-        ...m,
-        status: "Safe",
-        isSafe: true,
-      }));
-      setMembers(sanitized);
-    } catch (err) {
-      console.error("Failed to load family members:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ── NEW & IMPROVED REALISTIC EMERGENCY SIREN ("syrol") SYNTHESIZER ─────────
-  const startSiren = (soundType = sirenSoundType, volume = sirenVolume) => {
+  // ── High-Fidelity Emergency Siren & Alarm Synthesizer ─────────────────────
+  // Features 4 authentic emergency sound profiles using Web Audio LFO modulation:
+  // 1. 'wail': Authentic Civil Defense / Disaster Warning Siren (rising & falling horn)
+  // 2. 'yelp': Rapid Emergency Response Yelp (Fast high-urgency sweep)
+  // 3. 'hilo': European Two-Tone Emergency Vehicle Horn (960Hz <-> 720Hz)
+  // 4. 'klaxon': Pulsed Evacuation Klaxon Alarm
+  const startSiren = (soundType = sirenSoundType) => {
     if (sirenMuted) return;
     try {
-      stopSiren(); // Stop any currently playing audio nodes
+      stopSiren();
 
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!AudioContext) return;
 
       const ctx = new AudioContext();
       if (ctx.state === "suspended") {
-        setAudioPromptNeeded(true);
+        ctx.resume().catch(() => {});
       }
 
+      // Master output gain with smooth exponential attack
       const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(volume, ctx.currentTime);
+      masterGain.gain.setValueAtTime(0.01, ctx.currentTime);
+      masterGain.gain.exponentialRampToValueAtTime(0.28, ctx.currentTime + 0.15);
+
+      // Outdoor megaphone / acoustic horn resonance filter
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2600, ctx.currentTime);
+      filter.Q.setValueAtTime(3.0, ctx.currentTime);
+
+      filter.connect(masterGain);
       masterGain.connect(ctx.destination);
 
-      const activeOscs = [];
-      let activeLfo = null;
-      let intervalId = null;
+      let carrier = null;
+      let carrier2 = null;
+      let lfo = null;
+      let lfoGain = null;
 
       if (soundType === "wail") {
-        // 1. Realistic Electronic Emergency Siren: Warm dual oscillator + lowpass filter pitch sweep
-        const filter = ctx.createBiquadFilter();
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(1400, ctx.currentTime);
-        filter.connect(masterGain);
+        // Civil Defense Disaster Siren (Smooth 480Hz <-> 1220Hz continuous sweep)
+        carrier = ctx.createOscillator();
+        carrier.type = "sawtooth";
+        carrier.frequency.setValueAtTime(850, ctx.currentTime);
 
-        const osc1 = ctx.createOscillator();
-        osc1.type = "triangle";
-        osc1.frequency.setValueAtTime(740, ctx.currentTime);
+        carrier2 = ctx.createOscillator();
+        carrier2.type = "triangle";
+        carrier2.frequency.setValueAtTime(425, ctx.currentTime); // Sub-octave warmth
 
-        const osc2 = ctx.createOscillator();
-        osc2.type = "sawtooth";
-        osc2.frequency.setValueAtTime(743, ctx.currentTime); // subtle detuning for acoustic warmth
+        lfo = ctx.createOscillator();
+        lfo.type = "triangle";
+        lfo.frequency.setValueAtTime(0.36, ctx.currentTime); // ~2.8s emergency cycle
 
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        lfo.type = "sine";
-        lfo.frequency.setValueAtTime(0.38, ctx.currentTime); // ~2.6s rise and fall cycle
-        lfoGain.gain.setValueAtTime(280, ctx.currentTime); // sweeps between 460Hz and 1020Hz
+        lfoGain = ctx.createGain();
+        lfoGain.gain.setValueAtTime(370, ctx.currentTime); // 850 +/- 370 = 480Hz to 1220Hz
 
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc1.frequency);
-        lfoGain.connect(osc2.frequency);
-
-        osc1.connect(filter);
-        osc2.connect(filter);
-
-        osc1.start();
-        osc2.start();
-        lfo.start();
-
-        activeOscs.push(osc1, osc2);
-        activeLfo = lfo;
-      } else if (soundType === "air-raid") {
-        // 2. Civil Defense Air-Raid Siren: Deep mechanical outdoor warning horn (320Hz - 620Hz)
-        const filter = ctx.createBiquadFilter();
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(950, ctx.currentTime);
-        filter.connect(masterGain);
-
-        const osc1 = ctx.createOscillator();
-        osc1.type = "sawtooth";
-        osc1.frequency.setValueAtTime(450, ctx.currentTime);
-
-        const osc2 = ctx.createOscillator();
-        osc2.type = "triangle";
-        osc2.frequency.setValueAtTime(600, ctx.currentTime); // 4:3 harmonic ratio for dual-rotor effect
-
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        lfo.type = "sine";
-        lfo.frequency.setValueAtTime(0.28, ctx.currentTime); // slow ~3.5s wind up and down
-        lfoGain.gain.setValueAtTime(170, ctx.currentTime);
+        const lfoGain2 = ctx.createGain();
+        lfoGain2.gain.setValueAtTime(185, ctx.currentTime);
 
         lfo.connect(lfoGain);
-        lfoGain.connect(osc1.frequency);
-        lfoGain.connect(osc2.frequency);
+        lfoGain.connect(carrier.frequency);
 
-        osc1.connect(filter);
-        osc2.connect(filter);
+        lfo.connect(lfoGain2);
+        lfoGain2.connect(carrier2.frequency);
 
-        osc1.start();
-        osc2.start();
+        carrier.connect(filter);
+        carrier2.connect(filter);
+
         lfo.start();
+        carrier.start();
+        carrier2.start();
+      } else if (soundType === "yelp") {
+        // High-Urgency Rapid Rescue Yelp (Fast 3.6 Hz sweep from 600Hz to 1550Hz)
+        carrier = ctx.createOscillator();
+        carrier.type = "sawtooth";
+        carrier.frequency.setValueAtTime(1050, ctx.currentTime);
 
-        activeOscs.push(osc1, osc2);
-        activeLfo = lfo;
-      } else if (soundType === "eas-alert") {
-        // 3. Official EAS Emergency Broadcast System Alert: Simultaneous 853Hz + 960Hz dual pure tones
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        osc1.type = "sine";
-        osc1.frequency.setValueAtTime(853, ctx.currentTime);
-        osc2.type = "sine";
-        osc2.frequency.setValueAtTime(960, ctx.currentTime);
+        lfo = ctx.createOscillator();
+        lfo.type = "sawtooth";
+        lfo.frequency.setValueAtTime(3.6, ctx.currentTime);
 
-        osc1.connect(masterGain);
-        osc2.connect(masterGain);
+        lfoGain = ctx.createGain();
+        lfoGain.gain.setValueAtTime(480, ctx.currentTime);
 
-        osc1.start();
-        osc2.start();
-        activeOscs.push(osc1, osc2);
+        lfo.connect(lfoGain);
+        lfoGain.connect(carrier.frequency);
+        carrier.connect(filter);
+
+        lfo.start();
+        carrier.start();
       } else if (soundType === "hilo") {
-        // 4. European / Emergency Responder Two-Tone Hi-Lo Siren (880Hz / 660Hz)
-        const osc = ctx.createOscillator();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.connect(masterGain);
-        osc.start();
-        activeOscs.push(osc);
+        // European Two-Tone Emergency Horn (960Hz <-> 720Hz)
+        carrier = ctx.createOscillator();
+        carrier.type = "sawtooth";
+        carrier.frequency.setValueAtTime(840, ctx.currentTime);
 
-        let hi = false;
-        intervalId = setInterval(() => {
-          if (!audioCtxRef.current || ctx.state === "closed") return;
-          try {
-            osc.frequency.setValueAtTime(hi ? 880 : 660, ctx.currentTime);
-            hi = !hi;
-          } catch {}
-        }, 420);
+        carrier2 = ctx.createOscillator();
+        carrier2.type = "square";
+        carrier2.frequency.setValueAtTime(840, ctx.currentTime);
+        const c2Gain = ctx.createGain();
+        c2Gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        carrier2.connect(c2Gain);
+        c2Gain.connect(filter);
+
+        lfo = ctx.createOscillator();
+        lfo.type = "square";
+        lfo.frequency.setValueAtTime(1.15, ctx.currentTime); // 435ms alternating step
+
+        lfoGain = ctx.createGain();
+        lfoGain.gain.setValueAtTime(120, ctx.currentTime); // 840 +/- 120 = 960Hz and 720Hz
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(carrier.frequency);
+        lfoGain.connect(carrier2.frequency);
+        carrier.connect(filter);
+
+        lfo.start();
+        carrier.start();
+        carrier2.start();
       } else {
-        // 5. Rapid Evacuation Alert (Triple Pulse Buzzer)
-        const osc = ctx.createOscillator();
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(840, ctx.currentTime);
-        osc.connect(masterGain);
-        osc.start();
-        activeOscs.push(osc);
+        // Pulsed Disaster Evacuation Klaxon (880Hz / 587Hz pulse)
+        carrier = ctx.createOscillator();
+        carrier.type = "sawtooth";
+        carrier.frequency.setValueAtTime(880, ctx.currentTime);
 
-        let step = 0;
-        intervalId = setInterval(() => {
-          if (!audioCtxRef.current || ctx.state === "closed") return;
-          try {
-            const isBeep = step % 6 === 0 || step % 6 === 2 || step % 6 === 4;
-            masterGain.gain.setValueAtTime(isBeep ? volume : 0.0, ctx.currentTime);
-            step = (step + 1) % 6;
-          } catch {}
-        }, 120);
+        carrier2 = ctx.createOscillator();
+        carrier2.type = "triangle";
+        carrier2.frequency.setValueAtTime(587, ctx.currentTime);
+
+        const pulseGain = ctx.createGain();
+        pulseGain.gain.setValueAtTime(0.8, ctx.currentTime);
+
+        carrier.connect(pulseGain);
+        carrier2.connect(pulseGain);
+        pulseGain.connect(filter);
+
+        // Modulate amplitude at 4Hz
+        lfo = ctx.createOscillator();
+        lfo.type = "square";
+        lfo.frequency.setValueAtTime(3.8, ctx.currentTime);
+        lfo.connect(pulseGain.gain);
+
+        lfo.start();
+        carrier.start();
+        carrier2.start();
       }
 
       audioCtxRef.current = ctx;
-      oscRefs.current = activeOscs;
-      lfoRef.current = activeLfo;
-      gainRef.current = masterGain;
-      sirenIntervalRef.current = intervalId;
-
+      osc1Ref.current = carrier;
+      osc2Ref.current = carrier2;
+      lfoRef.current = lfo;
+      masterGainRef.current = masterGain;
       setSirenPlaying(true);
-      setAudioPromptNeeded(false);
 
       if (typeof navigator !== "undefined" && navigator.vibrate) {
-        navigator.vibrate([300, 100, 300, 100, 500]);
+        navigator.vibrate([350, 120, 350, 120, 600]);
       }
     } catch (err) {
-      console.warn("Unable to start siren buzzer:", err);
-      setAudioPromptNeeded(true);
+      console.warn("Unable to start emergency siren buzzer:", err);
     }
   };
 
   const stopSiren = () => {
     try {
-      if (sirenIntervalRef.current) {
-        clearInterval(sirenIntervalRef.current);
-        sirenIntervalRef.current = null;
+      if (pulseTimerRef.current) {
+        clearInterval(pulseTimerRef.current);
+        pulseTimerRef.current = null;
       }
-      if (lfoRef.current) {
-        try {
-          lfoRef.current.stop();
-          lfoRef.current.disconnect();
-        } catch {}
-        lfoRef.current = null;
+      if (masterGainRef.current && audioCtxRef.current) {
+        const now = audioCtxRef.current.currentTime;
+        masterGainRef.current.gain.cancelScheduledValues(now);
+        masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, now);
+        masterGainRef.current.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
       }
-      if (oscRefs.current && Array.isArray(oscRefs.current)) {
-        oscRefs.current.forEach((o) => {
-          try {
-            o.stop();
-            o.disconnect();
-          } catch {}
-        });
-        oscRefs.current = [];
-      }
-      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
-        audioCtxRef.current.close().catch(() => {});
-        audioCtxRef.current = null;
-      }
-    } catch (err) {
-      console.warn("Error stopping siren:", err);
-    }
+      setTimeout(() => {
+        if (osc1Ref.current) {
+          try { osc1Ref.current.stop(); osc1Ref.current.disconnect(); } catch {}
+          osc1Ref.current = null;
+        }
+        if (osc2Ref.current) {
+          try { osc2Ref.current.stop(); osc2Ref.current.disconnect(); } catch {}
+          osc2Ref.current = null;
+        }
+        if (lfoRef.current) {
+          try { lfoRef.current.stop(); lfoRef.current.disconnect(); } catch {}
+          lfoRef.current = null;
+        }
+        if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
+          try { audioCtxRef.current.close(); } catch {}
+          audioCtxRef.current = null;
+        }
+      }, 100);
+    } catch (err) {}
     setSirenPlaying(false);
   };
 
   const toggleSirenMute = () => {
     if (sirenPlaying) {
       stopSiren();
+      setSirenMuted(true);
     } else {
       setSirenMuted(false);
-      startSiren(sirenSoundType, sirenVolume);
+      startSiren();
     }
   };
 
-  // Change siren sound type and switch live if playing
-  const handleSoundTypeChange = (newType) => {
-    setSirenSoundType(newType);
-    if (sirenPlaying) {
-      startSiren(newType, sirenVolume);
-    }
-  };
+  // Filter active danger zones
+  const activeZones = selectedDisasterId === "all"
+    ? ACTIVE_DANGER_ZONES
+    : ACTIVE_DANGER_ZONES.filter((z) => z.id === selectedDisasterId);
 
-  // Change siren volume and switch live
-  const handleVolumeChange = (newVol) => {
-    setSirenVolume(newVol);
-    if (sirenPlaying) {
-      startSiren(sirenSoundType, newVol);
-    }
-  };
-
-  // ── DANGER TRACKING & ALWAYS SAFE LOGIC ──────────────────────────────────
-  // If NO disaster has happened: ALL MEMBERS ARE ALWAYS 100% SAFE!
-  // If disaster HAS happened: evaluate coordinates against active danger zone!
-  const targetDisasterZone = ACTIVE_DANGER_ZONES.find((z) => z.id === selectedDisasterId) || ACTIVE_DANGER_ZONES[0];
-
+  // ── Evaluate Members Against Active Danger Zones ─────────────────────────
   const evaluatedMembers = members.map((member) => {
-    // When the disaster has NOT happened: members are ALWAYS safe!
-    if (!disasterHappened) {
-      return {
-        ...member,
-        inDanger: false,
-        dangerZone: null,
-        nearestShelter: null,
-        distanceToEpicenterKm: null,
-        effectiveStatus: "Safe", // Always Safe when disaster has not happened!
-        status: "Safe",
-        isSafe: true,
-      };
-    }
+    // Member's manual status
+    const isManuallyUnsafe = member.status === "Needs Help";
 
-    // When disaster HAS happened: track if present in danger zone!
-    const evaluation = checkMemberInDangerZone(member, [targetDisasterZone]);
+    // Danger zone evaluation (only active when disaster alert is triggered)
+    const evaluation = disasterAlertActive
+      ? checkMemberInDangerZone(member, activeZones)
+      : { inDanger: false, memberCoords: null, dangerZone: null };
+
     const inDanger = evaluation.inDanger;
-    const nearestShelter = inDanger
-      ? findNearestSafeShelter(evaluation.memberCoords, DEFAULT_SHELTERS, evaluation.dangerZone)
+    // An individual is considered unsafe if they are inside an active danger zone OR manually marked Needs Help
+    const isUnsafe = inDanger || isManuallyUnsafe;
+
+    const coords = evaluation.memberCoords || parseMemberCoordinates(member);
+    const nearestShelter = isUnsafe && coords
+      ? findNearestSafeShelter(coords, DEFAULT_SHELTERS, evaluation.dangerZone)
       : null;
 
     return {
       ...member,
       inDanger,
+      isUnsafe,
       dangerZone: evaluation.dangerZone,
       distanceToEpicenterKm: evaluation.distanceToEpicenterKm,
-      memberCoords: evaluation.memberCoords,
+      memberCoords: coords,
       nearestShelter,
-      // If present in danger zone, symbol automatically changes to Unsafe!
-      effectiveStatus: inDanger ? "Unsafe" : "Safe",
-      status: inDanger ? "Needs Help" : "Safe",
-      isSafe: !inDanger,
+      effectiveStatus: isUnsafe ? "Unsafe" : "Safe",
     };
   });
 
-  const dangerCount = evaluatedMembers.filter((m) => m.inDanger).length;
-  const safeCount = evaluatedMembers.filter((m) => !m.inDanger).length;
+  const unsafeCount = evaluatedMembers.filter((m) => m.isUnsafe).length;
+  const safeCount = evaluatedMembers.filter((m) => !m.isUnsafe).length;
 
-  // Automatically buzz siren when any member is detected in danger after disaster happens
+  // ── DEFAULT-SILENT & UNSAFE AUTO-BUZZ EFFECT ─────────────────────────────
+  // RULE: By default on page load, the siren MUST NOT buzz!
+  // It ONLY buzzes when someone BECOMES unsafe (count increases > 0)
+  // or when an active disaster alert detects family members inside hazard zones.
   useEffect(() => {
-    if (disasterHappened && dangerCount > 0 && !sirenPlaying && !sirenMuted) {
-      startSiren(sirenSoundType, sirenVolume);
-    } else if (!disasterHappened && sirenPlaying) {
+    if (loading) return;
+
+    // First load / mount: ensure silent state, record current baseline
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      prevUnsafeCountRef.current = unsafeCount;
+      return;
+    }
+
+    // If any member BECOMES unsafe (count increased and > 0), buzz the siren!
+    if (unsafeCount > 0 && unsafeCount > prevUnsafeCountRef.current && !sirenMuted) {
+      startSiren();
+    } else if (unsafeCount === 0 && sirenPlaying) {
+      // If everyone is safe, immediately disarm the siren
       stopSiren();
     }
-  }, [disasterHappened, dangerCount, sirenMuted, sirenSoundType, sirenVolume]);
+
+    prevUnsafeCountRef.current = unsafeCount;
+  }, [unsafeCount, disasterAlertActive, loading, sirenMuted]);
 
   // Get real GPS coordinates
   const detectGPS = () => {
@@ -398,7 +400,6 @@ export default function FamilySafety() {
         location: location || "Location not specified",
         coordinates,
         status: "Safe",
-        isSafe: true,
       });
       setMembers(updated);
       setName("");
@@ -406,7 +407,7 @@ export default function FamilySafety() {
       setLocation("");
       setCoordinates("");
       setBloodGroup("Unknown");
-      setBroadcastMsg("✅ Family member registered successfully into safety network.");
+      setBroadcastMsg("✅ Family member registered into safety network.");
       setTimeout(() => setBroadcastMsg(""), 3500);
     } catch (err) {
       console.error("Error adding family member:", err);
@@ -416,40 +417,82 @@ export default function FamilySafety() {
     }
   };
 
-  // Toggle Safety Status manually
+  // Toggle Safety Status: If toggled to unsafe, it will buzz the siren!
   const handleToggleStatus = async (member) => {
-    if (!disasterHappened) {
-      setBroadcastMsg("🟢 Normal peacetime: All family members remain automatically SAFE. To simulate emergency hazard tracking, click 'Trigger Disaster in Area'.");
-      setTimeout(() => setBroadcastMsg(""), 4500);
-      return;
-    }
-    const newStatus = member.effectiveStatus === "Safe" ? "Needs Help" : "Safe";
+    const nextStatus = member.status === "Safe" ? "Needs Help" : "Safe";
     try {
-      const updated = await toggleMemberSafety(member.id || member._id, newStatus);
+      const updated = await toggleMemberSafety(member.id || member._id, nextStatus);
       setMembers(updated);
+      if (nextStatus === "Needs Help" && !sirenMuted) {
+        startSiren();
+      }
     } catch (err) {
       console.error("Error toggling safety:", err);
     }
   };
 
-  // Delete Member
+  // Delete Member (Permanently for all users)
   const handleDelete = async (member) => {
-    if (!window.confirm(`Are you sure you want to remove ${member.name} from Family Safety?`)) {
+    if (!window.confirm(`Are you sure you want to remove ${member.name} permanently for all users?`)) {
       return;
     }
     try {
       const updated = await removeFamilyMember(member.id || member._id);
       setMembers(updated);
+      setBroadcastMsg(`🗑️ Removed "${member.name}" permanently from safety network.`);
+      setTimeout(() => setBroadcastMsg(""), 4000);
     } catch (err) {
       console.error("Error deleting member:", err);
+    }
+  };
+
+  // Open Edit Modal (To change name or other info)
+  const handleOpenEdit = (member) => {
+    setEditingMember(member);
+    setEditName(member.name || "");
+    setEditRelation(member.relation || "Family");
+    setEditPhone(member.phone || "");
+    setEditBloodGroup(member.bloodGroup || "Unknown");
+    setEditLocation(member.location || "");
+    setEditCoordinates(member.coordinates || "");
+  };
+
+  const handleCloseEdit = () => {
+    setEditingMember(null);
+  };
+
+  // Save Edit Changes (Permanently syncs for every user)
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editName.trim() || !editingMember) return;
+    setEditSaving(true);
+    try {
+      const targetId = editingMember.id || editingMember._id;
+      const updated = await updateFamilyMember(targetId, {
+        name: editName.trim(),
+        relation: editRelation,
+        phone: editPhone,
+        bloodGroup: editBloodGroup,
+        location: editLocation || "Registered Address",
+        coordinates: editCoordinates,
+      });
+      setMembers(updated);
+      setBroadcastMsg(`✅ Permanently updated "${editName.trim()}" for every user.`);
+      setTimeout(() => setBroadcastMsg(""), 4000);
+      handleCloseEdit();
+    } catch (err) {
+      console.error("Error saving member edit:", err);
+      alert("Failed to save changes. Please try again.");
+    } finally {
+      setEditSaving(false);
     }
   };
 
   // Mark all safe
   const markAllSafe = async () => {
     try {
-      setDisasterHappened(false);
       stopSiren();
+      setDisasterAlertActive(false);
       let current = [...members];
       for (const m of current) {
         if (m.status !== "Safe") {
@@ -457,10 +500,24 @@ export default function FamilySafety() {
         }
       }
       setMembers(current);
-      setBroadcastMsg("✅ Disaster cleared: All family members confirmed Safe!");
+      setBroadcastMsg("✅ Entire family confirmed safe. Siren disarmed.");
       setTimeout(() => setBroadcastMsg(""), 4000);
     } catch (err) {
       console.error("Error marking all safe:", err);
+    }
+  };
+
+  // Trigger Incoming Disaster Alert in Area
+  const triggerIncomingDisaster = () => {
+    const nextState = !disasterAlertActive;
+    setDisasterAlertActive(nextState);
+    if (nextState) {
+      setBroadcastMsg("🚨 Active disaster alert triggered! Tracking family coordinates against danger zone.");
+      setTimeout(() => setBroadcastMsg(""), 5000);
+    } else {
+      stopSiren();
+      setBroadcastMsg("🟢 Disaster alert cleared. Family area status normal.");
+      setTimeout(() => setBroadcastMsg(""), 4000);
     }
   };
 
@@ -473,7 +530,7 @@ export default function FamilySafety() {
     }
     const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
     const msg = encodeURIComponent(
-      `🚨 EMERGENCY DISASTER SAFETY CHECK:\nHi ${member.name}, I am checking on your safety. Current status: ${member.effectiveStatus}. Please reply immediately: Are you SAFE or do you NEED RESCUE? Current timestamp: ${new Date().toLocaleTimeString()}`
+      `🚨 EMERGENCY DISASTER SAFETY CHECK:\nHi ${member.name}, I am tracking disaster alerts in your area. Please reply immediately: Are you SAFE or do you NEED RESCUE? Current timestamp: ${new Date().toLocaleTimeString()}`
     );
     window.open(`https://wa.me/${formattedPhone}?text=${msg}`, "_blank");
   };
@@ -499,13 +556,44 @@ export default function FamilySafety() {
                 Family Safety Tracker & Danger Radar
               </h1>
               <p style={{ color: "#94a3b8", marginTop: "4px", fontSize: "0.95rem" }}>
-                Automatic safety tracking: All family members are safe until a disaster strikes. When disaster occurs, dangerous zones trigger the siren and guide members to safety.
+                Automatic danger zone tracking, emergency siren buzzer alert, and nearest safe refuge routing.
               </p>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "4px", backgroundColor: "rgba(16, 185, 129, 0.12)", border: "1px solid #10b981", padding: "3px 10px", borderRadius: "20px", fontSize: "0.78rem", color: "#6ee7b7", fontWeight: "700" }}>
+                <span>☁️</span>
+                <span>Permanent Cloud Sync Active (All edits sync live across every user)</span>
+              </div>
             </div>
           </div>
         </div>
 
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+          {/* Siren Tone Selector */}
+          <select
+            value={sirenSoundType}
+            onChange={(e) => {
+              const newType = e.target.value;
+              setSirenSoundType(newType);
+              if (sirenPlaying) startSiren(newType);
+            }}
+            title="Choose Emergency Siren Sound Tone"
+            style={{
+              backgroundColor: "#1e293b",
+              border: "1px solid #475569",
+              color: "#38bdf8",
+              padding: "9px 12px",
+              borderRadius: "8px",
+              fontSize: "0.82rem",
+              fontWeight: "700",
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            <option value="wail">📢 Siren: Civil Defense Wail</option>
+            <option value="yelp">🚨 Siren: Rapid Emergency Yelp</option>
+            <option value="hilo">🚑 Siren: European Hi-Lo Horn</option>
+            <option value="klaxon">⚠️ Siren: Evacuation Klaxon</option>
+          </select>
+
           {/* Siren Buzzer Sound / Mute Button */}
           <button
             onClick={toggleSirenMute}
@@ -521,12 +609,12 @@ export default function FamilySafety() {
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              boxShadow: sirenPlaying ? "0 0 16px rgba(220, 38, 38, 0.7)" : "none",
+              boxShadow: sirenPlaying ? "0 0 18px rgba(220, 38, 38, 0.8)" : "none",
               transition: "all 0.2s ease",
             }}
           >
-            <span>{sirenPlaying ? "⏹️" : "🔊"}</span>
-            <span>{sirenPlaying ? "Stop Siren Sound" : "Test Siren Sound"}</span>
+            <span>{sirenPlaying ? "🔊" : "🔇"}</span>
+            <span>{sirenPlaying ? "Mute Siren Buzzer" : "Test Audio Siren"}</span>
           </button>
 
           <button
@@ -564,177 +652,78 @@ export default function FamilySafety() {
         </div>
       )}
 
-      {/* ── AUDIO USER GESTURE PROMPT ────────────────────────────────────── */}
-      {audioPromptNeeded && (
-        <div
-          style={{
-            backgroundColor: "#7f1d1d",
-            border: "2px solid #ef4444",
-            color: "#ffffff",
-            padding: "12px 18px",
-            borderRadius: "10px",
-            marginBottom: "20px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "10px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "1.4rem" }}>📢</span>
-            <span style={{ fontSize: "0.9rem", fontWeight: "600" }}>
-              Active Disaster Alert: Click below to enable the emergency civil defense siren sound.
-            </span>
-          </div>
-          <button
-            onClick={() => startSiren(sirenSoundType)}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#ffffff",
-              color: "#991b1b",
-              fontWeight: "800",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            🔊 Enable Audio Siren
-          </button>
-        </div>
-      )}
-
-      {/* ── DISASTER RADAR & SIREN SOUND CONTROL BAR ────────────────────── */}
+      {/* ── DANGER TRACKING & DISASTER SIMULATION CONTROL BAR ─────────────── */}
       <div
         style={{
-          backgroundColor: disasterHappened && dangerCount > 0 ? "rgba(127, 29, 29, 0.45)" : "#1e293b",
-          border: `2px solid ${disasterHappened && dangerCount > 0 ? "#ef4444" : "#166534"}`,
+          backgroundColor: unsafeCount > 0 ? "rgba(127, 29, 29, 0.45)" : "#1e293b",
+          border: `1.5px solid ${unsafeCount > 0 ? "#ef4444" : "#334155"}`,
           borderRadius: "14px",
-          padding: "20px 24px",
+          padding: "18px 22px",
           marginBottom: "24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "18px",
-          boxShadow: disasterHappened && dangerCount > 0 ? "0 0 30px rgba(239, 68, 68, 0.35)" : "none",
-          transition: "all 0.3s ease",
+          gap: "16px",
+          boxShadow: unsafeCount > 0 ? "0 0 25px rgba(239, 68, 68, 0.35)" : "none",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
           <div
             style={{
-              width: "48px",
-              height: "48px",
+              width: "44px",
+              height: "44px",
               borderRadius: "50%",
-              backgroundColor: disasterHappened && dangerCount > 0 ? "#dc2626" : "#166534",
+              backgroundColor: unsafeCount > 0 ? "#dc2626" : "#0284c7",
               color: "#fff",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "1.6rem",
-              boxShadow: disasterHappened && dangerCount > 0 ? "0 0 20px rgba(220, 38, 38, 0.8)" : "none",
-              animation: disasterHappened && dangerCount > 0 ? "pulse 1.2s infinite" : "none",
+              fontSize: "1.5rem",
+              boxShadow: unsafeCount > 0 ? "0 0 16px rgba(239, 68, 68, 0.8)" : "none",
             }}
           >
-            {disasterHappened && dangerCount > 0 ? "🚨" : "🟢"}
+            {unsafeCount > 0 ? "🚨" : "🛡️"}
           </div>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-              <strong
-                style={{
-                  color: disasterHappened && dangerCount > 0 ? "#fca5a5" : "#86efac",
-                  fontSize: "1.1rem",
-                }}
-              >
-                {disasterHappened
-                  ? dangerCount > 0
-                    ? `🚨 DISASTER IN PROGRESS: ${dangerCount} Member(s) in Danger Zone!`
-                    : "⚠️ Disaster Alert Active — All Members outside hazard zone"
-                  : "🟢 NORMAL STATUS: No Disaster Active — Entire Family is SAFE"}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <strong style={{ color: unsafeCount > 0 ? "#fca5a5" : "#f8fafc", fontSize: "1.05rem" }}>
+                {unsafeCount > 0
+                  ? `🚨 CRITICAL ALERT: ${unsafeCount} Family Member(s) Unsafe / In Danger Zone!`
+                  : "🛡️ Automated Danger Radar: Standing by (All Members Secure)"}
               </strong>
               {sirenPlaying && (
                 <span
                   style={{
                     backgroundColor: "#dc2626",
                     color: "#fff",
-                    padding: "3px 10px",
+                    padding: "2px 8px",
                     borderRadius: "12px",
                     fontSize: "0.72rem",
-                    fontWeight: "900",
+                    fontWeight: "800",
                     letterSpacing: "1px",
-                    boxShadow: "0 0 10px rgba(220, 38, 38, 0.8)",
+                    animation: "pulse 1s infinite",
                   }}
                 >
-                  SIREN BUZZING
+                  🔊 SIREN ACTIVE
                 </span>
               )}
             </div>
-            <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#94a3b8" }}>
-              {disasterHappened
-                ? `Active Hazard: ${targetDisasterZone.name} (${targetDisasterZone.type}) • Radius: ${targetDisasterZone.radiusKm} km`
-                : "Family members are safe by default. Click 'Trigger Disaster in Area' to simulate an incoming emergency."}
+            <p style={{ margin: "4px 0 0 0", fontSize: "0.83rem", color: "#94a3b8" }}>
+              {disasterAlertActive
+                ? "Active disaster detected in zone! Members located inside hazard perimeter are marked UNSAFE and siren sounds."
+                : "Default state: Silent. When an active disaster occurs or any member enters danger, siren buzzer sounds automatically."}
             </p>
           </div>
         </div>
 
-        {/* Controls: Disaster Trigger & Siren Sound Selector */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-          {/* Siren Sound Type Selector */}
+        {/* Controls */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Siren Sound:</span>
-            <select
-              value={sirenSoundType}
-              onChange={(e) => handleSoundTypeChange(e.target.value)}
-              style={{
-                backgroundColor: "#0f172a",
-                border: "1px solid #334155",
-                color: "#ffffff",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                fontSize: "0.82rem",
-                outline: "none",
-                cursor: "pointer",
-              }}
-            >
-              <option value="wail">🚨 Modern Electronic Siren (Realistic Wail)</option>
-              <option value="air-raid">📢 Civil Defense Air-Raid Horn (Deep Outdoor)</option>
-              <option value="eas-alert">📡 Emergency Broadcast EAS (Dual 853Hz+960Hz)</option>
-              <option value="hilo">🚓 Two-Tone Emergency Responder (Hi-Lo)</option>
-              <option value="pulse">⚠️ Rapid Evacuation Triple Pulse (Urgent Alarm)</option>
-            </select>
-          </div>
-
-          {/* Siren Volume Selector */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Volume:</span>
-            <select
-              value={sirenVolume}
-              onChange={(e) => handleVolumeChange(Number(e.target.value))}
-              style={{
-                backgroundColor: "#0f172a",
-                border: "1px solid #334155",
-                color: "#ffffff",
-                padding: "8px 10px",
-                borderRadius: "8px",
-                fontSize: "0.82rem",
-                outline: "none",
-                cursor: "pointer",
-              }}
-            >
-              <option value={0.12}>🔉 Low (25%)</option>
-              <option value={0.22}>🔊 Normal (50%)</option>
-              <option value={0.35}>📢 Loud (85%)</option>
-            </select>
-          </div>
-
-          {/* Disaster Type Selector */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Target Hazard:</span>
+            <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Hazard Zone:</span>
             <select
               value={selectedDisasterId}
               onChange={(e) => setSelectedDisasterId(e.target.value)}
-              disabled={disasterHappened}
               style={{
                 backgroundColor: "#0f172a",
                 border: "1px solid #334155",
@@ -743,9 +732,9 @@ export default function FamilySafety() {
                 borderRadius: "8px",
                 fontSize: "0.82rem",
                 outline: "none",
-                cursor: disasterHappened ? "not-allowed" : "pointer",
               }}
             >
+              <option value="all">All Danger Zones ({ACTIVE_DANGER_ZONES.length})</option>
               {ACTIVE_DANGER_ZONES.map((z) => (
                 <option key={z.id} value={z.id}>
                   {z.name} ({z.type})
@@ -754,55 +743,26 @@ export default function FamilySafety() {
             </select>
           </div>
 
-          {/* MAIN TOGGLE: TRIGGER DISASTER vs DISASTER PASSED */}
-          {!disasterHappened ? (
-            <button
-              onClick={() => setDisasterHappened(true)}
-              style={{
-                padding: "10px 18px",
-                backgroundColor: "#dc2626",
-                border: "1px solid #ef4444",
-                color: "#ffffff",
-                borderRadius: "8px",
-                fontWeight: "800",
-                fontSize: "0.86rem",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                boxShadow: "0 0 16px rgba(220, 38, 38, 0.6)",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <span>🚨</span>
-              <span>Trigger Disaster in Area</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                setDisasterHappened(false);
-                stopSiren();
-              }}
-              style={{
-                padding: "10px 18px",
-                backgroundColor: "#166534",
-                border: "1px solid #22c55e",
-                color: "#86efac",
-                borderRadius: "8px",
-                fontWeight: "800",
-                fontSize: "0.86rem",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                boxShadow: "0 0 16px rgba(34, 197, 94, 0.4)",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <span>🟢</span>
-              <span>Disaster Passed (All Safe)</span>
-            </button>
-          )}
+          {/* Trigger Incoming Disaster Toggle Button */}
+          <button
+            onClick={triggerIncomingDisaster}
+            style={{
+              padding: "10px 18px",
+              backgroundColor: disasterAlertActive ? "#dc2626" : "#0284c7",
+              border: "none",
+              color: "#ffffff",
+              borderRadius: "8px",
+              fontWeight: "800",
+              fontSize: "0.85rem",
+              cursor: "pointer",
+              boxShadow: disasterAlertActive ? "0 0 16px rgba(220, 38, 38, 0.6)" : "0 2px 8px rgba(2, 132, 199, 0.4)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <span>{disasterAlertActive ? "🛑 Clear Disaster Alert" : "🚨 Simulate Disaster in Area"}</span>
+          </button>
         </div>
       </div>
 
@@ -825,55 +785,44 @@ export default function FamilySafety() {
           <div style={{ fontSize: "0.8rem", color: "#94a3b8", marginTop: "4px" }}>In Safety Network</div>
         </div>
 
-        <div
-          style={{
-            backgroundColor: !disasterHappened || dangerCount === 0 ? "rgba(22, 101, 52, 0.3)" : "#1e293b",
-            padding: "18px",
-            borderRadius: "12px",
-            border: `1.5px solid ${!disasterHappened || dangerCount === 0 ? "#22c55e" : "#334155"}`,
-          }}
-        >
-          <span style={{ color: !disasterHappened || dangerCount === 0 ? "#86efac" : "#94a3b8", fontSize: "0.8rem", fontWeight: "600", textTransform: "uppercase" }}>
+        <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "12px", border: "1px solid #334155" }}>
+          <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: "600", textTransform: "uppercase" }}>
             Confirmed Safe
           </span>
           <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#22c55e", marginTop: "4px" }}>
             {safeCount}
           </div>
-          <div style={{ fontSize: "0.8rem", color: "#4ade80", marginTop: "4px" }}>
-            {!disasterHappened ? "100% Safe (No Disaster)" : "Outside Danger Zone"}
-          </div>
+          <div style={{ fontSize: "0.8rem", color: "#4ade80", marginTop: "4px" }}>Outside Danger Zones</div>
         </div>
 
         <div
           style={{
-            backgroundColor: dangerCount > 0 ? "#3b0707" : "#1e293b",
+            backgroundColor: unsafeCount > 0 ? "#3b0707" : "#1e293b",
             padding: "18px",
             borderRadius: "12px",
-            border: `1.5px solid ${dangerCount > 0 ? "#ef4444" : "#334155"}`,
-            boxShadow: dangerCount > 0 ? "0 0 15px rgba(239, 68, 68, 0.25)" : "none",
+            border: `1.5px solid ${unsafeCount > 0 ? "#ef4444" : "#334155"}`,
+            boxShadow: unsafeCount > 0 ? "0 0 15px rgba(239, 68, 68, 0.25)" : "none",
           }}
         >
-          <span style={{ color: dangerCount > 0 ? "#fca5a5" : "#94a3b8", fontSize: "0.8rem", fontWeight: "600", textTransform: "uppercase" }}>
-            In Danger Zone (Unsafe)
+          <span style={{ color: unsafeCount > 0 ? "#fca5a5" : "#94a3b8", fontSize: "0.8rem", fontWeight: "600", textTransform: "uppercase" }}>
+            Unsafe / In Danger
           </span>
-          <div style={{ fontSize: "1.8rem", fontWeight: "800", color: dangerCount > 0 ? "#ef4444" : "#22c55e", marginTop: "4px" }}>
-            {dangerCount}
+          <div style={{ fontSize: "1.8rem", fontWeight: "800", color: unsafeCount > 0 ? "#ef4444" : "#f8fafc", marginTop: "4px" }}>
+            {unsafeCount}
           </div>
-          <div style={{ fontSize: "0.8rem", color: dangerCount > 0 ? "#f87171" : "#86efac", marginTop: "4px" }}>
-            {dangerCount > 0 ? "⚠️ Auto-Flagged Unsafe" : "None in danger"}
+          <div style={{ fontSize: "0.8rem", color: unsafeCount > 0 ? "#f87171" : "#94a3b8", marginTop: "4px" }}>
+            {unsafeCount > 0 ? "⚠️ Siren Buzzer Triggered" : "0 Unsafe (Siren Silent)"}
           </div>
         </div>
 
         <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "12px", border: "1px solid #334155" }}>
           <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: "600", textTransform: "uppercase" }}>
-            Radar Perimeter Status
+            Radar Status
           </span>
-          <div style={{ fontSize: "1.2rem", fontWeight: "800", color: dangerCount > 0 ? "#ef4444" : "#22c55e", marginTop: "8px" }}>
-            {dangerCount > 0 ? "🚨 ALERT ACTIVE" : "🟢 ALL SECURE"}
+          <div style={{ fontSize: "1.2rem", fontWeight: "800", color: unsafeCount > 0 ? "#ef4444" : "#22c55e", marginTop: "8px" }}>
+            {unsafeCount > 0 ? "🚨 ALERT BUZZING" : "🟢 STANDBY (NORMAL)"}
           </div>
-          <div style={{ fontSize: "0.8rem", color: "#94a3b8", marginTop: "4px" }}>
-            {disasterHappened ? "Active Disaster Tracking" : "Standby Monitoring"}
-          </div>
+          <div style={{ fontSize: "0.8rem", color: "#94a3b8", marginTop: "4px" }}>Automatic Proximity Check</div>
         </div>
       </div>
 
@@ -1070,7 +1019,7 @@ export default function FamilySafety() {
             👥 Tracked Family Members ({evaluatedMembers.length})
           </h3>
           <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
-            {!disasterHappened ? "🟢 Normal status: All members safe" : "🚨 Disaster Tracking: Active"}
+            Automatic Unsafe Symbol & Siren Trigger on Threat Detection
           </span>
         </div>
 
@@ -1096,13 +1045,13 @@ export default function FamilySafety() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {evaluatedMembers.map((member) => {
-              const inDanger = member.inDanger;
-              const isSafe = !inDanger;
+              const isUnsafe = member.isUnsafe;
+              const isSafe = !isUnsafe;
               const coords = member.memberCoords || parseMemberCoordinates(member);
 
               // Evacuation Route to Nearest Safe Shelter Link
               const evacRouteUrl = member.nearestShelter && coords
-                ? `/map?evac=1&originLat=${coords.lat}&originLng=${coords.lng}&destLat=${member.nearestShelter.lat}&destLng=${member.nearestShelter.lng}&shelterName=${encodeURIComponent(member.nearestShelter.name)}&hazard=${encodeURIComponent(member.dangerZone?.name || "Active Hazard Zone")}&name=${encodeURIComponent(member.name)}`
+                ? `/map?evac=1&originLat=${coords.lat}&originLng=${coords.lng}&destLat=${member.nearestShelter.lat}&destLng=${member.nearestShelter.lng}&shelterName=${encodeURIComponent(member.nearestShelter.name)}&hazard=${encodeURIComponent(member.dangerZone?.name || "Active Danger Area")}&name=${encodeURIComponent(member.name)}`
                 : coords
                 ? `/map?lat=${coords.lat}&lng=${coords.lng}&name=${encodeURIComponent(member.name)}`
                 : `/map?name=${encodeURIComponent(member.location || member.name)}`;
@@ -1111,12 +1060,12 @@ export default function FamilySafety() {
                 <div
                   key={member.id || member._id}
                   style={{
-                    backgroundColor: inDanger ? "#2a0d0d" : "#1e293b",
+                    backgroundColor: isUnsafe ? "#2a0d0d" : "#1e293b",
                     borderRadius: "14px",
-                    border: `2px solid ${inDanger ? "#ef4444" : "#166534"}`,
+                    border: `2px solid ${isUnsafe ? "#ef4444" : "#166534"}`,
                     padding: "20px 24px",
-                    boxShadow: inDanger
-                      ? "0 0 30px rgba(239, 68, 68, 0.35)"
+                    boxShadow: isUnsafe
+                      ? "0 0 30px rgba(239, 68, 68, 0.4)"
                       : "none",
                     transition: "all 0.3s ease",
                   }}
@@ -1136,20 +1085,20 @@ export default function FamilySafety() {
                       {/* Avatar / Danger Symbol */}
                       <div
                         style={{
-                          width: "46px",
-                          height: "46px",
+                          width: "48px",
+                          height: "48px",
                           borderRadius: "50%",
-                          backgroundColor: inDanger ? "#ef4444" : "#166534",
+                          backgroundColor: isUnsafe ? "#ef4444" : "#166534",
                           color: "#ffffff",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           fontSize: "1.5rem",
-                          border: "2px solid #ffffff",
-                          boxShadow: inDanger ? "0 0 16px rgba(239, 68, 68, 0.8)" : "none",
+                          border: "2.5px solid #ffffff",
+                          boxShadow: isUnsafe ? "0 0 18px rgba(239, 68, 68, 0.9)" : "none",
                         }}
                       >
-                        {inDanger ? "⚠️" : "👤"}
+                        {isUnsafe ? "⚠️" : "👤"}
                       </div>
 
                       <div>
@@ -1158,8 +1107,8 @@ export default function FamilySafety() {
                             {member.name}
                           </span>
 
-                          {/* AUTOMATIC SYMBOL CHANGE: SAFE by default, UNSAFE only when disaster strikes and inside danger zone */}
-                          {inDanger ? (
+                          {/* AUTOMATIC SYMBOL CHANGE: UNSAFE SYMBOL */}
+                          {isUnsafe ? (
                             <span
                               style={{
                                 display: "inline-flex",
@@ -1173,11 +1122,11 @@ export default function FamilySafety() {
                                 fontSize: "0.78rem",
                                 fontWeight: "900",
                                 letterSpacing: "0.5px",
-                                boxShadow: "0 0 12px rgba(239, 68, 68, 0.6)",
+                                boxShadow: "0 0 14px rgba(239, 68, 68, 0.7)",
                               }}
                             >
                               <span>🚨</span>
-                              <span>UNSAFE (IN DANGER ZONE)</span>
+                              <span>{member.inDanger ? "UNSAFE (IN DANGER ZONE)" : "UNSAFE (NEEDS HELP)"}</span>
                             </span>
                           ) : (
                             <span
@@ -1232,7 +1181,7 @@ export default function FamilySafety() {
                         <div style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "12px" }}>
                           <span>
                             📍 Location:{" "}
-                            <span style={{ color: inDanger ? "#fca5a5" : "#e2e8f0", fontWeight: "600" }}>
+                            <span style={{ color: isUnsafe ? "#fca5a5" : "#e2e8f0", fontWeight: "600" }}>
                               {member.location || "Coordinates registered"}
                             </span>
                           </span>
@@ -1247,48 +1196,26 @@ export default function FamilySafety() {
 
                     {/* Right Action Buttons */}
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                      {/* Manual Status Button / Peacetime Safe Badge */}
-                      {!disasterHappened ? (
-                        <div
-                          style={{
-                            padding: "8px 14px",
-                            borderRadius: "8px",
-                            fontWeight: "700",
-                            fontSize: "0.82rem",
-                            backgroundColor: "#14532d",
-                            border: "1px solid #22c55e",
-                            color: "#86efac",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            cursor: "default",
-                          }}
-                          title="All family members remain safe while no disaster is active."
-                        >
-                          <span>🟢</span>
-                          <span>Always Safe (Peacetime)</span>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleToggleStatus(member)}
-                          style={{
-                            padding: "8px 14px",
-                            borderRadius: "8px",
-                            border: "none",
-                            fontWeight: "700",
-                            fontSize: "0.85rem",
-                            cursor: "pointer",
-                            backgroundColor: isSafe ? "#166534" : "#991b1b",
-                            color: isSafe ? "#86efac" : "#fca5a5",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <span>{isSafe ? "✅" : "🆘"}</span>
-                          <span>{isSafe ? "Marked Safe" : "Needs Help"}</span>
-                        </button>
-                      )}
+                      {/* Manual Status Toggle (Safe / Unsafe) */}
+                      <button
+                        onClick={() => handleToggleStatus(member)}
+                        style={{
+                          padding: "8px 14px",
+                          borderRadius: "8px",
+                          border: "none",
+                          fontWeight: "700",
+                          fontSize: "0.85rem",
+                          cursor: "pointer",
+                          backgroundColor: isSafe ? "#166534" : "#991b1b",
+                          color: isSafe ? "#86efac" : "#fca5a5",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <span>{isSafe ? "✅" : "🆘"}</span>
+                        <span>{isSafe ? "Marked Safe" : "Marked Unsafe"}</span>
+                      </button>
 
                       {/* WhatsApp Ping */}
                       {member.phone && (
@@ -1335,10 +1262,33 @@ export default function FamilySafety() {
                         </a>
                       )}
 
+                      {/* Edit Member Name & Details (Permanent for all users) */}
+                      <button
+                        onClick={() => handleOpenEdit(member)}
+                        title="Edit Member Name & Info (Permanent for all users)"
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: "1px solid #0284c7",
+                          backgroundColor: "rgba(2, 132, 199, 0.15)",
+                          color: "#38bdf8",
+                          fontWeight: "700",
+                          fontSize: "0.85rem",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "5px",
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <span>✏️</span>
+                        <span>Edit</span>
+                      </button>
+
                       {/* Delete */}
                       <button
                         onClick={() => handleDelete(member)}
-                        title="Remove Member"
+                        title="Remove Member Permanently"
                         style={{
                           background: "none",
                           border: "none",
@@ -1353,8 +1303,8 @@ export default function FamilySafety() {
                     </div>
                   </div>
 
-                  {/* ── DANGER ZONE ALERT & RESPONSE MAP CONNECT BAR ───────── */}
-                  {inDanger && member.dangerZone && (
+                  {/* ── DANGER ALERT & RESPONSE MAP CONNECT BAR ────────────── */}
+                  {isUnsafe && (
                     <div
                       style={{
                         marginTop: "16px",
@@ -1378,27 +1328,41 @@ export default function FamilySafety() {
                         <div>
                           <div style={{ color: "#fecaca", fontWeight: "800", fontSize: "0.95rem", display: "flex", alignItems: "center", gap: "8px" }}>
                             <span>⚠️</span>
-                            <span>IN DANGER ZONE: {member.dangerZone.name}</span>
-                            <span
-                              style={{
-                                backgroundColor: "#ef4444",
-                                color: "#ffffff",
-                                padding: "2px 8px",
-                                borderRadius: "4px",
-                                fontSize: "0.72rem",
-                                fontWeight: "800",
-                              }}
-                            >
-                              {member.dangerZone.severity} {member.dangerZone.type}
+                            <span>
+                              {member.dangerZone
+                                ? `IN ACTIVE DANGER ZONE: ${member.dangerZone.name}`
+                                : "STATUS: EMERGENCY ASSISTANCE REQUESTED"}
                             </span>
+                            {member.dangerZone && (
+                              <span
+                                style={{
+                                  backgroundColor: "#ef4444",
+                                  color: "#ffffff",
+                                  padding: "2px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.72rem",
+                                  fontWeight: "800",
+                                }}
+                              >
+                                {member.dangerZone.severity} {member.dangerZone.type}
+                              </span>
+                            )}
                           </div>
-                          <p style={{ margin: "4px 0 0 0", fontSize: "0.83rem", color: "#fca5a5" }}>
-                            {member.dangerZone.description} • Approximate distance to hazard epicenter:{" "}
-                            <strong>{member.distanceToEpicenterKm} km</strong> (Danger radius: {member.dangerZone.radiusKm} km)
-                          </p>
-                          <p style={{ margin: "4px 0 0 0", fontSize: "0.82rem", color: "#fdba74" }}>
-                            📢 <strong>Advisory:</strong> {member.dangerZone.advisory}
-                          </p>
+                          {member.dangerZone ? (
+                            <>
+                              <p style={{ margin: "4px 0 0 0", fontSize: "0.83rem", color: "#fca5a5" }}>
+                                {member.dangerZone.description} • Distance to hazard epicenter:{" "}
+                                <strong>{member.distanceToEpicenterKm} km</strong> (Danger radius: {member.dangerZone.radiusKm} km)
+                              </p>
+                              <p style={{ margin: "4px 0 0 0", fontSize: "0.82rem", color: "#fdba74" }}>
+                                📢 <strong>Advisory:</strong> {member.dangerZone.advisory}
+                              </p>
+                            </>
+                          ) : (
+                            <p style={{ margin: "4px 0 0 0", fontSize: "0.83rem", color: "#fca5a5" }}>
+                              Member flagged as needing emergency help or medical triage. Nearest safe shelter route computed below.
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -1418,7 +1382,7 @@ export default function FamilySafety() {
                         >
                           <div>
                             <div style={{ fontSize: "0.88rem", color: "#86efac", fontWeight: "700" }}>
-                              🛡️ Nearest Safe Location: {member.nearestShelter.name}
+                              🛡️ Nearest Safe Refuge: {member.nearestShelter.name}
                             </div>
                             <div style={{ fontSize: "0.8rem", color: "#cbd5e1", marginTop: "2px" }}>
                               📍 Distance: <strong>{member.nearestShelter.distToMember} km</strong> • Address: {member.nearestShelter.address} • Phone: {member.nearestShelter.phone}
@@ -1455,6 +1419,244 @@ export default function FamilySafety() {
           </div>
         )}
       </div>
+
+      {/* ── EDIT MEMBER MODAL (PERMANENT MULTI-USER CLOUD SYNC) ────────── */}
+      {editingMember && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.78)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#1e293b",
+              border: "1.5px solid #38bdf8",
+              borderRadius: "16px",
+              padding: "26px",
+              maxWidth: "520px",
+              width: "100%",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(56, 189, 248, 0.25)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "1.3rem", fontWeight: "800", color: "#f8fafc" }}>
+                  ✏️ Modify Family Member
+                </h3>
+                <p style={{ margin: "4px 0 0 0", fontSize: "0.82rem", color: "#38bdf8" }}>
+                  ☁️ Name and detail changes save permanently in Cloud & MongoDB for every user.
+                </p>
+              </div>
+              <button
+                onClick={handleCloseEdit}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#94a3b8",
+                  fontSize: "1.5rem",
+                  cursor: "pointer",
+                  lineHeight: "1",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "700", color: "#e2e8f0", marginBottom: "6px" }}>
+                  Full Name <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="e.g., Prafulla Kumar Behera"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    backgroundColor: "#0f172a",
+                    border: "1.5px solid #38bdf8",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontSize: "0.95rem",
+                    fontWeight: "700",
+                    boxSizing: "border-box",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.82rem", fontWeight: "600", color: "#94a3b8", marginBottom: "6px" }}>
+                    Relationship
+                  </label>
+                  <select
+                    value={editRelation}
+                    onChange={(e) => setEditRelation(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      backgroundColor: "#0f172a",
+                      border: "1px solid #475569",
+                      borderRadius: "8px",
+                      color: "#ffffff",
+                      fontSize: "0.9rem",
+                      boxSizing: "border-box",
+                      outline: "none",
+                    }}
+                  >
+                    {RELATIONSHIPS.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.82rem", fontWeight: "600", color: "#94a3b8", marginBottom: "6px" }}>
+                    Blood Group
+                  </label>
+                  <select
+                    value={editBloodGroup}
+                    onChange={(e) => setEditBloodGroup(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      backgroundColor: "#0f172a",
+                      border: "1px solid #475569",
+                      borderRadius: "8px",
+                      color: "#ffffff",
+                      fontSize: "0.9rem",
+                      boxSizing: "border-box",
+                      outline: "none",
+                    }}
+                  >
+                    {BLOOD_GROUPS.map((bg) => (
+                      <option key={bg} value={bg}>{bg}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: "600", color: "#94a3b8", marginBottom: "6px" }}>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="e.g., 9861012345"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: "600", color: "#94a3b8", marginBottom: "6px" }}>
+                  Location Address
+                </label>
+                <input
+                  type="text"
+                  value={editLocation}
+                  onChange={(e) => setEditLocation(e.target.value)}
+                  placeholder="e.g., Patia, Bhubaneswar"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.82rem", fontWeight: "600", color: "#94a3b8", marginBottom: "6px" }}>
+                  GPS Coordinates (lat, lng)
+                </label>
+                <input
+                  type="text"
+                  value={editCoordinates}
+                  onChange={(e) => setEditCoordinates(e.target.value)}
+                  placeholder="e.g., 20.3522, 85.8193"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "8px" }}>
+                <button
+                  type="button"
+                  onClick={handleCloseEdit}
+                  style={{
+                    padding: "10px 18px",
+                    backgroundColor: "#334155",
+                    border: "none",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSaving}
+                  style={{
+                    padding: "10px 22px",
+                    backgroundColor: "#0284c7",
+                    border: "none",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    fontWeight: "700",
+                    cursor: editSaving ? "not-allowed" : "pointer",
+                    boxShadow: "0 4px 14px rgba(2, 132, 199, 0.4)",
+                  }}
+                >
+                  {editSaving ? "Saving Permanently..." : "💾 Save Changes (All Users)"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

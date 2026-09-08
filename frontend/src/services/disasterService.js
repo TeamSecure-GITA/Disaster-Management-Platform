@@ -4,7 +4,15 @@
 // Supports both Backend API endpoints and offline resilient caching
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
+import {
+  collection,
+  doc,
+  getDocs,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+} from "firebase/firestore";
 
 const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -408,8 +416,118 @@ const INITIAL_FALLBACK_MEMBERS = [
   },
 ];
 
+// ─── Real-Time Permanent Cloud Sync for Family Safety Network ─────────────────
+const FIRESTORE_FAMILY_COLLECTION = "shared_family_safety";
+
+/**
+ * Subscribes to real-time changes in the global family safety network.
+ * When ANY user adds, removes, or modifies a name or details, the callback
+ * fires immediately for all connected users.
+ */
+export function subscribeToFamilyMembers(callback) {
+  if (!db) {
+    getFamilyMembers().then(callback);
+    return () => {};
+  }
+
+  try {
+    const colRef = collection(db, FIRESTORE_FAMILY_COLLECTION);
+    const unsubscribe = onSnapshot(
+      colRef,
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const members = [];
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            members.push({
+              ...data,
+              id: docSnap.id,
+              _id: docSnap.id,
+            });
+          });
+          // Sort by createdAtMs descending (newest first)
+          members.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+          localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
+          localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(members));
+          callback(members);
+        } else {
+          // If Firestore collection is empty, seed defaults into cloud so it's permanently stored
+          seedInitialFirestoreMembers().then(callback);
+        }
+      },
+      (error) => {
+        console.warn("Firestore subscription notice (using resilient fallback):", error);
+        getFamilyMembers().then(callback);
+      }
+    );
+
+    return unsubscribe;
+  } catch (err) {
+    console.warn("Failed to subscribe to Firestore family members:", err);
+    getFamilyMembers().then(callback);
+    return () => {};
+  }
+}
+
+async function seedInitialFirestoreMembers() {
+  if (db) {
+    try {
+      for (const m of INITIAL_FALLBACK_MEMBERS) {
+        await setDoc(doc(db, FIRESTORE_FAMILY_COLLECTION, m.id), {
+          ...m,
+          createdAtMs: Date.now(),
+        });
+      }
+    } catch {}
+  }
+  return INITIAL_FALLBACK_MEMBERS;
+}
+
 export async function getFamilyMembers() {
-  // 1. Read local storage first
+  // 1. Try Cloud Firestore (Primary shared real-time database)
+  if (db) {
+    try {
+      const colRef = collection(db, FIRESTORE_FAMILY_COLLECTION);
+      const snapshot = await getDocs(colRef);
+      if (!snapshot.empty) {
+        const members = [];
+        snapshot.forEach((docSnap) => {
+          members.push({
+            ...docSnap.data(),
+            id: docSnap.id,
+            _id: docSnap.id,
+          });
+        });
+        members.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+        localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
+        localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(members));
+        return members;
+      }
+    } catch (err) {
+      console.warn("Firestore fetch error, trying backend API:", err);
+    }
+  }
+
+  // 2. Try Backend Shared API (MongoDB Atlas)
+  try {
+    const res = await fetch(`${API_URL}/api/family/shared`);
+    if (res.ok) {
+      const json = await res.json();
+      const apiMembers = json.data;
+      if (Array.isArray(apiMembers) && apiMembers.length > 0) {
+        const mapped = apiMembers.map((m) => ({
+          ...m,
+          id: m.id || m._id,
+          _id: m._id || m.id,
+        }));
+        localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
+        localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(mapped));
+        return mapped;
+      }
+    }
+  } catch {}
+
+  // 3. Fallback to local storage cache
   let localMembers = [];
   try {
     const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
@@ -418,45 +536,6 @@ export async function getFamilyMembers() {
     }
   } catch {}
 
-  // 2. Try fetching from Backend if user is logged in
-  try {
-    const headers = await getAuthHeader();
-    if (headers.Authorization) {
-      const res = await fetch(`${API_URL}/api/family`, { headers });
-      if (res.ok) {
-        const json = await res.json();
-        const apiMembers = json.data?.members;
-        if (Array.isArray(apiMembers) && apiMembers.length > 0) {
-          const mapped = apiMembers.map((m) => ({
-            id: m._id,
-            _id: m._id,
-            name: m.name,
-            relation: m.relation || "Family",
-            phone: m.phone || "",
-            bloodGroup: m.bloodGroup || "",
-            status: m.isSafe ? "Safe" : "Needs Help",
-            isSafe: Boolean(m.isSafe),
-            location: m.location?.address || "Registered Address",
-            coordinates:
-              m.location?.latitude && m.location?.longitude
-                ? `${m.location.latitude}, ${m.location.longitude}`
-                : "",
-            lastUpdated: new Date(m.updatedAt || Date.now()).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          }));
-          // Mark as initialized so we never re-seed fallback members
-          localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
-          localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(mapped));
-          return mapped;
-        }
-      }
-    }
-  } catch {}
-
-  // Only seed fallback members the very first time (never initialized before).
-  // If the user has deleted all members intentionally, respect that empty state.
   const hasInitialized = localStorage.getItem(FAMILY_INITIALIZED_KEY);
   if (localMembers.length === 0 && !hasInitialized) {
     localMembers = INITIAL_FALLBACK_MEMBERS;
@@ -468,117 +547,148 @@ export async function getFamilyMembers() {
 }
 
 export async function addFamilyMember(memberData) {
+  const memberId = memberData.id || `mem-${Date.now()}`;
+  const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
   const newMember = {
-    id: `mem-${Date.now()}`,
+    id: memberId,
+    _id: memberId,
     name: memberData.name.trim(),
     relation: memberData.relation || "Family",
     phone: memberData.phone || "",
-    bloodGroup: memberData.bloodGroup || "",
+    bloodGroup: memberData.bloodGroup || "Unknown",
     status: memberData.status || "Safe",
-    isSafe: memberData.status === "Safe",
+    isSafe: memberData.status !== "Needs Help",
     location: memberData.location || "Current Location",
     coordinates: memberData.coordinates || "",
-    lastUpdated: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    createdAtMs: Date.now(),
+    createdAt: new Date().toISOString(),
+    lastUpdated: nowStr,
   };
 
-  // 1. Update local storage — read current members directly to avoid re-seed race
+  // 1. Save to Cloud Firestore permanently for every user
+  if (db) {
+    try {
+      const docRef = doc(db, FIRESTORE_FAMILY_COLLECTION, memberId);
+      await setDoc(docRef, newMember);
+    } catch (err) {
+      console.warn("Firestore add member error:", err);
+    }
+  }
+
+  // 2. Save to Backend Shared API (MongoDB Atlas)
+  try {
+    await fetch(`${API_URL}/api/family/shared`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newMember),
+    });
+  } catch {}
+
+  // 3. Update local cache
   let existing = [];
   try {
     const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
     if (raw) existing = JSON.parse(raw);
   } catch {}
 
-  const updated = [newMember, ...existing];
-  // Mark as initialized so fallback seed is never triggered again
+  const updated = [newMember, ...existing.filter((m) => m.id !== memberId && m._id !== memberId)];
   localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
   localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
 
-  // 2. Sync with Backend
-  try {
-    const headers = await getAuthHeader();
-    if (headers.Authorization) {
-      let lat = undefined;
-      let lng = undefined;
-      if (newMember.coordinates && newMember.coordinates.includes(",")) {
-        const parts = newMember.coordinates.split(",");
-        lat = parseFloat(parts[0]);
-        lng = parseFloat(parts[1]);
-      }
-      await fetch(`${API_URL}/api/family/members`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...headers },
-        body: JSON.stringify({
-          name: newMember.name,
-          relation: newMember.relation,
-          phone: newMember.phone,
-          bloodGroup: newMember.bloodGroup,
-          isSafe: newMember.isSafe,
-          location: {
-            address: newMember.location,
-            latitude: isNaN(lat) ? undefined : lat,
-            longitude: isNaN(lng) ? undefined : lng,
-          },
-        }),
-      });
+  return updated;
+}
+
+/**
+ * Modifies any family member's details (especially Name, relation, phone, location)
+ * permanently so that EVERY user across the platform sees the change immediately.
+ */
+export async function updateFamilyMember(memberId, updatedFields) {
+  const cleanId = String(memberId);
+  const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const payload = {
+    ...updatedFields,
+    lastUpdated: nowStr,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (payload.name) {
+    payload.name = payload.name.trim();
+  }
+
+  // 1. Update Cloud Firestore permanently for all users
+  if (db) {
+    try {
+      const docRef = doc(db, FIRESTORE_FAMILY_COLLECTION, cleanId);
+      await setDoc(docRef, payload, { merge: true });
+    } catch (err) {
+      console.warn("Firestore update member error:", err);
     }
+  }
+
+  // 2. Update Backend Shared API (MongoDB Atlas)
+  try {
+    await fetch(`${API_URL}/api/family/shared/${cleanId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
   } catch {}
 
-  return updated;
+  // 3. Update local cache
+  let existing = [];
+  try {
+    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
+    if (raw) existing = JSON.parse(raw);
+  } catch {}
+
+  const updatedList = existing.map((m) =>
+    (m.id === cleanId || m._id === cleanId) ? { ...m, ...payload } : m
+  );
+  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updatedList));
+
+  return updatedList;
 }
 
 export async function toggleMemberSafety(memberId, newStatus) {
-  const existing = await getFamilyMembers();
   const isSafe = newStatus === "Safe";
-  const updated = existing.map((m) =>
-    (m.id === memberId || m._id === memberId)
-      ? {
-          ...m,
-          status: newStatus,
-          isSafe,
-          lastUpdated: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        }
-      : m
-  );
-  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
-
-  // Sync to Backend
-  try {
-    const headers = await getAuthHeader();
-    if (headers.Authorization && !String(memberId).startsWith("mem-")) {
-      await fetch(`${API_URL}/api/family/members/${memberId}/safety`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", ...headers },
-        body: JSON.stringify({ isSafe }),
-      });
-    }
-  } catch {}
-
-  return updated;
+  return updateFamilyMember(memberId, {
+    status: newStatus,
+    isSafe,
+  });
 }
 
 export async function removeFamilyMember(memberId) {
-  // Read directly from localStorage to avoid re-seed triggering
+  const cleanId = String(memberId);
+
+  // 1. Delete from Cloud Firestore permanently for all users
+  if (db) {
+    try {
+      const docRef = doc(db, FIRESTORE_FAMILY_COLLECTION, cleanId);
+      await deleteDoc(docRef);
+    } catch (err) {
+      console.warn("Firestore delete member error:", err);
+    }
+  }
+
+  // 2. Delete from Backend Shared API (MongoDB Atlas)
+  try {
+    await fetch(`${API_URL}/api/family/shared/${cleanId}`, {
+      method: "DELETE",
+    });
+  } catch {}
+
+  // 3. Update local cache
   let existing = [];
   try {
     const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
     if (raw) existing = JSON.parse(raw);
   } catch {}
 
-  const updated = existing.filter((m) => m.id !== memberId && m._id !== memberId);
-  // Always mark initialized so an empty list stays empty after deletion
+  const updated = existing.filter((m) => m.id !== cleanId && m._id !== cleanId);
   localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
   localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
-
-  // Sync to Backend
-  try {
-    const headers = await getAuthHeader();
-    if (headers.Authorization && !String(memberId).startsWith("mem-")) {
-      await fetch(`${API_URL}/api/family/members/${memberId}`, {
-        method: "DELETE",
-        headers,
-      });
-    }
-  } catch {}
 
   return updated;
 }
