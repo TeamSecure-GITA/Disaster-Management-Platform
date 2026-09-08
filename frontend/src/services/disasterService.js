@@ -383,9 +383,8 @@ export function findNearestSafeShelter(memberCoords, shelters = DEFAULT_SHELTERS
 
 // ─── FAMILY SAFETY ───────────────────────────────────────────────────────────
 const LOCAL_FAMILY_KEY = "family_safety_members_v2";
-// Tracks whether we have already seeded fallback members at least once.
-// Once set, an empty list means the user deleted all members intentionally.
 const FAMILY_INITIALIZED_KEY = "family_safety_initialized_v2";
+const DELETED_FAMILY_KEY = "family_safety_deleted_ids_v1";
 
 const INITIAL_FALLBACK_MEMBERS = [
   {
@@ -416,15 +415,111 @@ const INITIAL_FALLBACK_MEMBERS = [
   },
 ];
 
+// Helper: Track IDs of family members explicitly removed by user so remote never restores them
+function getDeletedMemberIds() {
+  try {
+    const raw = localStorage.getItem(DELETED_FAMILY_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function addDeletedMemberId(id) {
+  try {
+    const set = getDeletedMemberIds();
+    set.add(String(id));
+    localStorage.setItem(DELETED_FAMILY_KEY, JSON.stringify(Array.from(set)));
+  } catch {}
+}
+
+function removeDeletedMemberId(id) {
+  try {
+    const set = getDeletedMemberIds();
+    set.delete(String(id));
+    localStorage.setItem(DELETED_FAMILY_KEY, JSON.stringify(Array.from(set)));
+  } catch {}
+}
+
+/**
+ * Synchronous local retrieval ensuring immediate render with zero vanish on refresh.
+ */
+export function getLocalFamilyMembers() {
+  const deletedIds = getDeletedMemberIds();
+  let localMembers = [];
+  try {
+    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
+    if (raw) {
+      localMembers = JSON.parse(raw);
+    }
+  } catch {}
+
+  const hasInitialized = localStorage.getItem(FAMILY_INITIALIZED_KEY);
+  if ((!localMembers || localMembers.length === 0) && !hasInitialized) {
+    localMembers = INITIAL_FALLBACK_MEMBERS;
+    localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
+    localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(localMembers));
+  }
+
+  // Filter out any members that were explicitly deleted by the user
+  const valid = (localMembers || []).filter(
+    (m) => m && !deletedIds.has(String(m.id)) && !deletedIds.has(String(m._id))
+  );
+
+  return valid;
+}
+
+/**
+ * Merge remote updates with local members without discarding local additions.
+ */
+function mergeFamilyMembers(remoteList, localList) {
+  const deletedIds = getDeletedMemberIds();
+  const map = new Map();
+
+  // 1. Local members take priority for newly added / locally edited fields
+  for (const m of localList) {
+    if (!m) continue;
+    const id = String(m.id || m._id);
+    if (deletedIds.has(id)) continue;
+    map.set(id, m);
+  }
+
+  // 2. Add remote members that haven't been deleted
+  for (const r of remoteList) {
+    if (!r) continue;
+    const id = String(r.id || r._id);
+    if (deletedIds.has(id)) continue;
+
+    if (!map.has(id)) {
+      map.set(id, { ...r, id, _id: id });
+    } else {
+      const local = map.get(id);
+      map.set(id, {
+        ...r,
+        ...local, // keep local edits
+        status: local.status || r.status || "Safe",
+        isSafe: local.isSafe !== undefined ? local.isSafe : (r.isSafe !== undefined ? r.isSafe : true),
+      });
+    }
+  }
+
+  const merged = Array.from(map.values());
+  merged.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+  return merged;
+}
+
 // ─── Real-Time Permanent Cloud Sync for Family Safety Network ─────────────────
 const FIRESTORE_FAMILY_COLLECTION = "shared_family_safety";
 
 /**
  * Subscribes to real-time changes in the global family safety network.
- * When ANY user adds, removes, or modifies a name or details, the callback
- * fires immediately for all connected users.
+ * Immediately serves local data, then merges cloud updates without erasing local names.
  */
 export function subscribeToFamilyMembers(callback) {
+  // 1. Immediately fire with local storage so members render instantly and never vanish on refresh
+  const initial = getLocalFamilyMembers();
+  callback(initial);
+
   if (!db) {
     getFamilyMembers().then(callback);
     return () => {};
@@ -435,28 +530,42 @@ export function subscribeToFamilyMembers(callback) {
     const unsubscribe = onSnapshot(
       colRef,
       (snapshot) => {
+        const local = getLocalFamilyMembers();
+        const deletedIds = getDeletedMemberIds();
+
         if (!snapshot.empty) {
-          const members = [];
+          const remote = [];
           snapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            members.push({
-              ...data,
-              id: docSnap.id,
-              _id: docSnap.id,
-            });
+            const id = docSnap.id;
+            if (!deletedIds.has(id)) {
+              remote.push({
+                ...data,
+                id,
+                _id: id,
+              });
+            }
           });
-          // Sort by createdAtMs descending (newest first)
-          members.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+
+          // Merge without erasing local additions
+          const merged = mergeFamilyMembers(remote, local);
           localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
-          localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(members));
-          callback(members);
+          localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(merged));
+          callback(merged);
         } else {
-          // If Firestore collection is empty, seed defaults into cloud so it's permanently stored
-          seedInitialFirestoreMembers().then(callback);
+          // If Firestore is empty, keep local members and seed them up
+          if (local.length > 0) {
+            local.forEach((m) => {
+              try {
+                setDoc(doc(db, FIRESTORE_FAMILY_COLLECTION, String(m.id || m._id)), m).catch(() => {});
+              } catch {}
+            });
+          }
+          callback(local);
         }
       },
       (error) => {
-        console.warn("Firestore subscription notice (using resilient fallback):", error);
+        console.warn("Firestore subscription notice (resilient local fallback):", error);
         getFamilyMembers().then(callback);
       }
     );
@@ -469,39 +578,28 @@ export function subscribeToFamilyMembers(callback) {
   }
 }
 
-async function seedInitialFirestoreMembers() {
-  if (db) {
-    try {
-      for (const m of INITIAL_FALLBACK_MEMBERS) {
-        await setDoc(doc(db, FIRESTORE_FAMILY_COLLECTION, m.id), {
-          ...m,
-          createdAtMs: Date.now(),
-        });
-      }
-    } catch {}
-  }
-  return INITIAL_FALLBACK_MEMBERS;
-}
-
 export async function getFamilyMembers() {
+  const local = getLocalFamilyMembers();
+  const deletedIds = getDeletedMemberIds();
+
   // 1. Try Cloud Firestore (Primary shared real-time database)
   if (db) {
     try {
       const colRef = collection(db, FIRESTORE_FAMILY_COLLECTION);
       const snapshot = await getDocs(colRef);
       if (!snapshot.empty) {
-        const members = [];
+        const remote = [];
         snapshot.forEach((docSnap) => {
-          members.push({
-            ...docSnap.data(),
-            id: docSnap.id,
-            _id: docSnap.id,
-          });
+          const data = docSnap.data();
+          const id = docSnap.id;
+          if (!deletedIds.has(id)) {
+            remote.push({ ...data, id, _id: id });
+          }
         });
-        members.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+        const merged = mergeFamilyMembers(remote, local);
         localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
-        localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(members));
-        return members;
+        localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(merged));
+        return merged;
       }
     } catch (err) {
       console.warn("Firestore fetch error, trying backend API:", err);
@@ -515,40 +613,27 @@ export async function getFamilyMembers() {
       const json = await res.json();
       const apiMembers = json.data;
       if (Array.isArray(apiMembers) && apiMembers.length > 0) {
-        const mapped = apiMembers.map((m) => ({
-          ...m,
-          id: m.id || m._id,
-          _id: m._id || m.id,
-        }));
+        const remote = apiMembers
+          .map((m) => ({ ...m, id: m.id || m._id, _id: m._id || m.id }))
+          .filter((m) => !deletedIds.has(String(m.id)));
+        const merged = mergeFamilyMembers(remote, local);
         localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
-        localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(mapped));
-        return mapped;
+        localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(merged));
+        return merged;
       }
     }
   } catch {}
 
   // 3. Fallback to local storage cache
-  let localMembers = [];
-  try {
-    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
-    if (raw) {
-      localMembers = JSON.parse(raw);
-    }
-  } catch {}
-
-  const hasInitialized = localStorage.getItem(FAMILY_INITIALIZED_KEY);
-  if (localMembers.length === 0 && !hasInitialized) {
-    localMembers = INITIAL_FALLBACK_MEMBERS;
-    localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
-    localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(localMembers));
-  }
-
-  return localMembers;
+  return local;
 }
 
 export async function addFamilyMember(memberData) {
-  const memberId = memberData.id || `mem-${Date.now()}`;
+  const memberId = memberData.id || `mem-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
   const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  // Ensure this ID is clean from deleted set
+  removeDeletedMemberId(memberId);
 
   const newMember = {
     id: memberId,
@@ -558,7 +643,7 @@ export async function addFamilyMember(memberData) {
     phone: memberData.phone || "",
     bloodGroup: memberData.bloodGroup || "Unknown",
     status: memberData.status || "Safe",
-    isSafe: memberData.status !== "Needs Help",
+    isSafe: memberData.status !== "Needs Help" && memberData.status !== "Unsafe",
     location: memberData.location || "Current Location",
     coordinates: memberData.coordinates || "",
     createdAtMs: Date.now(),
@@ -566,35 +651,32 @@ export async function addFamilyMember(memberData) {
     lastUpdated: nowStr,
   };
 
-  // 1. Save to Cloud Firestore permanently for every user
+  // 1. Immediately save to LocalStorage permanently
+  let existing = getLocalFamilyMembers();
+  const updated = [newMember, ...existing.filter((m) => String(m.id) !== String(memberId) && String(m._id) !== String(memberId))];
+  localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
+  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
+
+  // 2. Save to Cloud Firestore in background
   if (db) {
     try {
       const docRef = doc(db, FIRESTORE_FAMILY_COLLECTION, memberId);
-      await setDoc(docRef, newMember);
+      setDoc(docRef, newMember).catch((err) => {
+        console.warn("Firestore add member background notice:", err);
+      });
     } catch (err) {
       console.warn("Firestore add member error:", err);
     }
   }
 
-  // 2. Save to Backend Shared API (MongoDB Atlas)
+  // 3. Save to Backend Shared API in background
   try {
-    await fetch(`${API_URL}/api/family/shared`, {
+    fetch(`${API_URL}/api/family/shared`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newMember),
-    });
+    }).catch(() => {});
   } catch {}
-
-  // 3. Update local cache
-  let existing = [];
-  try {
-    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
-    if (raw) existing = JSON.parse(raw);
-  } catch {}
-
-  const updated = [newMember, ...existing.filter((m) => m.id !== memberId && m._id !== memberId)];
-  localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
-  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
 
   return updated;
 }
@@ -617,36 +699,31 @@ export async function updateFamilyMember(memberId, updatedFields) {
     payload.name = payload.name.trim();
   }
 
-  // 1. Update Cloud Firestore permanently for all users
+  // 1. Update local cache immediately
+  let existing = getLocalFamilyMembers();
+  const updatedList = existing.map((m) =>
+    (String(m.id) === cleanId || String(m._id) === cleanId) ? { ...m, ...payload } : m
+  );
+  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updatedList));
+
+  // 2. Update Cloud Firestore in background
   if (db) {
     try {
       const docRef = doc(db, FIRESTORE_FAMILY_COLLECTION, cleanId);
-      await setDoc(docRef, payload, { merge: true });
+      setDoc(docRef, payload, { merge: true }).catch(() => {});
     } catch (err) {
       console.warn("Firestore update member error:", err);
     }
   }
 
-  // 2. Update Backend Shared API (MongoDB Atlas)
+  // 3. Update Backend Shared API in background
   try {
-    await fetch(`${API_URL}/api/family/shared/${cleanId}`, {
+    fetch(`${API_URL}/api/family/shared/${cleanId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    });
+    }).catch(() => {});
   } catch {}
-
-  // 3. Update local cache
-  let existing = [];
-  try {
-    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
-    if (raw) existing = JSON.parse(raw);
-  } catch {}
-
-  const updatedList = existing.map((m) =>
-    (m.id === cleanId || m._id === cleanId) ? { ...m, ...payload } : m
-  );
-  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updatedList));
 
   return updatedList;
 }
@@ -662,33 +739,31 @@ export async function toggleMemberSafety(memberId, newStatus) {
 export async function removeFamilyMember(memberId) {
   const cleanId = String(memberId);
 
-  // 1. Delete from Cloud Firestore permanently for all users
+  // 1. Record ID in deleted set so remote snapshots never resurrect it
+  addDeletedMemberId(cleanId);
+
+  // 2. Update local cache immediately
+  let existing = getLocalFamilyMembers();
+  const updated = existing.filter((m) => String(m.id) !== cleanId && String(m._id) !== cleanId);
+  localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
+  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
+
+  // 3. Delete from Cloud Firestore in background
   if (db) {
     try {
       const docRef = doc(db, FIRESTORE_FAMILY_COLLECTION, cleanId);
-      await deleteDoc(docRef);
+      deleteDoc(docRef).catch(() => {});
     } catch (err) {
       console.warn("Firestore delete member error:", err);
     }
   }
 
-  // 2. Delete from Backend Shared API (MongoDB Atlas)
+  // 4. Delete from Backend Shared API in background
   try {
-    await fetch(`${API_URL}/api/family/shared/${cleanId}`, {
+    fetch(`${API_URL}/api/family/shared/${cleanId}`, {
       method: "DELETE",
-    });
+    }).catch(() => {});
   } catch {}
-
-  // 3. Update local cache
-  let existing = [];
-  try {
-    const raw = localStorage.getItem(LOCAL_FAMILY_KEY);
-    if (raw) existing = JSON.parse(raw);
-  } catch {}
-
-  const updated = existing.filter((m) => m.id !== cleanId && m._id !== cleanId);
-  localStorage.setItem(FAMILY_INITIALIZED_KEY, "true");
-  localStorage.setItem(LOCAL_FAMILY_KEY, JSON.stringify(updated));
 
   return updated;
 }

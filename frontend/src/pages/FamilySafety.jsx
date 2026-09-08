@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
+  getLocalFamilyMembers,
   getFamilyMembers,
   subscribeToFamilyMembers,
   addFamilyMember,
@@ -32,8 +33,8 @@ const RELATIONSHIPS = [
 const BLOOD_GROUPS = ["Unknown", "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 export default function FamilySafety() {
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [members, setMembers] = useState(() => getLocalFamilyMembers());
+  const [loading, setLoading] = useState(false);
 
   // Form states
   const [name, setName] = useState("");
