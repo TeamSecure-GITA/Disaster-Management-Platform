@@ -599,6 +599,7 @@ export default function Map() {
   // In-app navigation state (No external Google Maps redirect)
   const [activeRouteTarget, setActiveRouteTarget] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [evacBannerInfo, setEvacBannerInfo] = useState(null);
 
   // Online / offline detector
   useEffect(() => {
@@ -612,8 +613,40 @@ export default function Map() {
     };
   }, []);
 
-  // Check URL search parameters (e.g. ?lat=20.2312&lng=85.7765&name=Hospital)
+  // Check URL search parameters (e.g. ?lat=20.2312&lng=85.7765 or ?evac=1&originLat=...&destLat=...)
   useEffect(() => {
+    const isEvac = searchParams.get("evac") === "1";
+    const originLat = parseFloat(searchParams.get("originLat"));
+    const originLng = parseFloat(searchParams.get("originLng"));
+    const destLat = parseFloat(searchParams.get("destLat"));
+    const destLng = parseFloat(searchParams.get("destLng"));
+    const memberName = searchParams.get("name") || searchParams.get("memberName") || "Family Member";
+    const shelterName = searchParams.get("shelterName") || "Nearest Safe Refuge";
+    const hazard = searchParams.get("hazard") || "Active Disaster Danger Zone";
+
+    if (isEvac && !isNaN(originLat) && !isNaN(originLng) && !isNaN(destLat) && !isNaN(destLng)) {
+      setUserLocation([originLat, originLng]);
+      setActiveRouteTarget({
+        name: `${shelterName} (Safe Refuge)`,
+        lat: destLat,
+        lng: destLng,
+        category: "Safe Evacuation Shelter",
+        address: "Designated Safe Evacuation Zone",
+      });
+      const midLat = (originLat + destLat) / 2;
+      const midLng = (originLng + destLng) / 2;
+      setMapCenter([midLat, midLng]);
+      setMapZoom(13);
+      setEvacBannerInfo({
+        memberName,
+        shelterName,
+        hazard,
+        origin: [originLat, originLng],
+        dest: [destLat, destLng],
+      });
+      return;
+    }
+
     const paramLat = searchParams.get("lat");
     const paramLng = searchParams.get("lng");
     const paramName = searchParams.get("name");
@@ -944,6 +977,53 @@ export default function Map() {
         </div>
       </div>
 
+      {/* ── Evacuation Alert Banner (From Family Safety) ── */}
+      {evacBannerInfo && (
+        <div
+          style={{
+            backgroundColor: "#7f1d1d",
+            border: "2px solid #ef4444",
+            borderRadius: "12px",
+            padding: "14px 20px",
+            marginBottom: "16px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "12px",
+            boxShadow: "0 0 24px rgba(239, 68, 68, 0.4)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontSize: "1.8rem" }}>🚨</span>
+            <div>
+              <strong style={{ color: "#ffffff", fontSize: "1rem" }}>
+                Emergency Evacuation Route: {evacBannerInfo.memberName} (UNSAFE)
+              </strong>
+              <p style={{ margin: "3px 0 0 0", fontSize: "0.84rem", color: "#fca5a5" }}>
+                Fleeing danger inside <strong>{evacBannerInfo.hazard}</strong> to safe refuge at{" "}
+                <strong>{evacBannerInfo.shelterName}</strong>. Nearest safe route plotted below.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setEvacBannerInfo(null)}
+            style={{
+              backgroundColor: "rgba(0,0,0,0.3)",
+              border: "1px solid #f87171",
+              color: "#fff",
+              padding: "6px 12px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "0.8rem",
+              fontWeight: "700",
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* ── Map Container ── */}
       <div
         style={{
@@ -980,26 +1060,30 @@ export default function Map() {
             />
           )}
 
-          {/* User Location Marker */}
+          {/* User Location / Family Member Location Marker */}
           {userLocation && (
             <>
               <Marker
                 position={userLocation}
-                icon={createCustomIcon("#10b981", "👤")}
+                icon={createCustomIcon(evacBannerInfo ? "#ef4444" : "#10b981", evacBannerInfo ? "⚠️" : "👤")}
               >
                 <Popup>
                   <div style={{ color: "#0f172a", textAlign: "center" }}>
-                    <strong>📍 Your Current Location</strong>
-                    <div style={{ fontSize: "0.8rem", color: "#64748b" }}>
-                      GPS: {userLocation[0].toFixed(4)}, {userLocation[1].toFixed(4)}
+                    <strong>{evacBannerInfo ? `⚠️ ${evacBannerInfo.memberName} (UNSAFE)` : "📍 Your Current Location"}</strong>
+                    <div style={{ fontSize: "0.8rem", color: evacBannerInfo ? "#dc2626" : "#64748b", fontWeight: evacBannerInfo ? "bold" : "normal" }}>
+                      {evacBannerInfo ? `Danger Zone: ${evacBannerInfo.hazard}` : `GPS: ${userLocation[0].toFixed(4)}, ${userLocation[1].toFixed(4)}`}
                     </div>
                   </div>
                 </Popup>
               </Marker>
               <Circle
                 center={userLocation}
-                radius={2500}
-                pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.12 }}
+                radius={evacBannerInfo ? 1500 : 2500}
+                pathOptions={{
+                  color: evacBannerInfo ? "#ef4444" : "#10b981",
+                  fillColor: evacBannerInfo ? "#ef4444" : "#10b981",
+                  fillOpacity: evacBannerInfo ? 0.25 : 0.12,
+                }}
               />
             </>
           )}
@@ -1013,9 +1097,9 @@ export default function Map() {
                   [activeRouteTarget.lat, activeRouteTarget.lng],
                 ]}
                 pathOptions={{
-                  color: "#38bdf8",
-                  weight: 4,
-                  dashArray: "10, 10",
+                  color: evacBannerInfo ? "#22c55e" : "#38bdf8",
+                  weight: evacBannerInfo ? 5 : 4,
+                  dashArray: evacBannerInfo ? "8, 6" : "10, 10",
                 }}
               />
             </>

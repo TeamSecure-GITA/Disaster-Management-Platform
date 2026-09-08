@@ -241,6 +241,138 @@ export async function fetchShelters(userCoords = null) {
   return list;
 }
 
+// ─── ACTIVE DISASTER HAZARD & DANGER ZONES ──────────────────────────────────
+export const ACTIVE_DANGER_ZONES = [
+  {
+    id: "danger-flood-bhubaneswar",
+    name: "Bhubaneswar Urban Cloudburst & Inundation Zone",
+    type: "Flash Flood",
+    category: "flood",
+    severity: "High",
+    lat: 20.3522,
+    lng: 85.8193, // Patia / KIIT area
+    radiusKm: 6.0,
+    description: "Doppler radar cloudburst warning. Severe inundation across low-lying roads and societies.",
+    advisory: "Evacuate low ground immediately. Seek refuge at Bhubaneswar Central Cyclone Shelter.",
+  },
+  {
+    id: "danger-flood-cuttack",
+    name: "Mahanadi River Delta Inundation Corridor",
+    type: "Riverine Flood",
+    category: "flood",
+    severity: "Critical",
+    lat: 20.485,
+    lng: 85.852,
+    radiusKm: 8.0,
+    description: "River discharge crossing danger level +1.6m. Embankment overtopping active.",
+    advisory: "Immediate evacuation ordered. High risk of waterlogging and rapid currents.",
+  },
+  {
+    id: "danger-cyclone-coastal",
+    name: "Bay of Bengal Coastal Cyclone Front (Puri)",
+    type: "Severe Cyclone",
+    category: "cyclone",
+    severity: "Critical",
+    lat: 19.820,
+    lng: 85.920,
+    radiusKm: 15.0,
+    description: "Category 4 storm surge with 135 km/h sustained gusts and 3.2m sea tidal ingress.",
+    advisory: "Relocate immediately inland to wind-resistant multi-purpose shelters.",
+  },
+  {
+    id: "danger-landslide-daringbadi",
+    name: "Daringbadi Ridge Mudslide Danger Zone",
+    type: "Landslide",
+    category: "landslide",
+    severity: "High",
+    lat: 19.900,
+    lng: 84.130,
+    radiusKm: 6.5,
+    description: "Continuous mountain rainfall triggered active slope failure and highway rockfalls.",
+    advisory: "Avoid mountain ghat paths; evacuate hillside dwellings immediately.",
+  },
+];
+
+// Helper: Parse latitude and longitude from coordinate string or address
+export function parseMemberCoordinates(member) {
+  if (!member) return null;
+  if (typeof member.coordinates === "string" && member.coordinates.includes(",")) {
+    const parts = member.coordinates.split(",");
+    const lat = parseFloat(parts[0].trim());
+    const lng = parseFloat(parts[1].trim());
+    if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+  }
+  if (member.lat && member.lng) {
+    const lat = parseFloat(member.lat);
+    const lng = parseFloat(member.lng);
+    if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+  }
+  // Address matching fallback for standard regions
+  const loc = (member.location || "").toLowerCase();
+  if (loc.includes("patia") || loc.includes("bhubaneswar") || loc.includes("kiit")) {
+    return { lat: 20.3522, lng: 85.8193 };
+  }
+  if (loc.includes("cuttack") || loc.includes("barabati") || loc.includes("mahanadi")) {
+    return { lat: 20.4789, lng: 85.8647 };
+  }
+  if (loc.includes("puri")) {
+    return { lat: 19.8135, lng: 85.8312 };
+  }
+  if (loc.includes("balasore")) {
+    return { lat: 21.4934, lng: 86.9324 };
+  }
+  return null;
+}
+
+// Check if a family member is located inside an active disaster danger zone
+export function checkMemberInDangerZone(member, dangerZones = ACTIVE_DANGER_ZONES) {
+  const coords = parseMemberCoordinates(member);
+  if (!coords) {
+    return { inDanger: false, memberCoords: null, dangerZone: null };
+  }
+
+  for (const zone of dangerZones) {
+    if (zone.active === false) continue;
+    const distanceKm = calculateDistanceKm(coords.lat, coords.lng, zone.lat, zone.lng);
+    if (distanceKm !== null && distanceKm <= (zone.radiusKm || 5.0)) {
+      return {
+        inDanger: true,
+        memberCoords: coords,
+        dangerZone: zone,
+        distanceToEpicenterKm: distanceKm,
+      };
+    }
+  }
+
+  return { inDanger: false, memberCoords: coords, dangerZone: null };
+}
+
+// Find the closest safe shelter to a family member (preferably outside the disaster perimeter)
+export function findNearestSafeShelter(memberCoords, shelters = DEFAULT_SHELTERS, activeDangerZone = null) {
+  if (!memberCoords || memberCoords.lat == null || memberCoords.lng == null) return null;
+
+  const candidates = shelters.map((s) => {
+    const distToMember = calculateDistanceKm(memberCoords.lat, memberCoords.lng, s.lat, s.lng);
+    let isInsideHazard = false;
+    if (activeDangerZone) {
+      const distToHazard = calculateDistanceKm(s.lat, s.lng, activeDangerZone.lat, activeDangerZone.lng);
+      isInsideHazard = distToHazard != null && distToHazard <= (activeDangerZone.radiusKm || 5.0);
+    }
+    return {
+      ...s,
+      distToMember: distToMember !== null ? distToMember : 9999,
+      isInsideHazard,
+    };
+  });
+
+  // Prefer shelters outside the active danger zone; if none available, take closest shelter
+  const safeRefuges = candidates.filter((s) => !s.isInsideHazard);
+  const pool = safeRefuges.length > 0 ? safeRefuges : candidates;
+  pool.sort((a, b) => a.distToMember - b.distToMember);
+
+  return pool[0] || null;
+}
+
 // ─── FAMILY SAFETY ───────────────────────────────────────────────────────────
 const LOCAL_FAMILY_KEY = "family_safety_members_v2";
 // Tracks whether we have already seeded fallback members at least once.
