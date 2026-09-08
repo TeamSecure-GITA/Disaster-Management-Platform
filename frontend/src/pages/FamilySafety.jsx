@@ -71,10 +71,7 @@ export default function FamilySafety() {
   const lfoRef = useRef(null);
   const masterGainRef = useRef(null);
   const pulseTimerRef = useRef(null);
-
-  // Default-Silent Guard Refs: Siren MUST NOT buzz on initial page load
-  const isInitialLoadRef = useRef(true);
-  const prevUnsafeCountRef = useRef(0);
+  const isTestingRef = useRef(false);
 
   // Real-Time Permanent Cloud Sync for all users:
   // When ANY user adds, removes, or modifies a name, it updates live for every user!
@@ -102,12 +99,23 @@ export default function FamilySafety() {
     try {
       stopSiren();
 
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
 
-      const ctx = new AudioContext();
+      const ctx = new AudioContextClass();
       if (ctx.state === "suspended") {
         ctx.resume().catch(() => {});
+        const unlockAudio = () => {
+          if (ctx.state === "suspended") {
+            ctx.resume().catch(() => {});
+          }
+          window.removeEventListener("click", unlockAudio);
+          window.removeEventListener("touchstart", unlockAudio);
+          window.removeEventListener("keydown", unlockAudio);
+        };
+        window.addEventListener("click", unlockAudio, { once: true });
+        window.addEventListener("touchstart", unlockAudio, { once: true });
+        window.addEventListener("keydown", unlockAudio, { once: true });
       }
 
       // Master output gain with smooth exponential attack
@@ -258,30 +266,33 @@ export default function FamilySafety() {
         clearInterval(pulseTimerRef.current);
         pulseTimerRef.current = null;
       }
-      if (masterGainRef.current && audioCtxRef.current) {
-        const now = audioCtxRef.current.currentTime;
-        masterGainRef.current.gain.cancelScheduledValues(now);
-        masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, now);
-        masterGainRef.current.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+      const ctxToClose = audioCtxRef.current;
+      const osc1ToClose = osc1Ref.current;
+      const osc2ToClose = osc2Ref.current;
+      const lfoToClose = lfoRef.current;
+      const gainToFade = masterGainRef.current;
+
+      audioCtxRef.current = null;
+      osc1Ref.current = null;
+      osc2Ref.current = null;
+      lfoRef.current = null;
+      masterGainRef.current = null;
+
+      if (gainToFade && ctxToClose && ctxToClose.state !== "closed") {
+        try {
+          const now = ctxToClose.currentTime;
+          gainToFade.gain.cancelScheduledValues(now);
+          gainToFade.gain.setValueAtTime(gainToFade.gain.value, now);
+          gainToFade.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+        } catch {}
       }
+
       setTimeout(() => {
-        if (osc1Ref.current) {
-          try { osc1Ref.current.stop(); osc1Ref.current.disconnect(); } catch {}
-          osc1Ref.current = null;
-        }
-        if (osc2Ref.current) {
-          try { osc2Ref.current.stop(); osc2Ref.current.disconnect(); } catch {}
-          osc2Ref.current = null;
-        }
-        if (lfoRef.current) {
-          try { lfoRef.current.stop(); lfoRef.current.disconnect(); } catch {}
-          lfoRef.current = null;
-        }
-        if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
-          try { audioCtxRef.current.close(); } catch {}
-          audioCtxRef.current = null;
-        }
-      }, 100);
+        try { if (osc1ToClose) { osc1ToClose.stop(); osc1ToClose.disconnect(); } } catch {}
+        try { if (osc2ToClose) { osc2ToClose.stop(); osc2ToClose.disconnect(); } } catch {}
+        try { if (lfoToClose) { lfoToClose.stop(); lfoToClose.disconnect(); } } catch {}
+        try { if (ctxToClose && ctxToClose.state !== "closed") { ctxToClose.close(); } } catch {}
+      }, 90);
     } catch (err) {}
     setSirenPlaying(false);
   };
@@ -292,7 +303,17 @@ export default function FamilySafety() {
       setSirenMuted(true);
     } else {
       setSirenMuted(false);
-      startSiren();
+      if (unsafeCount > 0) {
+        startSiren();
+      } else {
+        // When all members are safe, preview siren for 2.5s and then automatically stop
+        isTestingRef.current = true;
+        startSiren();
+        setTimeout(() => {
+          isTestingRef.current = false;
+          stopSiren();
+        }, 2500);
+      }
     }
   };
 
@@ -303,8 +324,12 @@ export default function FamilySafety() {
 
   // ── Evaluate Members Against Active Danger Zones ─────────────────────────
   const evaluatedMembers = members.map((member) => {
-    // Member's manual status
-    const isManuallyUnsafe = member.status === "Needs Help";
+    // Member's manual status (unsafe if Needs Help, Unsafe, or not marked safe)
+    const isManuallyUnsafe =
+      member.status === "Needs Help" ||
+      member.status === "Unsafe" ||
+      member.status === "Danger" ||
+      member.isSafe === false;
 
     // Danger zone evaluation (only active when disaster alert is triggered)
     const evaluation = disasterAlertActive
@@ -312,7 +337,7 @@ export default function FamilySafety() {
       : { inDanger: false, memberCoords: null, dangerZone: null };
 
     const inDanger = evaluation.inDanger;
-    // An individual is considered unsafe if they are inside an active danger zone OR manually marked Needs Help
+    // An individual is considered unsafe if they are inside an active danger zone OR manually marked Needs Help/Unsafe
     const isUnsafe = inDanger || isManuallyUnsafe;
 
     const coords = evaluation.memberCoords || parseMemberCoordinates(member);
@@ -335,30 +360,27 @@ export default function FamilySafety() {
   const unsafeCount = evaluatedMembers.filter((m) => m.isUnsafe).length;
   const safeCount = evaluatedMembers.filter((m) => !m.isUnsafe).length;
 
-  // ── DEFAULT-SILENT & UNSAFE AUTO-BUZZ EFFECT ─────────────────────────────
-  // RULE: By default on page load, the siren MUST NOT buzz!
-  // It ONLY buzzes when someone BECOMES unsafe (count increases > 0)
-  // or when an active disaster alert detects family members inside hazard zones.
+  // ── AUTOMATIC SIREN BUZZER CONTROLLER ─────────────────────────────────────
+  // CORE REQUIREMENT:
+  // 1. If AT LEAST ANY family member is unsafe (unsafeCount > 0):
+  //    Buzz the siren automatically!
+  // 2. If ALL family members are safe (unsafeCount === 0):
+  //    Do NOT buzz the siren (silence / stop buzzer immediately).
   useEffect(() => {
     if (loading) return;
 
-    // First load / mount: ensure silent state, record current baseline
-    if (isInitialLoadRef.current) {
-      isInitialLoadRef.current = false;
-      prevUnsafeCountRef.current = unsafeCount;
-      return;
+    if (unsafeCount > 0) {
+      // At least one family member is unsafe -> buzz siren automatically!
+      if (!sirenMuted && !sirenPlaying) {
+        startSiren(sirenSoundType);
+      }
+    } else {
+      // All family members are safe -> do NOT buzz the siren!
+      if (sirenPlaying && !isTestingRef.current) {
+        stopSiren();
+      }
     }
-
-    // If any member BECOMES unsafe (count increased and > 0), buzz the siren!
-    if (unsafeCount > 0 && unsafeCount > prevUnsafeCountRef.current && !sirenMuted) {
-      startSiren();
-    } else if (unsafeCount === 0 && sirenPlaying) {
-      // If everyone is safe, immediately disarm the siren
-      stopSiren();
-    }
-
-    prevUnsafeCountRef.current = unsafeCount;
-  }, [unsafeCount, disasterAlertActive, loading, sirenMuted]);
+  }, [unsafeCount, loading, sirenMuted, sirenPlaying, sirenSoundType]);
 
   // Get real GPS coordinates
   const detectGPS = () => {
@@ -417,15 +439,16 @@ export default function FamilySafety() {
     }
   };
 
-  // Toggle Safety Status: If toggled to unsafe, it will buzz the siren!
+  // Toggle Safety Status: If toggled to unsafe, it will buzz the siren automatically!
   const handleToggleStatus = async (member) => {
-    const nextStatus = member.status === "Safe" ? "Needs Help" : "Safe";
+    const willBeUnsafe = !member.isUnsafe;
+    const nextStatus = willBeUnsafe ? "Needs Help" : "Safe";
     try {
+      if (willBeUnsafe) {
+        setSirenMuted(false); // Unmute so siren buzzes automatically
+      }
       const updated = await toggleMemberSafety(member.id || member._id, nextStatus);
       setMembers(updated);
-      if (nextStatus === "Needs Help" && !sirenMuted) {
-        startSiren();
-      }
     } catch (err) {
       console.error("Error toggling safety:", err);
     }
@@ -599,8 +622,8 @@ export default function FamilySafety() {
             onClick={toggleSirenMute}
             style={{
               padding: "10px 18px",
-              backgroundColor: sirenPlaying ? "#dc2626" : "#1e293b",
-              border: `1.5px solid ${sirenPlaying ? "#f87171" : "#475569"}`,
+              backgroundColor: sirenPlaying ? "#dc2626" : (unsafeCount > 0 ? "#7f1d1d" : "#1e293b"),
+              border: `1.5px solid ${sirenPlaying ? "#f87171" : (unsafeCount > 0 ? "#ef4444" : "#475569")}`,
               borderRadius: "10px",
               color: "#ffffff",
               fontWeight: "700",
@@ -614,7 +637,13 @@ export default function FamilySafety() {
             }}
           >
             <span>{sirenPlaying ? "🔊" : "🔇"}</span>
-            <span>{sirenPlaying ? "Mute Siren Buzzer" : "Test Audio Siren"}</span>
+            <span>
+              {sirenPlaying
+                ? "Mute Siren Buzzer"
+                : unsafeCount > 0
+                ? "Unmute Siren Buzzer"
+                : "Test Audio Siren (Preview)"}
+            </span>
           </button>
 
           <button
@@ -689,10 +718,10 @@ export default function FamilySafety() {
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <strong style={{ color: unsafeCount > 0 ? "#fca5a5" : "#f8fafc", fontSize: "1.05rem" }}>
                 {unsafeCount > 0
-                  ? `🚨 CRITICAL ALERT: ${unsafeCount} Family Member(s) Unsafe / In Danger Zone!`
-                  : "🛡️ Automated Danger Radar: Standing by (All Members Secure)"}
+                  ? `🚨 CRITICAL ALERT: ${unsafeCount} Family Member(s) Unsafe / In Danger!`
+                  : "🛡️ Safety Radar: All Family Members Safe"}
               </strong>
-              {sirenPlaying && (
+              {sirenPlaying ? (
                 <span
                   style={{
                     backgroundColor: "#dc2626",
@@ -705,14 +734,41 @@ export default function FamilySafety() {
                     animation: "pulse 1s infinite",
                   }}
                 >
-                  🔊 SIREN ACTIVE
+                  🔊 SIREN ACTIVE (BUZZING)
+                </span>
+              ) : unsafeCount === 0 ? (
+                <span
+                  style={{
+                    backgroundColor: "#166534",
+                    color: "#86efac",
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    fontSize: "0.72rem",
+                    fontWeight: "700",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  🔇 SIREN SILENT (ALL SAFE)
+                </span>
+              ) : (
+                <span
+                  style={{
+                    backgroundColor: "#7f1d1d",
+                    color: "#fca5a5",
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    fontSize: "0.72rem",
+                    fontWeight: "700",
+                  }}
+                >
+                  🔇 SIREN MUTED
                 </span>
               )}
             </div>
             <p style={{ margin: "4px 0 0 0", fontSize: "0.83rem", color: "#94a3b8" }}>
-              {disasterAlertActive
-                ? "Active disaster detected in zone! Members located inside hazard perimeter are marked UNSAFE and siren sounds."
-                : "Default state: Silent. When an active disaster occurs or any member enters danger, siren buzzer sounds automatically."}
+              {unsafeCount > 0
+                ? "⚠️ Automatic Siren is BUZZING because at least one family member is unsafe."
+                : "✅ Automatic Siren is SILENT because all family members are safe."}
             </p>
           </div>
         </div>
@@ -1199,6 +1255,7 @@ export default function FamilySafety() {
                       {/* Manual Status Toggle (Safe / Unsafe) */}
                       <button
                         onClick={() => handleToggleStatus(member)}
+                        title={isSafe ? "Click to report this member needs emergency help" : "Click to confirm this member is safe"}
                         style={{
                           padding: "8px 14px",
                           borderRadius: "8px",
@@ -1214,7 +1271,7 @@ export default function FamilySafety() {
                         }}
                       >
                         <span>{isSafe ? "✅" : "🆘"}</span>
-                        <span>{isSafe ? "Marked Safe" : "Marked Unsafe"}</span>
+                        <span>{isSafe ? "Safe (Click to Mark Unsafe)" : "Unsafe (Click to Mark Safe)"}</span>
                       </button>
 
                       {/* WhatsApp Ping */}
