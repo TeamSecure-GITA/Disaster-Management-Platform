@@ -10,7 +10,12 @@ import {
   getLoginAuditLogs,
   getLoginAnalytics,
   getPermissionRequests,
-  updatePermissionRequest
+  updatePermissionRequest,
+  getUserReviews,
+  getUnreadReviewCount,
+  markAllReviewsRead,
+  markReviewRead,
+  deleteReview,
 } from "../utils/adminAuth";
 import { getOfflineSession } from "../utils/offlineStorage";
 
@@ -25,6 +30,8 @@ export default function AdministratorHub() {
   const [authorizedAdmins, setAuthorizedAdmins] = useState(getAuthorizedAdmins());
   const [auditLogs, setAuditLogs] = useState(getLoginAuditLogs());
   const [requests, setRequests] = useState(getPermissionRequests());
+  const [reviews, setReviews] = useState(getUserReviews());
+  const [unreadReviews, setUnreadReviews] = useState(getUnreadReviewCount());
 
   // Add member form state
   const [newAdminEmail, setNewAdminEmail] = useState("");
@@ -50,6 +57,8 @@ export default function AdministratorHub() {
     setAuthorizedAdmins(getAuthorizedAdmins());
     setAuditLogs(getLoginAuditLogs());
     setRequests(getPermissionRequests());
+    setReviews(getUserReviews());
+    setUnreadReviews(getUnreadReviewCount());
   };
 
   const handleGrantPermission = (e) => {
@@ -110,6 +119,25 @@ export default function AdministratorHub() {
     updatePermissionRequest(reqId, "Rejected", currentUser?.name || "Head Administrator");
     setActionNotice(`❌ Request ${reqId} rejected.`);
     refreshData();
+  };
+
+  const handleMarkAllReviewsRead = () => {
+    markAllReviewsRead();
+    refreshData();
+    setActionNotice("✅ All reviews marked as read.");
+  };
+
+  const handleMarkReviewRead = (reviewId) => {
+    markReviewRead(reviewId);
+    refreshData();
+  };
+
+  const handleDeleteReview = (reviewId) => {
+    if (window.confirm("Are you sure you want to permanently delete this review?")) {
+      deleteReview(reviewId);
+      refreshData();
+      setActionNotice("🗑️ Review deleted.");
+    }
   };
 
   if (loading) {
@@ -262,6 +290,20 @@ export default function AdministratorHub() {
           </h3>
           <span style={{ fontSize: "0.72rem", color: "#c084fc" }}>Head: {HEAD_ADMIN_EMAIL}</span>
         </div>
+
+        {/* Reviews KPI card */}
+        <div style={{ backgroundColor: "rgba(15, 23, 42, 0.85)", padding: "18px", borderRadius: "12px", border: unreadReviews > 0 ? "1px solid rgba(249, 115, 22, 0.5)" : "1px solid #334155", position: "relative", overflow: "hidden" }}>
+          {unreadReviews > 0 && (
+            <div style={{ position: "absolute", top: 0, right: 0, width: "4px", height: "100%", background: "linear-gradient(to bottom, #f97316, #ea580c)" }} />
+          )}
+          <span style={{ fontSize: "0.8rem", color: "#94a3b8", display: "block" }}>User Reviews</span>
+          <h3 style={{ margin: "6px 0 0 0", fontSize: "1.8rem", fontWeight: "800", color: unreadReviews > 0 ? "#fb923c" : "#f8fafc" }}>
+            {reviews.length} Total
+          </h3>
+          <span style={{ fontSize: "0.72rem", color: unreadReviews > 0 ? "#fdba74" : "#64748b" }}>
+            {unreadReviews > 0 ? `🔔 ${unreadReviews} unread` : "All read"}
+          </span>
+        </div>
       </div>
 
       {/* ── TABS NAVIGATION ── */}
@@ -270,6 +312,13 @@ export default function AdministratorHub() {
           { id: "analytics", label: "📊 Live Logins & Active Users", icon: "🟢" },
           { id: "members", label: "🔑 Access Delegation (Add Members)", icon: "👥" },
           { id: "requests", label: `📋 Permission Requests (${requests.filter(r => r.status === "Pending").length})`, icon: "⏳" },
+          {
+            id: "reviews",
+            label: unreadReviews > 0
+              ? `⭐ User Reviews (${reviews.length})`
+              : `⭐ User Reviews (${reviews.length})`,
+            badge: unreadReviews > 0 ? unreadReviews : null,
+          },
         ].map(tab => (
           <button
             key={tab.id}
@@ -278,14 +327,34 @@ export default function AdministratorHub() {
               padding: "10px 18px",
               borderRadius: "8px",
               border: "none",
-              backgroundColor: activeTab === tab.id ? "#2563eb" : "rgba(30, 41, 59, 0.7)",
+              backgroundColor: activeTab === tab.id ? (tab.id === "reviews" && unreadReviews > 0 ? "#ea580c" : "#2563eb") : "rgba(30, 41, 59, 0.7)",
               color: activeTab === tab.id ? "#ffffff" : "#94a3b8",
               fontWeight: activeTab === tab.id ? "700" : "500",
               fontSize: "0.9rem",
-              cursor: "pointer"
+              cursor: "pointer",
+              position: "relative",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
             }}
           >
             {tab.label}
+            {tab.badge && (
+              <span style={{
+                backgroundColor: "#ef4444",
+                color: "#fff",
+                fontSize: "0.68rem",
+                fontWeight: "800",
+                padding: "1px 6px",
+                borderRadius: "999px",
+                minWidth: "18px",
+                textAlign: "center",
+                lineHeight: "1.4",
+                animation: "pulse 2s infinite",
+              }}>
+                {tab.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -626,6 +695,193 @@ export default function AdministratorHub() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ── TAB 4: USER REVIEWS ── */}
+      {activeTab === "reviews" && (
+        <div style={{ backgroundColor: "rgba(15, 23, 42, 0.85)", borderRadius: "14px", border: "1px solid #334155", padding: "20px" }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+            <div>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "1.15rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" }}>
+                ⭐ Platform User Reviews
+                {unreadReviews > 0 && (
+                  <span style={{
+                    backgroundColor: "rgba(249, 115, 22, 0.2)",
+                    border: "1px solid rgba(249, 115, 22, 0.5)",
+                    color: "#fb923c",
+                    fontSize: "0.72rem",
+                    fontWeight: "800",
+                    padding: "2px 8px",
+                    borderRadius: "999px",
+                    animation: "pulse 2s infinite",
+                  }}>
+                    🔔 {unreadReviews} New
+                  </span>
+                )}
+              </h3>
+              <p style={{ color: "#94a3b8", fontSize: "0.82rem", margin: 0 }}>
+                Feedback submitted by platform users. Unread reviews are highlighted below.
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {unreadReviews > 0 && (
+                <button
+                  onClick={handleMarkAllReviewsRead}
+                  style={{
+                    padding: "8px 14px",
+                    backgroundColor: "rgba(16, 185, 129, 0.15)",
+                    color: "#34d399",
+                    border: "1px solid rgba(16, 185, 129, 0.4)",
+                    borderRadius: "8px",
+                    fontSize: "0.82rem",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  ✓ Mark All as Read
+                </button>
+              )}
+              <span style={{
+                padding: "8px 14px",
+                backgroundColor: "rgba(99, 102, 241, 0.12)",
+                color: "#a5b4fc",
+                border: "1px solid rgba(99, 102, 241, 0.3)",
+                borderRadius: "8px",
+                fontSize: "0.82rem",
+                fontWeight: "600",
+              }}>
+                Total: {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+          </div>
+
+          {/* Summary stats */}
+          {reviews.length > 0 && (
+            <div style={{ display: "flex", gap: "12px", marginBottom: "18px", flexWrap: "wrap" }}>
+              <div style={{ backgroundColor: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.2)", borderRadius: "8px", padding: "10px 16px", minWidth: "110px", textAlign: "center" }}>
+                <div style={{ fontSize: "1.5rem", fontWeight: "800", color: "#f59e0b" }}>
+                  {(reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)}
+                </div>
+                <div style={{ fontSize: "0.72rem", color: "#fde68a" }}>Avg Rating</div>
+              </div>
+              {[5, 4, 3, 2, 1].map(star => {
+                const count = reviews.filter(r => r.rating === star).length;
+                const pct = reviews.length > 0 ? Math.round((count / reviews.length) * 100) : 0;
+                return (
+                  <div key={star} style={{ flex: 1, minWidth: "140px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.75rem", color: "#f59e0b", minWidth: "18px" }}>{star}★</span>
+                    <div style={{ flex: 1, height: "6px", backgroundColor: "#1e293b", borderRadius: "3px", overflow: "hidden" }}>
+                      <div style={{ width: `${pct}%`, height: "100%", backgroundColor: star >= 4 ? "#22c55e" : star === 3 ? "#f59e0b" : "#ef4444", borderRadius: "3px", transition: "width 0.5s" }} />
+                    </div>
+                    <span style={{ fontSize: "0.72rem", color: "#64748b", minWidth: "24px" }}>{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Reviews list */}
+          {reviews.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "48px 20px", color: "#475569" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: "10px" }}>📭</div>
+              <p style={{ fontWeight: "600", fontSize: "0.95rem" }}>No reviews submitted yet.</p>
+              <p style={{ fontSize: "0.82rem", color: "#334155" }}>Users can submit reviews from the platform's Review section.</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  style={{
+                    backgroundColor: review.readByAdmin ? "rgba(30, 41, 59, 0.5)" : "rgba(30, 41, 59, 0.85)",
+                    border: review.readByAdmin ? "1px solid #1e293b" : "1.5px solid rgba(249, 115, 22, 0.45)",
+                    borderRadius: "12px",
+                    padding: "16px 18px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    flexWrap: "wrap",
+                    gap: "14px",
+                    transition: "border-color 0.3s",
+                  }}
+                >
+                  {/* Left: review content */}
+                  <div style={{ flex: 1, minWidth: "240px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
+                      {/* Stars */}
+                      <span style={{ color: "#f59e0b", fontSize: "0.95rem", letterSpacing: "1px" }}>
+                        {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+                      </span>
+                      <span style={{ backgroundColor: "rgba(99, 102, 241, 0.15)", color: "#a5b4fc", fontSize: "0.7rem", fontWeight: "700", padding: "2px 7px", borderRadius: "4px", border: "1px solid rgba(99, 102, 241, 0.3)" }}>
+                        {review.category}
+                      </span>
+                      {!review.readByAdmin && (
+                        <span style={{ backgroundColor: "rgba(249, 115, 22, 0.18)", color: "#fb923c", fontSize: "0.68rem", fontWeight: "800", padding: "1px 7px", borderRadius: "999px", border: "1px solid rgba(249, 115, 22, 0.4)" }}>
+                          🔔 NEW
+                        </span>
+                      )}
+                    </div>
+
+                    <p style={{ margin: "0 0 8px 0", color: "#cbd5e1", fontSize: "0.87rem", lineHeight: "1.6", fontStyle: "italic" }}>
+                      "{review.message}"
+                    </p>
+
+                    <div style={{ display: "flex", gap: "16px", fontSize: "0.75rem", color: "#475569", flexWrap: "wrap" }}>
+                      <span>👤 <strong style={{ color: "#64748b" }}>{review.name}</strong></span>
+                      {review.email && <span>✉️ {review.email}</span>}
+                      <span>🕐 {new Date(review.submittedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      <span style={{ color: "#334155" }}>ID: {review.id}</span>
+                    </div>
+                  </div>
+
+                  {/* Right: actions */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-end" }}>
+                    {!review.readByAdmin && (
+                      <button
+                        onClick={() => handleMarkReviewRead(review.id)}
+                        style={{
+                          padding: "6px 11px",
+                          backgroundColor: "rgba(16, 185, 129, 0.15)",
+                          color: "#34d399",
+                          border: "1px solid rgba(16, 185, 129, 0.4)",
+                          borderRadius: "6px",
+                          fontSize: "0.75rem",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        ✓ Mark Read
+                      </button>
+                    )}
+                    {review.readByAdmin && (
+                      <span style={{ fontSize: "0.72rem", color: "#4ade80", fontStyle: "italic" }}>✓ Read</span>
+                    )}
+                    {isHead && (
+                      <button
+                        onClick={() => handleDeleteReview(review.id)}
+                        style={{
+                          padding: "6px 11px",
+                          backgroundColor: "rgba(239, 68, 68, 0.12)",
+                          color: "#fca5a5",
+                          border: "1px solid rgba(239, 68, 68, 0.3)",
+                          borderRadius: "6px",
+                          fontSize: "0.75rem",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        🗑️ Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

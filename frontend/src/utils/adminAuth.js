@@ -321,3 +321,90 @@ export function updatePermissionRequest(requestId, status, reviewer = "Debasish 
 
   return { success: true, message: `Request ${requestId} marked as ${status}` };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// USER REVIEWS — Platform Feedback & Administrator Notification System
+// ─────────────────────────────────────────────────────────────────────────────
+
+const LS_REVIEWS_KEY = "platform_user_reviews_v1";
+
+/**
+ * Save a new user review.
+ * @param {{ name: string, email: string, rating: number, category: string, message: string }} reviewData
+ * @returns {{ success: boolean, review: object }}
+ */
+export function saveUserReview({ name, email, rating, category, message }) {
+  const review = {
+    id: `REV-${Date.now()}`,
+    name: name || "Anonymous",
+    email: email || "",
+    rating: Math.min(5, Math.max(1, Number(rating) || 5)),
+    category: category || "General Feedback",
+    message: (message || "").trim(),
+    submittedAt: new Date().toISOString(),
+    readByAdmin: false,
+  };
+
+  let reviews = [];
+  try {
+    const raw = localStorage.getItem(LS_REVIEWS_KEY);
+    if (raw) reviews = JSON.parse(raw);
+    if (!Array.isArray(reviews)) reviews = [];
+  } catch { reviews = []; }
+
+  const updated = [review, ...reviews];
+  localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(updated));
+  return { success: true, review };
+}
+
+/**
+ * Retrieve all user reviews (newest first).
+ * @returns {Array}
+ */
+export function getUserReviews() {
+  try {
+    const raw = localStorage.getItem(LS_REVIEWS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch { }
+  return [];
+}
+
+/**
+ * Count reviews that have NOT been read by the administrator.
+ * @returns {number}
+ */
+export function getUnreadReviewCount() {
+  return getUserReviews().filter(r => !r.readByAdmin).length;
+}
+
+/**
+ * Mark all reviews as read by the administrator.
+ */
+export function markAllReviewsRead() {
+  const reviews = getUserReviews().map(r => ({ ...r, readByAdmin: true }));
+  localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(reviews));
+}
+
+/**
+ * Mark a single review as read.
+ * @param {string} reviewId
+ */
+export function markReviewRead(reviewId) {
+  const reviews = getUserReviews().map(r =>
+    r.id === reviewId ? { ...r, readByAdmin: true } : r
+  );
+  localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(reviews));
+}
+
+/**
+ * Delete a review by ID (admin-only action).
+ * @param {string} reviewId
+ */
+export function deleteReview(reviewId) {
+  const reviews = getUserReviews().filter(r => r.id !== reviewId);
+  localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(reviews));
+  return { success: true };
+}

@@ -42,6 +42,7 @@ const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
+const UserReview = lazy(() => import("./pages/UserReview"));
 
 function Loading() {
   return (
@@ -146,6 +147,7 @@ export default function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/reviews" element={<UserReview />} />
 
           </Route>
 

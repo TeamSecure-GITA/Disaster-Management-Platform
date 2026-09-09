@@ -228,6 +228,34 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
           {t.nav_header || "Navigation"}
         </div>
 
+        {/* Platform Reviews link — visible to all users */}
+        <NavLink
+          to="/reviews"
+          onClick={handleNavClick}
+          style={({ isActive }) => ({
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "9px 12px",
+            borderRadius: "8px",
+            textDecoration: "none",
+            fontSize: "0.875rem",
+            color: isActive ? "#ffffff" : "#fde68a",
+            background: isActive
+              ? "linear-gradient(135deg, #d97706, #b45309)"
+              : "rgba(245, 158, 11, 0.08)",
+            border: `1px solid ${isActive ? "#d97706" : "rgba(245, 158, 11, 0.25)"}`,
+            fontWeight: isActive ? "700" : "600",
+            transition: "all 0.15s",
+            marginBottom: "4px",
+          })}
+        >
+          <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.1rem" }}>⭐</span>
+          <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            Platform Reviews
+          </span>
+        </NavLink>
+
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
