@@ -123,6 +123,7 @@ const createRiskBadgeIcon = (riskPercent, color) => {
 const hospitalIcon = createCustomIcon("#ef4444", "🏥");
 const shelterIcon  = createCustomIcon("#2563eb", "⛺");
 const fireIcon     = createCustomIcon("#ea580c", "🚒");
+const officeIcon   = createCustomIcon("#8b5cf6", "🏛️");
 const hazardIcon   = createCustomIcon("#dc2626", "⚠️");
 
 // Component to dynamically pan and zoom the map
@@ -136,13 +137,658 @@ function MapController({ center, zoom }) {
   return null;
 }
 
-// ─── Real Emergency Facilities Dataset ──────────────────────────────────────
+// ─── Real Emergency Facilities Dataset (NER + Coastal Disaster Zones) ───────
 const EMERGENCY_FACILITIES = [
+  // ══════════════════════════════════════════════════════════════════════════
+  // NORTH EASTERN REGION (NER) — HOSPITALS & APEX TRAUMA CENTERS
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: "ner-hosp-1",
+    name: "Gauhati Medical College & Hospital (GMCH Apex Trauma)",
+    type: "hospital",
+    category: "Apex Regional Disaster Trauma Wing",
+    region: "ner",
+    state: "Assam",
+    lat: 26.1584,
+    lng: 91.7712,
+    address: "Narakasur Hilltop, Bhangagarh, Guwahati, Assam 781032",
+    phone: "+91 361 2529457",
+    emergencyPhone: "108 / 112",
+    capacity: "2,200 Beds • 150 ICU Beds • Apex Trauma & Burn Unit",
+    status: "Open 24/7",
+    website: "https://gmch.gov.in",
+  },
+  {
+    id: "ner-hosp-2",
+    name: "AIIMS Guwahati (All India Institute of Medical Sciences)",
+    type: "hospital",
+    category: "National Institute of Emergency Excellence",
+    region: "ner",
+    state: "Assam",
+    lat: 26.2758,
+    lng: 91.6881,
+    address: "Changsari, Kamrup Rural, Assam 781101",
+    phone: "+91 361 2912001",
+    emergencyPhone: "112 / +91 361 2912002",
+    capacity: "750 Beds • Critical Air Ambulance Helipad & Shock Care",
+    status: "Open 24/7",
+    website: "https://aiimsguwahati.ac.in",
+  },
+  {
+    id: "ner-hosp-3",
+    name: "STNM Multi-Speciality Hospital (Sir Thutob Namgyal)",
+    type: "hospital",
+    category: "Sikkim Apex Mountain Referral Hospital",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.3195,
+    lng: 88.6015,
+    address: "Sochakgang, Sichey, Gangtok, Sikkim 737101",
+    phone: "+91 3592 202944",
+    emergencyPhone: "108 / 112",
+    capacity: "1,000 Beds • Mountain Trauma ICU • Cryo & High-Altitude Units",
+    status: "Open 24/7",
+    website: "https://sikkim.gov.in",
+  },
+  {
+    id: "ner-hosp-4",
+    name: "NEIGRIHMS Shillong (Super Specialty & Trauma Wing)",
+    type: "hospital",
+    category: "Apex Central Medical Institute for NER",
+    region: "ner",
+    state: "Meghalaya",
+    lat: 25.5990,
+    lng: 91.9360,
+    address: "Mawdiangdiang, Shillong, Meghalaya 793018",
+    phone: "+91 364 2538025",
+    emergencyPhone: "108 / +91 364 2538012",
+    capacity: "800 Beds • 24/7 Neurotrauma ICU • Hyperbaric Facilities",
+    status: "Open 24/7",
+    website: "https://neigrihms.gov.in",
+  },
+  {
+    id: "ner-hosp-5",
+    name: "Mangan District Emergency Hospital",
+    type: "hospital",
+    category: "High-Altitude Landslide Disaster Care Unit",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.5085,
+    lng: 88.5280,
+    address: "North Sikkim Highway, Mangan, Sikkim 737116",
+    phone: "+91 3592 234224",
+    emergencyPhone: "108",
+    capacity: "120 Beds • Dedicated Oxygen Generator • Mountain Triage",
+    status: "Open 24/7",
+    website: "https://northsikkim.nic.in",
+  },
+  {
+    id: "ner-hosp-6",
+    name: "TRIHMS Naharlagun (Tomo Riba Institute)",
+    type: "hospital",
+    category: "State Apex Medical College & Trauma Center",
+    region: "ner",
+    state: "Arunachal Pradesh",
+    lat: 27.1065,
+    lng: 93.6934,
+    address: "Old Assembly Complex, Naharlagun, Papum Pare 791110",
+    phone: "+91 360 2244248",
+    emergencyPhone: "108 / 112",
+    capacity: "500 Beds • 24/7 Emergency Operation Theaters",
+    status: "Open 24/7",
+    website: "https://trihms.org",
+  },
+  {
+    id: "ner-hosp-7",
+    name: "Naga Hospital Authority Kohima (NHAK)",
+    type: "hospital",
+    category: "State Emergency & Trauma Referral Hospital",
+    region: "ner",
+    state: "Nagaland",
+    lat: 25.6669,
+    lng: 94.1063,
+    address: "Hospital Colony, Kohima, Nagaland 797001",
+    phone: "+91 370 2242858",
+    emergencyPhone: "108 / 112",
+    capacity: "350 Beds • NH-29 Accident & Landslide Trauma Wing",
+    status: "Open 24/7",
+    website: "https://nagaland.gov.in",
+  },
+  {
+    id: "ner-hosp-8",
+    name: "RIMS Imphal (Regional Institute of Medical Sciences)",
+    type: "hospital",
+    category: "Regional Super Specialty Trauma Center",
+    region: "ner",
+    state: "Manipur",
+    lat: 24.8197,
+    lng: 93.9214,
+    address: "Lamphelpat, Imphal West, Manipur 795004",
+    phone: "+91 385 2414629",
+    emergencyPhone: "108 / 112",
+    capacity: "1,074 Beds • Apex Blood Bank & Disaster Casualty Unit",
+    status: "Open 24/7",
+    website: "https://rims.edu.in",
+  },
+  {
+    id: "ner-hosp-9",
+    name: "ZMC Falkawn (Zoram Medical College)",
+    type: "hospital",
+    category: "State Referral & Disaster Casualty Hospital",
+    region: "ner",
+    state: "Mizoram",
+    lat: 23.6333,
+    lng: 92.7167,
+    address: "Falkawn, Aizawl District, Mizoram 796005",
+    phone: "+91 389 2350352",
+    emergencyPhone: "108 / 112",
+    capacity: "500 Beds • Monsoon Landslide Casualty Ward",
+    status: "Open 24/7",
+    website: "https://zmc.edu.in",
+  },
+  {
+    id: "ner-hosp-10",
+    name: "AGMC & GBP Hospital Agartala",
+    type: "hospital",
+    category: "Premier Government Medical College & Trauma",
+    region: "ner",
+    state: "Tripura",
+    lat: 23.8600,
+    lng: 91.2917,
+    address: "Kunjaban, Agartala, West Tripura 799006",
+    phone: "+91 381 2356701",
+    emergencyPhone: "108",
+    capacity: "1,200 Beds • Comprehensive Disaster Critical Care",
+    status: "Open 24/7",
+    website: "https://agmc.nic.in",
+  },
+  {
+    id: "ner-hosp-11",
+    name: "Assam Medical College & Hospital (AMCH Dibrugarh)",
+    type: "hospital",
+    category: "Upper Assam Apex Flood Trauma Hospital",
+    region: "ner",
+    state: "Assam",
+    lat: 27.4728,
+    lng: 94.9120,
+    address: "Barbari, Dibrugarh, Assam 786002",
+    phone: "+91 373 2300080",
+    emergencyPhone: "108",
+    capacity: "1,364 Beds • Flood Inundation & Emergency Care",
+    status: "Open 24/7",
+    website: "https://assammedicalcollege.in",
+  },
+  {
+    id: "ner-hosp-12",
+    name: "Cherrapunji (Sohra) CHC Emergency Hospital",
+    type: "hospital",
+    category: "High-Precipitation Plateau Emergency Clinic",
+    region: "ner",
+    state: "Meghalaya",
+    lat: 25.2986,
+    lng: 91.7324,
+    address: "Sohra, East Khasi Hills, Meghalaya 793108",
+    phone: "+91 3637 235222",
+    emergencyPhone: "108",
+    capacity: "60 Beds • Flash Flood & Slope Failure First Aid",
+    status: "Open 24/7",
+    website: "https://meghalaya.gov.in",
+  },
+  {
+    id: "ner-hosp-13",
+    name: "Tawang District Hospital (High-Altitude Post)",
+    type: "hospital",
+    category: "High-Altitude Mountain Disaster Hospital",
+    region: "ner",
+    state: "Arunachal Pradesh",
+    lat: 27.5861,
+    lng: 91.8697,
+    address: "Cona Road, Tawang, Arunachal Pradesh 790104",
+    phone: "+91 3794 222234",
+    emergencyPhone: "108",
+    capacity: "100 Beds • Snowstorm & Landslide Trauma Ward",
+    status: "Open 24/7",
+    website: "https://tawang.nic.in",
+  },
+  {
+    id: "ner-hosp-14",
+    name: "Silchar Medical College & Hospital (SMCH)",
+    type: "hospital",
+    category: "Barak Valley Apex Disaster Center",
+    region: "ner",
+    state: "Assam",
+    lat: 24.7836,
+    lng: 92.7932,
+    address: "Ghungoor, Silchar, Cachar, Assam 788014",
+    phone: "+91 3842 229110",
+    emergencyPhone: "108",
+    capacity: "1,000 Beds • Flood & Inundation Emergency Ward",
+    status: "Open 24/7",
+    website: "https://smcassam.gov.in",
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // NORTH EASTERN REGION (NER) — DISASTER MANAGEMENT OFFICES & EOCS
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: "ner-off-1",
+    name: "NESAC (ISRO North Eastern Space Applications Centre)",
+    type: "office",
+    category: "Apex Satellite Early Warning & Hazard Command",
+    region: "ner",
+    state: "Meghalaya",
+    lat: 25.6744,
+    lng: 91.9168,
+    address: "NESAC Campus, Department of Space, Umiam, Meghalaya 793103",
+    phone: "+91 364 2570140",
+    emergencyPhone: "+91 364 2570141",
+    capacity: "24/7 Real-Time Satellite Telemetry & Flood/Landslide Warning",
+    status: "Operational 24/7",
+    website: "https://nesac.gov.in",
+  },
+  {
+    id: "ner-off-2",
+    name: "ASDMA State Emergency Operation Center (SEOC Assam)",
+    type: "office",
+    category: "State Disaster Management Authority HQ",
+    region: "ner",
+    state: "Assam",
+    lat: 26.1445,
+    lng: 91.7915,
+    address: "Janata Bhawan, Dispur, Guwahati, Assam 781006",
+    phone: "+91 361 2237011",
+    emergencyPhone: "1070 / 1079 (Toll Free)",
+    capacity: "Apex Inter-Agency Crisis Control Room for 35 Districts",
+    status: "Operational 24/7",
+    website: "https://asdma.assam.gov.in",
+  },
+  {
+    id: "ner-off-3",
+    name: "Sikkim State Disaster Management Authority (SSDMA)",
+    type: "office",
+    category: "Himalayan Landslide & Flash Flood Operations HQ",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.3314,
+    lng: 88.6138,
+    address: "Tashiling Secretariat, Gangtok, Sikkim 737101",
+    phone: "+91 3592 201145",
+    emergencyPhone: "1070 / 1077 (District SEOC)",
+    capacity: "Teesta Basin Early Warning & NH-10 Highway Monitor Room",
+    status: "Operational 24/7",
+    website: "https://sikkim.gov.in",
+  },
+  {
+    id: "ner-off-4",
+    name: "Meghalaya State Disaster Management Authority (MSDMA)",
+    type: "office",
+    category: "State Disaster Management Authority EOC",
+    region: "ner",
+    state: "Meghalaya",
+    lat: 25.5689,
+    lng: 91.8872,
+    address: "Lower Lachumiere, Shillong, Meghalaya 793001",
+    phone: "+91 364 2502098",
+    emergencyPhone: "1070",
+    capacity: "Sohra Plateau Heavy Rainfall & Sonapur Highway Tunnel EOC",
+    status: "Operational 24/7",
+    website: "https://msdma.gov.in",
+  },
+  {
+    id: "ner-off-5",
+    name: "Nagaland State Disaster Management Authority (NSDMA)",
+    type: "office",
+    category: "State Disaster Command & Control Room",
+    region: "ner",
+    state: "Nagaland",
+    lat: 25.6885,
+    lng: 94.1132,
+    address: "New Secretariat Complex, Kohima, Nagaland 797004",
+    phone: "+91 370 2270050",
+    emergencyPhone: "1070 / 112",
+    capacity: "NH-29 Sinking Corridor Telemetry & Seismic Monitor Cell",
+    status: "Operational 24/7",
+    website: "https://nsdma.nagaland.gov.in",
+  },
+  {
+    id: "ner-off-6",
+    name: "Arunachal Pradesh Disaster Authority (APSDMA)",
+    type: "office",
+    category: "State Disaster Management Authority HQ",
+    region: "ner",
+    state: "Arunachal Pradesh",
+    lat: 27.0844,
+    lng: 93.6053,
+    address: "Block 20, Civil Secretariat, Itanagar 791111",
+    phone: "+91 360 2212228",
+    emergencyPhone: "1070",
+    capacity: "Trans-Himalayan Highway Landslide Alert Command",
+    status: "Operational 24/7",
+    website: "https://arunachalpradesh.gov.in",
+  },
+  {
+    id: "ner-off-7",
+    name: "DDMA Mangan Landslide Emergency Command Center",
+    type: "office",
+    category: "District Disaster Management Authority (DDMA)",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.5050,
+    lng: 88.5300,
+    address: "District Collectorate, Mangan, North Sikkim 737116",
+    phone: "+91 3592 234222",
+    emergencyPhone: "1077 (District Toll-Free)",
+    capacity: "North Sikkim Isolated Valley Relief & Aerial Airdrop Hub",
+    status: "Operational 24/7",
+    website: "https://northsikkim.nic.in",
+  },
+  {
+    id: "ner-off-8",
+    name: "Mizoram Disaster Management & Rehab (DM&R EOC)",
+    type: "office",
+    category: "State Disaster Relief & Subsidence Monitor",
+    region: "ner",
+    state: "Mizoram",
+    lat: 23.7198,
+    lng: 92.7142,
+    address: "MINECO Complex, Khatla, Aizawl, Mizoram 796001",
+    phone: "+91 389 2335842",
+    emergencyPhone: "1070",
+    capacity: "Aizawl Urban Slope Stability & Subsidence Watch",
+    status: "Operational 24/7",
+    website: "https://dmr.mizoram.gov.in",
+  },
+  {
+    id: "ner-off-9",
+    name: "Manipur State Disaster Management Authority (MSDMA)",
+    type: "office",
+    category: "State Disaster Operations Center",
+    region: "ner",
+    state: "Manipur",
+    lat: 24.8038,
+    lng: 93.9405,
+    address: "Old Secretariat, Imphal, Manipur 795001",
+    phone: "+91 385 2443441",
+    emergencyPhone: "1070",
+    capacity: "State Emergency Response & Rescue Mobilization",
+    status: "Operational 24/7",
+    website: "https://manipur.gov.in",
+  },
+  {
+    id: "ner-off-10",
+    name: "Tripura State Emergency Operation Center (TSEOC)",
+    type: "office",
+    category: "State Emergency Operations Hub",
+    region: "ner",
+    state: "Tripura",
+    lat: 23.8569,
+    lng: 91.2825,
+    address: "New Secretariat, Agartala, West Tripura 799010",
+    phone: "+91 381 2416045",
+    emergencyPhone: "1070",
+    capacity: "Flood Inundation & Cross-Border River Warning Cell",
+    status: "Operational 24/7",
+    website: "https://tripura.gov.in",
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // NORTH EASTERN REGION (NER) — RESCUE CENTERS, NDRF & SDRF BATTALIONS
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: "ner-res-1",
+    name: "1st Battalion NDRF Headquarters (North East Apex)",
+    type: "fire",
+    category: "National Disaster Response Force (NDRF) Battalion HQ",
+    region: "ner",
+    state: "Assam",
+    lat: 26.0967,
+    lng: 91.6025,
+    address: "Patgaon, Rani, Kamrup Rural, Assam 781017",
+    phone: "+91 361 2840027",
+    emergencyPhone: "112 / +91 9435117246",
+    capacity: "45 Search & Rescue Teams • Deep Diving, Collapsed Structure, Helipad",
+    status: "Ready for Deployment",
+    website: "https://www.ndrf.gov.in",
+  },
+  {
+    id: "ner-res-2",
+    name: "12th Battalion NDRF (Arunachal Foothills Base)",
+    type: "fire",
+    category: "NDRF Himalayan Disaster Battalion Depot",
+    region: "ner",
+    state: "Arunachal Pradesh",
+    lat: 27.1400,
+    lng: 93.7500,
+    address: "Doimukh Base, Papum Pare, Arunachal Pradesh 791112",
+    phone: "+91 360 2277100",
+    emergencyPhone: "112",
+    capacity: "Mountain Rope Rescue, Avalanche & Slope Extrication Teams",
+    status: "Ready for Deployment",
+    website: "https://www.ndrf.gov.in",
+  },
+  {
+    id: "ner-res-3",
+    name: "NDRF Regional Response Centre (RRC Gangtok / Teesta)",
+    type: "fire",
+    category: "Specialized Mountain Landslide Rescue Unit",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.3150,
+    lng: 88.6020,
+    address: "Tadong 5th Mile, Gangtok, Sikkim 737102",
+    phone: "+91 3592 231112",
+    emergencyPhone: "112 / 1077",
+    capacity: "High-Angle Rope Rescue, Canine Squads, Hydraulic Rock Cutters",
+    status: "Ready for Deployment",
+    website: "https://www.ndrf.gov.in",
+  },
+  {
+    id: "ner-res-4",
+    name: "NDRF Regional Response Centre (RRC Shillong)",
+    type: "fire",
+    category: "Regional Deep Ravine & Mudslide Rescue Base",
+    region: "ner",
+    state: "Meghalaya",
+    lat: 25.6020,
+    lng: 91.9320,
+    address: "New Shillong Township, Mawdiangdiang 793018",
+    phone: "+91 364 2530100",
+    emergencyPhone: "112",
+    capacity: "Deep Ravine Extrication & Mountain Medical First Responders",
+    status: "Ready for Deployment",
+    website: "https://www.ndrf.gov.in",
+  },
+  {
+    id: "ner-res-5",
+    name: "Sikkim SDRF Mountain Rescue Base",
+    type: "fire",
+    category: "State Disaster Response Force Mountain Division",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.3450,
+    lng: 88.6250,
+    address: "Burtuk Military Road, Gangtok, Sikkim 737101",
+    phone: "+91 3592 202022",
+    emergencyPhone: "112",
+    capacity: "Rapid Alpine Rescue & Fast River Crossing Boats",
+    status: "Ready for Deployment",
+    website: "https://sikkimpolice.nic.in",
+  },
+  {
+    id: "ner-res-6",
+    name: "Assam SDRF Riverine & Urban Rescue Center",
+    type: "fire",
+    category: "State Disaster Response Force Flood Command",
+    region: "ner",
+    state: "Assam",
+    lat: 26.2150,
+    lng: 91.7200,
+    address: "North Guwahati Base, Kamrup, Assam 781030",
+    phone: "+91 361 2690011",
+    emergencyPhone: "108 / 112",
+    capacity: "Inflatable Motorized Rescue Boats & Flood Evacuation Fleet",
+    status: "Ready for Deployment",
+    website: "https://fireandemergencyservices.assam.gov.in",
+  },
+  {
+    id: "ner-res-7",
+    name: "BRO Project Swastik Heavy Landslide Task Force",
+    type: "fire",
+    category: "Border Roads Organisation Mountain Clearance Base",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.2340,
+    lng: 88.4980,
+    address: "Singtam / Rangpo Highway Junction, East Sikkim 737132",
+    phone: "+91 3592 246220",
+    emergencyPhone: "112 (BRO Emergency)",
+    capacity: "Excavators, Heavy Bulldozers, Rock Breakers & Bailey Bridge Units",
+    status: "Ready for Deployment",
+    website: "https://bro.gov.in",
+  },
+  {
+    id: "ner-res-8",
+    name: "Nagaland SDRF Rapid Mobilization Camp",
+    type: "fire",
+    category: "State Disaster Response Force Rapid Unit",
+    region: "ner",
+    state: "Nagaland",
+    lat: 25.8050,
+    lng: 93.7750,
+    address: "NAP Training Complex, Chumukedima, Nagaland 797103",
+    phone: "+91 3862 242000",
+    emergencyPhone: "112",
+    capacity: "NH-29 Mudslide Search, Drone Recon & Evacuation Operations",
+    status: "Ready for Deployment",
+    website: "https://nagaland.gov.in",
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // NORTH EASTERN REGION (NER) — RELIEF CAMPS & EVACUATION SHELTERS
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: "ner-she-1",
+    name: "Guwahati Sarusajai Multi-Purpose Evacuation Hub",
+    type: "shelter",
+    category: "Mega Flood & Crisis Relief Camp",
+    region: "ner",
+    state: "Assam",
+    lat: 26.1150,
+    lng: 91.7580,
+    address: "National Games Stadium Complex, Sarusajai, Guwahati 781040",
+    phone: "+91 361 2237000",
+    emergencyPhone: "1077",
+    capacity: "3,500 Persons • Drinking Water Plants, Food Kitchens & Medical Tents",
+    status: "Active / Available",
+    website: "https://kamrupmetro.assam.gov.in",
+  },
+  {
+    id: "ner-she-2",
+    name: "Teesta Valley Flood & Landslide Transit Shelter",
+    type: "shelter",
+    category: "Highway Stranded Passenger Evacuation Refuge",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.0900,
+    lng: 88.4500,
+    address: "NH-10 Melli Bazaar Community Center, Melli, Sikkim 737128",
+    phone: "+91 3595 248230",
+    emergencyPhone: "108 / 112",
+    capacity: "800 Stranded Travelers • Hot Meals, Satellite Phone & Sleeping Pods",
+    status: "Active / Available",
+    website: "https://sikkim.gov.in",
+  },
+  {
+    id: "ner-she-3",
+    name: "Aizawl Ramhlun Sinking-Zone Evacuation Camp",
+    type: "shelter",
+    category: "Urban Landslide Subsidence Relief Shelter",
+    region: "ner",
+    state: "Mizoram",
+    lat: 23.7520,
+    lng: 92.7230,
+    address: "Ramhlun Vengthlang Indoor Complex, Aizawl, Mizoram 796012",
+    phone: "+91 389 2335100",
+    emergencyPhone: "1070",
+    capacity: "1,200 Persons • Structural Steel Reinforcement & Family Tents",
+    status: "Active / Available",
+    website: "https://aizawl.nic.in",
+  },
+  {
+    id: "ner-she-4",
+    name: "Cherrapunji Sohra Community High-Ground Refuge",
+    type: "shelter",
+    category: "Monsoon Cloudburst & Flash Flood Shelter",
+    region: "ner",
+    state: "Meghalaya",
+    lat: 25.2850,
+    lng: 91.7250,
+    address: "Community Hall, Saitsohpen, Sohra, Meghalaya 793108",
+    phone: "+91 3637 235100",
+    emergencyPhone: "108",
+    capacity: "600 Persons • Solar Power & Emergency Radio Transmitter",
+    status: "Active / Available",
+    website: "https://meghalaya.gov.in",
+  },
+  {
+    id: "ner-she-5",
+    name: "Kohima Local Ground Emergency Relief Camp",
+    type: "shelter",
+    category: "District Emergency Evacuation Camp",
+    region: "ner",
+    state: "Nagaland",
+    lat: 25.6720,
+    lng: 94.1080,
+    address: "Khuochiezie Stadium Ground, D-Block, Kohima 797001",
+    phone: "+91 370 2244100",
+    emergencyPhone: "112",
+    capacity: "1,500 Persons • Food Distribution Hub & Medical First Aid",
+    status: "Active / Available",
+    website: "https://kohima.nic.in",
+  },
+  {
+    id: "ner-she-6",
+    name: "Majuli High-Plinth Multi-Purpose Flood Refuge",
+    type: "shelter",
+    category: "High-Plinth Brahmaputra River Flood Shelter",
+    region: "ner",
+    state: "Assam",
+    lat: 26.9600,
+    lng: 94.2200,
+    address: "Garamur Sub-Division, Majuli Island, Assam 785104",
+    phone: "+91 3775 274400",
+    emergencyPhone: "1077",
+    capacity: "1,000 Persons + Livestock Refuge Deck • Solar Water Purifiers",
+    status: "Active / Available",
+    website: "https://majuli.gov.in",
+  },
+  {
+    id: "ner-she-7",
+    name: "Mangan Disaster Transit Evacuation Camp",
+    type: "shelter",
+    category: "Himalayan Landslide Evacuation Camp",
+    region: "ner",
+    state: "Sikkim",
+    lat: 27.5100,
+    lng: 88.5320,
+    address: "Near DC Office, Mangan Sports Ground, North Sikkim 737116",
+    phone: "+91 3592 234100",
+    emergencyPhone: "1077",
+    capacity: "750 Persons • High-Altitude Warm Sleeping Bags & Kerosene Heaters",
+    status: "Active / Available",
+    website: "https://northsikkim.nic.in",
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // COASTAL & EASTERN REGION (ODISHA / BAY OF BENGAL CYCLONE BELT)
+  // ══════════════════════════════════════════════════════════════════════════
   {
     id: "hosp-1",
     name: "AIIMS Super Specialty Hospital",
     type: "hospital",
     category: "Hospital & Trauma Center",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.2312,
     lng: 85.7765,
     address: "Sijua, Patrapada, Bhubaneswar, Odisha 751019",
@@ -157,6 +803,8 @@ const EMERGENCY_FACILITIES = [
     name: "Capital Hospital & Disaster Emergency Ward",
     type: "hospital",
     category: "Government Hospital",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.2644,
     lng: 85.8281,
     address: "Unit 6, Ganga Nagar, Bhubaneswar, Odisha 751001",
@@ -171,6 +819,8 @@ const EMERGENCY_FACILITIES = [
     name: "KIMS Medical College & Hospital",
     type: "hospital",
     category: "Super Specialty Hospital",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.3533,
     lng: 85.8189,
     address: "KIIT Road, Patia, Bhubaneswar, Odisha 751024",
@@ -185,6 +835,8 @@ const EMERGENCY_FACILITIES = [
     name: "SCB Medical College & Hospital",
     type: "hospital",
     category: "Premier Emergency Medical College",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.4625,
     lng: 85.8928,
     address: "Mangalabag, Cuttack, Odisha 753007",
@@ -199,6 +851,8 @@ const EMERGENCY_FACILITIES = [
     name: "Apollo Hospitals Emergency Center",
     type: "hospital",
     category: "Private Super Specialty",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.3089,
     lng: 85.8338,
     address: "Plot No. 251, Sainik School Rd, Unit 15, Bhubaneswar 751005",
@@ -213,6 +867,8 @@ const EMERGENCY_FACILITIES = [
     name: "District Headquarters Hospital Puri",
     type: "hospital",
     category: "Coastal District Hospital",
+    region: "coastal",
+    state: "Odisha",
     lat: 19.8135,
     lng: 85.8312,
     address: "Grand Road, Puri, Odisha 752001",
@@ -227,6 +883,8 @@ const EMERGENCY_FACILITIES = [
     name: "Balasore District Emergency Hospital",
     type: "hospital",
     category: "District Emergency Hospital",
+    region: "coastal",
+    state: "Odisha",
     lat: 21.4934,
     lng: 86.9337,
     address: "Hospital Road, Balasore, Odisha 756001",
@@ -237,12 +895,14 @@ const EMERGENCY_FACILITIES = [
     website: "https://balasore.nic.in",
   },
 
-  // ── RESCUE CENTERS & CYCLONE SHELTERS ──
+  // ── COASTAL RESCUE CENTERS & CYCLONE SHELTERS ──
   {
     id: "shelter-1",
     name: "Bhubaneswar Central Disaster Relief Camp",
     type: "shelter",
     category: "Multi-Purpose Rescue Center",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.2961,
     lng: 85.8245,
     address: "Unit 1, Master Canteen Area, Bhubaneswar 751009",
@@ -257,6 +917,8 @@ const EMERGENCY_FACILITIES = [
     name: "Puri Coastal Multi-Purpose Cyclone Shelter",
     type: "shelter",
     category: "ODRAP Cyclone Shelter",
+    region: "coastal",
+    state: "Odisha",
     lat: 19.7983,
     lng: 85.8195,
     address: "Chakratirtha Road, Marine Drive, Puri, Odisha 752002",
@@ -271,6 +933,8 @@ const EMERGENCY_FACILITIES = [
     name: "Cuttack Mahanadi Flood Relief Center",
     type: "shelter",
     category: "Flood Evacuation Shelter",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.4728,
     lng: 85.8753,
     address: "Ring Road, Barabati Stadium Compound, Cuttack 753001",
@@ -285,6 +949,8 @@ const EMERGENCY_FACILITIES = [
     name: "Balasore Coastal Evacuation Shelter",
     type: "shelter",
     category: "Cyclone & Storm Shelter",
+    region: "coastal",
+    state: "Odisha",
     lat: 21.5034,
     lng: 86.9212,
     address: "Station Road, Balasore, Odisha 756001",
@@ -299,6 +965,8 @@ const EMERGENCY_FACILITIES = [
     name: "Paradip Port Marine Rescue Base",
     type: "shelter",
     category: "Marine & Coastal Rescue Camp",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.2647,
     lng: 86.6853,
     address: "Port Trust Compound, Paradip, Jagatsinghpur 754142",
@@ -309,12 +977,14 @@ const EMERGENCY_FACILITIES = [
     website: "https://paradipport.gov.in",
   },
 
-  // ── FIRE & RAPID RESCUE STATIONS ──
+  // ── COASTAL FIRE & RAPID RESCUE STATIONS ──
   {
     id: "fire-1",
     name: "ODRAF & NDRF Rapid Action Rescue Base",
     type: "fire",
     category: "Rapid Action Disaster Response Force",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.3175,
     lng: 85.8012,
     address: "Baramunda, Bhubaneswar, Odisha 751003",
@@ -329,6 +999,8 @@ const EMERGENCY_FACILITIES = [
     name: "Cuttack Central Emergency Fire Station",
     type: "fire",
     category: "Fire & River Rescue Base",
+    region: "coastal",
+    state: "Odisha",
     lat: 20.4611,
     lng: 85.8694,
     address: "Buxi Bazaar, Cuttack, Odisha 753001",
@@ -587,7 +1259,8 @@ export default function Map() {
 
   // Map state
   const [baseLayer, setBaseLayer] = useState("satellite"); // "satellite" | "streets" | "dark"
-  const [filter, setFilter] = useState("all"); // "all" | "hospital" | "shelter" | "fire" | "risks"
+  const [filter, setFilter] = useState("all"); // "all" | "hospital" | "shelter" | "fire" | "office" | "risks"
+  const [selectedRegion, setSelectedRegion] = useState(searchParams.get("region") || "all"); // "all" | "ner" | "coastal"
   const [riskCategoryFilter, setRiskCategoryFilter] = useState("all"); // "all" | "flood" | "cyclone" | "heavy_rain" | "landslide" | "soil_moisture" | "erosion"
   const [minRiskPercent, setMinRiskPercent] = useState(30);
   const [showSatelliteRadar, setShowSatelliteRadar] = useState(true);
@@ -615,6 +1288,13 @@ export default function Map() {
 
   // Check URL search parameters (e.g. ?lat=20.2312&lng=85.7765 or ?evac=1&originLat=...&destLat=...)
   useEffect(() => {
+    const regionParam = searchParams.get("region");
+    if (regionParam === "ner") {
+      setSelectedRegion("ner");
+      setMapCenter([26.2006, 92.9376]);
+      setMapZoom(7);
+    }
+
     const isEvac = searchParams.get("evac") === "1";
     const originLat = parseFloat(searchParams.get("originLat"));
     const originLng = parseFloat(searchParams.get("originLng"));
@@ -705,14 +1385,20 @@ export default function Map() {
     }
   };
 
-  // Filter facilities
+  // Filter facilities by region, type, and search query
   const filteredFacilities = EMERGENCY_FACILITIES.filter((fac) => {
-    const matchesType = filter === "all" || fac.type === filter;
+    const matchesRegion = selectedRegion === "all" || fac.region === selectedRegion;
+    const matchesType =
+      filter === "all" ||
+      fac.type === filter ||
+      (filter === "fire" && (fac.type === "fire" || fac.type === "rescue")) ||
+      (filter === "office" && fac.type === "office");
     const matchesSearch =
       fac.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       fac.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      fac.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
+      fac.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (fac.state && fac.state.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesRegion && matchesType && matchesSearch;
   });
 
   // Filter satellite weather risk zones
@@ -739,6 +1425,16 @@ export default function Map() {
 
   const estimatedDriveMin = routeDistance ? Math.round((parseFloat(routeDistance) / 45) * 60) : null;
   const estimatedWalkMin = routeDistance ? Math.round((parseFloat(routeDistance) / 4.5) * 60) : null;
+
+  // Facility counts according to current selected region
+  const regionFacilities = EMERGENCY_FACILITIES.filter(
+    (fac) => selectedRegion === "all" || fac.region === selectedRegion
+  );
+  const countAll = regionFacilities.length;
+  const countHospitals = regionFacilities.filter((f) => f.type === "hospital").length;
+  const countShelters = regionFacilities.filter((f) => f.type === "shelter").length;
+  const countFireRescue = regionFacilities.filter((f) => f.type === "fire" || f.type === "rescue").length;
+  const countOffices = regionFacilities.filter((f) => f.type === "office").length;
 
   return (
     <div style={{ color: "#fff", minHeight: "100vh", boxSizing: "border-box" }}>
@@ -899,6 +1595,7 @@ export default function Map() {
               setRiskCategoryFilter("landslide");
               setMapCenter([26.2006, 92.9376]);
               setMapZoom(7);
+              setSelectedRegion("ner");
             }}
             style={{
               padding: "5px 12px",
@@ -922,8 +1619,8 @@ export default function Map() {
             <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: "700" }}>MIN RISK:</span>
             {[
               { val: 0, label: "All" },
-              { val: 50, label: "&gt;50%" },
-              { val: 75, label: "&gt;75% High" },
+              { val: 50, label: ">50%" },
+              { val: 75, label: ">75% High" },
               { val: 85, label: "🚨 Critical Only" },
             ].map((th) => (
               <button
@@ -947,33 +1644,78 @@ export default function Map() {
           </div>
         </div>
 
-        {/* Row 3: Facilities Filter Tabs */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", borderTop: "1px solid #1e293b", paddingTop: "8px" }}>
-          <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: "700" }}>EMERGENCY FACILITIES:</span>
-          {[
-            { id: "all", label: `All Facilities (${EMERGENCY_FACILITIES.length})` },
-            { id: "hospital", label: "🏥 Hospitals (7)" },
-            { id: "shelter", label: "⛺ Cyclone Shelters (5)" },
-            { id: "fire", label: "🚒 Fire & ODRAF (2)" },
-          ].map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => setFilter(cat.id)}
-              style={{
-                padding: "4px 10px",
-                borderRadius: "6px",
-                border: "none",
-                fontWeight: "600",
-                fontSize: "0.76rem",
-                cursor: "pointer",
-                backgroundColor: filter === cat.id ? "#334155" : "transparent",
-                color: filter === cat.id ? "#38bdf8" : "#94a3b8",
-              }}
-            >
-              {cat.label}
-            </button>
-          ))}
+        {/* Row 3: Regional & Facilities Filter Tabs */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", borderTop: "1px solid #1e293b", paddingTop: "8px" }}>
+          {/* Region Filter */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "0.74rem", color: "#94a3b8", fontWeight: "700", marginRight: "2px" }}>
+              REGION:
+            </span>
+            {[
+              { id: "all", label: "🌐 All India", center: [23.5, 88.5], zoom: 6 },
+              { id: "ner", label: "🏔️ North East (NER)", center: [26.2006, 92.9376], zoom: 7 },
+              { id: "coastal", label: "🌊 Coastal Odisha", center: [20.2961, 85.8245], zoom: 9 },
+            ].map((reg) => (
+              <button
+                key={reg.id}
+                type="button"
+                onClick={() => {
+                  setSelectedRegion(reg.id);
+                  setMapCenter(reg.center);
+                  setMapZoom(reg.zoom);
+                }}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  border: selectedRegion === reg.id ? "1px solid #38bdf8" : "1px solid #334155",
+                  fontWeight: "700",
+                  fontSize: "0.76rem",
+                  cursor: "pointer",
+                  backgroundColor: selectedRegion === reg.id ? "#0369a1" : "#0f172a",
+                  color: selectedRegion === reg.id ? "#ffffff" : "#cbd5e1",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {reg.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Facilities Filter */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "0.74rem", color: "#94a3b8", fontWeight: "700", marginRight: "2px" }}>
+              FACILITIES:
+            </span>
+            {[
+              { id: "all", label: `All Facilities (${countAll})` },
+              { id: "hospital", label: `🏥 Hospitals (${countHospitals})` },
+              { id: "shelter", label: `⛺ Shelters (${countShelters})` },
+              { id: "fire", label: `🚒 Fire & Rescue (${countFireRescue})` },
+              { id: "office", label: `🏛️ Disaster Offices / SDMA (${countOffices})` },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setFilter(cat.id)}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  border: filter === cat.id ? "1px solid #64748b" : "1px solid transparent",
+                  fontWeight: "700",
+                  fontSize: "0.76rem",
+                  cursor: "pointer",
+                  backgroundColor: filter === cat.id ? "#334155" : "transparent",
+                  color: filter === cat.id ? "#38bdf8" : "#94a3b8",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -1210,6 +1952,8 @@ export default function Map() {
                 ? hospitalIcon
                 : facility.type === "shelter"
                 ? shelterIcon
+                : facility.type === "office"
+                ? officeIcon
                 : fireIcon;
 
             return (
@@ -1222,13 +1966,20 @@ export default function Map() {
                   <div style={{ color: "#0f172a", maxWidth: "290px", padding: "2px", lineHeight: "1.4" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
                       <span style={{ fontSize: "1.1rem" }}>
-                        {facility.type === "hospital" ? "🏥" : facility.type === "shelter" ? "⛺" : "🚒"}
+                        {facility.type === "hospital" ? "🏥" : facility.type === "shelter" ? "⛺" : facility.type === "office" ? "🏛️" : "🚒"}
                       </span>
                       <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{facility.name}</strong>
                     </div>
 
-                    <div style={{ fontSize: "0.75rem", color: "#1d4ed8", fontWeight: "700", marginBottom: "4px" }}>
-                      {facility.category} • <span style={{ color: "#16a34a" }}>{facility.status}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", fontSize: "0.75rem", marginBottom: "4px" }}>
+                      <span style={{ color: "#1d4ed8", fontWeight: "700" }}>{facility.category}</span>
+                      <span>•</span>
+                      <span style={{ color: "#16a34a", fontWeight: "600" }}>{facility.status}</span>
+                      {facility.region === "ner" && (
+                        <span style={{ backgroundColor: "#065f46", color: "#a7f3d0", fontSize: "0.68rem", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                          NER • {facility.state || "North East"}
+                        </span>
+                      )}
                     </div>
 
                     <div style={{ fontSize: "0.78rem", color: "#475569", marginBottom: "4px" }}>

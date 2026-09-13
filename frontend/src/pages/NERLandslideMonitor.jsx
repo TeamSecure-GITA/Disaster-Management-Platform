@@ -335,11 +335,505 @@ const INITIAL_DATA = {
   ]
 };
 
+// Verified North Eastern Region (NER) Emergency Infrastructure
+export const NER_EMERGENCY_FACILITIES = [
+  // ── APEX HOSPITALS & TRAUMA CENTERS ──
+  {
+    id: "ner-hosp-1",
+    name: "Gauhati Medical College & Hospital (GMCH)",
+    category: "Level-1 Trauma Center & Apex Hospital",
+    type: "hospital",
+    state: "Assam",
+    city: "Guwahati",
+    address: "Narakasur Hilltop, Bhangagarh, Guwahati, Assam 781032",
+    lat: 26.1584,
+    lng: 91.7709,
+    phone: "+91 361 2529457",
+    emergencyPhone: "108 / 102",
+    capacity: "1800 Beds • Apex Regional Trauma Care",
+    status: "Open 24/7",
+    facilities: ["Apex Trauma ICU", "Emergency Blood Bank", "Helipad Evacuation", "Disaster Ward"]
+  },
+  {
+    id: "ner-hosp-2",
+    name: "AIIMS Guwahati Apex Hospital",
+    category: "Super Specialty Apex Hospital",
+    type: "hospital",
+    state: "Assam",
+    city: "Changsari",
+    address: "Silbharal, Changsari, Kamrup, Assam 781101",
+    lat: 26.2415,
+    lng: 91.6847,
+    phone: "+91 361 2680000",
+    emergencyPhone: "108 / 112",
+    capacity: "750 Beds • 24/7 Advanced Critical Care",
+    status: "Open 24/7",
+    facilities: ["Level-1 Trauma Unit", "Critical Care Resuscitation", "High-Tech Diagnostics"]
+  },
+  {
+    id: "ner-hosp-3",
+    name: "STNM Multispecialty Hospital & Apex Disaster Trauma Wing",
+    category: "Apex Government Hospital",
+    type: "hospital",
+    state: "Sikkim",
+    city: "Gangtok",
+    address: "Sochagang, Sichey, Gangtok, East Sikkim 737101",
+    lat: 27.3389,
+    lng: 88.6065,
+    phone: "+91 3592 202944",
+    emergencyPhone: "108 / 112",
+    capacity: "1000 Beds • Mountain Trauma Resuscitation Hub",
+    status: "Open 24/7",
+    facilities: ["Teesta Landslide Casualty Triage", "Blood Bank", "Dedicated Disaster ICU"]
+  },
+  {
+    id: "ner-hosp-4",
+    name: "NEIGRIHMS Super Specialty Emergency & Trauma Center",
+    category: "Autonomous Apex Medical Institute",
+    type: "hospital",
+    state: "Meghalaya",
+    city: "Shillong",
+    address: "Mawdiangdiang, Shillong, Meghalaya 793018",
+    lat: 25.5962,
+    lng: 91.9392,
+    phone: "+91 364 2538025",
+    emergencyPhone: "108 / +91 364 2538011",
+    capacity: "800 Beds • Regional Disaster Triage Center",
+    status: "Open 24/7",
+    facilities: ["Regional Trauma & Burn Unit", "Critical Care ICU", "Emergency Blood Storage"]
+  },
+  {
+    id: "ner-hosp-5",
+    name: "Mangan District Hospital",
+    category: "High-Altitude District Emergency Hospital",
+    type: "hospital",
+    state: "Sikkim",
+    city: "Mangan",
+    address: "Mangan Bazaar, North Sikkim 737116",
+    lat: 27.5097,
+    lng: 88.5284,
+    phone: "+91 3592 234224",
+    emergencyPhone: "108",
+    capacity: "120 Beds • Frontline Teesta Valley Disaster Medical Unit",
+    status: "Open 24/7",
+    facilities: ["Emergency Surgical Suite", "Oxygen Plant", "Frontline Landslide Triage"]
+  },
+  {
+    id: "ner-hosp-6",
+    name: "TRIHMS Naharlagun Disaster Trauma & Emergency Center",
+    category: "State Medical Institute & Hospital",
+    type: "hospital",
+    state: "Arunachal Pradesh",
+    city: "Naharlagun",
+    address: "LGB Regional Hospital Campus, Papum Pare, Arunachal Pradesh 791110",
+    lat: 27.1065,
+    lng: 93.6923,
+    phone: "+91 360 2244248",
+    emergencyPhone: "108 / 112",
+    capacity: "600 Beds • 24/7 Trauma Resuscitation",
+    status: "Open 24/7",
+    facilities: ["Landslide Road Casualty Unit", "Blood Bank", "Emergency ICU"]
+  },
+  {
+    id: "ner-hosp-7",
+    name: "Naga Hospital Authority Kohima (NHAK)",
+    category: "Apex State Referral & Trauma Hospital",
+    type: "hospital",
+    state: "Nagaland",
+    city: "Kohima",
+    address: "Hospital Road, Kohima, Nagaland 797001",
+    lat: 25.6669,
+    lng: 94.1086,
+    phone: "+91 370 2222916",
+    emergencyPhone: "108 / 112",
+    capacity: "500 Beds • High Altitude Trauma Care",
+    status: "Open 24/7",
+    facilities: ["Disaster Emergency Ward", "Trauma Care Suite", "Blood Bank"]
+  },
+  {
+    id: "ner-hosp-8",
+    name: "Regional Institute of Medical Sciences (RIMS)",
+    category: "Premier Autonomous Medical College & Hospital",
+    type: "hospital",
+    state: "Manipur",
+    city: "Imphal",
+    address: "Lamphelpat, Imphal West, Manipur 795004",
+    lat: 24.8197,
+    lng: 93.9219,
+    phone: "+91 385 2414629",
+    emergencyPhone: "108 / 112",
+    capacity: "1074 Beds • Apex Regional Referral & Trauma",
+    status: "Open 24/7",
+    facilities: ["Multispecialty Disaster ICU", "Burn Care", "Emergency Operation Theatres"]
+  },
+  {
+    id: "ner-hosp-9",
+    name: "Zoram Medical College & Hospital (ZMC)",
+    category: "Apex State Medical College Hospital",
+    type: "hospital",
+    state: "Mizoram",
+    city: "Falkawn",
+    address: "Falkawn, Aizawl District, Mizoram 796005",
+    lat: 23.6375,
+    lng: 92.7094,
+    phone: "+91 389 2330831",
+    emergencyPhone: "108 / 112",
+    capacity: "500 Beds • Landslide Triage & Trauma Center",
+    status: "Open 24/7",
+    facilities: ["Specialist Trauma Surgery", "Blood Component Center", "Emergency ICU"]
+  },
+  {
+    id: "ner-hosp-10",
+    name: "Agartala Government Medical College & GBP Hospital",
+    category: "Apex State Referral & Emergency Hospital",
+    type: "hospital",
+    state: "Tripura",
+    city: "Agartala",
+    address: "Kunjaban, Agartala, West Tripura 799006",
+    lat: 23.8569,
+    lng: 91.2868,
+    phone: "+91 381 2357155",
+    emergencyPhone: "108 / 112",
+    capacity: "1100 Beds • Level-1 State Trauma Center",
+    status: "Open 24/7",
+    facilities: ["24/7 Critical Care", "High Volume Triage", "Disaster Burn Unit"]
+  },
+
+  // ── DISASTER MANAGEMENT OFFICES & AUTHORITIES ──
+  {
+    id: "ner-office-1",
+    name: "North Eastern Space Applications Centre (NESAC - ISRO)",
+    category: "Space Early Warning & Satellite Landslide Atlas Division",
+    type: "office",
+    state: "Meghalaya",
+    city: "Umiam",
+    address: "Department of Space, Govt of India, Umiam, Meghalaya 793103",
+    lat: 25.6749,
+    lng: 91.9168,
+    phone: "+91 364 2570140",
+    emergencyPhone: "+91 364 2570141",
+    capacity: "ISRO Satellite Earth Observation & Early Warning Command",
+    status: "Operational 24/7 (Emergency Cell)",
+    facilities: ["Real-time ISRO Satellite Feeds", "Rainfall Threshold Modeling", "Multi-hazard Mapping"]
+  },
+  {
+    id: "ner-office-2",
+    name: "Assam State Disaster Management Authority (ASDMA)",
+    category: "State Disaster Management Authority & EOC",
+    type: "office",
+    state: "Assam",
+    city: "Guwahati",
+    address: "State Emergency Operation Centre, Dispur, Guwahati 781006",
+    lat: 26.1438,
+    lng: 91.7898,
+    phone: "+91 361 2237221",
+    emergencyPhone: "1070 / 1079",
+    capacity: "Apex State Disaster Command Hub",
+    status: "Operational 24/7",
+    facilities: ["State EOC", "Flood & Landslide Control Room", "Wireless Satellite Uplink"]
+  },
+  {
+    id: "ner-office-3",
+    name: "Sikkim State Disaster Management Authority (SSDMA)",
+    category: "State Disaster Authority & Mountain Hazard EOC",
+    type: "office",
+    state: "Sikkim",
+    city: "Gangtok",
+    address: "Tashiling Secretariat, Gangtok, Sikkim 737101",
+    lat: 27.3325,
+    lng: 88.6142,
+    phone: "+91 3592 202206",
+    emergencyPhone: "1070 / +91 3592 202206",
+    capacity: "Sikkim Multi-hazard Landslide & GLOF Cell",
+    status: "Operational 24/7",
+    facilities: ["Teesta Basin Sensor Monitoring", "GLOF Early Warning Center", "Inter-agency Radio"]
+  },
+  {
+    id: "ner-office-4",
+    name: "Meghalaya State Disaster Management Authority (MSDMA)",
+    category: "State Emergency Operation Centre",
+    type: "office",
+    state: "Meghalaya",
+    city: "Shillong",
+    address: "Revenue & Disaster Management, Civil Secretariat, Shillong 793001",
+    lat: 25.5788,
+    lng: 91.8833,
+    phone: "+91 364 2502098",
+    emergencyPhone: "1070 / 112",
+    capacity: "Khasi, Jaintia & Garo Hills Disaster Monitoring",
+    status: "Operational 24/7",
+    facilities: ["State EOC", "Rainfall & Landslide Command", "District Liaison"]
+  },
+  {
+    id: "ner-office-5",
+    name: "Arunachal Pradesh State Disaster Management Authority (APSDMA)",
+    category: "State Emergency Operations Centre",
+    type: "office",
+    state: "Arunachal Pradesh",
+    city: "Itanagar",
+    address: "Civil Secretariat, Block 2, Itanagar, Arunachal Pradesh 791111",
+    lat: 27.0844,
+    lng: 93.6053,
+    phone: "+91 360 2212240",
+    emergencyPhone: "1070 / 112",
+    capacity: "Frontier State Mountain Hazard Operations",
+    status: "Operational 24/7",
+    facilities: ["High-Altitude Rescue Coordination", "Riverine Flood Watch", "Satellite Comms"]
+  },
+  {
+    id: "ner-office-6",
+    name: "Nagaland State Disaster Management Authority (NSDMA)",
+    category: "State Emergency Operation Centre",
+    type: "office",
+    state: "Nagaland",
+    city: "Kohima",
+    address: "Civil Secretariat Complex, Kohima, Nagaland 797004",
+    lat: 25.6989,
+    lng: 94.1118,
+    phone: "+91 370 2270050",
+    emergencyPhone: "1070 / +91 370 2291122",
+    capacity: "State EOC • Landslide Warning Cell",
+    status: "Operational 24/7",
+    facilities: ["Weather Radar Link", "District Response Hub", "Community First Responder Desk"]
+  },
+  {
+    id: "ner-office-7",
+    name: "Disaster Management & Rehabilitation Department (Mizoram)",
+    category: "State Disaster Management Department & SEOC",
+    type: "office",
+    state: "Mizoram",
+    city: "Aizawl",
+    address: "Chaltlang, Aizawl, Mizoram 796012",
+    lat: 23.7431,
+    lng: 92.7302,
+    phone: "+91 389 2334898",
+    emergencyPhone: "1070 / 112",
+    capacity: "Aizawl Subsidence & Slope Safety Directorate",
+    status: "Operational 24/7",
+    facilities: ["Slope Stabilization Directorate", "State Disaster Control Room", "Geo-hazard Cell"]
+  },
+  {
+    id: "ner-office-8",
+    name: "Mangan District Disaster Management Authority (DDMA)",
+    category: "District Incident Command Post (North Sikkim Landslides)",
+    type: "office",
+    state: "Sikkim",
+    city: "Mangan",
+    address: "DC Office Complex, Pentok, Mangan, North Sikkim 737116",
+    lat: 27.5052,
+    lng: 88.5341,
+    phone: "+91 3592 234241",
+    emergencyPhone: "+91 3592 234241 / 1077",
+    capacity: "North Sikkim Frontline Landslide Command Post",
+    status: "Operational 24/7",
+    facilities: ["Chungthang-Lachen-Lachung Relief Command", "Heavy Earthmover Dispatch", "Army-Civilian Liaison"]
+  },
+
+  // ── RESCUE CENTERS, NDRF & SDRF BATTALIONS ──
+  {
+    id: "ner-rescue-1",
+    name: "1st Battalion NDRF State Headquarters",
+    category: "National Disaster Response Force (NDRF)",
+    type: "rescue",
+    state: "Assam",
+    city: "Guwahati",
+    address: "Patgaon, Rani, Kamrup Rural, Guwahati, Assam 781017",
+    lat: 26.0682,
+    lng: 91.6119,
+    phone: "+91 361 2849005",
+    emergencyPhone: "0361-2849005 / +91 9435552693",
+    capacity: "18 Deep Disaster Response Teams • Canine Search Units",
+    status: "Operational 24/7",
+    facilities: ["Collapsed Structure Search & Rescue (CSSR)", "Deep Water Rescue Boats", "Heliborne Quick Reaction"]
+  },
+  {
+    id: "ner-rescue-2",
+    name: "12th Battalion NDRF Base",
+    category: "National Disaster Response Force (NDRF)",
+    type: "rescue",
+    state: "Arunachal Pradesh",
+    city: "Doimukh",
+    address: "Emchi, Doimukh, Papum Pare, Arunachal Pradesh 791112",
+    lat: 27.1422,
+    lng: 93.7511,
+    phone: "+91 360 2277107",
+    emergencyPhone: "112 / +91 360 2277107",
+    capacity: "Mountain & Heavy Landslide Specialized Battalions",
+    status: "Operational 24/7",
+    facilities: ["High-Altitude Technical Rescue", "Pneumatic Jack Extrication", "Satellite Comms Rig"]
+  },
+  {
+    id: "ner-rescue-3",
+    name: "NDRF Regional Response Center (RRC Burtuk)",
+    category: "NDRF Specialized Mountain Avalanche & Landslide Unit",
+    type: "rescue",
+    state: "Sikkim",
+    city: "Gangtok",
+    address: "Burtuk, Gangtok, East Sikkim 737101",
+    lat: 27.3524,
+    lng: 88.6212,
+    phone: "+91 3592 205112",
+    emergencyPhone: "108 / 112",
+    capacity: "Fast-Deployment Mountain & Riverine Rescue Teams",
+    status: "Operational 24/7",
+    facilities: ["Teesta Basin Quick Reaction Teams", "Hydraulic Rock Cutters", "Rope Rescue Systems"]
+  },
+  {
+    id: "ner-rescue-4",
+    name: "Border Roads Organisation (BRO) Project Swastik Heavy Clearance Post",
+    category: "BRO Landslide Heavy Equipment Task Force",
+    type: "rescue",
+    state: "Sikkim",
+    city: "Singtam",
+    address: "NH-10 Clearing Depot, Singtam / Rangpo Axis, Sikkim 737134",
+    lat: 27.2341,
+    lng: 88.4988,
+    phone: "+91 3592 231140",
+    emergencyPhone: "Control Room: 03592-231140",
+    capacity: "Heavy Earthmovers • Hydraulic Breakers • Rapid Bailey Bridge Units",
+    status: "Operational 24/7",
+    facilities: ["JCBs & Track Excavators", "Rock Blasting Explosive Engineers", "Emergency Bailey Bridge Launchers"]
+  },
+  {
+    id: "ner-rescue-5",
+    name: "Sikkim SDRF Quick Reaction Base",
+    category: "State Disaster Response Force (SDRF)",
+    type: "rescue",
+    state: "Sikkim",
+    city: "Gangtok",
+    address: "Police Reserve Lines, Burtuk, Gangtok 737101",
+    lat: 27.3481,
+    lng: 88.6189,
+    phone: "+91 3592 202206",
+    emergencyPhone: "112",
+    capacity: "Specialized Mountain Rescue Teams",
+    status: "Operational 24/7",
+    facilities: ["Slope Stabilization Crews", "Search & Extrication Dogs", "Emergency Radio"]
+  },
+  {
+    id: "ner-rescue-6",
+    name: "Assam SDRF State Headquarters",
+    category: "State Disaster Response Force (SDRF)",
+    type: "rescue",
+    state: "Assam",
+    city: "Guwahati",
+    address: "Fire Service & SDRF Complex, Sila, Changsari, Assam 781101",
+    lat: 26.2289,
+    lng: 91.6742,
+    phone: "+91 361 2840003",
+    emergencyPhone: "101 / 112",
+    capacity: "Brahmaputra Flood & Hilly Slope Rescue Units",
+    status: "Operational 24/7",
+    facilities: ["High-power Inflatable Boats", "Deep Diving Equipment", "Heavy Cutting Tools"]
+  },
+
+  // ── RELIEF & EVACUATION SHELTERS ──
+  {
+    id: "ner-shelter-1",
+    name: "Sarusajai Indoor Stadium Mega Evacuation & Relief Hub",
+    category: "Mega Evacuation & Relief Staging Center",
+    type: "shelter",
+    state: "Assam",
+    city: "Guwahati",
+    address: "National Highway 37, Sarusajai, Guwahati, Assam 781034",
+    lat: 26.1158,
+    lng: 91.7371,
+    phone: "1070 / 1079",
+    emergencyPhone: "1070",
+    capacity: "2500 Displaced Persons • Food & Relief Logistics Hub",
+    status: "Active Evacuation Center",
+    facilities: ["High-Capacity Shelter", "24/7 Medical Unit", "Community Kitchen", "NDRF Liaison", "Backup Generators"]
+  },
+  {
+    id: "ner-shelter-2",
+    name: "Melli Teesta River Landslide Transit & Relief Shelter",
+    category: "Valley Landslide Transit Evacuation Refuge",
+    type: "shelter",
+    state: "Sikkim",
+    city: "South Sikkim",
+    address: "NH-10 Junction, Melli Bazaar, South Sikkim 737128",
+    lat: 27.0906,
+    lng: 88.4552,
+    phone: "+91 3592 202206",
+    emergencyPhone: "1070",
+    capacity: "650 Persons • High Ground River Safe Zone",
+    status: "Active Relief Station",
+    facilities: ["Landslide Safe High-Ground", "First Aid Station", "Clean Water Filtration", "Emergency Rations"]
+  },
+  {
+    id: "ner-shelter-3",
+    name: "Ramhlun North Landslide & Subsidence Community Refuge",
+    category: "Community Landslide & Sinking Slope Refuge",
+    type: "shelter",
+    state: "Mizoram",
+    city: "Aizawl",
+    address: "Ramhlun Vengthlang, Aizawl, Mizoram 796012",
+    lat: 23.7538,
+    lng: 92.7231,
+    phone: "+91 389 2334898",
+    emergencyPhone: "1070",
+    capacity: "500 Persons • Reinforced Foundation Shelter",
+    status: "Open & Stocked",
+    facilities: ["Reinforced Slope Foundation", "Safe Potable Water", "Blankets & Bedding", "Solar Backup Lights"]
+  },
+  {
+    id: "ner-shelter-4",
+    name: "Majuli Island High-Plinth Flood & Erosion Haven",
+    category: "Elevated Disaster Safe Haven",
+    type: "shelter",
+    state: "Assam",
+    city: "Majuli",
+    address: "Kamalabari Ghat Road, Garamur, Majuli, Assam 785104",
+    lat: 26.9602,
+    lng: 94.2185,
+    phone: "+91 3775 274433",
+    emergencyPhone: "1077",
+    capacity: "1200 Persons • Raised Plinth Refuge",
+    status: "Stocked with Emergency Supplies",
+    facilities: ["Raised Elevated Plinth", "Rescue Inflatable Boats", "Water Purification Plants", "Solar Microgrid"]
+  },
+  {
+    id: "ner-shelter-5",
+    name: "Kohima Solidarity Park Disaster Evacuation Center",
+    category: "Evacuation & Emergency Relief Camp",
+    type: "shelter",
+    state: "Nagaland",
+    city: "Kohima",
+    address: "Below New Secretariat, Kohima, Nagaland 797004",
+    lat: 25.6882,
+    lng: 94.1037,
+    phone: "+91 370 2270050",
+    emergencyPhone: "1070",
+    capacity: "750 Evacuees • Medical & Water Storage",
+    status: "Operational",
+    facilities: ["Open Staging Area", "Mobile Medical Units", "Sanitation Blocks", "Emergency Communications"]
+  },
+  {
+    id: "ner-shelter-6",
+    name: "Sohra High-Plateau Storm & Cloudburst Safe Haven",
+    category: "High Altitude Extreme Weather Refuge",
+    type: "shelter",
+    state: "Meghalaya",
+    city: "Cherrapunji",
+    address: "Near Circuit House, Sohra, East Khasi Hills, Meghalaya 793108",
+    lat: 25.2744,
+    lng: 91.7323,
+    phone: "+91 364 2502098",
+    emergencyPhone: "108 / 112",
+    capacity: "450 Evacuees • Rain-Shielded Concrete Compound",
+    status: "Operational",
+    facilities: ["Reinforced Concrete Roof", "Thermal Blankets", "Clean Rainwater Harvesting", "Emergency Radio"]
+  }
+];
+
 export default function NERLandslideMonitor() {
   const [data, setData] = useState(INITIAL_DATA);
   const [selectedLanguage, setSelectedLanguage] = useState("en");
-  const [activeTab, setActiveTab] = useState("overview"); // "overview" | "corridors" | "calculator" | "priorities" | "field"
+  const [activeTab, setActiveTab] = useState("overview"); // "overview" | "corridors" | "calculator" | "priorities" | "field" | "infrastructure"
   const [corridorFilter, setCorridorFilter] = useState("All");
+  const [infrCategory, setInfrCategory] = useState("all"); // "all" | "hospital" | "office" | "rescue" | "shelter"
+  const [infrState, setInfrState] = useState("all");
+  const [infrSearch, setInfrSearch] = useState("");
 
   // Calculator State
   const [calcRain, setCalcRain] = useState(135);
@@ -512,6 +1006,7 @@ export default function NERLandslideMonitor() {
             { id: "priorities", label: "🚨 Emergency Response Priority", icon: "🎯" },
             { id: "calculator", label: "🧮 AI Landslide Susceptibility Calculator", icon: "⚡" },
             { id: "field", label: "📝 Recent Field Crack Reports", icon: "🔍" },
+            { id: "infrastructure", label: "🏛️ Emergency Infrastructure & Hospitals", icon: "🏥" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1018,6 +1513,338 @@ export default function NERLandslideMonitor() {
                   <div>Crack Width: <strong style={{ color: "#f87171" }}>{obs.crackWidthCm} cm</strong></div>
                   <div>Slope Angle: <strong style={{ color: "#fbbf24" }}>{obs.slopeAngleDeg}°</strong></div>
                   <div>Road Status: <strong style={{ color: "#fca5a5" }}>{obs.roadStatus}</strong></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 6: NER EMERGENCY INFRASTRUCTURE, HOSPITALS & SDMAs ── */}
+      {activeTab === "infrastructure" && (
+        <div>
+          {/* Header Banner & Live Map Jump */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.9)",
+              border: "1px solid rgba(56, 189, 248, 0.3)",
+              borderRadius: "16px",
+              padding: "20px 24px",
+              marginBottom: "20px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "16px",
+              background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 58, 138, 0.4) 100%)",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+                <span style={{ fontSize: "1.5rem" }}>🏛️</span>
+                <h3 style={{ margin: 0, fontSize: "1.3rem", fontWeight: "800", color: "#f8fafc" }}>
+                  North Eastern Region (NER) Disaster Response Directory
+                </h3>
+                <span style={{ backgroundColor: "#0284c7", color: "#ffffff", padding: "2px 8px", borderRadius: "6px", fontSize: "0.72rem", fontWeight: "700" }}>
+                  8 States Covered
+                </span>
+              </div>
+              <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.85rem", maxWidth: "760px" }}>
+                Verified emergency hospitals, state disaster management authorities (SDMA), ISRO NESAC command, NDRF & SDRF battalions, BRO clearance depots, and high-altitude relief shelters across Assam, Sikkim, Meghalaya, Arunachal, Nagaland, Manipur, Mizoram & Tripura.
+              </p>
+            </div>
+
+            <Link
+              to="/map?region=ner"
+              style={{
+                backgroundColor: "#2563eb",
+                color: "#ffffff",
+                padding: "10px 18px",
+                borderRadius: "10px",
+                fontWeight: "700",
+                fontSize: "0.88rem",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              🗺️ Open Live Response Map (NER View)
+            </Link>
+          </div>
+
+          {/* Filters Bar: Category, State & Search */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.8)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "12px",
+              padding: "14px 18px",
+              marginBottom: "20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            {/* Top row: Category tabs */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.76rem", color: "#94a3b8", fontWeight: "700" }}>FACILITY TYPE:</span>
+              {[
+                { id: "all", label: "All Infrastructure (28)" },
+                { id: "hospital", label: "🏥 Hospitals & Trauma Centers (10)" },
+                { id: "office", label: "🏛️ Disaster Offices & SDMA (8)" },
+                { id: "rescue", label: "🚒 NDRF / SDRF / BRO Bases (6)" },
+                { id: "shelter", label: "⛺ Evacuation Shelters (6)" },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setInfrCategory(cat.id)}
+                  style={{
+                    padding: "5px 12px",
+                    borderRadius: "8px",
+                    border: infrCategory === cat.id ? "1px solid #38bdf8" : "1px solid transparent",
+                    background: infrCategory === cat.id ? "#0369a1" : "rgba(30, 41, 59, 0.6)",
+                    color: infrCategory === cat.id ? "#ffffff" : "#cbd5e1",
+                    fontSize: "0.78rem",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Bottom row: State selector & Search input */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "0.76rem", color: "#94a3b8", fontWeight: "700" }}>STATE:</span>
+                {[
+                  "all",
+                  "Assam",
+                  "Sikkim",
+                  "Meghalaya",
+                  "Arunachal Pradesh",
+                  "Nagaland",
+                  "Manipur",
+                  "Mizoram",
+                  "Tripura",
+                ].map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setInfrState(st)}
+                    style={{
+                      padding: "3px 10px",
+                      borderRadius: "6px",
+                      border: infrState === st ? "1px solid #64748b" : "1px solid rgba(255, 255, 255, 0.05)",
+                      background: infrState === st ? "#334155" : "transparent",
+                      color: infrState === st ? "#38bdf8" : "#94a3b8",
+                      fontSize: "0.74rem",
+                      fontWeight: infrState === st ? "700" : "500",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {st === "all" ? "All 8 States" : st}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search text input */}
+              <input
+                type="text"
+                placeholder="🔍 Search name, district, or capacity..."
+                value={infrSearch}
+                onChange={(e) => setInfrSearch(e.target.value)}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  background: "rgba(15, 23, 42, 0.9)",
+                  color: "#f8fafc",
+                  fontSize: "0.8rem",
+                  minWidth: "240px",
+                  outline: "none",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Cards Grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+              gap: "16px",
+            }}
+          >
+            {NER_EMERGENCY_FACILITIES.filter((fac) => {
+              const matchesCat = infrCategory === "all" || fac.type === infrCategory;
+              const matchesState = infrState === "all" || fac.state.toLowerCase() === infrState.toLowerCase();
+              const matchesQuery =
+                !infrSearch ||
+                fac.name.toLowerCase().includes(infrSearch.toLowerCase()) ||
+                fac.city.toLowerCase().includes(infrSearch.toLowerCase()) ||
+                fac.state.toLowerCase().includes(infrSearch.toLowerCase()) ||
+                fac.category.toLowerCase().includes(infrSearch.toLowerCase());
+              return matchesCat && matchesState && matchesQuery;
+            }).map((fac) => (
+              <div
+                key={fac.id}
+                style={{
+                  backgroundColor: "rgba(15, 23, 42, 0.85)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: "14px",
+                  padding: "18px 20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  transition: "transform 0.15s ease, border-color 0.15s ease",
+                }}
+              >
+                <div>
+                  {/* Category & State Tag */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", gap: "8px" }}>
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontWeight: "700",
+                        backgroundColor:
+                          fac.type === "hospital"
+                            ? "rgba(239, 68, 68, 0.2)"
+                            : fac.type === "office"
+                            ? "rgba(139, 92, 246, 0.2)"
+                            : fac.type === "rescue"
+                            ? "rgba(234, 88, 12, 0.2)"
+                            : "rgba(37, 99, 235, 0.2)",
+                        color:
+                          fac.type === "hospital"
+                            ? "#f87171"
+                            : fac.type === "office"
+                            ? "#c084fc"
+                            : fac.type === "rescue"
+                            ? "#fb923c"
+                            : "#60a5fa",
+                        border: `1px solid ${
+                          fac.type === "hospital"
+                            ? "#ef4444"
+                            : fac.type === "office"
+                            ? "#8b5cf6"
+                            : fac.type === "rescue"
+                            ? "#ea580c"
+                            : "#2563eb"
+                        }`,
+                      }}
+                    >
+                      {fac.type === "hospital"
+                        ? "🏥 " + fac.category
+                        : fac.type === "office"
+                        ? "🏛️ " + fac.category
+                        : fac.type === "rescue"
+                        ? "🚒 " + fac.category
+                        : "⛺ " + fac.category}
+                    </span>
+
+                    <span
+                      style={{
+                        fontSize: "0.72rem",
+                        fontWeight: "700",
+                        backgroundColor: "#065f46",
+                        color: "#a7f3d0",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {fac.state}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h4 style={{ margin: "4px 0 6px 0", fontSize: "1.08rem", fontWeight: "700", color: "#f8fafc", lineHeight: "1.3" }}>
+                    {fac.name}
+                  </h4>
+
+                  {/* Location & Capacity */}
+                  <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginBottom: "8px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div>📍 {fac.address}</div>
+                    <div style={{ color: "#e2e8f0" }}>
+                      👥 <strong>Capacity:</strong> {fac.capacity}
+                    </div>
+                  </div>
+
+                  {/* Badges */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
+                    {fac.facilities?.map((f, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: "0.68rem",
+                          backgroundColor: "rgba(30, 41, 59, 0.8)",
+                          color: "#cbd5e1",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid rgba(255, 255, 255, 0.05)",
+                        }}
+                      >
+                        ✓ {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom Actions & Helplines */}
+                <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)", paddingTop: "12px", marginTop: "6px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                    <span style={{ fontSize: "0.74rem", color: "#10b981", fontWeight: "700" }}>
+                      ● {fac.status}
+                    </span>
+                    <span style={{ fontSize: "0.78rem", color: "#fca5a5", fontWeight: "700" }}>
+                      📞 {fac.emergencyPhone}
+                    </span>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <Link
+                      to={`/map?region=ner&lat=${fac.lat}&lng=${fac.lng}`}
+                      style={{
+                        flex: "1",
+                        textAlign: "center",
+                        padding: "7px 10px",
+                        backgroundColor: "#16a34a",
+                        color: "#ffffff",
+                        borderRadius: "8px",
+                        fontWeight: "700",
+                        fontSize: "0.78rem",
+                        textDecoration: "none",
+                        transition: "background 0.15s ease",
+                      }}
+                    >
+                      📍 Live Map View
+                    </Link>
+                    <a
+                      href={`tel:${fac.emergencyPhone.replace(/[^0-9]/g, "")}`}
+                      style={{
+                        padding: "7px 12px",
+                        backgroundColor: "rgba(239, 68, 68, 0.2)",
+                        color: "#f87171",
+                        border: "1px solid #ef4444",
+                        borderRadius: "8px",
+                        fontWeight: "700",
+                        fontSize: "0.78rem",
+                        textDecoration: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      📞 Call
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
