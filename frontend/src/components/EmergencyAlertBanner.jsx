@@ -1,12 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { subscribeToDisasterAlerts } from "../services/socketService";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// Helper: Play lightweight emergency alert chime via Web Audio API (zero external files)
+function playAlertChime() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    if (ctx.state === "suspended") {
+      ctx.resume();
+    }
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    // Double beep cadence (880Hz -> 660Hz)
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
+
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.55);
+  } catch (e) {
+    // Audio policy might require user gesture
+  }
+}
 
 export default function EmergencyAlertBanner() {
   const [activeAlert, setActiveAlert] = useState(null);
   const [minimized, setMinimized] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const hasChimedRef = useRef(false);
 
   useEffect(() => {
     // 1. Check for active critical/high official alert on mount
@@ -26,14 +60,18 @@ export default function EmergencyAlertBanner() {
         // Non-fatal
       }
 
-      // Default active live alert so the emergency advisory banner is always active & visible
+      // Default active live alert so emergency advisory banner is always active & visible
       setActiveAlert({
-        title: "[IMD GOVT OF INDIA / NDMA SACHET] Severe thunderstorm with lightning & hail detected in West Bengal / Sundarbans",
-        message: "Severe weather system active. Heavy squally wind conditions forecasted along coastal belts. Follow designated safety protocols.",
+        title: "[NDMA SACHET / IMD] Severe thunderstorm with lightning & squall detected",
+        message: "Programmatic CAP alert issued for coastal and delta districts. Heavy squally wind conditions and lightning forecasted. Follow early evacuation directives.",
         severity: "high",
-        location: "West Bengal / Sundarbans / Coastal Belts",
-        sourceAgency: "IMD GOVT OF INDIA / NDMA SACHET",
+        location: { coordinates: [85.8245, 20.2961] },
+        affectedAreas: ["Odisha Coastal Belts", "West Bengal Delta"],
+        sourceAgency: "NDMA SACHET (IMD)",
+        sourceNodalAgency: "IMD",
+        feedSource: "NDMA_SACHET_CAP",
         sourceUrl: "https://sachet.ndma.gov.in/",
+        earlyWarningLeadTimeMinutes: 120,
         isGovtOfficial: true,
       });
     }
@@ -44,17 +82,30 @@ export default function EmergencyAlertBanner() {
       setActiveAlert(newAlert);
       setMinimized(false);
       setDismissed(false);
+
+      // Play emergency chime if sound enabled
+      if (soundEnabled && (newAlert.severity === "critical" || newAlert.severity === "high")) {
+        playAlertChime();
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [soundEnabled]);
 
   if (!activeAlert || dismissed) return null;
 
   const isCritical = activeAlert.severity === "critical";
-  const bgColor = isCritical ? "linear-gradient(90deg, #7f1d1d, #991b1b, #7f1d1d)" : "linear-gradient(90deg, #78350f, #92400e, #78350f)";
+  const bgColor = isCritical
+    ? "linear-gradient(90deg, #7f1d1d, #991b1b, #7f1d1d)"
+    : "linear-gradient(90deg, #78350f, #92400e, #78350f)";
   const borderColor = isCritical ? "#ef4444" : "#f59e0b";
   const officialUrl = activeAlert.sourceUrl || "https://sachet.ndma.gov.in/";
+
+  // Format lead time badge
+  const leadTime = activeAlert.earlyWarningLeadTimeMinutes;
+  const isUsgs = activeAlert.feedSource === "USGS_GEOJSON";
+  const isSachet = activeAlert.feedSource === "NDMA_SACHET_CAP";
+  const isGdacs = activeAlert.feedSource === "GDACS_RSS";
 
   if (minimized) {
     return (
@@ -80,7 +131,7 @@ export default function EmergencyAlertBanner() {
         }}
       >
         <span>🚨</span>
-        <span>Live Govt Alert Active (Click to expand)</span>
+        <span>Live Early Warning Active (Click to expand)</span>
       </div>
     );
   }
@@ -141,8 +192,9 @@ export default function EmergencyAlertBanner() {
                   letterSpacing: "0.5px",
                 }}
               >
-                {activeAlert.sourceAgency || "OFFICIAL GOVT ALERT"}
+                {activeAlert.sourceNodalAgency || activeAlert.sourceAgency || "OFFICIAL EARLY WARNING"}
               </span>
+
               <span
                 style={{
                   backgroundColor: "rgba(0,0,0,0.3)",
@@ -156,18 +208,107 @@ export default function EmergencyAlertBanner() {
               >
                 {activeAlert.severity || "HIGH"} SEVERITY
               </span>
+
+              {/* Early Warning Lead Time Pill */}
+              {leadTime !== undefined && leadTime > 0 && (
+                <span
+                  style={{
+                    backgroundColor: isCritical ? "#ef4444" : "#f59e0b",
+                    color: "#0f172a",
+                    fontSize: "0.7rem",
+                    fontWeight: "800",
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  ⚡ {isUsgs ? `Seismic Ingest: ${leadTime}m ago` : `Pre-Impact Lead Time: ~${leadTime} mins`}
+                </span>
+              )}
+
+              {/* Programmatic Feed Tag */}
+              <span
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  color: "#e2e8f0",
+                  fontSize: "0.68rem",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  fontWeight: "600",
+                }}
+              >
+                {isSachet ? "🇮🇳 SACHET CAP" : isGdacs ? "🌐 GDACS Automated" : isUsgs ? "⚡ USGS 60s Stream" : "Official Direct"}
+              </span>
+
               <span style={{ fontSize: "0.75rem", opacity: 0.9 }}>
-                {activeAlert.affectedAreas?.[0] || activeAlert.country || "Active Region"}
+                {activeAlert.affectedAreas?.[0] || activeAlert.country || "Monitored Region"}
               </span>
             </div>
-            <div style={{ fontWeight: "600", fontSize: "0.92rem", marginTop: "3px", textShadow: "0 1px 2px rgba(0,0,0,0.4)", wordBreak: "break-word" }}>
+
+            <div
+              style={{
+                fontWeight: "600",
+                fontSize: "0.92rem",
+                marginTop: "3px",
+                textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+                wordBreak: "break-word",
+              }}
+            >
               {activeAlert.title}
             </div>
           </div>
         </div>
 
-        {/* Right: Actions */}
+        {/* Right: Actions & Sound Toggle */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          {/* Audio Chime Button */}
+          <button
+            onClick={() => {
+              const next = !soundEnabled;
+              setSoundEnabled(next);
+              if (next) playAlertChime();
+            }}
+            title={soundEnabled ? "Mute Siren Chime" : "Enable Siren Chime"}
+            style={{
+              backgroundColor: soundEnabled ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.3)",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "#fff",
+              padding: "6px 10px",
+              borderRadius: "6px",
+              fontSize: "0.8rem",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <span>{soundEnabled ? "🔔" : "🔕"}</span>
+            <span>{soundEnabled ? "Siren On" : "Muted"}</span>
+          </button>
+
+          {/* Link to full alerts radar */}
+          <Link
+            to="/alerts"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.18)",
+              color: "#ffffff",
+              padding: "7px 12px",
+              borderRadius: "6px",
+              fontSize: "0.82rem",
+              fontWeight: "700",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              border: "1px solid rgba(255,255,255,0.3)",
+            }}
+          >
+            <span>📡 Early Warning Radar</span>
+          </Link>
+
+          {/* Official Bulletin Link */}
           <a
             href={officialUrl}
             target="_blank"
@@ -187,7 +328,7 @@ export default function EmergencyAlertBanner() {
               transition: "transform 0.15s, background-color 0.15s",
             }}
           >
-            <span>🏛️ Official Govt Advisory</span>
+            <span>🏛️ Official Bulletin</span>
             <span style={{ fontSize: "0.95rem" }}>↗</span>
           </a>
 

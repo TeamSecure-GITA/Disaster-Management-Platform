@@ -11,6 +11,9 @@ const {
   getLiveGovtAlerts,
   syncGovtAlerts,
   getGovtPortals,
+  getFeedHealth,
+  getCrowdSignals,
+  verifyCrowdSignalAction,
 } = require("../controllers/alertController");
 
 const {
@@ -23,10 +26,15 @@ const {
 
 const router = express.Router();
 
-// Live official government feeds & portals (publicly accessible)
+// Live official programmatic disaster feeds & early warning health (publicly accessible)
 router.get("/live-govt", getLiveGovtAlerts);
 router.get("/portals", getGovtPortals);
+router.get("/feed-health", getFeedHealth);
 router.post("/sync-govt", syncGovtAlerts);
+
+// Live crowd-sourced social media signals & volume anomalies
+router.get("/crowd-signals", getCrowdSignals);
+router.post("/crowd-signals/:id/verify", protect, operationsOnly, verifyCrowdSignalAction);
 
 router.post(
   "/",

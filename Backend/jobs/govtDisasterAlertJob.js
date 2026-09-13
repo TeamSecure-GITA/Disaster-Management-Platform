@@ -2,15 +2,15 @@ const cron = require("node-cron");
 const govtAlertService = require("../services/govtAlertService");
 
 const startGovtDisasterAlertJob = () => {
-  // Poll official disaster & weather portals every 2 minutes: "*/2 * * * *"
-  const cronSchedule = process.env.GOVT_ALERT_CRON || "*/2 * * * *";
+  // Poll official programmatic feeds every 1 minute to catch seismic & nowcast events instantly
+  const cronSchedule = process.env.GOVT_ALERT_CRON || "* * * * *";
 
   const task = cron.schedule(cronSchedule, async () => {
     try {
-      console.log("[GovtDisasterAlertJob] Checking official disaster and weather warning sources...");
+      console.log("[GovtDisasterAlertJob] ⚡ Polling GDACS, NDMA SACHET & USGS 60s feeds for early warnings...");
       const result = await govtAlertService.fetchAndSyncGovtAlerts();
       if (result.newAlertsCount > 0) {
-        console.log(`[GovtDisasterAlertJob] 🚨 Broadcasted ${result.newAlertsCount} new disaster/weather alert(s) to users.`);
+        console.log(`[GovtDisasterAlertJob] 🚨 Instant Early Warning: Broadcasted ${result.newAlertsCount} new disaster alert(s) to citizens.`);
       }
     } catch (error) {
       console.error("[GovtDisasterAlertJob] Job execution error:", error.message);

@@ -92,10 +92,12 @@ const govtAlertService = require("../services/govtAlertService");
 
 const getLiveGovtAlerts = async (req, res, next) => {
   try {
-    const alerts = await govtAlertService.getLiveGovtAlerts();
+    const { source } = req.query;
+    const alerts = await govtAlertService.getLiveGovtAlerts(source || "all");
     res.status(200).json({
       success: true,
       count: alerts.length,
+      source: source || "all",
       data: alerts,
     });
   } catch (error) {
@@ -108,7 +110,7 @@ const syncGovtAlerts = async (req, res, next) => {
     const result = await govtAlertService.fetchAndSyncGovtAlerts();
     res.status(200).json({
       success: true,
-      message: "Official government alerts synchronized successfully",
+      message: "Official programmatic feeds (GDACS, NDMA SACHET, USGS) synchronized successfully",
       ...result,
     });
   } catch (error) {
@@ -128,6 +130,54 @@ const getGovtPortals = async (req, res, next) => {
   }
 };
 
+const getFeedHealth = async (req, res, next) => {
+  try {
+    const health = govtAlertService.getFeedHealthStatus();
+    res.status(200).json({
+      success: true,
+      data: health,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const crowdSignalService = require("../services/crowdSignalService");
+
+const getCrowdSignals = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const signals = await crowdSignalService.getActiveCrowdSignals(limit);
+    res.status(200).json({
+      success: true,
+      count: signals.length,
+      data: signals,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verifyCrowdSignalAction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { action, notes } = req.body;
+    const signal = await crowdSignalService.verifyCrowdSignal(
+      id,
+      req.user?._id || null,
+      action || "escalate",
+      notes || ""
+    );
+    res.status(200).json({
+      success: true,
+      message: `Crowd signal successfully updated (${signal.status})`,
+      data: signal,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createAlert,
   getAlerts,
@@ -137,4 +187,7 @@ module.exports = {
   getLiveGovtAlerts,
   syncGovtAlerts,
   getGovtPortals,
+  getFeedHealth,
+  getCrowdSignals,
+  verifyCrowdSignalAction,
 };

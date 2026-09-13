@@ -17,6 +17,7 @@ const startAlertExpiryJob = require("./jobs/alertExpiryJob");
 const startSatelliteUpdateJob = require("./jobs/satelliteUpdateJob");
 const startWeatherUpdateJob = require("./jobs/weatherUpdateJob");
 const startGovtDisasterAlertJob = require("./jobs/govtDisasterAlertJob");
+const startCrowdSignalJob = require("./jobs/crowdSignalJob");
 const { startNewsFetcherJob } = require("./jobs/newsFetcher");
 const { startMeshHealthJob } = require("./jobs/meshHealthJob");
 
@@ -43,6 +44,7 @@ const startServerRuntime = () => {
     startSatelliteUpdateJob(),
     startWeatherUpdateJob(),
     startGovtDisasterAlertJob(),
+    startCrowdSignalJob(),
   ];
 
   // Start news RSS fetcher (runs every 6h + immediately on startup)

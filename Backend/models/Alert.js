@@ -116,6 +116,41 @@ const alertSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+
+    sourceNodalAgency: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    feedSource: {
+      type: String,
+      enum: ["NDMA_SACHET_CAP", "GDACS_RSS", "USGS_GEOJSON", "INTERNAL", "MANUAL"],
+      default: "INTERNAL",
+      index: true,
+    },
+
+    earlyWarningLeadTimeMinutes: {
+      type: Number,
+      default: 0,
+    },
+
+    urgency: {
+      type: String,
+      enum: ["Immediate", "Expected", "Future", "Past", "Unknown"],
+      default: "Immediate",
+    },
+
+    certainty: {
+      type: String,
+      enum: ["Observed", "Likely", "Possible", "Unlikely", "Unknown"],
+      default: "Observed",
+    },
+
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
   {
     timestamps: true,

@@ -5,6 +5,7 @@ import HeaderTopBar from "./HeaderTopBar";
 import EmergencyAlertBanner from "./EmergencyAlertBanner";
 import LiveNotificationToast from "./LiveNotificationToast";
 import MobileBottomNav from "./MobileBottomNav";
+import OfflineStatusWidget from "./OfflineStatusWidget";
 import { detectDesktopMode } from "../utils/browserMode";
 
 export default function DashboardLayout() {
