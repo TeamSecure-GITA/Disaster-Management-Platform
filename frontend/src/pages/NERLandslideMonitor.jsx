@@ -962,6 +962,26 @@ export default function NERLandslideMonitor() {
             >
               🗺️ GIS Risk Map
             </Link>
+            <Link
+              to="/ar-see-the-risk"
+              style={{
+                background: "linear-gradient(135deg, #0369a1, #22d3ee33)",
+                color: "#22d3ee",
+                border: "1.5px solid #22d3ee",
+                padding: "10px 18px",
+                borderRadius: "10px",
+                fontWeight: "700",
+                fontSize: "0.9rem",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 4px 14px rgba(34,211,238,0.3)",
+                animation: "arGlow 2s ease-in-out infinite alternate",
+              }}
+            >
+              📡 AR See the Risk
+            </Link>
           </div>
         </div>
 
@@ -1851,6 +1871,57 @@ export default function NERLandslideMonitor() {
           </div>
         </div>
       )}
+
+
+      {/* ── AR See the Risk Feature Banner ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #0c2340, #0369a1 60%, #0c2340)',
+        border: '2px solid #22d3ee',
+        borderRadius: '16px',
+        padding: '20px 24px',
+        marginTop: '24px',
+        display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap',
+        boxShadow: '0 0 40px rgba(34,211,238,0.2)',
+      }}>
+        <span style={{ fontSize: '3rem', flexShrink: 0 }}>📡</span>
+        <div style={{ flex: 1, minWidth: '220px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span style={{ fontSize: '1rem', fontWeight: 800, color: '#22d3ee' }}>AR "See the Risk" — World First</span>
+            <span style={{ background: 'linear-gradient(135deg,#7c3aed,#1d4ed8)', color: '#fff', borderRadius: '6px', padding: '2px 8px', fontSize: '0.65rem', fontWeight: 800 }}>NEW</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5 }}>
+            Point your phone camera at any slope — see a live LSI heatmap overlay and safe-distance line in real time. Designed for non-literate users in remote NER villages. Nobody in disaster-tech has shipped this.
+          </p>
+        </div>
+        <Link to="/ar-see-the-risk" style={{
+          background: 'linear-gradient(135deg,#22d3ee,#0369a1)',
+          color: '#000',
+          border: 'none',
+          borderRadius: '10px',
+          padding: '12px 24px',
+          fontSize: '0.92rem',
+          fontWeight: 800,
+          textDecoration: 'none',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 4px 20px rgba(34,211,238,0.45)',
+          flexShrink: 0,
+        }}>
+          🚀 Launch AR Camera
+        </Link>
+      </div>
+
+      <style>{`
+        @keyframes arGlow {
+          from { box-shadow: 0 4px 14px rgba(34,211,238,0.3); }
+          to   { box-shadow: 0 4px 28px rgba(34,211,238,0.7); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.3; }
+        }
+      `}</style>
 
     </div>
   );

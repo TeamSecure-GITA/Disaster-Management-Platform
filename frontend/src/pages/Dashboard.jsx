@@ -613,24 +613,45 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          <Link
-            to="/ner-landslide-monitor"
-            style={{
-              backgroundColor: "#4f46e5",
-              color: "#ffffff",
-              padding: "10px 18px",
-              borderRadius: "8px",
-              textDecoration: "none",
-              fontWeight: "700",
-              fontSize: "0.88rem",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              boxShadow: "0 2px 10px rgba(79, 70, 229, 0.4)"
-            }}
-          >
-            Launch NER Monitor ➔
-          </Link>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <Link
+              to="/ar-see-the-risk"
+              style={{
+                backgroundColor: "#0284c7",
+                color: "#ffffff",
+                padding: "10px 18px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontWeight: "700",
+                fontSize: "0.88rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                border: "1px solid #38bdf8",
+                boxShadow: "0 2px 10px rgba(2, 132, 199, 0.4)"
+              }}
+            >
+              📡 AR See the Risk
+            </Link>
+            <Link
+              to="/ner-landslide-monitor"
+              style={{
+                backgroundColor: "#4f46e5",
+                color: "#ffffff",
+                padding: "10px 18px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontWeight: "700",
+                fontSize: "0.88rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: "0 2px 10px rgba(79, 70, 229, 0.4)"
+              }}
+            >
+              Launch NER Monitor ➔
+            </Link>
+          </div>
         </div>
 
         {/* ── Quick Stats Grid (Responsive 4 -> 2 -> 1) ────────────────────── */}
@@ -706,6 +727,12 @@ export default function Dashboard() {
                 style={{ backgroundColor: "#2563eb", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}
               >
                 {t.broadcastAlert}
+              </button>
+              <button
+                onClick={() => navigate("/ar-see-the-risk")}
+                style={{ backgroundColor: "#0284c7", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+              >
+                📡 AR "See the Risk" Scanner
               </button>
               <button
                 onClick={() => navigate("/shelter-finder")}

@@ -40,6 +40,7 @@ const Register = lazy(() => import("./pages/Register"));
 const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
+const ARSeeTheRisk = lazy(() => import("./pages/ARSeeTheRisk"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const UserReview = lazy(() => import("./pages/UserReview"));
@@ -110,7 +111,10 @@ export default function App() {
             <Route path="/admin" element={<Navigate to="/administrator" replace />} />
 
             <Route path="/ner-landslide-monitor" element={<NERLandslideMonitor />} />
-            <Route path="/landslide-monitor" element={<Navigate to="/ner-landslide-monitor" replace />} />
+            <Route path="/ar-see-the-risk" element={<ARSeeTheRisk />} />
+            <Route path="/ar-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
+            <Route path="/see-the-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
+            <Route path="/ar-slope-scanner" element={<Navigate to="/ar-see-the-risk" replace />} />
 
             <Route path="/alerts" element={<Alerts />} />
 

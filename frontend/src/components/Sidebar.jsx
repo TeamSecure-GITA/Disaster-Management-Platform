@@ -32,11 +32,13 @@ import {
   IconAdmin,
   IconFaq,
   IconMesh,
+  IconAR,
 } from "./NavigationIcons";
 
 const menuItems = [
   { key: "nav_dashboard",          fallback: "Dashboard",              icon: IconDashboard,     path: "/" },
   { key: "nav_ner_landslide",      fallback: "NER Landslide Monitor",  icon: IconLandslide,     path: "/ner-landslide-monitor" },
+  { key: "nav_ar_risk",            fallback: "AR See the Risk",        icon: IconAR,            path: "/ar-see-the-risk" },
   { key: "nav_alerts",             fallback: "Disaster Alerts",        icon: IconAlerts,        path: "/alerts" },
   { key: "nav_climate_chronicle",  fallback: "Climate Chronicle",      icon: IconClimate,       path: "/climate-chronicle" },
   { key: "nav_map",                fallback: "Disaster Response Map",  icon: IconMap,           path: "/map" },

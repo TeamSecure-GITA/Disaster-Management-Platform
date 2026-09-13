@@ -438,3 +438,24 @@ export function IconMesh({ size = 22 }) {
   );
 }
 
+export function IconAR({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 5px rgba(34,211,238,0.5))" }}>
+      <rect x="2" y="7" width="20" height="13" rx="3" fill="url(#ar-cam)" />
+      <circle cx="12" cy="13.5" r="4" fill="url(#ar-lens)" />
+      <circle cx="12" cy="13.5" r="2.2" fill="#0ea5e9" opacity="0.9" />
+      <circle cx="12" cy="13.5" r="1" fill="#e0f2fe" opacity="0.95" />
+      <rect x="9" y="4" width="6" height="3" rx="1.5" fill="url(#ar-notch)" />
+      <line x1="5"  y1="9.5"  x2="5"  y2="18.5" stroke="#22d3ee" strokeWidth="1.2" opacity="0.55" />
+      <line x1="9"  y1="9.5"  x2="9"  y2="18.5" stroke="#f97316" strokeWidth="1.2" opacity="0.55" />
+      <line x1="15" y1="9.5"  x2="15" y2="18.5" stroke="#eab308" strokeWidth="1.2" opacity="0.55" />
+      <line x1="19" y1="9.5"  x2="19" y2="18.5" stroke="#22d3ee" strokeWidth="1.2" opacity="0.55" />
+      <line x1="3" y1="15.5" x2="21" y2="15.5" stroke="#22d3ee" strokeWidth="1.5" strokeDasharray="2.5 2" />
+      <defs>
+        <linearGradient id="ar-cam"   x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#0369a1"/><stop offset="100%" stopColor="#1e293b"/></linearGradient>
+        <linearGradient id="ar-lens"  x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#22d3ee"/><stop offset="100%" stopColor="#0284c7"/></linearGradient>
+        <linearGradient id="ar-notch" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#38bdf8"/><stop offset="100%" stopColor="#0369a1"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import localforage from 'localforage';
 
 function IncidentReport() {
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({
     type: "Flood",
     location: "",
@@ -22,6 +24,26 @@ function IncidentReport() {
       if (saved && Array.isArray(saved)) setReports(saved);
     }).catch(() => {});
   }, []);
+
+  // Pre-fill from query parameters (e.g. from AR "See the Risk" scanner)
+  useEffect(() => {
+    const pType = searchParams.get("type");
+    const pLoc = searchParams.get("location");
+    const pSev = searchParams.get("severity");
+    const pDesc = searchParams.get("description");
+    const pAff = searchParams.get("affectedPeople");
+
+    if (pType || pLoc || pSev || pDesc || pAff) {
+      setForm((prev) => ({
+        ...prev,
+        ...(pType ? { type: pType } : {}),
+        ...(pLoc ? { location: pLoc } : {}),
+        ...(pSev ? { severity: pSev } : {}),
+        ...(pDesc ? { description: pDesc } : {}),
+        ...(pAff ? { affectedPeople: pAff } : {}),
+      }));
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setForm({
