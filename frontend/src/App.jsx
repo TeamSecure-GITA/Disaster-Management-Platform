@@ -43,6 +43,7 @@ const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const UserReview = lazy(() => import("./pages/UserReview"));
+const MeshConsole = lazy(() => import("./pages/MeshConsole"));
 
 function Loading() {
   return (
@@ -148,6 +149,7 @@ export default function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/reviews" element={<UserReview />} />
+            <Route path="/mesh-console" element={<MeshConsole />} />
 
           </Route>
 

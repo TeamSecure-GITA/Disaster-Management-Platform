@@ -406,3 +406,35 @@ export function IconFaq({ size = 22 }) {
   );
 }
 
+export function IconMesh({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 4px rgba(0,255,136,0.4))" }}>
+      {/* Tower base */}
+      <rect x="10.5" y="8" width="3" height="14" rx="1" fill="url(#mesh-tower)" />
+      {/* Antenna */}
+      <circle cx="12" cy="5" r="2.5" fill="url(#mesh-signal)" opacity="0.9" />
+      <circle cx="12" cy="5" r="1.2" fill="#ffffff" opacity="0.95" />
+      {/* Signal waves left */}
+      <path d="M6 4c0-3 3-5 6-5" stroke="url(#mesh-wave)" strokeWidth="1.3" strokeLinecap="round" fill="none" opacity="0.7" />
+      <path d="M8 5.5c0-2 2-3.5 4-3.5" stroke="url(#mesh-wave)" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5" />
+      {/* Signal waves right */}
+      <path d="M18 4c0-3-3-5-6-5" stroke="url(#mesh-wave)" strokeWidth="1.3" strokeLinecap="round" fill="none" opacity="0.7" />
+      <path d="M16 5.5c0-2-2-3.5-4-3.5" stroke="url(#mesh-wave)" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5" />
+      {/* Mesh dots */}
+      <circle cx="4" cy="18" r="2" fill="url(#mesh-node)" />
+      <circle cx="20" cy="18" r="2" fill="url(#mesh-node)" />
+      <circle cx="12" cy="22" r="1.5" fill="url(#mesh-node)" opacity="0.7" />
+      {/* Connection lines */}
+      <line x1="6" y1="18" x2="10.5" y2="14" stroke="#00ff88" strokeWidth="0.8" opacity="0.5" />
+      <line x1="18" y1="18" x2="13.5" y2="14" stroke="#00ff88" strokeWidth="0.8" opacity="0.5" />
+      <line x1="12" y1="22" x2="12" y2="20" stroke="#00ff88" strokeWidth="0.8" opacity="0.4" />
+      <defs>
+        <linearGradient id="mesh-tower" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#059669"/></linearGradient>
+        <linearGradient id="mesh-signal" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#34d399"/><stop offset="100%" stopColor="#059669"/></linearGradient>
+        <linearGradient id="mesh-wave" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#22d3ee"/></linearGradient>
+        <linearGradient id="mesh-node" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#6ee7b7"/><stop offset="100%" stopColor="#059669"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
