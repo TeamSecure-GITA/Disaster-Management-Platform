@@ -207,6 +207,52 @@ const acknowledgeSOS = async (req, res, next) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// AMC Revenue & Contracts
+// ─────────────────────────────────────────────────────────────────────────────
+
+const getAmcContracts = async (req, res, next) => {
+  try {
+    const stats = await meshService.getAmcStats();
+    res.status(200).json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Seeder & Simulator
+// ─────────────────────────────────────────────────────────────────────────────
+
+const seedMesh = async (req, res, next) => {
+  try {
+    const force = req.query.force === "true" || req.body?.force === true;
+    const result = await meshService.seedMeshNetwork(force);
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const simulatePacket = async (req, res, next) => {
+  try {
+    const result = await meshService.simulateMeshPacket(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Simulated packet broadcasted over mesh",
+      data: result.message,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   ingestMessage,
   registerBeacon,
@@ -217,4 +263,7 @@ module.exports = {
   getMeshMessages,
   getMeshTopology,
   acknowledgeSOS,
+  getAmcContracts,
+  seedMesh,
+  simulatePacket,
 };
