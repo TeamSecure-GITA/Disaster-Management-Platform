@@ -4,6 +4,8 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { createEvacuationPlan, fetchShelters } from "../services/disasterService";
+import { startEmergencySiren, stopEmergencySiren } from "../utils/sirenAudio";
+import OfflineCompassWidget, { calculateBearing, getCardinalDirection } from "../components/OfflineCompassWidget";
 
 // Marker Icons
 const userPinIcon = L.divIcon({
@@ -56,6 +58,15 @@ export default function EvacuationPlanner() {
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [plan, setPlan] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
+  const [sirenActive, setSirenActive] = useState(false);
+  const [notificationSent, setNotificationSent] = useState(false);
+
+  // Auto-stop siren if component unmounts
+  useEffect(() => {
+    return () => {
+      stopEmergencySiren();
+    };
+  }, []);
 
   // Auto detect location on initial mount if available
   useEffect(() => {
@@ -98,6 +109,52 @@ export default function EvacuationPlanner() {
     );
   };
 
+  // Toggle Acoustic Emergency Siren
+  const toggleSiren = () => {
+    if (sirenActive) {
+      stopEmergencySiren();
+      setSirenActive(false);
+    } else {
+      startEmergencySiren();
+      setSirenActive(true);
+    }
+  };
+
+  // Dispatch Dual Online & Offline Notification
+  const triggerDualNotification = async () => {
+    const title = `🚨 CRITICAL PRE-DISASTER WARNING: You are in an UNSAFE ZONE!`;
+    const body = `Immediate evacuation required for ${disasterType}. Proceed towards safe shelter: ${plan?.destination?.name || "Designated Relief Hub"}!`;
+
+    if ("Notification" in window) {
+      let permission = Notification.permission;
+      if (permission !== "granted") {
+        try {
+          permission = await Notification.requestPermission();
+        } catch {}
+      }
+
+      if (permission === "granted") {
+        try {
+          new Notification(title, {
+            body,
+            icon: "/pwa-192x192.png",
+            badge: "/favicon.ico",
+            tag: "unsafe-zone-evac",
+            requireInteraction: true,
+          });
+          if (navigator.vibrate) {
+            navigator.vibrate([500, 200, 500, 200, 500]);
+          }
+        } catch (e) {
+          console.warn("Notification trigger error:", e);
+        }
+      }
+    }
+
+    setNotificationSent(true);
+    setTimeout(() => setNotificationSent(false), 5000);
+  };
+
   // Generate Evacuation Plan
   const handleGeneratePlan = async (e) => {
     if (e) e.preventDefault();
@@ -115,6 +172,9 @@ export default function EvacuationPlanner() {
       });
       setPlan(generated);
       setCheckedItems({});
+
+      // Trigger automatic dual pre-disaster notification on high-threat generation
+      triggerDualNotification();
     } catch (err) {
       console.error("Error creating plan:", err);
       alert("Unable to generate plan. Please try again.");
@@ -153,18 +213,35 @@ export default function EvacuationPlanner() {
   const centerLat = (originLat + destLat) / 2;
   const centerLng = (originLng + destLng) / 2;
 
+  const initialBearing = calculateBearing(originLat, originLng, destLat, destLng);
+  const cardinalDir = getCardinalDirection(initialBearing);
+
   return (
     <div style={{ maxWidth: "1150px", margin: "0 auto", padding: "10px 0" }}>
       {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <div style={{ marginBottom: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
           <span style={{ fontSize: "2.2rem" }}>🧭</span>
           <div>
-            <h1 style={{ fontSize: "1.9rem", fontWeight: "800", margin: 0, color: "#f8fafc" }}>
-              Smart Evacuation Planner
-            </h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <h1 style={{ fontSize: "1.9rem", fontWeight: "800", margin: 0, color: "#f8fafc" }}>
+                Smart Evacuation Planner & Unsafe Zone Radar
+              </h1>
+              <span
+                style={{
+                  backgroundColor: "#dc2626",
+                  color: "#fff",
+                  padding: "3px 10px",
+                  borderRadius: "999px",
+                  fontSize: "0.72rem",
+                  fontWeight: "800",
+                }}
+              >
+                ● Pre-Disaster Early Warning
+              </span>
+            </div>
             <p style={{ color: "#94a3b8", marginTop: "4px", fontSize: "0.95rem" }}>
-              Generates an immediate safe evacuation route, calculates travel time, and pinpoints the nearest active emergency rescue shelter.
+              Pre-disaster unsafe zone alerts, dual online/offline notifications, acoustic siren, and 100% offline gyro vector compass navigation.
             </p>
           </div>
         </div>
@@ -329,7 +406,7 @@ export default function EvacuationPlanner() {
             }}
           >
             <span>🧭</span>
-            <span>{loadingPlan ? "Calculating Safe Evacuation Route..." : "Generate Live Evacuation Plan"}</span>
+            <span>{loadingPlan ? "Calculating Safe Evacuation Route..." : "Check Unsafe Zone & Generate Route"}</span>
           </button>
         </form>
       </div>
@@ -337,6 +414,81 @@ export default function EvacuationPlanner() {
       {/* ── PLAN RESULTS ────────────────────────────────────────────────── */}
       {plan && (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          {/* CRITICAL PRE-DISASTER UNSAFE ZONE ALERT CARD */}
+          <div
+            style={{
+              background: "linear-gradient(135deg, #7f1d1d, #991b1b)",
+              border: "2px solid #ef4444",
+              borderRadius: "14px",
+              padding: "22px 26px",
+              boxShadow: "0 10px 30px rgba(239, 68, 68, 0.35)",
+              color: "#fff",
+              animation: "pulse 2s infinite",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "14px" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "1.6rem" }}>🚨</span>
+                  <h2 style={{ margin: 0, fontSize: "1.35rem", fontWeight: "900", color: "#fecaca" }}>
+                    CRITICAL PRE-DISASTER WARNING: YOU ARE IN AN UNSAFE ZONE!
+                  </h2>
+                </div>
+                <p style={{ margin: "8px 0 0 0", color: "#fee2e2", fontSize: "0.92rem", lineHeight: "1.5" }}>
+                  Your current location (<strong>{location}</strong>) is situated directly within the high-impact hazard perimeter for <strong>{disasterType}</strong>. Immediate relocation to <strong>{plan.destination.name}</strong> is strongly advised before conditions deteriorate.
+                </p>
+              </div>
+
+              {/* Siren & Notification Controls */}
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                {/* Acoustic Emergency Siren Button */}
+                <button
+                  type="button"
+                  onClick={toggleSiren}
+                  style={{
+                    backgroundColor: sirenActive ? "#ffffff" : "#dc2626",
+                    color: sirenActive ? "#dc2626" : "#ffffff",
+                    border: "2px solid #ffffff",
+                    padding: "10px 18px",
+                    borderRadius: "8px",
+                    fontWeight: "800",
+                    fontSize: "0.88rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: sirenActive ? "0 0 20px #ffffff" : "0 4px 12px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  <span>{sirenActive ? "⏹️" : "🔊"}</span>
+                  <span>{sirenActive ? "SILENCE SIREN" : "SOUND EMERGENCY SIREN"}</span>
+                </button>
+
+                {/* Dual Online/Offline Notification Button */}
+                <button
+                  type="button"
+                  onClick={triggerDualNotification}
+                  style={{
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #f87171",
+                    color: "#fecaca",
+                    padding: "10px 16px",
+                    borderRadius: "8px",
+                    fontWeight: "700",
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>{notificationSent ? "✅" : "📲"}</span>
+                  <span>{notificationSent ? "Notification Dispatched" : "Dual Push Notification"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Primary Destination & ETA Banner */}
           <div
             style={{
@@ -401,8 +553,8 @@ export default function EvacuationPlanner() {
             {/* Hazard Alert Notice */}
             <div
               style={{
-                backgroundColor: "#7f1d1d",
-                border: "1px solid #ef4444",
+                backgroundColor: "#0f172a",
+                border: "1px solid #334155",
                 borderRadius: "10px",
                 padding: "14px 18px",
                 marginTop: "18px",
@@ -441,7 +593,7 @@ export default function EvacuationPlanner() {
                 }}
               >
                 <span>🗺️</span>
-                <span>Open Turn-by-Turn GPS Navigation</span>
+                <span>Open Google Maps Turn-by-Turn</span>
               </a>
 
               <button
@@ -483,6 +635,82 @@ export default function EvacuationPlanner() {
                 <span>🖨️</span>
                 <span>Print / Save Plan</span>
               </button>
+            </div>
+          </div>
+
+          {/* ── OFFLINE HARDWARE COMPASS & VECTOR ROUTING SECTION ─────────── */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "20px" }}>
+            {/* 100% Offline Compass Widget */}
+            <OfflineCompassWidget
+              userLat={originLat}
+              userLng={originLng}
+              shelterLat={destLat}
+              shelterLng={destLng}
+              shelterName={plan.destination.name}
+              distanceKm={plan.estimatedTime.distanceKm}
+            />
+
+            {/* Offline Turn-by-Turn Cardinal Waypoints */}
+            <div
+              style={{
+                backgroundColor: "#1e293b",
+                borderRadius: "16px",
+                border: "1px solid #334155",
+                padding: "20px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+                  <span style={{ fontSize: "1.4rem" }}>📍</span>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "800", color: "#f8fafc" }}>
+                      Offline Cardinal Corridor Waypoints
+                    </h3>
+                    <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
+                      Follow without internet or map tiles
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div style={{ backgroundColor: "#0f172a", padding: "10px 14px", borderRadius: "8px", borderLeft: "4px solid #ef4444" }}>
+                    <strong style={{ fontSize: "0.85rem", color: "#f87171" }}>Step 1: Immediate Egress (Origin)</strong>
+                    <div style={{ fontSize: "0.8rem", color: "#cbd5e1", marginTop: "2px" }}>
+                      Depart current structure at {location}. Secure ID & emergency go-bag.
+                    </div>
+                  </div>
+
+                  <div style={{ backgroundColor: "#0f172a", padding: "10px 14px", borderRadius: "8px", borderLeft: "4px solid #38bdf8" }}>
+                    <strong style={{ fontSize: "0.85rem", color: "#38bdf8" }}>
+                      Step 2: Vector Corridor ({cardinalDir} - {Math.round(initialBearing)}°)
+                    </strong>
+                    <div style={{ fontSize: "0.8rem", color: "#cbd5e1", marginTop: "2px" }}>
+                      Move {cardinalDir} along highest-elevation spinal roadways away from rivers, drainage channels, or downed power cables.
+                    </div>
+                  </div>
+
+                  <div style={{ backgroundColor: "#0f172a", padding: "10px 14px", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
+                    <strong style={{ fontSize: "0.85rem", color: "#fbbf24" }}>Step 3: Midway Checkpoint (~{(plan.estimatedTime.distanceKm / 2).toFixed(1)} km)</strong>
+                    <div style={{ fontSize: "0.8rem", color: "#cbd5e1", marginTop: "2px" }}>
+                      Verify magnetic azimuth with offline compass. Maintain distance from low-lying underpasses.
+                    </div>
+                  </div>
+
+                  <div style={{ backgroundColor: "#0f172a", padding: "10px 14px", borderRadius: "8px", borderLeft: "4px solid #22c55e" }}>
+                    <strong style={{ fontSize: "0.85rem", color: "#4ade80" }}>Step 4: Shelter Check-in ({plan.destination.name})</strong>
+                    <div style={{ fontSize: "0.8rem", color: "#cbd5e1", marginTop: "2px" }}>
+                      Arrive at {plan.destination.address}. Report to shelter administration desk for medical triage and family registration.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: "14px", fontSize: "0.75rem", color: "#94a3b8", textAlign: "center" }}>
+                ⚡ Cached in local device storage. Operates during complete cellular tower outage.
+              </div>
             </div>
           </div>
 

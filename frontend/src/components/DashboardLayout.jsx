@@ -119,6 +119,8 @@ export default function DashboardLayout() {
         {!isDesktopMode && (
           <MobileBottomNav onOpenMenu={() => setSidebarOpen(true)} />
         )}
+
+        <OfflineStatusWidget />
       </div>
     </div>
   );
