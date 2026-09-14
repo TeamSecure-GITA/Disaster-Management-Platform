@@ -4,11 +4,15 @@ import {
   Send, RefreshCw, Play, Square, CheckCircle, AlertTriangle, 
   WifiOff, MapPin, Heart, Zap, Download, Eye, Compass, 
   Layers, ChevronRight, Cpu, ArrowUpRight, Clock, Info, 
-  Sparkles, Sliders, ExternalLink, Award, FileText
+  Sparkles, Sliders, ExternalLink, Award, FileText,
+  Wifi, ShieldCheck, Bluetooth, QrCode
 } from 'lucide-react';
+import AtmosphericWifiBendingTab from '../components/worldfirst/AtmosphericWifiBendingTab';
+import PqcOfflineLedgerTab from '../components/worldfirst/PqcOfflineLedgerTab';
+import BleSpittingProtocolTab from '../components/worldfirst/BleSpittingProtocolTab';
 
 export default function WorldFirstInnovationsSuite() {
-  const [activeTab, setActiveTab] = useState('chirp');
+  const [activeTab, setActiveTab] = useState('wifi-bending');
 
   // -------------------------------------------------------------
   // TAB 1: "SOUND-WAVE" DATA TRANSFER (CHIRP PROTOCOL)
@@ -509,8 +513,65 @@ export default function WorldFirstInnovationsSuite() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-6">
+        {/* Tab Navigation - 8 World-First Deep-Tech Innovations */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-2.5 mt-6">
+          {/* FINAL SUITE INNOVATION 1 */}
+          <button
+            onClick={() => setActiveTab('wifi-bending')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'wifi-bending'
+                ? 'bg-cyan-950/60 border-cyan-500 text-white shadow-lg shadow-cyan-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-500/20 text-cyan-300 text-[9px] font-bold rounded-full border border-cyan-500/30">
+              NEW
+            </div>
+            <Wifi className={`w-5 h-5 flex-shrink-0 ${activeTab === 'wifi-bending' ? 'text-cyan-400 animate-pulse' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Wi-Fi CSI Bending</div>
+              <div className="text-[10px] text-slate-400">Passive Human Density</div>
+            </div>
+          </button>
+
+          {/* FINAL SUITE INNOVATION 2 */}
+          <button
+            onClick={() => setActiveTab('pqc-ledger')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'pqc-ledger'
+                ? 'bg-purple-950/60 border-purple-500 text-white shadow-lg shadow-purple-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-purple-500/20 text-purple-300 text-[9px] font-bold rounded-full border border-purple-500/30">
+              NEW
+            </div>
+            <ShieldCheck className={`w-5 h-5 flex-shrink-0 ${activeTab === 'pqc-ledger' ? 'text-purple-400' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">PQC Offline Ledger</div>
+              <div className="text-[10px] text-slate-400">ML-DSA Lattice Aid</div>
+            </div>
+          </button>
+
+          {/* FINAL SUITE INNOVATION 3 */}
+          <button
+            onClick={() => setActiveTab('ble-spitting')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'ble-spitting'
+                ? 'bg-amber-950/60 border-amber-500 text-white shadow-lg shadow-amber-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-amber-500/20 text-amber-300 text-[9px] font-bold rounded-full border border-amber-500/30">
+              NEW
+            </div>
+            <Bluetooth className={`w-5 h-5 flex-shrink-0 ${activeTab === 'ble-spitting' ? 'text-amber-400' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">BLE "Spitting" Burst</div>
+              <div className="text-[10px] text-slate-400">Debris Soil Penetration</div>
+            </div>
+          </button>
+
           <button
             onClick={() => setActiveTab('chirp')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
@@ -589,6 +650,20 @@ export default function WorldFirstInnovationsSuite() {
       </div>
 
       <div className="max-w-7xl mx-auto">
+        {/* ========================================================= */}
+        {/* FINAL SUITE TAB 1: WI-FI BENDING (PASSIVE CSI DENSITY)    */}
+        {/* ========================================================= */}
+        {activeTab === 'wifi-bending' && <AtmosphericWifiBendingTab />}
+
+        {/* ========================================================= */}
+        {/* FINAL SUITE TAB 2: POST-QUANTUM OFFLINE LEDGER           */}
+        {/* ========================================================= */}
+        {activeTab === 'pqc-ledger' && <PqcOfflineLedgerTab />}
+
+        {/* ========================================================= */}
+        {/* FINAL SUITE TAB 3: BLE SPITTING PROTOCOL (MICRO-BURSTING) */}
+        {/* ========================================================= */}
+        {activeTab === 'ble-spitting' && <BleSpittingProtocolTab />}
         {/* ========================================================= */}
         {/* TAB 1: SOUND-WAVE DATA TRANSFER (CHIRP PROTOCOL)           */}
         {/* ========================================================= */}
