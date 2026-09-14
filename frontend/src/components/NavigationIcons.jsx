@@ -765,6 +765,34 @@ export function IconDecentralized({ size = 22 }) {
   );
 }
 
+export function IconExtremeResilience({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(245,158,11,0.6))" }}>
+      {/* Micro-CPU Compute Grid Core */}
+      <rect x="5" y="5" width="14" height="14" rx="2.5" fill="url(#res-cpu)" stroke="#f59e0b" strokeWidth="1.2" />
+      
+      {/* Outer Chip Pins */}
+      <path d="M8 2v3M12 2v3M16 2v3M8 19v3M12 19v3M16 19v3M2 8h3M2 12h3M2 16h3M19 8h3M19 12h3M19 16h3" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+      
+      {/* Central Green Battery / Zero-Power Lightning */}
+      <path d="M12 8v8M9.5 12h5" stroke="#10b981" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="3.2" stroke="#10b981" strokeWidth="1.2" strokeDasharray="2,1.5" />
+      
+      {/* Optical Light Ray Flare */}
+      <circle cx="15.5" cy="8.5" r="1.5" fill="#ffffff" />
+
+      <defs>
+        <linearGradient id="res-cpu" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#78350f" />
+          <stop offset="50%" stopColor="#451a03" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
 
 
 

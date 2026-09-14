@@ -44,6 +44,7 @@ const NERTopographySuite = lazy(() => import("./pages/NERTopographySuite"));
 const WorldFirstInnovationsSuite = lazy(() => import("./pages/WorldFirstInnovationsSuite"));
 const HyperSpeedRescueSuite = lazy(() => import("./pages/HyperSpeedRescueSuite"));
 const DecentralizedResilienceSuite = lazy(() => import("./pages/DecentralizedResilienceSuite"));
+const ExtremeResilienceSuite = lazy(() => import("./pages/ExtremeResilienceSuite"));
 const ARSeeTheRisk = lazy(() => import("./pages/ARSeeTheRisk"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
@@ -156,6 +157,11 @@ export default function App() {
             <Route path="/triage-heatmaps" element={<Navigate to="/decentralized-resilience" replace />} />
             <Route path="/ipfs-mirroring" element={<Navigate to="/decentralized-resilience" replace />} />
             <Route path="/sar-render-engine" element={<Navigate to="/decentralized-resilience" replace />} />
+            <Route path="/extreme-resilience" element={<ExtremeResilienceSuite />} />
+            <Route path="/wasm-supercomputer" element={<Navigate to="/extreme-resilience" replace />} />
+            <Route path="/e-ink-canvas" element={<Navigate to="/extreme-resilience" replace />} />
+            <Route path="/nfc-relief-lockers" element={<Navigate to="/extreme-resilience" replace />} />
+            <Route path="/lifi-optical-receiver" element={<Navigate to="/extreme-resilience" replace />} />
             <Route path="/ar-see-the-risk" element={<ARSeeTheRisk />} />
             <Route path="/ar-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
             <Route path="/see-the-risk" element={<Navigate to="/ar-see-the-risk" replace />} />

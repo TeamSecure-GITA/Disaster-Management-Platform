@@ -48,6 +48,7 @@ import {
   IconWorldFirst,
   IconHyperSpeed,
   IconDecentralized,
+  IconExtremeResilience,
 } from "./NavigationIcons";
 
 const menuItems = [
@@ -57,6 +58,7 @@ const menuItems = [
   { key: "nav_world_first",        fallback: "World-First Deep Tech",  icon: IconWorldFirst,    path: "/world-first-innovations" },
   { key: "nav_hyper_speed",        fallback: "Hyper-Speed Rescue Suite", icon: IconHyperSpeed,   path: "/hyper-speed-rescue" },
   { key: "nav_decentralized",      fallback: "Decentralized Resilience", icon: IconDecentralized, path: "/decentralized-resilience" },
+  { key: "nav_extreme_resilience",  fallback: "Extreme Resilience Grid", icon: IconExtremeResilience, path: "/extreme-resilience" },
   { key: "nav_ar_risk",            fallback: "AR See the Risk",        icon: IconAR,            path: "/ar-see-the-risk" },
   { key: "nav_alerts",             fallback: "Disaster Alerts",        icon: IconAlerts,        path: "/alerts" },
   { key: "nav_climate_chronicle",  fallback: "Climate Chronicle",      icon: IconClimate,       path: "/climate-chronicle" },
