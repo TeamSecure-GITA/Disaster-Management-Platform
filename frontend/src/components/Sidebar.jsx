@@ -41,6 +41,7 @@ import {
   IconMicroTask,
   IconAidLedger,
   IconReconstruct,
+  IconZeroInternet,
 } from "./NavigationIcons";
 
 const menuItems = [
@@ -354,8 +355,9 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
           <span>&#127758;</span> During the Disaster
         </div>
         {[
-          { icon: IconSafeZone,  path: "/safe-zones",         label: "Safe Zone Tracker" },
-          { icon: IconDynRoute,  path: "/dynamic-evacuation", label: "AI Evacuation Router" },
+          { icon: IconZeroInternet, path: "/zero-internet-mesh", label: "Zero-Internet Mesh" },
+          { icon: IconSafeZone,     path: "/safe-zones",         label: "Safe Zone Tracker" },
+          { icon: IconDynRoute,     path: "/dynamic-evacuation", label: "AI Evacuation Router" },
         ].map(item => (
           <NavLink key={item.path} to={item.path} onClick={handleNavClick}
             style={({ isActive }) => ({

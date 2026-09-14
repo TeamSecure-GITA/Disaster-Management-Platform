@@ -604,3 +604,22 @@ export function IconReconstruct({ size = 22 }) {
     </svg>
   );
 }
+
+export function IconZeroInternet({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(56,189,248,0.5))" }}>
+      <circle cx="12" cy="12" r="9" stroke="url(#zi-circle)" strokeWidth="1.6" strokeDasharray="3 2" />
+      <circle cx="12" cy="12" r="3" fill="#38bdf8" />
+      <path d="M4.5 12a7.5 7.5 0 0 1 15 0" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M7.5 12a4.5 4.5 0 0 1 9 0" stroke="#22d3ee" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="6" cy="17" r="1.8" fill="#34d399" />
+      <circle cx="18" cy="17" r="1.8" fill="#fbbf24" />
+      <line x1="6" y1="17" x2="12" y2="12" stroke="#34d399" strokeWidth="1.2" strokeDasharray="2 1" />
+      <line x1="18" y1="17" x2="12" y2="12" stroke="#fbbf24" strokeWidth="1.2" strokeDasharray="2 1" />
+      <defs>
+        <linearGradient id="zi-circle" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#0284c7"/><stop offset="100%" stopColor="#0369a1"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+

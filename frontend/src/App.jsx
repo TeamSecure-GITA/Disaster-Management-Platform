@@ -54,6 +54,7 @@ const DynamicEvacuationRouter  = lazy(() => import("./pages/DynamicEvacuationRou
 const MicroTasking             = lazy(() => import("./pages/MicroTasking"));
 const AidLedger                = lazy(() => import("./pages/AidLedger"));
 const ReconstructionMap        = lazy(() => import("./pages/ReconstructionMap"));
+const ZeroInternetMesh         = lazy(() => import("./pages/ZeroInternetMesh"));
 
 function Loading() {
   return (
@@ -170,6 +171,7 @@ export default function App() {
             <Route path="/smart-alerts"       element={<SmartAlerts />} />
 
             {/* ── During the Disaster ───────────────────────────── */}
+            <Route path="/zero-internet-mesh" element={<ZeroInternetMesh />} />
             <Route path="/safe-zones"         element={<SafeZoneTracker />} />
             <Route path="/dynamic-evacuation" element={<DynamicEvacuationRouter />} />
 
