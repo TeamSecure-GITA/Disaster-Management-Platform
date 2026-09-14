@@ -676,5 +676,38 @@ export function IconNERSuite({ size = 22 }) {
   );
 }
 
+export function IconWorldFirst({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(14,165,233,0.6))" }}>
+      {/* Outer Ultrasonic / RF Wave Ring */}
+      <circle cx="12" cy="12" r="9.5" stroke="url(#wf-ring)" strokeWidth="1.2" strokeDasharray="3,2" opacity="0.8" />
+      
+      {/* Central Radio Tower Emitter */}
+      <path d="M12 4v10" stroke="#38bdf8" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="4" r="2" fill="#38bdf8" />
+      
+      {/* Bio-Pulse ECG Spike across base */}
+      <path d="M4 17h4l2-4 2 6 2-4 2 2h4" stroke="url(#wf-pulse)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      
+      {/* Acoustic concentric ripples */}
+      <path d="M8 8a5.5 5.5 0 0 1 8 0" stroke="#34d399" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
+      <path d="M6 6a8.5 8.5 0 0 1 12 0" stroke="#34d399" strokeWidth="1.1" strokeLinecap="round" opacity="0.6" />
+
+      <defs>
+        <linearGradient id="wf-ring" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#0284c7" />
+          <stop offset="100%" stopColor="#10b981" />
+        </linearGradient>
+        <linearGradient id="wf-pulse" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f43f5e" />
+          <stop offset="50%" stopColor="#fbbf24" />
+          <stop offset="100%" stopColor="#10b981" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
 
 

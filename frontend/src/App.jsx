@@ -41,6 +41,7 @@ const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
 const NERTopographySuite = lazy(() => import("./pages/NERTopographySuite"));
+const WorldFirstInnovationsSuite = lazy(() => import("./pages/WorldFirstInnovationsSuite"));
 const ARSeeTheRisk = lazy(() => import("./pages/ARSeeTheRisk"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
@@ -133,6 +134,13 @@ export default function App() {
             <Route path="/ner-landslide-monitor" element={<NERLandslideMonitor />} />
             <Route path="/ner-topography-suite" element={<NERTopographySuite />} />
             <Route path="/ner-killer-features" element={<Navigate to="/ner-topography-suite" replace />} />
+            <Route path="/world-first-innovations" element={<WorldFirstInnovationsSuite />} />
+            <Route path="/deep-tech-suite" element={<Navigate to="/world-first-innovations" replace />} />
+            <Route path="/sound-wave-chirp" element={<Navigate to="/world-first-innovations" replace />} />
+            <Route path="/reverse-gps-radio" element={<Navigate to="/world-first-innovations" replace />} />
+            <Route path="/citizen-vitals-triage" element={<Navigate to="/world-first-innovations" replace />} />
+            <Route path="/mudslide-fluid-dynamics" element={<Navigate to="/world-first-innovations" replace />} />
+            <Route path="/living-infrastructure-ledger" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/ar-see-the-risk" element={<ARSeeTheRisk />} />
             <Route path="/ar-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
             <Route path="/see-the-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
