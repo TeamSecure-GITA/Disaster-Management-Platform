@@ -738,6 +738,34 @@ export function IconHyperSpeed({ size = 22 }) {
   );
 }
 
+export function IconDecentralized({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(139,92,246,0.6))" }}>
+      {/* 3D Isometric IPFS Cube Frame */}
+      <path d="M12 2l8 4.5v9L12 20l-8-4.5v-9L12 2z" fill="url(#ipfs-cube-top)" opacity="0.3" stroke="#8b5cf6" strokeWidth="1.2" />
+      <path d="M12 2v9l8 4.5" stroke="#a78bfa" strokeWidth="1.2" />
+      <path d="M12 11l-8 4.5" stroke="#a78bfa" strokeWidth="1.2" />
+      
+      {/* Decentralized Peer Swarm Nodes */}
+      <circle cx="12" cy="11" r="2.2" fill="#38bdf8" />
+      <circle cx="4" cy="6.5" r="1.6" fill="#10b981" />
+      <circle cx="20" cy="6.5" r="1.6" fill="#10b981" />
+      <circle cx="12" cy="20" r="1.6" fill="#f43f5e" />
+      
+      {/* Radar Wave Echo */}
+      <path d="M7 3.5a11 11 0 0 1 10 0" stroke="#38bdf8" strokeWidth="1.1" strokeDasharray="2,2" />
+
+      <defs>
+        <linearGradient id="ipfs-cube-top" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#06b6d4" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
 
 
 

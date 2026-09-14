@@ -43,6 +43,7 @@ const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
 const NERTopographySuite = lazy(() => import("./pages/NERTopographySuite"));
 const WorldFirstInnovationsSuite = lazy(() => import("./pages/WorldFirstInnovationsSuite"));
 const HyperSpeedRescueSuite = lazy(() => import("./pages/HyperSpeedRescueSuite"));
+const DecentralizedResilienceSuite = lazy(() => import("./pages/DecentralizedResilienceSuite"));
 const ARSeeTheRisk = lazy(() => import("./pages/ARSeeTheRisk"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
@@ -149,6 +150,12 @@ export default function App() {
             <Route path="/acoustic-scream-triangulation" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/leo-satellite-bridge" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/pre-deployment-engine" element={<Navigate to="/hyper-speed-rescue" replace />} />
+            <Route path="/decentralized-resilience" element={<DecentralizedResilienceSuite />} />
+            <Route path="/ultrasonic-mesh-relay" element={<Navigate to="/decentralized-resilience" replace />} />
+            <Route path="/radio-triangulation" element={<Navigate to="/decentralized-resilience" replace />} />
+            <Route path="/triage-heatmaps" element={<Navigate to="/decentralized-resilience" replace />} />
+            <Route path="/ipfs-mirroring" element={<Navigate to="/decentralized-resilience" replace />} />
+            <Route path="/sar-render-engine" element={<Navigate to="/decentralized-resilience" replace />} />
             <Route path="/ar-see-the-risk" element={<ARSeeTheRisk />} />
             <Route path="/ar-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
             <Route path="/see-the-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
