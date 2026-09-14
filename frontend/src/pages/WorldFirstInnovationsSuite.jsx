@@ -10,9 +10,11 @@ import {
 import AtmosphericWifiBendingTab from '../components/worldfirst/AtmosphericWifiBendingTab';
 import PqcOfflineLedgerTab from '../components/worldfirst/PqcOfflineLedgerTab';
 import BleSpittingProtocolTab from '../components/worldfirst/BleSpittingProtocolTab';
+import WebNfcTriageTab from '../components/worldfirst/WebNfcTriageTab';
+import ZeroInfrastructureDataFlowTab from '../components/worldfirst/ZeroInfrastructureDataFlowTab';
 
 export default function WorldFirstInnovationsSuite() {
-  const [activeTab, setActiveTab] = useState('wifi-bending');
+  const [activeTab, setActiveTab] = useState('zero-grid-flow');
 
   // -------------------------------------------------------------
   // TAB 1: "SOUND-WAVE" DATA TRANSFER (CHIRP PROTOCOL)
@@ -500,6 +502,21 @@ export default function WorldFirstInnovationsSuite() {
             <p className="text-slate-400 text-sm sm:text-base mt-1 max-w-3xl">
               Breakthrough survival technologies solving total cellular blackout, GPS gorge blindness, triage prioritization, sub-surface mountain liquefaction, and indigenous natural infrastructure protection.
             </p>
+
+            {/* SIH Grand Jury Executive Pitch Mic-Drop Card */}
+            <div className="mt-4 p-3.5 bg-gradient-to-r from-indigo-950/80 via-purple-950/40 to-slate-900 border border-indigo-500/40 rounded-xl relative overflow-hidden shadow-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">💡</span>
+                <div>
+                  <div className="text-[11px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+                    SIH Grand Jury Pitch Thesis:
+                  </div>
+                  <p className="text-xs text-slate-200 italic mt-0.5 leading-relaxed">
+                    "The world's current disaster platforms assume the internet will always come back. <strong className="text-white not-italic underline decoration-amber-400">We built our platform for the day it doesn't.</strong> By turning the ambient environment, sound waves, radio echoes, and the collective computing power of everyday smartphones into a self-healing rescue grid, we have created a platform that cannot be knocked offline by any natural disaster on Earth."
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 self-start md:self-auto">
@@ -513,9 +530,47 @@ export default function WorldFirstInnovationsSuite() {
           </div>
         </div>
 
-        {/* Tab Navigation - 8 World-First Deep-Tech Innovations */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-2.5 mt-6">
-          {/* FINAL SUITE INNOVATION 1 */}
+        {/* Tab Navigation - 10 World-First Deep-Tech Pillars */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-6">
+          {/* ZERO-GRID FLOW */}
+          <button
+            onClick={() => setActiveTab('zero-grid-flow')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'zero-grid-flow'
+                ? 'bg-indigo-950/60 border-indigo-500 text-white shadow-lg shadow-indigo-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 text-[9px] font-bold rounded-full border border-indigo-500/30">
+              CORE
+            </div>
+            <Cpu className={`w-5 h-5 flex-shrink-0 ${activeTab === 'zero-grid-flow' ? 'text-indigo-400 animate-pulse' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Zero-Grid Flow</div>
+              <div className="text-[10px] text-slate-400">Master Architecture</div>
+            </div>
+          </button>
+
+          {/* WEB-NFC TRIAGE */}
+          <button
+            onClick={() => setActiveTab('nfc-triage')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'nfc-triage'
+                ? 'bg-rose-950/60 border-rose-500 text-white shadow-lg shadow-rose-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-rose-500/20 text-rose-300 text-[9px] font-bold rounded-full border border-rose-500/30">
+              NEW
+            </div>
+            <Zap className={`w-5 h-5 flex-shrink-0 ${activeTab === 'nfc-triage' ? 'text-rose-400 animate-pulse' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Web-NFC Triage</div>
+              <div className="text-[10px] text-slate-400">Skin Digital Stamps</div>
+            </div>
+          </button>
+
+          {/* FINAL SUITE INNOVATION 1: WI-FI BENDING */}
           <button
             onClick={() => setActiveTab('wifi-bending')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -534,7 +589,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
-          {/* FINAL SUITE INNOVATION 2 */}
+          {/* FINAL SUITE INNOVATION 2: PQC LEDGER */}
           <button
             onClick={() => setActiveTab('pqc-ledger')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -553,7 +608,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
-          {/* FINAL SUITE INNOVATION 3 */}
+          {/* FINAL SUITE INNOVATION 3: BLE SPITTING */}
           <button
             onClick={() => setActiveTab('ble-spitting')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -572,6 +627,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
+          {/* SOUND-WAVE CHIRP */}
           <button
             onClick={() => setActiveTab('chirp')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
@@ -587,6 +643,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
+          {/* REVERSE GPS */}
           <button
             onClick={() => setActiveTab('reverse-gps')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
@@ -602,6 +659,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
+          {/* CITIZEN VITALS */}
           <button
             onClick={() => setActiveTab('vitals')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
@@ -617,6 +675,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
+          {/* FLUID MUDSLIDE AI */}
           <button
             onClick={() => setActiveTab('mudslide')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
@@ -632,6 +691,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
+          {/* LIVING ROOT BRIDGES */}
           <button
             onClick={() => setActiveTab('root-bridge')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
@@ -650,6 +710,16 @@ export default function WorldFirstInnovationsSuite() {
       </div>
 
       <div className="max-w-7xl mx-auto">
+        {/* ========================================================= */}
+        {/* ZERO-GRID FLOW: THE ULTIMATE ZERO-INFRASTRUCTURE PIPELINE  */}
+        {/* ========================================================= */}
+        {activeTab === 'zero-grid-flow' && <ZeroInfrastructureDataFlowTab />}
+
+        {/* ========================================================= */}
+        {/* WEB-NFC TRIAGE: SKIN-SAFE DIGITAL STAMPS                  */}
+        {/* ========================================================= */}
+        {activeTab === 'nfc-triage' && <WebNfcTriageTab />}
+
         {/* ========================================================= */}
         {/* FINAL SUITE TAB 1: WI-FI BENDING (PASSIVE CSI DENSITY)    */}
         {/* ========================================================= */}

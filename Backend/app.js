@@ -49,6 +49,7 @@ const reviewRoutes = require("./routes/reviewRoutes");
 const wifiCsiRoutes = require("./routes/wifiCsiRoutes");
 const pqcLedgerRoutes = require("./routes/pqcLedgerRoutes");
 const bleSpitRoutes = require("./routes/bleSpitRoutes");
+const nfcTriageRoutes = require("./routes/nfcTriageRoutes");
 
 const app = express();
 
@@ -169,6 +170,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/wifi-csi", wifiCsiRoutes);
 app.use("/api/pqc-ledger", pqcLedgerRoutes);
 app.use("/api/ble-spit", bleSpitRoutes);
+app.use("/api/nfc-triage", nfcTriageRoutes);
 
 // ================================
 // 404 HANDLER
