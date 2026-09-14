@@ -927,6 +927,24 @@ export default function NERLandslideMonitor() {
           {/* Quick Actions */}
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <Link
+              to="/ner-topography-suite"
+              style={{
+                background: "linear-gradient(135deg, #059669, #0284c7)",
+                color: "#ffffff",
+                padding: "10px 18px",
+                borderRadius: "10px",
+                fontWeight: "800",
+                fontSize: "0.88rem",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 4px 14px rgba(5, 150, 105, 0.4)",
+              }}
+            >
+              🏔️ NER Topography Tech Suite (5 Killer Features)
+            </Link>
+            <Link
               to="/incident-report"
               style={{
                 backgroundColor: "#ef4444",

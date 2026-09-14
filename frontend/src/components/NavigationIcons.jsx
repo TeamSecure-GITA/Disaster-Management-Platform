@@ -651,6 +651,7 @@ export function IconDelivery({ size = 22 }) {
       <circle cx="6" cy="17" r="2.2" fill="#1e293b" stroke="#f97316" strokeWidth="1.2" />
       <circle cx="18" cy="17" r="2.2" fill="#1e293b" stroke="#f97316" strokeWidth="1.2" />
       <path d="M5 11h3M5 13h5" stroke="#fed7aa" strokeWidth="1.2" strokeLinecap="round" />
+      <defs>
         <linearGradient id="truck-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ea580c"/><stop offset="100%" stopColor="#c2410c"/></linearGradient>
         <linearGradient id="truck-cab" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#f97316"/><stop offset="100%" stopColor="#ea580c"/></linearGradient>
       </defs>
