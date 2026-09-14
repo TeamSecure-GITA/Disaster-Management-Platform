@@ -490,27 +490,33 @@ export function updatePermissionRequest(requestId, status, reviewer = "Debasish 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // USER REVIEWS — Platform Feedback & Administrator Notification System
+// Permanently stored in DB/disk until deleted by Administrator
 // ─────────────────────────────────────────────────────────────────────────────
 
 const LS_REVIEWS_KEY = "platform_user_reviews_v1";
+const API_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
 /**
- * Save a new user review.
- * @param {{ name: string, email: string, rating: number, category: string, message: string }} reviewData
- * @returns {{ success: boolean, review: object }}
+ * Save a new user review permanently to Backend (MongoDB + disk backup) + local storage.
+ * @param {{ name: string, email: string, rating: number, category: string, message: string, device?: string }} reviewData
+ * @returns {Promise<{ success: boolean, review: object, message?: string }>}
  */
-export function saveUserReview({ name, email, rating, category, message }) {
+export async function saveUserReview({ name, email, rating, category, message, device }) {
+  const localId = `REV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   const review = {
-    id: `REV-${Date.now()}`,
-    name: name || "Anonymous",
-    email: email || "",
+    id: localId,
+    reviewId: localId,
+    name: (name || "Anonymous").trim(),
+    email: (email || "").trim(),
     rating: Math.min(5, Math.max(1, Number(rating) || 5)),
     category: category || "General Feedback",
     message: (message || "").trim(),
     submittedAt: new Date().toISOString(),
     readByAdmin: false,
+    device: device || (typeof navigator !== "undefined" ? navigator.userAgent : "Web Client")
   };
 
+  // 1. Immediately cache in localStorage for instant offline access
   let reviews = [];
   try {
     const raw = localStorage.getItem(LS_REVIEWS_KEY);
@@ -518,13 +524,76 @@ export function saveUserReview({ name, email, rating, category, message }) {
     if (!Array.isArray(reviews)) reviews = [];
   } catch { reviews = []; }
 
-  const updated = [review, ...reviews];
-  localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(updated));
-  return { success: true, review };
+  reviews = [review, ...reviews.filter(r => r.id !== localId && r.reviewId !== localId)];
+  localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(reviews));
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("platform_reviews_updated"));
+    window.dispatchEvent(new Event("admin_auth_updated"));
+  }
+
+  // 2. Persist permanently to backend database + disk file
+  try {
+    const res = await fetch(`${API_URL}/api/reviews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: review.name,
+        email: review.email,
+        rating: review.rating,
+        category: review.category,
+        message: review.message,
+        device: review.device
+      })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.review) {
+        const serverReview = {
+          ...data.review,
+          id: data.review.reviewId || data.review.id || localId
+        };
+        const updatedList = reviews.map(r => r.id === localId ? serverReview : r);
+        localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(updatedList));
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("platform_reviews_updated"));
+        }
+        return { success: true, review: serverReview, message: "Review permanently saved until deleted by Administrator." };
+      }
+    }
+  } catch (err) {
+    console.warn("Backend review sync failed, cached locally:", err.message);
+  }
+
+  return { success: true, review, message: "Review permanently saved locally." };
 }
 
 /**
- * Retrieve all user reviews (newest first).
+ * Fetch all reviews from Backend API with local fallback.
+ * @returns {Promise<Array>}
+ */
+export async function fetchUserReviews() {
+  try {
+    const res = await fetch(`${API_URL}/api/reviews`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.reviews)) {
+        localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(data.reviews));
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("platform_reviews_updated"));
+        }
+        return data.reviews;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch remote reviews, using local cache:", err.message);
+  }
+  return getUserReviews();
+}
+
+/**
+ * Retrieve all user reviews from local cache (synchronous).
  * @returns {Array}
  */
 export function getUserReviews() {
@@ -547,30 +616,62 @@ export function getUnreadReviewCount() {
 }
 
 /**
- * Mark all reviews as read by the administrator.
+ * Mark all reviews as read by the administrator (local + backend).
  */
-export function markAllReviewsRead() {
+export async function markAllReviewsRead() {
   const reviews = getUserReviews().map(r => ({ ...r, readByAdmin: true }));
   localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(reviews));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("platform_reviews_updated"));
+  }
+
+  try {
+    await fetch(`${API_URL}/api/reviews/read-all`, { method: "PATCH" });
+  } catch (err) {
+    console.warn("Error syncing markAllReviewsRead with server:", err.message);
+  }
 }
 
 /**
- * Mark a single review as read.
+ * Mark a single review as read (local + backend).
  * @param {string} reviewId
  */
-export function markReviewRead(reviewId) {
+export async function markReviewRead(reviewId) {
   const reviews = getUserReviews().map(r =>
-    r.id === reviewId ? { ...r, readByAdmin: true } : r
+    (r.id === reviewId || r.reviewId === reviewId) ? { ...r, readByAdmin: true } : r
   );
   localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(reviews));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("platform_reviews_updated"));
+  }
+
+  try {
+    await fetch(`${API_URL}/api/reviews/${encodeURIComponent(reviewId)}/read`, { method: "PATCH" });
+  } catch (err) {
+    console.warn("Error syncing markReviewRead with server:", err.message);
+  }
 }
 
 /**
- * Delete a review by ID (admin-only action).
+ * Permanently delete a review by ID (admin-only action, local + backend).
  * @param {string} reviewId
  */
-export function deleteReview(reviewId) {
-  const reviews = getUserReviews().filter(r => r.id !== reviewId);
+export async function deleteReview(reviewId) {
+  const reviews = getUserReviews().filter(r => r.id !== reviewId && r.reviewId !== reviewId);
   localStorage.setItem(LS_REVIEWS_KEY, JSON.stringify(reviews));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("platform_reviews_updated"));
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/reviews/${encodeURIComponent(reviewId)}`, {
+      method: "DELETE"
+    });
+    if (res.ok) {
+      return { success: true, message: "Review permanently deleted." };
+    }
+  } catch (err) {
+    console.warn("Error syncing review delete with server:", err.message);
+  }
   return { success: true };
 }

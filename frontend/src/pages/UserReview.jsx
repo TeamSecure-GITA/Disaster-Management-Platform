@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { saveUserReview, getUserReviews } from "../utils/adminAuth";
+import { saveUserReview, getUserReviews, fetchUserReviews } from "../utils/adminAuth";
 import { getOfflineSession } from "../utils/offlineStorage";
 
 const CATEGORIES = [
@@ -60,8 +60,9 @@ export default function UserReview() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [myReviews, setMyReviews] = useState([]);
+  const [myReviews, setMyReviews] = useState(getUserReviews());
   const [activeTab, setActiveTab] = useState("submit"); // "submit" | "history"
 
   useEffect(() => {
@@ -69,12 +70,24 @@ export default function UserReview() {
       if (session) setCurrentUser(session);
     });
 
-    // Load this user's past reviews
-    const all = getUserReviews();
-    setMyReviews(all);
+    // 1. Initial sync with local cache
+    setMyReviews(getUserReviews());
+
+    // 2. Fetch permanently saved reviews from backend database/file
+    fetchUserReviews().then((all) => {
+      if (Array.isArray(all)) {
+        setMyReviews(all);
+      }
+    });
+
+    const handleUpdate = () => {
+      setMyReviews(getUserReviews());
+    };
+    window.addEventListener("platform_reviews_updated", handleUpdate);
+    return () => window.removeEventListener("platform_reviews_updated", handleUpdate);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -87,18 +100,27 @@ export default function UserReview() {
       return;
     }
 
-    const result = saveUserReview({
-      name: currentUser?.name || "Anonymous",
-      email: currentUser?.email || "",
-      rating: form.rating,
-      category: form.category,
-      message: form.message.trim(),
-    });
+    setIsSubmitting(true);
+    try {
+      const result = await saveUserReview({
+        name: currentUser?.name || "Anonymous",
+        email: currentUser?.email || "",
+        rating: form.rating,
+        category: form.category,
+        message: form.message.trim(),
+      });
 
-    if (result.success) {
-      setSubmitted(true);
-      setMyReviews(getUserReviews());
-      setForm({ rating: 0, category: "General Feedback", message: "" });
+      if (result.success) {
+        setSubmitted(true);
+        setMyReviews(getUserReviews());
+        setForm({ rating: 0, category: "General Feedback", message: "" });
+      } else {
+        setError(result.message || "Failed to submit review.");
+      }
+    } catch (err) {
+      setError("Network error saving review. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -479,24 +501,25 @@ export default function UserReview() {
 
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   style={{
                     width: "100%",
                     padding: "13px",
                     borderRadius: "10px",
-                    background: "linear-gradient(135deg, #2563eb, #4f46e5)",
+                    background: isSubmitting ? "#334155" : "linear-gradient(135deg, #2563eb, #4f46e5)",
                     color: "#fff",
                     fontWeight: "700",
                     fontSize: "1rem",
                     border: "none",
-                    cursor: "pointer",
-                    boxShadow: "0 4px 16px rgba(37, 99, 235, 0.4)",
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                    boxShadow: isSubmitting ? "none" : "0 4px 16px rgba(37, 99, 235, 0.4)",
                     transition: "opacity 0.2s",
                     letterSpacing: "0.01em",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                  onMouseEnter={(e) => (!isSubmitting && (e.currentTarget.style.opacity = "0.88"))}
+                  onMouseLeave={(e) => (!isSubmitting && (e.currentTarget.style.opacity = "1"))}
                 >
-                  ⭐ Submit Review &amp; Notify Administrator →
+                  {isSubmitting ? "⏳ Saving Permanently to Administrator Hub..." : "⭐ Submit Review & Notify Administrator →"}
                 </button>
               </form>
             </div>

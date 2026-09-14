@@ -15,6 +15,7 @@ import {
   getPermissionRequests,
   updatePermissionRequest,
   getUserReviews,
+  fetchUserReviews,
   getUnreadReviewCount,
   markAllReviewsRead,
   markReviewRead,
@@ -60,9 +61,21 @@ export default function AdministratorHub() {
       }
     }
     checkAuth();
+    refreshData();
+
+    const handleReviewsUpdate = () => {
+      setReviews(getUserReviews());
+      setUnreadReviews(getUnreadReviewCount());
+    };
+    window.addEventListener("platform_reviews_updated", handleReviewsUpdate);
+    window.addEventListener("admin_auth_updated", refreshData);
+    return () => {
+      window.removeEventListener("platform_reviews_updated", handleReviewsUpdate);
+      window.removeEventListener("admin_auth_updated", refreshData);
+    };
   }, []);
 
-  const refreshData = () => {
+  const refreshData = async () => {
     setAnalytics(getLoginAnalytics());
     setAuthorizedAdmins(getAuthorizedAdmins());
     setApprovedMembers(getApprovedMembers());
@@ -70,6 +83,14 @@ export default function AdministratorHub() {
     setRequests(getPermissionRequests());
     setReviews(getUserReviews());
     setUnreadReviews(getUnreadReviewCount());
+
+    try {
+      const serverReviews = await fetchUserReviews();
+      if (Array.isArray(serverReviews)) {
+        setReviews(serverReviews);
+        setUnreadReviews(serverReviews.filter((r) => !r.readByAdmin).length);
+      }
+    } catch (_) {}
   };
 
   const handleGrantPermission = (e) => {
@@ -161,22 +182,24 @@ export default function AdministratorHub() {
     refreshData();
   };
 
-  const handleMarkAllReviewsRead = () => {
-    markAllReviewsRead();
-    refreshData();
+  const handleMarkAllReviewsRead = async () => {
+    await markAllReviewsRead();
+    await refreshData();
     setActionNotice("✅ All reviews marked as read.");
+    setTimeout(() => setActionNotice(""), 3500);
   };
 
-  const handleMarkReviewRead = (reviewId) => {
-    markReviewRead(reviewId);
-    refreshData();
+  const handleMarkReviewRead = async (reviewId) => {
+    await markReviewRead(reviewId);
+    await refreshData();
   };
 
-  const handleDeleteReview = (reviewId) => {
-    if (window.confirm("Are you sure you want to permanently delete this review?")) {
-      deleteReview(reviewId);
-      refreshData();
-      setActionNotice("🗑️ Review deleted.");
+  const handleDeleteReview = async (reviewId) => {
+    if (window.confirm("Are you sure you want to permanently delete this review? This will remove it from the permanent database and disk storage.")) {
+      await deleteReview(reviewId);
+      await refreshData();
+      setActionNotice("🗑️ Review permanently deleted.");
+      setTimeout(() => setActionNotice(""), 3500);
     }
   };
 
@@ -1028,11 +1051,14 @@ export default function AdministratorHub() {
                       "{review.message}"
                     </p>
 
-                    <div style={{ display: "flex", gap: "16px", fontSize: "0.75rem", color: "#475569", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: "16px", fontSize: "0.75rem", color: "#475569", flexWrap: "wrap", alignItems: "center" }}>
                       <span>👤 <strong style={{ color: "#64748b" }}>{review.name}</strong></span>
                       {review.email && <span>✉️ {review.email}</span>}
                       <span>🕐 {new Date(review.submittedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                       <span style={{ color: "#334155" }}>ID: {review.id}</span>
+                      <span style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", color: "#34d399", padding: "1px 6px", borderRadius: "4px", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                        💾 Permanent Storage
+                      </span>
                     </div>
                   </div>
 
@@ -1059,9 +1085,10 @@ export default function AdministratorHub() {
                     {review.readByAdmin && (
                       <span style={{ fontSize: "0.72rem", color: "#4ade80", fontStyle: "italic" }}>✓ Read</span>
                     )}
-                    {isHead && (
+                    {(isHead || isAdmin) && (
                       <button
                         onClick={() => handleDeleteReview(review.id)}
+                        title="Permanently delete this review from the system"
                         style={{
                           padding: "6px 11px",
                           backgroundColor: "rgba(239, 68, 68, 0.12)",
@@ -1074,7 +1101,7 @@ export default function AdministratorHub() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        🗑️ Delete
+                        🗑️ Delete Permanently
                       </button>
                     )}
                   </div>

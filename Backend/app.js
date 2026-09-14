@@ -45,6 +45,7 @@ const nerLandslideRoutes = require("./routes/nerLandslideRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
 const firewallRoutes = require("./routes/firewallRoutes");
 const meshRoutes = require("./routes/meshRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 const app = express();
 
@@ -159,6 +160,7 @@ app.use("/api/ner", nerLandslideRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/firewall", firewallRoutes);
 app.use("/api/mesh", meshRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // ================================
 // 404 HANDLER

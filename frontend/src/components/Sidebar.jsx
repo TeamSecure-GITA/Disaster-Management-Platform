@@ -7,7 +7,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import logoImg from "../assets/logo.png";
-import { isAuthorizedAdmin, isHeadAdmin, isApprovedMember } from "../utils/adminAuth";
+import { isAuthorizedAdmin, isHeadAdmin, isApprovedMember, getUnreadReviewCount } from "../utils/adminAuth";
 import { useLanguage } from "../i18n/LanguageContext";
 import {
   IconDashboard,
@@ -91,6 +91,7 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [isHead, setIsHead]   = React.useState(false);
   const [isApproved, setIsApproved] = React.useState(false);
+  const [unreadReviews, setUnreadReviews] = React.useState(getUnreadReviewCount());
 
   /* ── Auth check ─────────────────────────────────────── */
   React.useEffect(() => {
@@ -111,6 +112,7 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
         setIsAdmin(authorized);
         setIsHead(email ? isHeadAdmin(email) : false);
         setIsApproved(approved);
+        setUnreadReviews(getUnreadReviewCount());
       } catch (e) {
         console.error("Sidebar auth check error:", e);
       }
@@ -119,9 +121,11 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
     checkClearance();
 
     window.addEventListener("admin_auth_updated", checkClearance);
+    window.addEventListener("platform_reviews_updated", checkClearance);
     window.addEventListener("storage", checkClearance);
     return () => {
       window.removeEventListener("admin_auth_updated", checkClearance);
+      window.removeEventListener("platform_reviews_updated", checkClearance);
       window.removeEventListener("storage", checkClearance);
     };
   }, []);
@@ -245,6 +249,24 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
           >
             <IconAdmin size={20} />
             <span style={{ flex: 1 }}>{t.nav_admin || "Administrator"}</span>
+            {unreadReviews > 0 && (
+              <span
+                title={`${unreadReviews} unread user review${unreadReviews !== 1 ? "s" : ""}`}
+                style={{
+                  fontSize: "0.62rem",
+                  backgroundColor: "#ea580c",
+                  color: "#ffffff",
+                  padding: "2px 6px",
+                  borderRadius: "999px",
+                  fontWeight: "800",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "2px",
+                }}
+              >
+                ⭐ {unreadReviews}
+              </span>
+            )}
             <span style={{
               fontSize: "0.62rem",
               backgroundColor: isHead ? "#f59e0b" : "#6366f1",
