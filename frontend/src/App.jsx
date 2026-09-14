@@ -42,6 +42,7 @@ const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
 const NERTopographySuite = lazy(() => import("./pages/NERTopographySuite"));
 const WorldFirstInnovationsSuite = lazy(() => import("./pages/WorldFirstInnovationsSuite"));
+const HyperSpeedRescueSuite = lazy(() => import("./pages/HyperSpeedRescueSuite"));
 const ARSeeTheRisk = lazy(() => import("./pages/ARSeeTheRisk"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
@@ -141,6 +142,13 @@ export default function App() {
             <Route path="/citizen-vitals-triage" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/mudslide-fluid-dynamics" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/living-infrastructure-ledger" element={<Navigate to="/world-first-innovations" replace />} />
+            <Route path="/hyper-speed-rescue" element={<HyperSpeedRescueSuite />} />
+            <Route path="/future-rescue-tech" element={<Navigate to="/hyper-speed-rescue" replace />} />
+            <Route path="/drone-swarm-dispatch" element={<Navigate to="/hyper-speed-rescue" replace />} />
+            <Route path="/rescue-ar-hud" element={<Navigate to="/hyper-speed-rescue" replace />} />
+            <Route path="/acoustic-scream-triangulation" element={<Navigate to="/hyper-speed-rescue" replace />} />
+            <Route path="/leo-satellite-bridge" element={<Navigate to="/hyper-speed-rescue" replace />} />
+            <Route path="/pre-deployment-engine" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/ar-see-the-risk" element={<ARSeeTheRisk />} />
             <Route path="/ar-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
             <Route path="/see-the-risk" element={<Navigate to="/ar-see-the-risk" replace />} />

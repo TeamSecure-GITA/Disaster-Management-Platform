@@ -708,6 +708,37 @@ export function IconWorldFirst({ size = 22 }) {
   );
 }
 
+export function IconHyperSpeed({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(244,63,94,0.6))" }}>
+      {/* Dynamic Hexagon Spatial Frame */}
+      <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke="url(#hs-hex)" strokeWidth="1.2" strokeDasharray="3,1.5" opacity="0.8" />
+      
+      {/* Central Lightning Bolt */}
+      <path d="M13 3L6 13h5l-2 8 9-11h-5l3-7z" fill="url(#hs-bolt)" />
+      
+      {/* Quad Drone Rotor Cross-Beams */}
+      <circle cx="5.5" cy="5.5" r="2" stroke="#38bdf8" strokeWidth="1.2" />
+      <circle cx="18.5" cy="5.5" r="2" stroke="#38bdf8" strokeWidth="1.2" />
+      <circle cx="5.5" cy="18.5" r="2" stroke="#38bdf8" strokeWidth="1.2" />
+      <circle cx="18.5" cy="18.5" r="2" stroke="#38bdf8" strokeWidth="1.2" />
+
+      <defs>
+        <linearGradient id="hs-hex" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f43f5e" />
+          <stop offset="100%" stopColor="#8b5cf6" />
+        </linearGradient>
+        <linearGradient id="hs-bolt" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f43f5e" />
+          <stop offset="50%" stopColor="#fbbf24" />
+          <stop offset="100%" stopColor="#f97316" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
 
 
 

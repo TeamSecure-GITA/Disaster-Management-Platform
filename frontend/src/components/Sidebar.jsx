@@ -46,6 +46,7 @@ import {
   IconDelivery,
   IconNERSuite,
   IconWorldFirst,
+  IconHyperSpeed,
 } from "./NavigationIcons";
 
 const menuItems = [
@@ -53,6 +54,7 @@ const menuItems = [
   { key: "nav_ner_landslide",      fallback: "NER Landslide Monitor",  icon: IconLandslide,     path: "/ner-landslide-monitor" },
   { key: "nav_ner_topography",     fallback: "NER Topo Command Suite", icon: IconNERSuite,      path: "/ner-topography-suite" },
   { key: "nav_world_first",        fallback: "World-First Deep Tech",  icon: IconWorldFirst,    path: "/world-first-innovations" },
+  { key: "nav_hyper_speed",        fallback: "Hyper-Speed Rescue Suite", icon: IconHyperSpeed,   path: "/hyper-speed-rescue" },
   { key: "nav_ar_risk",            fallback: "AR See the Risk",        icon: IconAR,            path: "/ar-see-the-risk" },
   { key: "nav_alerts",             fallback: "Disaster Alerts",        icon: IconAlerts,        path: "/alerts" },
   { key: "nav_climate_chronicle",  fallback: "Climate Chronicle",      icon: IconClimate,       path: "/climate-chronicle" },
