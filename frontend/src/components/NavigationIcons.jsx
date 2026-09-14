@@ -459,3 +459,148 @@ export function IconAR({ size = 22 }) {
     </svg>
   );
 }
+
+export function IconDigitalTwin({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(168,85,247,0.5))" }}>
+      <rect x="2" y="13" width="20" height="9" rx="2" fill="url(#dt-ground)" />
+      <rect x="3"  y="8"  width="3" height="5" rx="0.8" fill="url(#dt-b1)" />
+      <rect x="7"  y="5"  width="3" height="8" rx="0.8" fill="url(#dt-b2)" />
+      <rect x="11" y="7"  width="3" height="6" rx="0.8" fill="url(#dt-b3)" />
+      <rect x="15" y="4"  width="3" height="9" rx="0.8" fill="url(#dt-b2)" />
+      <rect x="19" y="9"  width="2" height="4" rx="0.8" fill="url(#dt-b1)" />
+      <line x1="2" y1="10" x2="22" y2="10" stroke="#a855f7" strokeWidth="1.5" strokeDasharray="2 1.5" opacity="0.85" />
+      <circle cx="4.5"  cy="8"  r="1" fill="#e879f9" />
+      <circle cx="8.5"  cy="5"  r="1" fill="#c084fc" />
+      <circle cx="12.5" cy="7"  r="1" fill="#a855f7" />
+      <circle cx="16.5" cy="4"  r="1" fill="#c084fc" />
+      <defs>
+        <linearGradient id="dt-ground" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#1e1b4b"/><stop offset="100%" stopColor="#0f172a"/></linearGradient>
+        <linearGradient id="dt-b1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#7c3aed"/><stop offset="100%" stopColor="#4c1d95"/></linearGradient>
+        <linearGradient id="dt-b2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#a855f7"/><stop offset="100%" stopColor="#7c3aed"/></linearGradient>
+        <linearGradient id="dt-b3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#c084fc"/><stop offset="100%" stopColor="#9333ea"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconVulnerability({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(251,146,60,0.5))" }}>
+      <path d="M12 2L3 6.5v5.5C3 17.6 7 21.5 12 22c5-0.5 9-4.4 9-10V6.5L12 2z" fill="url(#vuln-shield)" />
+      <path d="M11 7l1 3-2 1 3 5" stroke="#fef08a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M14 9l-1.5 2.5" stroke="#fed7aa" strokeWidth="1.1" strokeLinecap="round" opacity="0.7" />
+      <circle cx="12" cy="13" r="4.5" fill="url(#vuln-warn)" opacity="0.9" />
+      <path d="M12 10.5v2.2" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="14.5" r="0.6" fill="#ffffff" />
+      <defs>
+        <linearGradient id="vuln-shield" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ea580c"/><stop offset="100%" stopColor="#7c2d12"/></linearGradient>
+        <linearGradient id="vuln-warn" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#f97316"/><stop offset="100%" stopColor="#c2410c"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconSensory({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(52,211,153,0.5))" }}>
+      <path d="M10 4.5C10 3.4 10.9 2.5 12 2.5s2 .9 2 2" stroke="#34d399" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M6 10C6 7.2 8.7 5 12 5s6 2.2 6 5v3l1.5 2.5H4.5L6 13v-3z" fill="url(#sens-bell)" />
+      <path d="M10 18.5a2 2 0 004 0" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M2.5 8.5C2 10 2 12 2.5 13.5" stroke="#22d3ee" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+      <path d="M21.5 8.5C22 10 22 12 21.5 13.5" stroke="#22d3ee" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+      <circle cx="12" cy="11" r="1.8" fill="#34d399" opacity="0.95" />
+      <defs>
+        <linearGradient id="sens-bell" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#059669"/><stop offset="100%" stopColor="#064e3b"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
+export function IconSafeZone({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(34,197,94,0.5))" }}>
+      <path d="M12 2L4 6v6c0 5.5 3.5 10.7 8 12 4.5-1.3 8-6.5 8-12V6L12 2z" fill="url(#sz-shield)" />
+      <path d="M9 12l2 2 4-4" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="8" y="17" width="8" height="2.5" rx="1" fill="#bbf7d0" opacity="0.7" />
+      <rect x="9.5" y="17" width="2.5" height="2.5" rx="0.5" fill="#22c55e" opacity="0.9" />
+      <defs>
+        <linearGradient id="sz-shield" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#16a34a"/><stop offset="100%" stopColor="#064e3b"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconDynRoute({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(251,191,36,0.5))" }}>
+      <circle cx="5" cy="19" r="2.5" fill="url(#dr-start)" />
+      <circle cx="19" cy="5" r="2.5" fill="url(#dr-end)" />
+      <path d="M5 19C5 14 8 11 12 10s7-2 7-5" stroke="url(#dr-line1)" strokeWidth="2" strokeLinecap="round" strokeDasharray="3 2" />
+      <path d="M5 19C7 16 9 14 13 13s5-5 6-8" stroke="url(#dr-line2)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" strokeDasharray="2 2" />
+      <polygon points="16,3 22,3 22,9" fill="#fbbf24" opacity="0.8" />
+      <defs>
+        <linearGradient id="dr-start" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ef4444"/><stop offset="100%" stopColor="#b91c1c"/></linearGradient>
+        <linearGradient id="dr-end" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#22c55e"/><stop offset="100%" stopColor="#15803d"/></linearGradient>
+        <linearGradient id="dr-line1" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stopColor="#ef4444"/><stop offset="100%" stopColor="#fbbf24"/></linearGradient>
+        <linearGradient id="dr-line2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stopColor="#f97316"/><stop offset="100%" stopColor="#fbbf24"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconMicroTask({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(251,146,60,0.5))" }}>
+      <rect x="3" y="3" width="18" height="18" rx="3" fill="url(#mt-board)" />
+      <rect x="6" y="7" width="5" height="3" rx="1" fill="#fde68a" />
+      <rect x="13" y="7" width="5" height="3" rx="1" fill="#86efac" />
+      <rect x="6" y="12" width="5" height="3" rx="1" fill="#93c5fd" />
+      <rect x="13" y="12" width="5" height="3" rx="1" fill="#f9a8d4" />
+      <circle cx="19" cy="5" r="3" fill="#ef4444" />
+      <text x="19" y="6.5" textAnchor="middle" fill="#fff" fontSize="4" fontWeight="bold">3</text>
+      <defs>
+        <linearGradient id="mt-board" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#1e293b"/><stop offset="100%" stopColor="#0f172a"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconAidLedger({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(251,191,36,0.5))" }}>
+      <rect x="3" y="4" width="18" height="16" rx="2.5" fill="url(#al-bg)" />
+      <circle cx="8" cy="9" r="2" fill="#fbbf24" />
+      <circle cx="8" cy="15" r="2" fill="#34d399" />
+      <rect x="12" y="8" width="7" height="1.5" rx="0.75" fill="#e2e8f0" opacity="0.7" />
+      <rect x="12" y="10" width="5" height="1.5" rx="0.75" fill="#e2e8f0" opacity="0.4" />
+      <rect x="12" y="14" width="7" height="1.5" rx="0.75" fill="#e2e8f0" opacity="0.7" />
+      <rect x="12" y="16" width="4" height="1.5" rx="0.75" fill="#e2e8f0" opacity="0.4" />
+      <path d="M6.5 9h3M6.5 15h3" stroke="#fff" strokeWidth="0.8" opacity="0.5" />
+      <defs>
+        <linearGradient id="al-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#082f49"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconReconstruct({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(96,165,250,0.5))" }}>
+      <rect x="2" y="14" width="20" height="8" rx="1.5" fill="url(#rc-ground)" />
+      <rect x="5" y="8" width="6" height="6" rx="1" fill="url(#rc-bld1)" />
+      <rect x="13" y="10" width="6" height="4" rx="1" fill="url(#rc-bld2)" opacity="0.6" />
+      <rect x="13" y="6" width="3" height="8" rx="0.8" fill="url(#rc-bld3)" />
+      <path d="M8 4l-2 4h4l-2-4z" fill="#fbbf24" />
+      <line x1="8" y1="2" x2="8" y2="4" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="5" y="12" width="6" height="2" rx="0.5" fill="#34d399" opacity="0.9" />
+      <defs>
+        <linearGradient id="rc-ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#374151"/><stop offset="100%" stopColor="#1f2937"/></linearGradient>
+        <linearGradient id="rc-bld1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#60a5fa"/><stop offset="100%" stopColor="#2563eb"/></linearGradient>
+        <linearGradient id="rc-bld2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#94a3b8"/><stop offset="100%" stopColor="#475569"/></linearGradient>
+        <linearGradient id="rc-bld3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#38bdf8"/><stop offset="100%" stopColor="#0284c7"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}

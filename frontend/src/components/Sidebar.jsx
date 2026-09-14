@@ -33,6 +33,14 @@ import {
   IconFaq,
   IconMesh,
   IconAR,
+  IconDigitalTwin,
+  IconVulnerability,
+  IconSensory,
+  IconSafeZone,
+  IconDynRoute,
+  IconMicroTask,
+  IconAidLedger,
+  IconReconstruct,
 } from "./NavigationIcons";
 
 const menuItems = [
@@ -300,6 +308,107 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
             Platform Reviews
           </span>
         </NavLink>
+
+        {/* ────────── BEFORE THE DISASTER ───────── */}
+        <div style={{
+          fontSize: "0.6rem", fontWeight: "800", color: "#6366f1",
+          textTransform: "uppercase", letterSpacing: "0.1em",
+          padding: "10px 10px 4px", marginTop: "6px",
+          borderTop: "1px solid rgba(99,102,241,0.2)",
+          display: "flex", alignItems: "center", gap: "6px",
+        }}>
+          <span>&#128302;</span> Before the Disaster
+        </div>
+        {[
+          { icon: IconDigitalTwin, path: "/digital-twin",      label: "Digital Twin Sim" },
+          { icon: IconVulnerability,path: "/vulnerability-map", label: "Vulnerability Map" },
+          { icon: IconSensory,     path: "/smart-alerts",      label: "Smart Alerts" },
+        ].map(item => (
+          <NavLink key={item.path} to={item.path} onClick={handleNavClick}
+            style={({ isActive }) => ({
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
+              fontSize: "0.83rem",
+              color: isActive ? "#ffffff" : "#a5b4fc",
+              backgroundColor: isActive ? "#4338ca" : "transparent",
+              fontWeight: isActive ? "700" : "500",
+              boxShadow: isActive ? "0 3px 12px rgba(99,102,241,0.4)" : "none",
+              transition: "all 0.13s",
+            })}
+            onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(99,102,241,0.15)"; }}
+            onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
+          >
+            <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+          </NavLink>
+        ))}
+
+        {/* ────────── DURING THE DISASTER ───────── */}
+        <div style={{
+          fontSize: "0.6rem", fontWeight: "800", color: "#0ea5e9",
+          textTransform: "uppercase", letterSpacing: "0.1em",
+          padding: "10px 10px 4px", marginTop: "6px",
+          borderTop: "1px solid rgba(14,165,233,0.2)",
+          display: "flex", alignItems: "center", gap: "6px",
+        }}>
+          <span>&#127758;</span> During the Disaster
+        </div>
+        {[
+          { icon: IconSafeZone,  path: "/safe-zones",         label: "Safe Zone Tracker" },
+          { icon: IconDynRoute,  path: "/dynamic-evacuation", label: "AI Evacuation Router" },
+        ].map(item => (
+          <NavLink key={item.path} to={item.path} onClick={handleNavClick}
+            style={({ isActive }) => ({
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
+              fontSize: "0.83rem",
+              color: isActive ? "#ffffff" : "#7dd3fc",
+              backgroundColor: isActive ? "#0369a1" : "transparent",
+              fontWeight: isActive ? "700" : "500",
+              boxShadow: isActive ? "0 3px 12px rgba(14,165,233,0.4)" : "none",
+              transition: "all 0.13s",
+            })}
+            onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(14,165,233,0.12)"; }}
+            onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
+          >
+            <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+          </NavLink>
+        ))}
+
+        {/* ────────── AFTER THE DISASTER ────────── */}
+        <div style={{
+          fontSize: "0.6rem", fontWeight: "800", color: "#10b981",
+          textTransform: "uppercase", letterSpacing: "0.1em",
+          padding: "10px 10px 4px", marginTop: "6px",
+          borderTop: "1px solid rgba(16,185,129,0.2)",
+          display: "flex", alignItems: "center", gap: "6px",
+        }}>
+          <span>&#129309;</span> After the Disaster
+        </div>
+        {[
+          { icon: IconMicroTask,   path: "/volunteer-tasks", label: "Volunteer Tasks" },
+          { icon: IconAidLedger,   path: "/aid-ledger",      label: "Aid Ledger" },
+          { icon: IconReconstruct, path: "/reconstruction",  label: "Reconstruction" },
+        ].map(item => (
+          <NavLink key={item.path} to={item.path} onClick={handleNavClick}
+            style={({ isActive }) => ({
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
+              fontSize: "0.83rem",
+              color: isActive ? "#ffffff" : "#6ee7b7",
+              backgroundColor: isActive ? "#065f46" : "transparent",
+              fontWeight: isActive ? "700" : "500",
+              boxShadow: isActive ? "0 3px 12px rgba(16,185,129,0.4)" : "none",
+              transition: "all 0.13s",
+            })}
+            onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(16,185,129,0.12)"; }}
+            onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
+          >
+            <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+          </NavLink>
+        ))}
       </div>
 
       {/* ── Footer / Status ─────────────────────── */}

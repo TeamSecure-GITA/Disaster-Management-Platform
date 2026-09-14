@@ -45,6 +45,15 @@ const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const UserReview = lazy(() => import("./pages/UserReview"));
 const MeshConsole = lazy(() => import("./pages/MeshConsole"));
+// ── New Hyper-Platform Features ─────────────────────────────────────────
+const DigitalTwinSimulation    = lazy(() => import("./pages/DigitalTwinSimulation"));
+const VulnerabilityMap         = lazy(() => import("./pages/VulnerabilityMap"));
+const SmartAlerts              = lazy(() => import("./pages/SmartAlerts"));
+const SafeZoneTracker          = lazy(() => import("./pages/SafeZoneTracker"));
+const DynamicEvacuationRouter  = lazy(() => import("./pages/DynamicEvacuationRouter"));
+const MicroTasking             = lazy(() => import("./pages/MicroTasking"));
+const AidLedger                = lazy(() => import("./pages/AidLedger"));
+const ReconstructionMap        = lazy(() => import("./pages/ReconstructionMap"));
 
 function Loading() {
   return (
@@ -154,6 +163,20 @@ export default function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/reviews" element={<UserReview />} />
             <Route path="/mesh-console" element={<MeshConsole />} />
+
+            {/* ── Before the Disaster ───────────────────────────── */}
+            <Route path="/digital-twin"       element={<DigitalTwinSimulation />} />
+            <Route path="/vulnerability-map"  element={<VulnerabilityMap />} />
+            <Route path="/smart-alerts"       element={<SmartAlerts />} />
+
+            {/* ── During the Disaster ───────────────────────────── */}
+            <Route path="/safe-zones"         element={<SafeZoneTracker />} />
+            <Route path="/dynamic-evacuation" element={<DynamicEvacuationRouter />} />
+
+            {/* ── After the Disaster ────────────────────────────── */}
+            <Route path="/volunteer-tasks"    element={<MicroTasking />} />
+            <Route path="/aid-ledger"         element={<AidLedger />} />
+            <Route path="/reconstruction"     element={<ReconstructionMap />} />
 
           </Route>
 
