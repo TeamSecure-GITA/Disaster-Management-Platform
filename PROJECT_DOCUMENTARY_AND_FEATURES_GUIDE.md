@@ -492,6 +492,31 @@ npm run dev
 * **Low-Bandwidth 2G Emergency Mode:** `http://localhost:5173/low-bandwidth`
 * **Anti-Herd Dynamic Evacuation Router:** `http://localhost:5173/dynamic-evacuation`
 
+* **Platform User Reviews & Feedback:** `http://localhost:5173/reviews`
+* **Administrator Command Hub & Review Management:** `http://localhost:5173/administrator`
+
+---
+
+## 🌟 Permanent User Review & Administrator Audit System
+
+### 1. Architectural Design & Zero Data Loss Guarantee
+Standard feedback systems store reviews either exclusively in local browser caches (lost when cache clears or not visible to other machines) or fail completely if MongoDB is temporarily unavailable. 
+Our platform implements a **Dual-Layer Permanent Persistence Architecture**:
+1. **Backend Mongo + Disk Fallback (`/api/reviews`)**:
+   - Every review submitted by any citizen or responder is dispatched to `POST /api/reviews`.
+   - The backend validates the submission and writes it simultaneously to **MongoDB** (`Review` collection) and the server's **permanent disk backup** (`Backend/data/reviews.json`).
+   - Even if the database connection restarts or is offline, the review is preserved permanently on disk and automatically re-synced upon reconnection.
+2. **Permanent Storage Guarantee**:
+   - A submitted review can **NEVER be lost, overwritten, or automatically expired**.
+   - It remains permanently stored in the platform until an authorized **Administrator explicitly deletes it** via `DELETE /api/reviews/:id`.
+3. **Administrator Menu Integration (`/administrator` -> ⭐ User Reviews)**:
+   - All reviews across all devices and citizens are displayed centrally in the **Administrator Command Hub**.
+   - Displays average rating score, star rating breakdown distribution (5★ to 1★), category tags, author name, timestamp, and review message.
+   - Highlights new unread reviews with pulsating notification badges in both the Administrator Hub and the global Sidebar navigation.
+   - **One-Click Read Actions**: `✓ Mark Read` and `✓ Mark All as Read` to manage incoming citizen feedback.
+   - **Permanent Deletion Control**: Authorized Administrators can permanently delete invalid, resolved, or abusive reviews with a confirmation prompt, updating MongoDB, disk backup, and frontend state synchronously.
+
 ---
 
 *Authored by the Disaster Management Engineering Team | Built for Resilience Under Catastrophe.*
+
