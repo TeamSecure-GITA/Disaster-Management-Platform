@@ -7,6 +7,9 @@ import {
   getAuthorizedAdmins,
   grantAdminPermission,
   revokeAdminPermission,
+  getApprovedMembers,
+  grantMemberApproval,
+  revokeMemberApproval,
   getLoginAuditLogs,
   getLoginAnalytics,
   getPermissionRequests,
@@ -28,14 +31,21 @@ export default function AdministratorHub() {
   // Data states
   const [analytics, setAnalytics] = useState(getLoginAnalytics());
   const [authorizedAdmins, setAuthorizedAdmins] = useState(getAuthorizedAdmins());
+  const [approvedMembers, setApprovedMembers] = useState(getApprovedMembers());
   const [auditLogs, setAuditLogs] = useState(getLoginAuditLogs());
   const [requests, setRequests] = useState(getPermissionRequests());
   const [reviews, setReviews] = useState(getUserReviews());
   const [unreadReviews, setUnreadReviews] = useState(getUnreadReviewCount());
 
-  // Add member form state
+  // Add admin form state
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminRole, setNewAdminRole] = useState("Regional Administrator");
+
+  // Add approved member form state
+  const [newMemberEmail, setNewMemberEmail] = useState("");
+  const [newMemberRole, setNewMemberRole] = useState("Field Responder");
+  const [newMemberSector, setNewMemberSector] = useState("North East Regional Command");
+
   const [actionNotice, setActionNotice] = useState("");
 
   useEffect(() => {
@@ -55,6 +65,7 @@ export default function AdministratorHub() {
   const refreshData = () => {
     setAnalytics(getLoginAnalytics());
     setAuthorizedAdmins(getAuthorizedAdmins());
+    setApprovedMembers(getApprovedMembers());
     setAuditLogs(getLoginAuditLogs());
     setRequests(getPermissionRequests());
     setReviews(getUserReviews());
@@ -94,6 +105,35 @@ export default function AdministratorHub() {
   const handleRevokePermission = (emailToRevoke) => {
     if (window.confirm(`Are you sure you want to revoke Administrator access for ${emailToRevoke}?`)) {
       const res = revokeAdminPermission(emailToRevoke);
+      setActionNotice(res.message);
+      refreshData();
+    }
+  };
+
+  const handleGrantMemberClearance = (e) => {
+    e.preventDefault();
+    if (!newMemberEmail || !newMemberEmail.includes("@")) {
+      setActionNotice("⚠️ Please enter a valid member email address.");
+      return;
+    }
+    const res = grantMemberApproval(
+      newMemberEmail.trim(),
+      newMemberRole,
+      currentUser?.name || "Administrator",
+      newMemberSector
+    );
+    if (res.success) {
+      setActionNotice(`✅ Success: Approved member clearance granted to ${newMemberEmail}. They can now view and access all tactical disaster suites.`);
+      setNewMemberEmail("");
+      refreshData();
+    } else {
+      setActionNotice(`⚠️ ${res.message}`);
+    }
+  };
+
+  const handleRevokeMemberClearance = (emailToRevoke) => {
+    if (window.confirm(`Are you sure you want to revoke operational clearance for ${emailToRevoke}?`)) {
+      const res = revokeMemberApproval(emailToRevoke);
       setActionNotice(res.message);
       refreshData();
     }
@@ -597,6 +637,166 @@ export default function AdministratorHub() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* ── SECTION 2: APPROVED OPERATIONAL MEMBERS ── */}
+          <div style={{ backgroundColor: "rgba(15, 23, 42, 0.85)", borderRadius: "14px", border: "1px solid #0284c7", padding: "20px" }}>
+            <h3 style={{ margin: "0 0 8px 0", fontSize: "1.15rem", fontWeight: "700", color: "#38bdf8", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span>🛡️</span> Grant Operational Member Clearance
+            </h3>
+            <p style={{ color: "#94a3b8", fontSize: "0.82rem", margin: "0 0 16px 0", lineHeight: "1.5" }}>
+              Approve field responders, geologists, and relief coordinators to unlock restricted features (Digital Twin, Drone Analytics, Zero-Net Mesh, Aid Ledger, and Deep Tech Suites).
+            </p>
+
+            <form onSubmit={handleGrantMemberClearance}>
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px" }}>
+                  Member Email Address
+                </label>
+                <input
+                  type="email"
+                  placeholder="e.g. geologist.sikkim@gsi.gov.in"
+                  value={newMemberEmail}
+                  onChange={(e) => setNewMemberEmail(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "16px" }}>
+                <div>
+                  <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px" }}>
+                    Operational Role
+                  </label>
+                  <select
+                    value={newMemberRole}
+                    onChange={(e) => setNewMemberRole(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      backgroundColor: "#0f172a",
+                      border: "1px solid #334155",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "0.85rem",
+                      boxSizing: "border-box"
+                    }}
+                  >
+                    <option value="Field Responder">Field Responder</option>
+                    <option value="Geotechnical Analyst">Geotechnical Analyst</option>
+                    <option value="UAV Drone Pilot">UAV Drone Pilot</option>
+                    <option value="Relief Logistics Officer">Relief Logistics Officer</option>
+                    <option value="Community Volunteer Lead">Community Volunteer Lead</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px" }}>
+                    Sector
+                  </label>
+                  <input
+                    type="text"
+                    value={newMemberSector}
+                    onChange={(e) => setNewMemberSector(e.target.value)}
+                    placeholder="Sikkim / Brahmaputra"
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      backgroundColor: "#0f172a",
+                      border: "1px solid #334155",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "0.85rem",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  background: "linear-gradient(135deg, #0284c7, #0369a1)",
+                  color: "#fff",
+                  fontWeight: "700",
+                  fontSize: "0.9rem",
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(2, 132, 199, 0.4)"
+                }}
+              >
+                🛡️ Grant Member Clearance →
+              </button>
+            </form>
+          </div>
+
+          {/* List of Approved Operational Members */}
+          <div style={{ backgroundColor: "rgba(15, 23, 42, 0.85)", borderRadius: "14px", border: "1px solid #334155", padding: "20px" }}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.15rem", fontWeight: "700", color: "#a5b4fc", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span>📋</span> Approved Operational Members ({approvedMembers.length})
+            </h3>
+            <p style={{ color: "#94a3b8", fontSize: "0.8rem", margin: "0 0 14px 0" }}>
+              Members who possess verified clearance to view Before/During/After disaster features.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {approvedMembers.map((member) => (
+                <div
+                  key={member.email}
+                  style={{
+                    backgroundColor: "rgba(30, 41, 59, 0.6)",
+                    border: "1px solid #334155",
+                    borderRadius: "10px",
+                    padding: "12px 14px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "10px"
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <strong style={{ fontSize: "0.92rem", color: "#f8fafc" }}>{member.name || member.email.split("@")[0]}</strong>
+                      <span style={{ backgroundColor: "rgba(34, 197, 94, 0.2)", color: "#4ade80", padding: "2px 6px", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "700" }}>
+                        APPROVED
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "0.78rem", color: "#38bdf8", marginTop: "2px" }}>{member.email}</div>
+                    <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "2px" }}>
+                      Role: <strong>{member.roleTitle}</strong> · Sector: <strong>{member.sector || "General"}</strong>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleRevokeMemberClearance(member.email)}
+                    style={{
+                      backgroundColor: "rgba(239, 68, 68, 0.2)",
+                      color: "#fca5a5",
+                      border: "1px solid rgba(239, 68, 68, 0.4)",
+                      padding: "6px 10px",
+                      borderRadius: "6px",
+                      fontSize: "0.75rem",
+                      fontWeight: "600",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Revoke
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
 

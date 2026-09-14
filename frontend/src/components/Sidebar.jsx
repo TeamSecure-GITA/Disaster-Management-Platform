@@ -7,7 +7,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import logoImg from "../assets/logo.png";
-import { isAuthorizedAdmin, isHeadAdmin } from "../utils/adminAuth";
+import { isAuthorizedAdmin, isHeadAdmin, isApprovedMember } from "../utils/adminAuth";
 import { useLanguage } from "../i18n/LanguageContext";
 import {
   IconDashboard,
@@ -51,15 +51,10 @@ import {
   IconExtremeResilience,
 } from "./NavigationIcons";
 
-const menuItems = [
+// ── Public Citizen Navigation Items ──────────────────────────────────────────
+const publicMenuItems = [
   { key: "nav_dashboard",          fallback: "Dashboard",              icon: IconDashboard,     path: "/" },
   { key: "nav_ner_landslide",      fallback: "NER Landslide Monitor",  icon: IconLandslide,     path: "/ner-landslide-monitor" },
-  { key: "nav_ner_topography",     fallback: "NER Topo Command Suite", icon: IconNERSuite,      path: "/ner-topography-suite" },
-  { key: "nav_world_first",        fallback: "World-First Deep Tech",  icon: IconWorldFirst,    path: "/world-first-innovations" },
-  { key: "nav_hyper_speed",        fallback: "Hyper-Speed Rescue Suite", icon: IconHyperSpeed,   path: "/hyper-speed-rescue" },
-  { key: "nav_decentralized",      fallback: "Decentralized Resilience", icon: IconDecentralized, path: "/decentralized-resilience" },
-  { key: "nav_extreme_resilience",  fallback: "Extreme Resilience Grid", icon: IconExtremeResilience, path: "/extreme-resilience" },
-  { key: "nav_ar_risk",            fallback: "AR See the Risk",        icon: IconAR,            path: "/ar-see-the-risk" },
   { key: "nav_alerts",             fallback: "Disaster Alerts",        icon: IconAlerts,        path: "/alerts" },
   { key: "nav_climate_chronicle",  fallback: "Climate Chronicle",      icon: IconClimate,       path: "/climate-chronicle" },
   { key: "nav_map",                fallback: "Disaster Response Map",  icon: IconMap,           path: "/map" },
@@ -81,31 +76,54 @@ const menuItems = [
   { key: "nav_faq",                fallback: "FAQ",                    icon: IconFaq,           path: "/faq" },
 ];
 
+// ── Tactical Deep-Tech Command Suites — Restricted to Admin & Approved Members
+const tacticalMenuItems = [
+  { key: "nav_ner_topography",     fallback: "NER Topo Command Suite", icon: IconNERSuite,      path: "/ner-topography-suite" },
+  { key: "nav_world_first",        fallback: "World-First Deep Tech",  icon: IconWorldFirst,    path: "/world-first-innovations" },
+  { key: "nav_hyper_speed",        fallback: "Hyper-Speed Rescue Suite", icon: IconHyperSpeed,   path: "/hyper-speed-rescue" },
+  { key: "nav_decentralized",      fallback: "Decentralized Resilience", icon: IconDecentralized, path: "/decentralized-resilience" },
+  { key: "nav_extreme_resilience",  fallback: "Extreme Resilience Grid", icon: IconExtremeResilience, path: "/extreme-resilience" },
+  { key: "nav_ar_risk",            fallback: "AR See the Risk",        icon: IconAR,            path: "/ar-see-the-risk" },
+];
+
 function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
   const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [isHead, setIsHead]   = React.useState(false);
+  const [isApproved, setIsApproved] = React.useState(false);
 
   /* ── Auth check ─────────────────────────────────────── */
   React.useEffect(() => {
-    try {
-      const rawUser    = localStorage.getItem("user");
-      const rawSession = localStorage.getItem("user_session");
-      const rawProfile = localStorage.getItem("user_profile_data_v2");
-      let email = "", role = "";
+    const checkClearance = () => {
+      try {
+        const rawUser    = localStorage.getItem("user");
+        const rawSession = localStorage.getItem("user_session");
+        const rawProfile = localStorage.getItem("user_profile_data_v2");
+        let email = "", role = "";
 
-      if (rawUser)    { try { const p = JSON.parse(rawUser);    email = p?.email || ""; role = p?.role || ""; } catch {} }
-      if (!email && rawSession) { try { const p = JSON.parse(rawSession); email = p?.email || ""; role = p?.role || ""; } catch {} }
-      if (!email && rawProfile) { try { const p = JSON.parse(rawProfile); email = p?.email || ""; role = p?.role || ""; } catch {} }
+        if (rawUser)    { try { const p = JSON.parse(rawUser);    email = p?.email || ""; role = p?.role || ""; } catch {} }
+        if (!email && rawSession) { try { const p = JSON.parse(rawSession); email = p?.email || ""; role = p?.role || ""; } catch {} }
+        if (!email && rawProfile) { try { const p = JSON.parse(rawProfile); email = p?.email || ""; role = p?.role || ""; } catch {} }
 
-      if (email) {
-        const authorized = isAuthorizedAdmin(email) || role === "admin";
+        const authorized = (email && isAuthorizedAdmin(email)) || role === "admin";
+        const approved = authorized || (email && isApprovedMember(email));
+
         setIsAdmin(authorized);
-        setIsHead(isHeadAdmin(email));
+        setIsHead(email ? isHeadAdmin(email) : false);
+        setIsApproved(approved);
+      } catch (e) {
+        console.error("Sidebar auth check error:", e);
       }
-    } catch (e) {
-      console.error("Sidebar auth check error:", e);
-    }
+    };
+
+    checkClearance();
+
+    window.addEventListener("admin_auth_updated", checkClearance);
+    window.addEventListener("storage", checkClearance);
+    return () => {
+      window.removeEventListener("admin_auth_updated", checkClearance);
+      window.removeEventListener("storage", checkClearance);
+    };
   }, []);
 
   const handleNavClick = () => {
@@ -252,7 +270,7 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
         }}>
           {t.nav_header || "Navigation"}
         </div>
-        {menuItems.map((item) => (
+        {publicMenuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -294,7 +312,7 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
           </NavLink>
         ))}
 
-        {/* Platform Reviews — last item, after FAQ */}
+        {/* Platform Reviews — public community feedback */}
         <NavLink
           to="/reviews"
           onClick={handleNavClick}
@@ -322,109 +340,197 @@ function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
           </span>
         </NavLink>
 
-        {/* ────────── BEFORE THE DISASTER ───────── */}
-        <div style={{
-          fontSize: "0.6rem", fontWeight: "800", color: "#6366f1",
-          textTransform: "uppercase", letterSpacing: "0.1em",
-          padding: "10px 10px 4px", marginTop: "6px",
-          borderTop: "1px solid rgba(99,102,241,0.2)",
-          display: "flex", alignItems: "center", gap: "6px",
-        }}>
-          <span>&#128302;</span> Before the Disaster
-        </div>
-        {[
-          { icon: IconDigitalTwin, path: "/digital-twin",      label: "Digital Twin Sim" },
-          { icon: IconVulnerability,path: "/vulnerability-map", label: "Vulnerability Map" },
-          { icon: IconSensory,     path: "/smart-alerts",      label: "Smart Alerts" },
-        ].map(item => (
-          <NavLink key={item.path} to={item.path} onClick={handleNavClick}
-            style={({ isActive }) => ({
-              display: "flex", alignItems: "center", gap: "12px",
-              padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
-              fontSize: "0.83rem",
-              color: isActive ? "#ffffff" : "#a5b4fc",
-              backgroundColor: isActive ? "#4338ca" : "transparent",
-              fontWeight: isActive ? "700" : "500",
-              boxShadow: isActive ? "0 3px 12px rgba(99,102,241,0.4)" : "none",
-              transition: "all 0.13s",
-            })}
-            onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(99,102,241,0.15)"; }}
-            onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
-          >
-            <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
-          </NavLink>
-        ))}
+        {/* ── RESTRICTED TACTICAL SECTIONS (ADMIN & APPROVED MEMBERS ONLY) ── */}
+        {isApproved ? (
+          <>
+            {/* ────────── TACTICAL COMMAND SUITES ───────── */}
+            <div style={{
+              fontSize: "0.6rem", fontWeight: "800", color: "#f59e0b",
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              padding: "10px 10px 4px", marginTop: "8px",
+              borderTop: "1px solid rgba(245,158,11,0.25)",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}>
+              <span>⚡</span> Tactical Command Suites
+            </div>
+            {tacticalMenuItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={handleNavClick}
+                style={({ isActive }) => ({
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  padding: "9px 12px",
+                  borderRadius: "8px",
+                  textDecoration: "none",
+                  fontSize: "0.85rem",
+                  color: isActive ? "#ffffff" : "#fde68a",
+                  backgroundColor: isActive ? "#b45309" : "rgba(245,158,11,0.06)",
+                  border: `1px solid ${isActive ? "#f59e0b" : "rgba(245,158,11,0.18)"}`,
+                  fontWeight: isActive ? "700" : "500",
+                  boxShadow: isActive ? "0 3px 12px rgba(245,158,11,0.4)" : "none",
+                  transition: "all 0.13s",
+                  marginBottom: "2px",
+                })}
+                onMouseEnter={e => {
+                  if (!e.currentTarget.classList.contains("active"))
+                    e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.15)";
+                }}
+                onMouseLeave={e => {
+                  if (!e.currentTarget.classList.contains("active"))
+                    e.currentTarget.style.backgroundColor = "rgba(245,158,11,0.06)";
+                }}
+              >
+                <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <item.icon size={20} />
+                </span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {t[item.key] || item.fallback}
+                </span>
+              </NavLink>
+            ))}
 
-        {/* ────────── DURING THE DISASTER ───────── */}
-        <div style={{
-          fontSize: "0.6rem", fontWeight: "800", color: "#0ea5e9",
-          textTransform: "uppercase", letterSpacing: "0.1em",
-          padding: "10px 10px 4px", marginTop: "6px",
-          borderTop: "1px solid rgba(14,165,233,0.2)",
-          display: "flex", alignItems: "center", gap: "6px",
-        }}>
-          <span>&#127758;</span> During the Disaster
-        </div>
-        {[
-          { icon: IconZeroInternet, path: "/zero-internet-mesh", label: "Zero-Internet Mesh" },
-          { icon: IconDrone,        path: "/drone-analytics",    label: "Live Drone Analytics" },
-          { icon: IconDelivery,     path: "/relief-tracker",     label: "Live Relief Tracker" },
-          { icon: IconSafeZone,     path: "/safe-zones",         label: "Safe Zone Tracker" },
-          { icon: IconDynRoute,     path: "/dynamic-evacuation", label: "AI Evacuation Router" },
-        ].map(item => (
-          <NavLink key={item.path} to={item.path} onClick={handleNavClick}
-            style={({ isActive }) => ({
-              display: "flex", alignItems: "center", gap: "12px",
-              padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
-              fontSize: "0.83rem",
-              color: isActive ? "#ffffff" : "#7dd3fc",
-              backgroundColor: isActive ? "#0369a1" : "transparent",
-              fontWeight: isActive ? "700" : "500",
-              boxShadow: isActive ? "0 3px 12px rgba(14,165,233,0.4)" : "none",
-              transition: "all 0.13s",
-            })}
-            onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(14,165,233,0.12)"; }}
-            onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
-          >
-            <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
-          </NavLink>
-        ))}
+            {/* ────────── BEFORE THE DISASTER ───────── */}
+            <div style={{
+              fontSize: "0.6rem", fontWeight: "800", color: "#6366f1",
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              padding: "10px 10px 4px", marginTop: "8px",
+              borderTop: "1px solid rgba(99,102,241,0.2)",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}>
+              <span>&#128302;</span> Before the Disaster
+            </div>
+            {[
+              { icon: IconDigitalTwin, path: "/digital-twin",      label: "Digital Twin Sim" },
+              { icon: IconVulnerability,path: "/vulnerability-map", label: "Vulnerability Map" },
+              { icon: IconSensory,     path: "/smart-alerts",      label: "Smart Alerts" },
+            ].map(item => (
+              <NavLink key={item.path} to={item.path} onClick={handleNavClick}
+                style={({ isActive }) => ({
+                  display: "flex", alignItems: "center", gap: "12px",
+                  padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
+                  fontSize: "0.83rem",
+                  color: isActive ? "#ffffff" : "#a5b4fc",
+                  backgroundColor: isActive ? "#4338ca" : "transparent",
+                  fontWeight: isActive ? "700" : "500",
+                  boxShadow: isActive ? "0 3px 12px rgba(99,102,241,0.4)" : "none",
+                  transition: "all 0.13s",
+                })}
+                onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(99,102,241,0.15)"; }}
+                onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
+              >
+                <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+              </NavLink>
+            ))}
 
-        {/* ────────── AFTER THE DISASTER ────────── */}
-        <div style={{
-          fontSize: "0.6rem", fontWeight: "800", color: "#10b981",
-          textTransform: "uppercase", letterSpacing: "0.1em",
-          padding: "10px 10px 4px", marginTop: "6px",
-          borderTop: "1px solid rgba(16,185,129,0.2)",
-          display: "flex", alignItems: "center", gap: "6px",
-        }}>
-          <span>&#129309;</span> After the Disaster
-        </div>
-        {[
-          { icon: IconMicroTask,   path: "/volunteer-tasks", label: "Volunteer Tasks" },
-          { icon: IconAidLedger,   path: "/aid-ledger",      label: "Aid Ledger" },
-          { icon: IconReconstruct, path: "/reconstruction",  label: "Reconstruction" },
-        ].map(item => (
-          <NavLink key={item.path} to={item.path} onClick={handleNavClick}
-            style={({ isActive }) => ({
-              display: "flex", alignItems: "center", gap: "12px",
-              padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
-              fontSize: "0.83rem",
-              color: isActive ? "#ffffff" : "#6ee7b7",
-              backgroundColor: isActive ? "#065f46" : "transparent",
-              fontWeight: isActive ? "700" : "500",
-              boxShadow: isActive ? "0 3px 12px rgba(16,185,129,0.4)" : "none",
-              transition: "all 0.13s",
-            })}
-            onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(16,185,129,0.12)"; }}
-            onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
-          >
-            <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
-          </NavLink>
-        ))}
+            {/* ────────── DURING THE DISASTER ───────── */}
+            <div style={{
+              fontSize: "0.6rem", fontWeight: "800", color: "#0ea5e9",
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              padding: "10px 10px 4px", marginTop: "8px",
+              borderTop: "1px solid rgba(14,165,233,0.2)",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}>
+              <span>&#127758;</span> During the Disaster
+            </div>
+            {[
+              { icon: IconZeroInternet, path: "/zero-internet-mesh", label: "Zero-Internet Mesh" },
+              { icon: IconDrone,        path: "/drone-analytics",    label: "Live Drone Analytics" },
+              { icon: IconDelivery,     path: "/relief-tracker",     label: "Live Relief Tracker" },
+              { icon: IconSafeZone,     path: "/safe-zones",         label: "Safe Zone Tracker" },
+              { icon: IconDynRoute,     path: "/dynamic-evacuation", label: "AI Evacuation Router" },
+            ].map(item => (
+              <NavLink key={item.path} to={item.path} onClick={handleNavClick}
+                style={({ isActive }) => ({
+                  display: "flex", alignItems: "center", gap: "12px",
+                  padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
+                  fontSize: "0.83rem",
+                  color: isActive ? "#ffffff" : "#7dd3fc",
+                  backgroundColor: isActive ? "#0369a1" : "transparent",
+                  fontWeight: isActive ? "700" : "500",
+                  boxShadow: isActive ? "0 3px 12px rgba(14,165,233,0.4)" : "none",
+                  transition: "all 0.13s",
+                })}
+                onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(14,165,233,0.12)"; }}
+                onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
+              >
+                <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+              </NavLink>
+            ))}
+
+            {/* ────────── AFTER THE DISASTER ────────── */}
+            <div style={{
+              fontSize: "0.6rem", fontWeight: "800", color: "#10b981",
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              padding: "10px 10px 4px", marginTop: "8px",
+              borderTop: "1px solid rgba(16,185,129,0.2)",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}>
+              <span>&#129309;</span> After the Disaster
+            </div>
+            {[
+              { icon: IconMicroTask,   path: "/volunteer-tasks", label: "Volunteer Tasks" },
+              { icon: IconAidLedger,   path: "/aid-ledger",      label: "Aid Ledger" },
+              { icon: IconReconstruct, path: "/reconstruction",  label: "Reconstruction" },
+            ].map(item => (
+              <NavLink key={item.path} to={item.path} onClick={handleNavClick}
+                style={({ isActive }) => ({
+                  display: "flex", alignItems: "center", gap: "12px",
+                  padding: "8px 12px", borderRadius: "8px", textDecoration: "none",
+                  fontSize: "0.83rem",
+                  color: isActive ? "#ffffff" : "#6ee7b7",
+                  backgroundColor: isActive ? "#065f46" : "transparent",
+                  fontWeight: isActive ? "700" : "500",
+                  boxShadow: isActive ? "0 3px 12px rgba(16,185,129,0.4)" : "none",
+                  transition: "all 0.13s",
+                })}
+                onMouseEnter={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "rgba(16,185,129,0.12)"; }}
+                onMouseLeave={e => { if (!e.currentTarget.classList.contains("active")) e.currentTarget.style.backgroundColor = "transparent"; }}
+              >
+                <span style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><item.icon size={20} /></span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+              </NavLink>
+            ))}
+          </>
+        ) : (
+          <div style={{
+            margin: "12px 6px 4px",
+            padding: "12px",
+            borderRadius: "10px",
+            background: "rgba(15, 23, 42, 0.6)",
+            border: "1px dashed rgba(148, 163, 184, 0.25)",
+            textAlign: "center"
+          }}>
+            <div style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+              <span>🔒</span> Tactical Features Restricted
+            </div>
+            <div style={{ fontSize: "0.68rem", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+              Restricted to Admin & Approved Members only
+            </div>
+            <NavLink
+              to="/login"
+              onClick={handleNavClick}
+              style={{
+                display: "inline-block",
+                marginTop: "8px",
+                fontSize: "0.7rem",
+                color: "#38bdf8",
+                fontWeight: "700",
+                textDecoration: "none",
+                padding: "4px 10px",
+                borderRadius: "6px",
+                background: "rgba(56, 189, 248, 0.1)",
+                border: "1px solid rgba(56, 189, 248, 0.3)"
+              }}
+            >
+              Login / Request Clearance
+            </NavLink>
+          </div>
+        )}
       </div>
 
       {/* ── Footer / Status ─────────────────────── */}

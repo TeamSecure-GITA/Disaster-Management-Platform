@@ -208,7 +208,165 @@ export function revokeAdminPermission(memberEmail) {
   const admins = getAuthorizedAdmins();
   const updated = admins.filter(a => a.email.toLowerCase() !== cleanEmail);
   localStorage.setItem("admin_authorized_members_v2", JSON.stringify(updated));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("admin_auth_updated"));
+  }
   return { success: true, message: `Administrator access revoked for ${cleanEmail}` };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// APPROVED MEMBERS — Members explicitly verified/approved by Administrator
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const DEFAULT_APPROVED_MEMBERS = [
+  {
+    email: "responder.assam@disaster.gov.in",
+    name: "J. Baruah",
+    roleTitle: "Field Responder",
+    approvedAt: "2026-09-01T00:00:00.000Z",
+    approvedBy: "Debasish N. (Head Administrator)",
+    sector: "Assam & Brahmaputra Basin",
+    clearance: "Approved Operational Member"
+  },
+  {
+    email: "sikkim.deoc@disaster.gov.in",
+    name: "T. Lepcha",
+    roleTitle: "Geotechnical Officer",
+    approvedAt: "2026-09-01T00:00:00.000Z",
+    approvedBy: "Debasish N. (Head Administrator)",
+    sector: "Sikkim & Teesta Corridor",
+    clearance: "Approved Operational Member"
+  }
+];
+
+export function getApprovedMembers() {
+  try {
+    const raw = localStorage.getItem("admin_approved_members_v2");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error("Error reading approved members:", e);
+  }
+  localStorage.setItem("admin_approved_members_v2", JSON.stringify(DEFAULT_APPROVED_MEMBERS));
+  return DEFAULT_APPROVED_MEMBERS;
+}
+
+export function isApprovedMember(email) {
+  if (!email) return false;
+  const cleanEmail = email.trim().toLowerCase();
+
+  // 1. All authorized admins are automatically approved
+  if (isAuthorizedAdmin(cleanEmail)) return true;
+
+  // 2. Check explicit approved members list
+  const approved = getApprovedMembers();
+  if (approved.some(m => (typeof m === "string" ? m : m.email).toLowerCase() === cleanEmail)) {
+    return true;
+  }
+
+  // 3. Check permission requests marked as "Approved"
+  const requests = getPermissionRequests();
+  if (requests.some(r => r.email?.toLowerCase() === cleanEmail && r.status === "Approved")) {
+    return true;
+  }
+
+  // 4. Check current user profile / session
+  try {
+    const rawUser = localStorage.getItem("user");
+    if (rawUser) {
+      const u = JSON.parse(rawUser);
+      if (u?.email?.toLowerCase() === cleanEmail && (u?.isApproved === true || u?.status === "approved" || u?.adminApproved === true || u?.role === "approved_member" || u?.role === "responder" || u?.role === "admin")) {
+        return true;
+      }
+    }
+    const rawProfile = localStorage.getItem("user_profile_data_v2");
+    if (rawProfile) {
+      const p = JSON.parse(rawProfile);
+      if (p?.email?.toLowerCase() === cleanEmail && (p?.isApproved === true || p?.status === "approved" || p?.adminApproved === true)) {
+        return true;
+      }
+    }
+  } catch {}
+
+  return false;
+}
+
+export function hasPrivilegedFeatureAccess(email, role) {
+  if (role === "admin") return true;
+  if (!email) return false;
+  return isAuthorizedAdmin(email) || isApprovedMember(email);
+}
+
+export function grantMemberApproval(memberEmail, roleTitle = "Approved Operational Member", approvedBy = "Head Administrator", sector = "Disaster Field Operations") {
+  if (!memberEmail) return { success: false, message: "Email is required" };
+  const cleanEmail = memberEmail.trim().toLowerCase();
+
+  const members = getApprovedMembers();
+  if (members.some(m => (typeof m === "string" ? m : m.email).toLowerCase() === cleanEmail)) {
+    return { success: false, message: "This email is already an approved member." };
+  }
+
+  const newMember = {
+    email: cleanEmail,
+    name: cleanEmail.split("@")[0],
+    roleTitle,
+    approvedAt: new Date().toISOString(),
+    approvedBy: approvedBy || "Head Administrator",
+    sector: sector || "General Disaster Field Operations",
+    clearance: "Approved Operational Member"
+  };
+
+  const updated = [...members, newMember];
+  localStorage.setItem("admin_approved_members_v2", JSON.stringify(updated));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("admin_auth_updated"));
+  }
+  return { success: true, message: `Member clearance granted to ${cleanEmail}`, member: newMember };
+}
+
+export function revokeMemberApproval(memberEmail) {
+  if (!memberEmail) return { success: false, message: "Email is required" };
+  const cleanEmail = memberEmail.trim().toLowerCase();
+
+  const members = getApprovedMembers();
+  const updated = members.filter(m => (typeof m === "string" ? m : m.email).toLowerCase() !== cleanEmail);
+  localStorage.setItem("admin_approved_members_v2", JSON.stringify(updated));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("admin_auth_updated"));
+  }
+  return { success: true, message: `Member clearance revoked for ${cleanEmail}` };
+}
+
+export function requestMemberApproval({ email, name, requestedRole = "Field Responder / Operational Member", sector = "Disaster Operations", reason = "Operational field clearance" }) {
+  if (!email) return { success: false, message: "Email is required" };
+  const cleanEmail = email.trim().toLowerCase();
+
+  const requests = getPermissionRequests();
+  const existing = requests.find(r => r.email.toLowerCase() === cleanEmail && r.status === "Pending");
+  if (existing) {
+    return { success: false, message: "A clearance request is already pending for this email." };
+  }
+
+  const newReq = {
+    id: `REQ-${Date.now().toString().slice(-4)}`,
+    email: cleanEmail,
+    name: name || cleanEmail.split("@")[0],
+    currentRole: "User",
+    requestedRole,
+    sector,
+    reason,
+    timestamp: new Date().toISOString(),
+    status: "Pending"
+  };
+
+  const updated = [newReq, ...requests];
+  localStorage.setItem("admin_permission_requests", JSON.stringify(updated));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("admin_auth_updated"));
+  }
+  return { success: true, message: "Clearance request submitted to Administrator.", request: newReq };
 }
 
 export function recordLoginEvent({ email, name, role }) {
@@ -313,10 +471,18 @@ export function updatePermissionRequest(requestId, status, reviewer = "Debasish 
   });
   localStorage.setItem("admin_permission_requests", JSON.stringify(updated));
 
-  // If approved, grant admin permission automatically
+  // If approved, grant clearance automatically
   const matched = requests.find(r => r.id === requestId);
   if (matched && status === "Approved") {
-    grantAdminPermission(matched.email, matched.requestedRole, reviewer);
+    if ((matched.requestedRole || "").toLowerCase().includes("admin")) {
+      grantAdminPermission(matched.email, matched.requestedRole, reviewer);
+    } else {
+      grantMemberApproval(matched.email, matched.requestedRole, reviewer, matched.sector);
+    }
+  }
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("admin_auth_updated"));
   }
 
   return { success: true, message: `Request ${requestId} marked as ${status}` };

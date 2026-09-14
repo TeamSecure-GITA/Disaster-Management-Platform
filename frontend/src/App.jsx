@@ -9,6 +9,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import DashboardLayout from "./components/DashboardLayout";
 import SplashScreen from "./components/SplashScreen";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import ApprovedMemberProtectedRoute from "./components/ApprovedMemberProtectedRoute";
 import { syncPhoneKeysFromProfile } from "./utils/phoneUtils";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { initDevToolsGuard } from "./utils/devToolsGuard";
@@ -134,35 +135,78 @@ export default function App() {
             />
             <Route path="/admin" element={<Navigate to="/administrator" replace />} />
 
+            {/* ── Tactical Command Intelligence (Admin & Approved Members Only) ── */}
             <Route path="/ner-landslide-monitor" element={<NERLandslideMonitor />} />
-            <Route path="/ner-topography-suite" element={<NERTopographySuite />} />
+            <Route
+              path="/ner-topography-suite"
+              element={
+                <ApprovedMemberProtectedRoute featureName="NER Topography Command Suite">
+                  <NERTopographySuite />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
             <Route path="/ner-killer-features" element={<Navigate to="/ner-topography-suite" replace />} />
-            <Route path="/world-first-innovations" element={<WorldFirstInnovationsSuite />} />
+            <Route
+              path="/world-first-innovations"
+              element={
+                <ApprovedMemberProtectedRoute featureName="World-First Deep Tech Suite">
+                  <WorldFirstInnovationsSuite />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
             <Route path="/deep-tech-suite" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/sound-wave-chirp" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/reverse-gps-radio" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/citizen-vitals-triage" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/mudslide-fluid-dynamics" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/living-infrastructure-ledger" element={<Navigate to="/world-first-innovations" replace />} />
-            <Route path="/hyper-speed-rescue" element={<HyperSpeedRescueSuite />} />
+            <Route
+              path="/hyper-speed-rescue"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Hyper-Speed Rescue Suite">
+                  <HyperSpeedRescueSuite />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
             <Route path="/future-rescue-tech" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/drone-swarm-dispatch" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/rescue-ar-hud" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/acoustic-scream-triangulation" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/leo-satellite-bridge" element={<Navigate to="/hyper-speed-rescue" replace />} />
             <Route path="/pre-deployment-engine" element={<Navigate to="/hyper-speed-rescue" replace />} />
-            <Route path="/decentralized-resilience" element={<DecentralizedResilienceSuite />} />
+            <Route
+              path="/decentralized-resilience"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Decentralized Resilience Suite">
+                  <DecentralizedResilienceSuite />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
             <Route path="/ultrasonic-mesh-relay" element={<Navigate to="/decentralized-resilience" replace />} />
             <Route path="/radio-triangulation" element={<Navigate to="/decentralized-resilience" replace />} />
             <Route path="/triage-heatmaps" element={<Navigate to="/decentralized-resilience" replace />} />
             <Route path="/ipfs-mirroring" element={<Navigate to="/decentralized-resilience" replace />} />
             <Route path="/sar-render-engine" element={<Navigate to="/decentralized-resilience" replace />} />
-            <Route path="/extreme-resilience" element={<ExtremeResilienceSuite />} />
+            <Route
+              path="/extreme-resilience"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Extreme Resilience Grid">
+                  <ExtremeResilienceSuite />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
             <Route path="/wasm-supercomputer" element={<Navigate to="/extreme-resilience" replace />} />
             <Route path="/e-ink-canvas" element={<Navigate to="/extreme-resilience" replace />} />
             <Route path="/nfc-relief-lockers" element={<Navigate to="/extreme-resilience" replace />} />
             <Route path="/lifi-optical-receiver" element={<Navigate to="/extreme-resilience" replace />} />
-            <Route path="/ar-see-the-risk" element={<ARSeeTheRisk />} />
+            <Route
+              path="/ar-see-the-risk"
+              element={
+                <ApprovedMemberProtectedRoute featureName="AR See the Risk">
+                  <ARSeeTheRisk />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
             <Route path="/ar-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
             <Route path="/see-the-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
             <Route path="/ar-slope-scanner" element={<Navigate to="/ar-see-the-risk" replace />} />
@@ -206,22 +250,99 @@ export default function App() {
             <Route path="/reviews" element={<UserReview />} />
             <Route path="/mesh-console" element={<MeshConsole />} />
 
-            {/* ── Before the Disaster ───────────────────────────── */}
-            <Route path="/digital-twin"       element={<DigitalTwinSimulation />} />
-            <Route path="/vulnerability-map"  element={<VulnerabilityMap />} />
-            <Route path="/smart-alerts"       element={<SmartAlerts />} />
+            {/* ── Before the Disaster (Admin & Approved Members Only) ── */}
+            <Route
+              path="/digital-twin"
+              element={
+                <ApprovedMemberProtectedRoute featureName="AI Digital Twin 3D Simulation">
+                  <DigitalTwinSimulation />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/vulnerability-map"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Infrastructure Vulnerability Heatmap">
+                  <VulnerabilityMap />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/smart-alerts"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Multi-Sensory Decentralized Alerts">
+                  <SmartAlerts />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
 
-            {/* ── During the Disaster ───────────────────────────── */}
-            <Route path="/zero-internet-mesh" element={<ZeroInternetMesh />} />
-            <Route path="/safe-zones"         element={<SafeZoneTracker />} />
-            <Route path="/dynamic-evacuation" element={<DynamicEvacuationRouter />} />
-            <Route path="/drone-analytics"    element={<DroneVideoAnalytics />} />
-            <Route path="/relief-tracker"     element={<LiveReliefTracker />} />
+            {/* ── During the Disaster (Admin & Approved Members Only) ── */}
+            <Route
+              path="/zero-internet-mesh"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Zero-Internet P2P Mesh Protocol">
+                  <ZeroInternetMesh />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/safe-zones"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Autonomous Safe Zone Tracker">
+                  <SafeZoneTracker />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/dynamic-evacuation"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Anti-Herd Dynamic Evacuation Router">
+                  <DynamicEvacuationRouter />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/drone-analytics"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Live Drone Video Analytics">
+                  <DroneVideoAnalytics />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/relief-tracker"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Live Relief Tracker & Blockchain Ledger">
+                  <LiveReliefTracker />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
 
-            {/* ── After the Disaster ────────────────────────────── */}
-            <Route path="/volunteer-tasks"    element={<MicroTasking />} />
-            <Route path="/aid-ledger"         element={<AidLedger />} />
-            <Route path="/reconstruction"     element={<ReconstructionMap />} />
+            {/* ── After the Disaster (Admin & Approved Members Only) ── */}
+            <Route
+              path="/volunteer-tasks"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Decentralized Volunteer Micro-Tasking">
+                  <MicroTasking />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/aid-ledger"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Blockchain Aid Distribution Ledger">
+                  <AidLedger />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
+            <Route
+              path="/reconstruction"
+              element={
+                <ApprovedMemberProtectedRoute featureName="Community Reconstruction Map">
+                  <ReconstructionMap />
+                </ApprovedMemberProtectedRoute>
+              }
+            />
 
           </Route>
 
