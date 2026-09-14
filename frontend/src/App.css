@@ -619,3 +619,35 @@ aside.sidebar nav.sidebar-nav a.sidebar-link.active {
     text-align: center;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ULTRA-LOW BANDWIDTH & 2G STRIP-DOWN MODE
+   ───────────────────────────────────────────────────────────────────────────── */
+html[data-low-bandwidth="true"],
+body.ultra-low-bandwidth-active {
+  background-color: #000000 !important;
+  color: #f8fafc !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+html[data-low-bandwidth="true"] * {
+  animation: none !important;
+  transition: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-low-bandwidth="true"] img:not(.essential-id),
+html[data-low-bandwidth="true"] video,
+html[data-low-bandwidth="true"] iframe:not(.critical-map) {
+  display: none !important;
+}
+
+html[data-low-bandwidth="true"] div[style*="background: linear-gradient"],
+html[data-low-bandwidth="true"] button[style*="background: linear-gradient"] {
+  background: #111827 !important;
+  border-color: #475569 !important;
+}

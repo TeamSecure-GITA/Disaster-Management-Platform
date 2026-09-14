@@ -824,8 +824,166 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* ── 💡 Core Strategic Strategy: Next-Gen Platform vs. Standard Websites ── */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(7, 21, 39, 0.98))",
+            border: "2px solid rgba(56, 189, 248, 0.35)",
+            borderRadius: "16px",
+            padding: "24px",
+            boxShadow: "0 12px 35px rgba(2, 132, 199, 0.15)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px", marginBottom: "18px" }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                <span style={{ fontSize: "1.4rem" }}>💡</span>
+                <span style={{ fontSize: "0.75rem", fontWeight: "800", color: "#38bdf8", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  Core Strategic Competitive Advantage
+                </span>
+              </div>
+              <h2 style={{ margin: 0, fontSize: "1.35rem", fontWeight: "800", color: "#ffffff" }}>
+                Why This Platform Stands Out: Next-Gen vs. Standard Government Portals
+              </h2>
+              <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: "0.85rem" }}>
+                Architected from the ground up to outperform legacy emergency websites during total infrastructure failure.
+              </p>
+            </div>
+            <span
+              style={{
+                backgroundColor: "rgba(16, 185, 129, 0.15)",
+                border: "1px solid rgba(16, 185, 129, 0.4)",
+                color: "#34d399",
+                padding: "4px 12px",
+                borderRadius: "999px",
+                fontSize: "0.75rem",
+                fontWeight: "800",
+              }}
+            >
+              PROVEN RESILIENCE ARCHITECTURE
+            </span>
+          </div>
+
+          {/* Comparison Matrix Table */}
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 8px", fontSize: "0.88rem" }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left", padding: "10px 14px", color: "#94a3b8", fontSize: "0.78rem", fontWeight: "700", textTransform: "uppercase", width: "42%" }}>
+                    Standard Official Websites (Legacy)
+                  </th>
+                  <th style={{ width: "16px" }}></th>
+                  <th style={{ textAlign: "left", padding: "10px 14px", color: "#38bdf8", fontSize: "0.78rem", fontWeight: "700", textTransform: "uppercase", width: "58%" }}>
+                    Your Next-Gen Platform (Hyper-Resilient)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    legacy: "Static text updates and PDFs",
+                    legacyNote: "Delayed warnings, non-interactive documents, difficult to parse during frantic evacuations.",
+                    nextGen: "Live, interactive 3D maps and predictive AI",
+                    nextGenNote: "Physics-based digital twin simulations, automated damage forecasting, and real-time corridor overlays.",
+                    actionLabel: "3D Digital Twin",
+                    actionPath: "/digital-twin",
+                  },
+                  {
+                    legacy: "Top-down communication only",
+                    legacyNote: "Citizens passively wait for broadcasts; no real-time two-way feedback or crowdsourced reports.",
+                    nextGen: "Two-way, crowdsourced peer-to-peer rescue",
+                    nextGenNote: "Crowdsourced infrastructure vulnerability mapping, gamified volunteer micro-tasks, and citizen radar.",
+                    actionLabel: "Volunteer Micro-Tasks",
+                    actionPath: "/volunteer-tasks",
+                  },
+                  {
+                    legacy: "Useless without internet/cellular connection",
+                    legacyNote: "Server overloads and severed cell towers render government portals completely inaccessible.",
+                    nextGen: "Works offline using local device mesh networks",
+                    nextGenNote: "Zero-Internet P2P protocol, Bluetooth & Wi-Fi Direct multi-hop relaying, and downloadable offline app.",
+                    actionLabel: "Zero-Internet Mesh",
+                    actionPath: "/zero-internet-mesh",
+                  },
+                  {
+                    legacy: "Opaque donation spending",
+                    legacyNote: "Unknown disbursement timelines, bureaucratic bottlenecks, lack of transparent tracking.",
+                    nextGen: "100% transparent blockchain tracking",
+                    nextGenNote: "Immutable public cryptographic ledger verifying every rupee, ration, and medicine dose to the recipient.",
+                    actionLabel: "Blockchain Aid Ledger",
+                    actionPath: "/aid-ledger",
+                  },
+                ].map((row, idx) => (
+                  <tr key={idx} style={{ background: "rgba(255,255,255,0.03)" }}>
+                    <td
+                      style={{
+                        padding: "14px 16px",
+                        borderTopLeftRadius: "10px",
+                        borderBottomLeftRadius: "10px",
+                        border: "1px solid rgba(239, 68, 68, 0.2)",
+                        borderRight: "none",
+                        background: "rgba(239, 68, 68, 0.05)",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", color: "#fca5a5" }}>
+                        <span style={{ color: "#ef4444" }}>❌</span>
+                        <span>{row.legacy}</span>
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "4px", paddingLeft: "24px" }}>
+                        {row.legacyNote}
+                      </div>
+                    </td>
+                    <td style={{ background: "transparent", border: "none", textAlign: "center", color: "#64748b", fontWeight: "bold" }}>
+                      &rarr;
+                    </td>
+                    <td
+                      style={{
+                        padding: "14px 16px",
+                        borderTopRightRadius: "10px",
+                        borderBottomRightRadius: "10px",
+                        border: "1px solid rgba(14, 165, 233, 0.3)",
+                        borderLeft: "none",
+                        background: "rgba(14, 165, 233, 0.08)",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "800", color: "#38bdf8" }}>
+                            <span style={{ color: "#34d399" }}>✅</span>
+                            <span>{row.nextGen}</span>
+                          </div>
+                          <div style={{ fontSize: "0.75rem", color: "#cbd5e1", marginTop: "4px", paddingLeft: "24px" }}>
+                            {row.nextGenNote}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => navigate(row.actionPath)}
+                          style={{
+                            padding: "6px 14px",
+                            borderRadius: "8px",
+                            border: "1px solid rgba(56, 189, 248, 0.4)",
+                            background: "linear-gradient(135deg, #0284c7, #0369a1)",
+                            color: "#ffffff",
+                            fontSize: "0.75rem",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            whiteSpace: "nowrap",
+                            boxShadow: "0 2px 8px rgba(2, 132, 199, 0.3)",
+                          }}
+                        >
+                          Explore {row.actionLabel} &rarr;
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* ── Hazard Reporting ─────────────────────────────────────────────── */}
         <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
+
           <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>{t.hazardReport}</h3>
           <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>{t.hazardDesc}</p>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>

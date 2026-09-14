@@ -55,6 +55,8 @@ const MicroTasking             = lazy(() => import("./pages/MicroTasking"));
 const AidLedger                = lazy(() => import("./pages/AidLedger"));
 const ReconstructionMap        = lazy(() => import("./pages/ReconstructionMap"));
 const ZeroInternetMesh         = lazy(() => import("./pages/ZeroInternetMesh"));
+const LowBandwidthPortal       = lazy(() => import("./pages/LowBandwidthPortal"));
+import { LowBandwidthProvider } from "./utils/LowBandwidthContext";
 
 function Loading() {
   return (
@@ -90,6 +92,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <LanguageProvider>
+      <LowBandwidthProvider>
       {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
       <BrowserRouter>
 
@@ -97,8 +100,12 @@ export default function App() {
 
         <Routes>
 
+          {/* ULTRA-LOW BANDWIDTH 2G MODE — ZERO HEAVY LAYOUT OVERHEAD */}
+          <Route path="/low-bandwidth" element={<LowBandwidthPortal />} />
+
           {/* AUTH */}
           <Route path="/login" element={<Login />} />
+
           <Route path="/register" element={<Register />} />
 
           {/* ADMIN — must be BEFORE wildcard */}
@@ -190,7 +197,8 @@ export default function App() {
       </Suspense>
 
     </BrowserRouter>
+    </LowBandwidthProvider>
     </LanguageProvider>
     </ErrorBoundary>
   );
-}
+}

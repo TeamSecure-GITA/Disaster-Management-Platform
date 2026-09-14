@@ -21,8 +21,11 @@ import {
   subscribeToAuthChange,
 } from "../services/authService";
 import { subscribeToDisasterAlerts } from "../services/socketService";
+import { useLowBandwidth } from "../utils/LowBandwidthContext";
 
 export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false }) {
+  const { isLowBandwidth, toggleLowBandwidth } = useLowBandwidth();
+
   const { langDisplayName, setLangByDisplayName, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -315,7 +318,40 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
             <option value="Santali" style={{ background: "#0f172a" }}>Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
           </select>
         </div>
+
+        {/* ── ⚡ 2G ULTRA-LOW BANDWIDTH MODE TOGGLE ── */}
+        <button
+          onClick={() => {
+            if (!isLowBandwidth) {
+              toggleLowBandwidth();
+              navigate("/low-bandwidth");
+            } else {
+              toggleLowBandwidth();
+              navigate("/");
+            }
+          }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            backgroundColor: isLowBandwidth ? "#f59e0b" : "rgba(245, 158, 11, 0.12)",
+            border: `1px solid ${isLowBandwidth ? "#d97706" : "rgba(245, 158, 11, 0.4)"}`,
+            color: isLowBandwidth ? "#000000" : "#fbbf24",
+            padding: "4px 10px",
+            borderRadius: "6px",
+            fontSize: "0.78rem",
+            fontWeight: "800",
+            cursor: "pointer",
+            flexShrink: 0,
+            transition: "all 0.15s",
+          }}
+          title="Ultra-Low Bandwidth Mode: Strips heavy code/images for 2G networks & damaged grids"
+        >
+          <span>⚡</span>
+          <span>{isLowBandwidth ? "2G MODE ON" : "2G MODE"}</span>
+        </button>
       </div>
+
 
       {/* Right Top Controls: Profile Icon (if logged in) and Hamburger Menu */}
       <div
