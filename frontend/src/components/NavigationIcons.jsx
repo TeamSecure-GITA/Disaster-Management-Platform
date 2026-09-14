@@ -623,3 +623,57 @@ export function IconZeroInternet({ size = 22 }) {
   );
 }
 
+export function IconDrone({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(239,68,68,0.5))" }}>
+      <circle cx="12" cy="12" r="3.5" fill="url(#drone-body)" />
+      <circle cx="12" cy="12" r="1.5" fill="#38bdf8" />
+      <line x1="12" y1="8.5" x2="5" y2="4" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="12" y1="8.5" x2="19" y2="4" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="12" y1="15.5" x2="5" y2="20" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="12" y1="15.5" x2="19" y2="20" stroke="#94a3b8" strokeWidth="1.8" strokeLinecap="round" />
+      <ellipse cx="5" cy="4" rx="3.5" ry="1.2" fill="none" stroke="#38bdf8" strokeWidth="1.2" />
+      <ellipse cx="19" cy="4" rx="3.5" ry="1.2" fill="none" stroke="#38bdf8" strokeWidth="1.2" />
+      <ellipse cx="5" cy="20" rx="3.5" ry="1.2" fill="none" stroke="#38bdf8" strokeWidth="1.2" />
+      <ellipse cx="19" cy="20" rx="3.5" ry="1.2" fill="none" stroke="#38bdf8" strokeWidth="1.2" />
+      <defs>
+        <linearGradient id="drone-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ef4444"/><stop offset="100%" stopColor="#b91c1c"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconDelivery({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(249,115,22,0.5))" }}>
+      <rect x="2" y="7" width="13" height="9" rx="1.5" fill="url(#truck-body)" />
+      <path d="M15 10h4l3 3v3h-7v-6z" fill="url(#truck-cab)" />
+      <circle cx="6" cy="17" r="2.2" fill="#1e293b" stroke="#f97316" strokeWidth="1.2" />
+      <circle cx="18" cy="17" r="2.2" fill="#1e293b" stroke="#f97316" strokeWidth="1.2" />
+      <path d="M5 11h3M5 13h5" stroke="#fed7aa" strokeWidth="1.2" strokeLinecap="round" />
+        <linearGradient id="truck-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#ea580c"/><stop offset="100%" stopColor="#c2410c"/></linearGradient>
+        <linearGradient id="truck-cab" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#f97316"/><stop offset="100%" stopColor="#ea580c"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function IconNERSuite({ size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(16,185,129,0.5))" }}>
+      <path d="M12 3L2 20h20L12 3z" fill="url(#ner-ridge)" />
+      <path d="M12 3l4 8-3 4-2-2-4 7h11L12 3z" fill="url(#ner-peak)" opacity="0.85" />
+      <circle cx="12" cy="7" r="1.8" fill="#38bdf8" />
+      <path d="M9 7a4 4 0 0 1 6 0" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M7 6a7 7 0 0 1 10 0" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
+      <path d="M6 18l3-3 3 1.5 3-4" stroke="#a7f3d0" strokeWidth="1.4" strokeLinecap="round" />
+      <defs>
+        <linearGradient id="ner-ridge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#059669"/><stop offset="100%" stopColor="#047857"/></linearGradient>
+        <linearGradient id="ner-peak" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#34d399"/><stop offset="100%" stopColor="#059669"/></linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
+

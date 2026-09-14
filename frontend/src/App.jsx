@@ -40,6 +40,7 @@ const Register = lazy(() => import("./pages/Register"));
 const AdminTickets = lazy(() => import("./pages/AdminTickets"));
 const ClimateChronicle = lazy(() => import("./pages/ClimateChronicle"));
 const NERLandslideMonitor = lazy(() => import("./pages/NERLandslideMonitor"));
+const NERTopographySuite = lazy(() => import("./pages/NERTopographySuite"));
 const ARSeeTheRisk = lazy(() => import("./pages/ARSeeTheRisk"));
 const AdministratorHub = lazy(() => import("./pages/AdministratorHub"));
 const FAQ = lazy(() => import("./pages/FAQ"));
@@ -55,6 +56,8 @@ const MicroTasking             = lazy(() => import("./pages/MicroTasking"));
 const AidLedger                = lazy(() => import("./pages/AidLedger"));
 const ReconstructionMap        = lazy(() => import("./pages/ReconstructionMap"));
 const ZeroInternetMesh         = lazy(() => import("./pages/ZeroInternetMesh"));
+const DroneVideoAnalytics      = lazy(() => import("./pages/DroneVideoAnalytics"));
+const LiveReliefTracker        = lazy(() => import("./pages/LiveReliefTracker"));
 const LowBandwidthPortal       = lazy(() => import("./pages/LowBandwidthPortal"));
 import { LowBandwidthProvider } from "./utils/LowBandwidthContext";
 
@@ -128,6 +131,8 @@ export default function App() {
             <Route path="/admin" element={<Navigate to="/administrator" replace />} />
 
             <Route path="/ner-landslide-monitor" element={<NERLandslideMonitor />} />
+            <Route path="/ner-topography-suite" element={<NERTopographySuite />} />
+            <Route path="/ner-killer-features" element={<Navigate to="/ner-topography-suite" replace />} />
             <Route path="/ar-see-the-risk" element={<ARSeeTheRisk />} />
             <Route path="/ar-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
             <Route path="/see-the-risk" element={<Navigate to="/ar-see-the-risk" replace />} />
@@ -181,6 +186,8 @@ export default function App() {
             <Route path="/zero-internet-mesh" element={<ZeroInternetMesh />} />
             <Route path="/safe-zones"         element={<SafeZoneTracker />} />
             <Route path="/dynamic-evacuation" element={<DynamicEvacuationRouter />} />
+            <Route path="/drone-analytics"    element={<DroneVideoAnalytics />} />
+            <Route path="/relief-tracker"     element={<LiveReliefTracker />} />
 
             {/* ── After the Disaster ────────────────────────────── */}
             <Route path="/volunteer-tasks"    element={<MicroTasking />} />

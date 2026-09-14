@@ -161,6 +161,43 @@ export default function ZeroInternetMesh() {
   ]);
   const [newOffer, setNewOffer] = useState({ offers: "", needs: "" });
 
+  // Store-and-Forward / Satellite Gateway Batch Sync State
+  const [cachedPackets, setCachedPackets] = useState([
+    { id: "CP-01", type: "SOS", origin: "Sunita & Family", coords: "28.6160, 77.2115", detail: "Need infant medicine & potable water", hops: 2, timestamp: "08:14:02" },
+    { id: "CP-02", type: "DAMAGE", origin: "Rahul Sharma", coords: "28.6145, 77.2098", detail: "Bridge pillar cracked & flooded (1.8m depth)", hops: 1, timestamp: "08:15:20" },
+    { id: "CP-03", type: "SOS", origin: "Trapped Elderly Couple", coords: "28.6110, 77.2050", detail: "Trapped on roof, need evacuation boat", hops: 3, timestamp: "08:18:45" },
+    { id: "CP-04", type: "RESOURCE", origin: "Field Medic Relay #2", coords: "28.6128, 77.2075", detail: "Medic station open at Ward 4 community hall", hops: 1, timestamp: "08:21:10" },
+  ]);
+  const [isUploadingBatch, setIsUploadingBatch] = useState(false);
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState(null);
+  const [syncedBatches, setSyncedBatches] = useState([
+    { id: "BATCH-ISRO-882", time: "07:55:12", count: 9, gateway: "ISRO GSAT-7A Terminal #01", status: "VERIFIED_DELIVERED" },
+  ]);
+
+  const triggerBatchSatelliteUpload = () => {
+    setIsUploadingBatch(true);
+    setUploadSuccessMessage(null);
+
+    setTimeout(() => {
+      const batchId = `BATCH-SAT-${Math.floor(1000 + Math.random() * 9000)}`;
+      const packetCount = cachedPackets.length;
+      setSyncedBatches((prev) => [
+        {
+          id: batchId,
+          time: new Date().toLocaleTimeString(),
+          count: packetCount,
+          gateway: "Field Medic Relay #2 (Starlink Mobile Uplink / Restored 4G)",
+          status: "VERIFIED_DELIVERED",
+        },
+        ...prev,
+      ]);
+      setCachedPackets([]);
+      setIsUploadingBatch(false);
+      setUploadSuccessMessage(`✓ Batch #${batchId} successfully delivered! ${packetCount} cached offline packets from isolated citizens uploaded to NDRF Central Command.`);
+      logPacket("GATEWAY_UPLINK", "CENTRAL_SERVER", 1, `BATCH_UPLOAD [${packetCount} PKTS]`, "Starlink / Satcom");
+    }, 2200);
+  };
+
   const channelRef = useRef(null);
   const canvasRef = useRef(null);
   const radarAngleRef = useRef(0);
@@ -635,6 +672,7 @@ export default function ZeroInternetMesh() {
               { id: "radar", label: "🎯 Tactical Citizen Radar", icon: "🎯" },
               { id: "barter", label: "📦 Resource Barter Board", icon: "📦" },
               { id: "packetLog", label: "🔀 Mesh Packet Router Log", icon: "🔀" },
+              { id: "satelliteUplink", label: "🛰️ Satellite Gateway & Batch Upload", icon: "🛰️" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -782,6 +820,128 @@ export default function ZeroInternetMesh() {
                     <span style={{ color: "#34d399" }}>{pkt.hops} hop</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tab 5: Satellite Gateway & Batch Upload */}
+          {activeTab === "satelliteUplink" && (
+            <div style={{ background: "rgba(15,23,42,0.75)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "20px", backdropFilter: "blur(10px)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: "800", color: "#38bdf8", display: "flex", alignItems: "center", gap: "8px" }}>
+                    🛰️ Store-and-Forward / Satellite Gateway Uplink Engine
+                  </h3>
+                  <p style={{ margin: "4px 0 0", fontSize: "0.8rem", color: "#94a3b8" }}>
+                    Multi-hop packets pass from phone to phone (100m hops) until an edge node touches satellite or restored cellular coverage.
+                  </p>
+                </div>
+                <span style={{ fontSize: "0.72rem", backgroundColor: "#0284c7", color: "#fff", padding: "3px 10px", borderRadius: "999px", fontWeight: "700" }}>
+                  STORE-AND-FORWARD
+                </span>
+              </div>
+
+              {/* Gateway Node Status Bar */}
+              <div style={{ padding: "14px", backgroundColor: "rgba(14,165,233,0.1)", border: "1px solid rgba(56,189,248,0.3)", borderRadius: "12px", marginBottom: "18px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+                <div>
+                  <div style={{ fontSize: "0.72rem", color: "#38bdf8", fontWeight: "700", textTransform: "uppercase" }}>
+                    Detected Active Gateway Node:
+                  </div>
+                  <div style={{ fontSize: "0.95rem", fontWeight: "800", color: "#f8fafc", marginTop: "2px" }}>
+                    📡 Field Medic Relay #2 (Starlink Mobile Uplink / Restored BSNL 4G)
+                  </div>
+                  <div style={{ fontSize: "0.74rem", color: "#94a3b8", marginTop: "2px" }}>
+                    Distance: <strong>140m</strong> &bull; Hops to Uplink: <strong>1 Hop</strong> &bull; Gateway Latency: <strong>48ms</strong>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={triggerBatchSatelliteUpload}
+                  disabled={isUploadingBatch || cachedPackets.length === 0}
+                  style={{
+                    padding: "10px 18px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: cachedPackets.length === 0 ? "#334155" : "linear-gradient(135deg, #0284c7, #0369a1)",
+                    color: "#fff",
+                    fontWeight: "800",
+                    fontSize: "0.85rem",
+                    cursor: cachedPackets.length === 0 || isUploadingBatch ? "not-allowed" : "pointer",
+                    boxShadow: cachedPackets.length > 0 ? "0 4px 14px rgba(2,132,199,0.35)" : "none",
+                  }}
+                >
+                  {isUploadingBatch
+                    ? "⏳ Transmitting Batch to Server..."
+                    : cachedPackets.length === 0
+                    ? "✓ All Packets Synced"
+                    : `🛰️ Upload Batch (${cachedPackets.length} Packets)`}
+                </button>
+              </div>
+
+              {uploadSuccessMessage && (
+                <div style={{ padding: "12px 14px", backgroundColor: "rgba(16,185,129,0.15)", border: "1px solid #10b981", borderRadius: "10px", color: "#6ee7b7", fontSize: "0.82rem", fontWeight: "600", marginBottom: "16px" }}>
+                  {uploadSuccessMessage}
+                </div>
+              )}
+
+              {/* Local Mesh Queue List */}
+              <div style={{ marginBottom: "18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "0.78rem", fontWeight: "700", color: "#cbd5e1" }}>
+                    📦 Queued Local Packets in Device Flash Cache ({cachedPackets.length}):
+                  </span>
+                  <span style={{ fontSize: "0.7rem", color: "#64748b" }}>Auto-clears upon gateway upload</span>
+                </div>
+
+                {cachedPackets.length === 0 ? (
+                  <div style={{ padding: "18px", backgroundColor: "rgba(255,255,255,0.02)", borderRadius: "10px", border: "1px dashed #334155", textAlign: "center", color: "#64748b", fontSize: "0.8rem" }}>
+                    No pending packets in queue. All local distress records have been uploaded to NDRF Central Command.
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {cachedPackets.map((pkt) => (
+                      <div key={pkt.id} style={{ padding: "10px 14px", backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "0.72rem", backgroundColor: pkt.type === "SOS" ? "#dc2626" : pkt.type === "DAMAGE" ? "#ea580c" : "#0284c7", color: "#fff", padding: "2px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                              {pkt.type}
+                            </span>
+                            <strong style={{ fontSize: "0.84rem", color: "#f8fafc" }}>{pkt.origin}</strong>
+                            <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>📍 {pkt.coords}</span>
+                          </div>
+                          <div style={{ fontSize: "0.78rem", color: "#cbd5e1", marginTop: "4px" }}>
+                            {pkt.detail}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", fontSize: "0.7rem", color: "#64748b" }}>
+                          <div>{pkt.timestamp}</div>
+                          <div style={{ color: "#34d399", fontWeight: "600" }}>{pkt.hops} mesh hops</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Uploaded History */}
+              <div>
+                <div style={{ fontSize: "0.78rem", fontWeight: "700", color: "#cbd5e1", marginBottom: "8px" }}>
+                  📋 Central NDRF Server Sync Receipts:
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {syncedBatches.map((b) => (
+                    <div key={b.id} style={{ padding: "8px 12px", backgroundColor: "rgba(255,255,255,0.02)", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.74rem" }}>
+                      <div>
+                        <strong style={{ color: "#38bdf8" }}>{b.id}</strong> &bull; {b.count} Packets Beamed &bull; Gateway: {b.gateway}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ color: "#64748b" }}>{b.time}</span>
+                        <span style={{ color: "#34d399", fontWeight: "700" }}>● {b.status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
