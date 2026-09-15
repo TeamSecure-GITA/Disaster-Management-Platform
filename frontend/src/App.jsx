@@ -155,6 +155,14 @@ export default function App() {
               }
             />
             <Route path="/deep-tech-suite" element={<Navigate to="/world-first-innovations" replace />} />
+            <Route path="/magnetometer-rubble-locator" element={<Navigate to="/world-first-innovations?tab=magnetometer" replace />} />
+            <Route path="/magnetometer-locator" element={<Navigate to="/world-first-innovations?tab=magnetometer" replace />} />
+            <Route path="/thermoelectric-thermal-tap" element={<Navigate to="/world-first-innovations?tab=thermal-tap" replace />} />
+            <Route path="/thermal-tap" element={<Navigate to="/world-first-innovations?tab=thermal-tap" replace />} />
+            <Route path="/barometric-flash-flood" element={<Navigate to="/world-first-innovations?tab=barometric" replace />} />
+            <Route path="/barometric-flood" element={<Navigate to="/world-first-innovations?tab=barometric" replace />} />
+            <Route path="/quantum-gossip-routing" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
+            <Route path="/quantum-gossip" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
             <Route path="/sound-wave-chirp" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/reverse-gps-radio" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/citizen-vitals-triage" element={<Navigate to="/world-first-innovations" replace />} />

@@ -1,20 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Volume2, Radio, Activity, Mountain, Trees, ShieldAlert, 
   Send, RefreshCw, Play, Square, CheckCircle, AlertTriangle, 
   WifiOff, MapPin, Heart, Zap, Download, Eye, Compass, 
   Layers, ChevronRight, Cpu, ArrowUpRight, Clock, Info, 
   Sparkles, Sliders, ExternalLink, Award, FileText,
-  Wifi, ShieldCheck, Bluetooth, QrCode
+  Wifi, ShieldCheck, Bluetooth, QrCode, BatteryCharging,
+  Waves, Lock, Network
 } from 'lucide-react';
 import AtmosphericWifiBendingTab from '../components/worldfirst/AtmosphericWifiBendingTab';
 import PqcOfflineLedgerTab from '../components/worldfirst/PqcOfflineLedgerTab';
 import BleSpittingProtocolTab from '../components/worldfirst/BleSpittingProtocolTab';
 import WebNfcTriageTab from '../components/worldfirst/WebNfcTriageTab';
 import ZeroInfrastructureDataFlowTab from '../components/worldfirst/ZeroInfrastructureDataFlowTab';
+import MagnetometerLocatorTab from '../components/worldfirst/MagnetometerLocatorTab';
+import ThermoelectricTapTab from '../components/worldfirst/ThermoelectricTapTab';
+import BarometricFlashFloodTab from '../components/worldfirst/BarometricFlashFloodTab';
+import QuantumGossipRoutingTab from '../components/worldfirst/QuantumGossipRoutingTab';
 
 export default function WorldFirstInnovationsSuite() {
-  const [activeTab, setActiveTab] = useState('zero-grid-flow');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'zero-grid-flow';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Sync tab with URL search parameter
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
 
   // -------------------------------------------------------------
   // TAB 1: "SOUND-WAVE" DATA TRANSFER (CHIRP PROTOCOL)
@@ -530,11 +551,11 @@ export default function WorldFirstInnovationsSuite() {
           </div>
         </div>
 
-        {/* Tab Navigation - 10 World-First Deep-Tech Pillars */}
+        {/* Tab Navigation - World-First Deep-Tech Pillars */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-6">
           {/* ZERO-GRID FLOW */}
           <button
-            onClick={() => setActiveTab('zero-grid-flow')}
+            onClick={() => handleTabChange('zero-grid-flow')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
               activeTab === 'zero-grid-flow'
                 ? 'bg-indigo-950/60 border-indigo-500 text-white shadow-lg shadow-indigo-950/50'
@@ -548,6 +569,82 @@ export default function WorldFirstInnovationsSuite() {
             <div>
               <div className="text-xs font-bold leading-tight">Zero-Grid Flow</div>
               <div className="text-[10px] text-slate-400">Master Architecture</div>
+            </div>
+          </button>
+
+          {/* 1. MAGNETOMETER RUBBLE LOCATOR */}
+          <button
+            onClick={() => handleTabChange('magnetometer')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'magnetometer'
+                ? 'bg-indigo-950/80 border-indigo-400 text-white shadow-lg shadow-indigo-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-indigo-400/20 text-indigo-300 text-[9px] font-black rounded-full border border-indigo-400/40 animate-pulse">
+              NEW
+            </div>
+            <Compass className={`w-5 h-5 flex-shrink-0 ${activeTab === 'magnetometer' ? 'text-indigo-400 animate-spin' : 'text-slate-400'}`} style={{ animationDuration: '8s' }} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Magnetometer 3D</div>
+              <div className="text-[10px] text-slate-400">Trapped-Human Locator</div>
+            </div>
+          </button>
+
+          {/* 2. THERMOELECTRIC THERMAL-TAP */}
+          <button
+            onClick={() => handleTabChange('thermal-tap')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'thermal-tap'
+                ? 'bg-amber-950/80 border-amber-400 text-white shadow-lg shadow-amber-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-amber-400/20 text-amber-300 text-[9px] font-black rounded-full border border-amber-400/40">
+              NEW
+            </div>
+            <BatteryCharging className={`w-5 h-5 flex-shrink-0 ${activeTab === 'thermal-tap' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Thermal-Tap Seebeck</div>
+              <div className="text-[10px] text-slate-400">Sub-1% Deep Sleep SOS</div>
+            </div>
+          </button>
+
+          {/* 3. BAROMETRIC FLASH-FLOOD LOOP */}
+          <button
+            onClick={() => handleTabChange('barometric')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'barometric'
+                ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-400/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-400/40 animate-pulse">
+              NEW
+            </div>
+            <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'barometric' ? 'text-cyan-400 animate-bounce' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Barometric Warning</div>
+              <div className="text-[10px] text-slate-400">Flash-Flood Shockwave</div>
+            </div>
+          </button>
+
+          {/* 4. QUANTUM GOSSIP ROUTING */}
+          <button
+            onClick={() => handleTabChange('quantum-gossip')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'quantum-gossip'
+                ? 'bg-purple-950/80 border-purple-400 text-white shadow-lg shadow-purple-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-purple-400/20 text-purple-300 text-[9px] font-black rounded-full border border-purple-400/40">
+              NEW
+            </div>
+            <Lock className={`w-5 h-5 flex-shrink-0 ${activeTab === 'quantum-gossip' ? 'text-purple-400 animate-pulse' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Quantum Gossip P2P</div>
+              <div className="text-[10px] text-slate-400">Kyber-1024 Lattice Mesh</div>
             </div>
           </button>
 
@@ -714,6 +811,26 @@ export default function WorldFirstInnovationsSuite() {
         {/* ZERO-GRID FLOW: THE ULTIMATE ZERO-INFRASTRUCTURE PIPELINE  */}
         {/* ========================================================= */}
         {activeTab === 'zero-grid-flow' && <ZeroInfrastructureDataFlowTab />}
+
+        {/* ========================================================= */}
+        {/* 1. MAGNETOMETER: RUBBLE VOID & TRAPPED-HUMAN LOCATOR      */}
+        {/* ========================================================= */}
+        {activeTab === 'magnetometer' && <MagnetometerLocatorTab />}
+
+        {/* ========================================================= */}
+        {/* 2. THERMOELECTRIC: "THERMAL-TAP" LOW-POWER ALERTING       */}
+        {/* ========================================================= */}
+        {activeTab === 'thermal-tap' && <ThermoelectricTapTab />}
+
+        {/* ========================================================= */}
+        {/* 3. BAROMETRIC: "FLASH-FLOOD WAVE" EARLY WARNING LOOP      */}
+        {/* ========================================================= */}
+        {activeTab === 'barometric' && <BarometricFlashFloodTab />}
+
+        {/* ========================================================= */}
+        {/* 4. QUANTUM GOSSIP: RESISTANT DISTRIBUTED EPIDEMIC ROUTING */}
+        {/* ========================================================= */}
+        {activeTab === 'quantum-gossip' && <QuantumGossipRoutingTab />}
 
         {/* ========================================================= */}
         {/* WEB-NFC TRIAGE: SKIN-SAFE DIGITAL STAMPS                  */}
