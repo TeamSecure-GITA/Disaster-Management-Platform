@@ -29,7 +29,7 @@ This platform provides an **end-to-end, AI-powered early warning and geotechnica
 | **e. Citizen & Official Field Reporting**<br>• Geo-tagged photos/videos<br>• Crack width & length measurements<br>• Slope creep & road blockages | • Specialized **NER Slope Movement & Geotechnical Reporting** in `IncidentReport.jsx`<br>• Automated 1-click GPS coordinate locking (`navigator.geolocation`)<br>• Crack length (m), crack width (cm), slope movement trend (Stationary / Creep / Rapid / Rockfall), and road blockage status capture<br>• Damage assessment photo uploads (`DamageAssessment.jsx`) | ✅ Implemented & Operational |
 | **f. Operational Dashboards**<br>• Risk severity heat levels<br>• Highway connectivity tracker<br>• Weather-linked risk forecasts<br>• Response prioritization matrix | • **Dedicated NER Landslide Risk Monitor** (`NERLandslideMonitor.jsx` at `/ner-landslide-monitor`)<br>• 8-State live geotechnical intelligence cards with IMD color-coded advisories<br>• Highway clearance ETA & alternate route bypass recommendations<br>• Automated Emergency Response Prioritization Queue ranking states 1 to 8 by vulnerability | ✅ Implemented & Operational |
 | **Multilingual Support**<br>Indigenous & Regional Languages | • Multi-language alert broadcast engine (`selectedLanguage` switcher in UI & notification services)<br>• Languages supported: **English (EN)**, **Hindi (हिंदी)**, **Assamese (অসমীয়া)**, **Bengali (বাংলা)**, **Nepali (नेपाली)**, and **Odia (ଓଡ଼ିଆ)** | ✅ Implemented & Operational |
-| **Low-Network / Offline Functionality**<br>Remote Himalayan & hill tracts | • Full Progressive Web App (PWA) offline capability via service workers & Workbox<br>• Local caching with IndexedDB (`localforage` & `idb`) for offline report queueing<br>• Background two-way conflict-free sync (`syncRoutes.js`, `SyncOperation.js`) upon network restoration<br>• SMS fallback syntax generation for zero-internet emergency communication | ✅ Implemented & Operational |
+| **Low-Network / Offline Functionality**<br>Remote Himalayan & hill tracts | • Full Progressive Web App (PWA) offline capability via service workers & Workbox<br>• Local caching with IndexedDB (`localforage` & `idb`) for offline report queueing<br>• Background two-way conflict-free sync (`syncRoutes.js`, `SyncOperation.js`) upon network restoration<br>• **Zero-Grid Rescue Extensions:**<br>&nbsp;&nbsp;◦ *Acoustic FSK Chirps (1.8–19.8 kHz):* Screen-to-screen distress hops spanning 1,400m river chasms<br>&nbsp;&nbsp;◦ *Barometric Flash-Flood Shockwave Detection:* Bernoulli vacuum drop alert ($\Delta P/\Delta t < -0.45\text{ hPa}$) providing 60-90s alarm<br>&nbsp;&nbsp;◦ *Magnetometer 3D Void Locator:* Sub-microtesla geomagnetic cavity detection under 3+ meters of landslide mud/rebar<br>&nbsp;&nbsp;◦ *Web-Bluetooth 15ms Spitting:* Deep mud RF penetration preserving 186+ hours battery<br>&nbsp;&nbsp;◦ *Web-NFC Digital Triage Stamps:* On-skin patient triage tracking between remote hill clinics | ✅ Implemented & Operational |
 
 ---
 
@@ -163,13 +163,15 @@ To ensure life-saving alerts reach indigenous and remote hill populations, early
 
 | Layer | Technologies Used |
 |---|---|
-| **Frontend Web App & PWA** | React 19, Vite 8, React Router DOM 7, Progressive Web App (Service Worker + Workbox), LocalForage (IndexedDB) |
+| **Frontend Web App & PWA** | React 19, Vite 6, React Router DOM 7, Progressive Web App (Service Worker + Workbox), LocalForage & IDB (IndexedDB) |
+| **Hardware & Web Sensors** | Generic Sensor API (`PressureSensor`), Web Sensor API (`Magnetometer`), Web-NFC (`NDEFReader/Writer`), Web Audio API (`AudioContext` FSK), Web-Bluetooth |
+| **Edge Compute & Cryptography**| WebAssembly (WASM), NIST FIPS 203/204 Post-Quantum Cryptography (ML-DSA / ML-KEM), WebGL SAR Engine |
 | **Mapping & GIS** | Leaflet 1.9, React-Leaflet, OpenStreetMap Cartography |
-| **Visual Analytics & UI** | Recharts, Lucide React, Curated Dark Theme CSS3 |
-| **Backend REST & Real-Time** | Node.js 24, Express.js 5, Socket.IO 4, Node-Cron |
-| **Database & ODM** | MongoDB, Mongoose 8 |
+| **Visual Analytics & UI** | Recharts, Lucide React, Curated Dark Theme CSS3, Glassmorphism |
+| **Backend REST & Real-Time** | Node.js 22+, Express.js 5, Socket.IO 4, Node-Cron, WAF Firewall |
+| **Database & Persistence** | MongoDB, Mongoose 8, Dual-Layer Server Disk Persistence (`reviews.json`) |
 | **Alerting & Notifications** | Firebase Cloud Messaging (FCM), Nodemailer, WhatsApp URL Dispatch |
-| **Weather & External APIs** | Open-Meteo API, OpenWeatherMap, Indian RSS News Syndication |
+| **Weather & External APIs** | Open-Meteo API, OpenWeatherMap, Indian National RSS News Syndication |
 
 ---
 

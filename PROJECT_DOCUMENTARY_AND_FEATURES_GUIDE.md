@@ -1,7 +1,7 @@
 # 🛡️ PROJECT DOCUMENTARY & COMPREHENSIVE FEATURES GUIDE
 ## *Next-Generation Autonomous, Decentralized & Predictive Disaster Management Platform*
 
-> **Document Version:** 4.2.0-Production  
+> **Document Version:** 5.0.0-Production (Current Live Status)  
 > **Target Region:** North Eastern Region (NER) of India & Global Extreme Disaster Theaters  
 > **Platform Classification:** Decentralized Edge-AI, WebAssembly (WASM), Web-NFC, Li-Fi & P2P Mesh Web Operating System  
 > **Repository:** `TeamSecure-GITA/Disaster-Management-Platform`
@@ -30,18 +30,22 @@
    - 3.3 Edge-AI Acoustic "Scream & Thump" Location Triangulation
    - 3.4 Low-Earth Orbit (LEO) Direct-to-Cellular Micro-Data Bridge
    - 3.5 Predictive "Pre-Deployment" Relocation Engine
-7. [Module 4: World-First Deep-Tech Disaster Suite](#7-module-4-world-first-deep-tech-disaster-suite-8-groundbreaking-innovations)
+7. [Module 4: World-First Deep-Tech Disaster Suite](#7-module-4-world-first-deep-tech-disaster-suite-14-groundbreaking-innovations--zero-grid-pipeline)
    - 4.1 Atmospheric Wi-Fi "Bending" Detection (Passive Human Density Mapping)
    - 4.2 Post-Quantum Cryptographic (PQC) Offline Identity Ledger (NIST ML-DSA / ML-KEM)
    - 4.3 Web-Bluetooth "Spitting" Protocol for Debris Penetration (Asynchronous Micro-Bursting)
    - 4.4 Web-NFC "Digital Triage Stamps" for Mass Casualties
    - 4.5 The Ultimate Zero-Infrastructure Data Flow Pipeline
    - 4.6 💡 The Ultimate SIH Grand Jury Pitch Mic-Drop
-   - 4.7 Audible & Ultrasonic Chirp Audio Modem
-   - 4.8 Terrestrial Reverse GPS Vector Trilateration
-   - 4.9 Bio-Sensing Citizen Vitals Crowd-Map (START Triage)
-   - 4.10 Sub-Surface Fluid Dynamics Mudslide Predictor (Mohr-Coulomb / Bishop FoS)
-   - 4.11 Indigenous "Root-Bridge" (Jingkieng Jri) Structural Health Ledger
+   - 4.7 Magnetometer "Disrupted-Field" Trapped-Human Locator (Web Sensor API)
+   - 4.8 Thermoelectric "Thermal-Tap" Low-Power Alerting (Seebeck Effect Engine)
+   - 4.9 Barometric Pressure "Flash-Flood Wave" Early Warning Loop (Generic Sensor API)
+   - 4.10 Quantum-Resistant Encrypted Distributed "Gossip" Routing (Kyber-1024)
+   - 4.11 Audible & Ultrasonic Chirp Audio Modem (1.8–19.8 kHz FSK)
+   - 4.12 Terrestrial Reverse GPS Vector Trilateration (AM/FM Signals)
+   - 4.13 Bio-Sensing Citizen Vitals Crowd-Map (START Triage)
+   - 4.14 Sub-Surface Fluid Dynamics Mudslide Predictor (Mohr-Coulomb / Bishop FoS)
+   - 4.15 Indigenous "Root-Bridge" (Jingkieng Jri) Structural Health Ledger
 8. [Module 5: North East India (NER) Extreme Topography Command Suite](#8-module-5-north-east-india-ner-extreme-topography-command-suite)
    - 5.1 Seismic-Acoustic Early Landslide Warning System (IoT + Edge AI)
    - 5.2 UHF/VHF Radio-to-Web Digital Gateway (Web Audio AFSK HAM Listener)
@@ -67,9 +71,13 @@
     - 8.2 Multi-Platform Push Notifications & Trilingual Climate Chronicle
     - 8.3 Offline Cryptographic QR Rescue ID
     - 8.4 Family Safety Locator & Real-Time Shelter Finder
-12. [Full Technology Stack & Native Browser APIs Utilized](#12-full-technology-stack--native-browser-apis-utilized)
-13. [End-to-End Disaster Data Flow Diagram](#13-end-to-end-disaster-data-flow-diagram)
-14. [How to Run, Test & Simulate Every Feature Locally](#14-how-to-run-test--simulate-every-feature-locally)
+12. [Module 9: Tactical RBAC Protection & Administrator Command Governance](#12-module-9-tactical-rbac-protection--administrator-command-governance)
+    - 9.1 Role-Based Access Control (RBAC) Tactical Disaster Route Guards
+    - 9.2 Administrator Command Hub & Tactical Member Verification
+    - 9.3 Permanent Dual-Layer Review Persistence Engine
+13. [Full Technology Stack & Native Browser APIs Utilized](#13-full-technology-stack--native-browser-apis-utilized)
+14. [End-to-End Disaster Data Flow Diagram](#14-end-to-end-disaster-data-flow-diagram)
+15. [How to Run, Test & Simulate Every Feature Locally](#15-how-to-run-test--simulate-every-feature-locally)
 
 ---
 
@@ -287,7 +295,7 @@ When 5,000+ displaced citizens crowd into a concrete stadium or underground emer
 
 ---
 
-## 7. MODULE 4: WORLD-FIRST DEEP-TECH DISASTER SUITE (8 GROUNDBREAKING INNOVATIONS)
+## 7. MODULE 4: WORLD-FIRST DEEP-TECH DISASTER SUITE (14 GROUNDBREAKING INNOVATIONS & ZERO-GRID PIPELINE)
 * **Master Route:** `/world-first-innovations`  
 * **Source Component:** `frontend/src/pages/WorldFirstInnovationsSuite.jsx`  
 * **Navigation Icon:** `IconWorldFirst`
@@ -465,7 +473,33 @@ When 5,000+ displaced citizens crowd into a concrete stadium or underground emer
 
 ---
 
-## 12. FULL TECHNOLOGY STACK & NATIVE BROWSER APIS UTILIZED
+## 12. MODULE 9: TACTICAL RBAC PROTECTION & ADMINISTRATOR COMMAND GOVERNANCE
+
+### 12.1 Role-Based Access Control (RBAC) Tactical Disaster Route Guards
+* **Security Threat Model:** High-stakes tactical disaster capabilities (such as manual drone flight command, live thermal cameras, synthetic aperture radar raw views, dynamic evacuation corridor closures, and digital twin catastrophe simulations) could be weaponized or misused during active panic if accessible to unverified public users.
+* **Operational Mechanics:**
+  - Implemented via `ApprovedMemberProtectedRoute.jsx` and client-side credential verification (`adminAuth.js`).
+  - Protects tactical routes: `/drone-analytics`, `/satellite`, `/dynamic-evacuation`, `/digital-twin`, `/sensors`, `/drones`, `/vulnerability-map`, and `/reconstruction-map`.
+  - Non-approved citizens encountering these routes are greeted by an elegant **Tactical Clearance Gate**. They can review required clearance levels, view their real-time application status, or submit a formal tactical membership request.
+  - Active credentials auto-poll the backend and unlock instantly once approved by an administrator.
+
+### 12.2 Administrator Command Hub & Tactical Member Verification (`/administrator`)
+* **Master Route:** `/administrator`
+* **Administrative Capabilities:**
+  - **Member Verification Queue:** Inspect submitted civilian, volunteer, and responder credentials; grant **APPROVED_TACTICAL** or **ADMINISTRATOR** clearance, or revoke access in 1 click.
+  - **System Health & WAF Security:** Real-time monitoring of active database states, memory consumption, request throughput, and active firewall rules.
+  - **Broadcast Alert Generation:** Issue immediate priority emergency overrides that propagate instantly to all connected devices via Socket.IO.
+
+### 12.3 Permanent Dual-Layer Review Persistence Engine (`/reviews`, `/administrator`)
+* **Zero Data Loss Architecture:**
+  - Every citizen review and field evaluation submitted to `POST /api/reviews` is concurrently committed to **MongoDB** and the permanent server disk store (`Backend/data/reviews.json`).
+  - Even during database restarts, maintenance, or cold offline boots, reviews persist on disk and auto-synchronize with the database.
+  - Reviews **never expire or auto-delete**; they remain permanently stored until an authorized Administrator explicitly issues a `DELETE /api/reviews/:id`.
+  - **Administrator Review Hub Integration:** Features average rating calculation, 5★ to 1★ star breakdown, unread notification badges in the navigation bar, `✓ Mark Read`, `✓ Mark All as Read`, and verified administrative deletion.
+
+---
+
+## 13. FULL TECHNOLOGY STACK & NATIVE BROWSER APIS UTILIZED
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────┐
@@ -475,46 +509,48 @@ When 5,000+ displaced citizens crowd into a concrete stadium or underground emer
                                          ▼
 ┌──────────────────────────────────────────────────────────────────────────────────┐
 │                         NATIVE BROWSER & HARDWARE APIS                           │
-│  • WebAssembly (WASM): Finite-Element Geophysical Fluid Dynamics Engine          │
-│  • Web-NFC API (NDEFReader): Offline Crate Tag Scanning & Key Exchange           │
-│  • Web Audio API (AudioContext, AnalyserNode): Acoustic Chirps & HAM AFSK Modem  │
-│  • Canvas API: 0.033 Hz Ultra-Low Energy Monochrome OLED Rendering               │
-│  • WebXR / DeviceOrientation API: Augmented Reality Rescue Visor                 │
+│  • Generic Sensor API (window.PressureSensor): Flash-Flood Bernoulli Vacuum Wave│
+│  • Web Sensor API (window.Magnetometer): 3D Magnetic Debris Cavity Void Locator  │
+│  • WebAssembly (WASM): NIST FIPS 203/204 PQC (Kyber-1024, Dilithium-65) & FEM    │
+│  • Web-NFC API (NDEFReader/NDEFWriter): On-Skin Digital Triage & Relief Lockers │
+│  • Web Audio API (AudioContext, AnalyserNode): Acoustic FSK Audio & HAM Demod   │
+│  • Canvas API & WebGL: 0.033 Hz Ultra-Low Energy OLED & Raw SAR Radar Backscatter│
+│  • WebXR & DeviceOrientation API: Augmented Reality Tactical HUD for Responders  │
 │  • MediaDevices (getUserMedia): Optical Li-Fi Sensor Downlink & PPG Bio-Sensing │
-│  • WebHID & Web-Bluetooth APIs: Real-time Pulse Oximeter & Smartwatch Telemetry  │
-│  • BroadcastChannel & WebRTC DataChannels: Zero-Internet Peer-to-Peer Mesh Sync │
+│  • WebHID & Web-Bluetooth APIs: Continuous Pulse Oximeter & BLE 15ms Spitting    │
+│  • BroadcastChannel & WebRTC DataChannels: Zero-Internet Epidemic P2P Mesh Gossip│
 │  • ServiceWorker & CacheStorage API: Full Offline Progressive Web App (PWA)     │
-│  • Network Information API: Automated 2G Emergency Mode Detection                │
+│  • Network Information API: Automated 2G Emergency Mode Detection (<50KB)       │
 └────────────────────────────────────────┬─────────────────────────────────────────┘
                                          ▼
 ┌──────────────────────────────────────────────────────────────────────────────────┐
 │                         BACKEND & EDGE CLUSTER STACK                             │
-│  Node.js 24  •  Express.js  •  MongoDB / IndexedDB  •  Socket.io  •  Firebase    │
-│  YOLOv8 Computer Vision  •  Synthetic Aperture Radar (SAR) Algorithms            │
+│  Node.js 22+  •  Express.js 5  •  MongoDB (Mongoose 8) + Disk Persistence        │
+│  Socket.io 4  •  Firebase Admin  •  YOLOv8 Vision  •  NIST PQC Cryptography      │
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 13. END-TO-END DISASTER DATA FLOW DIAGRAM
+## 14. END-TO-END DISASTER DATA FLOW DIAGRAM
 
 ```
- [ IoT Soil Sensors ]       [ Trapped Survivor Phone ]      [ Emergency Shelter LED ]
-   MEMS + Moisture            Mic / Camera / NFC             Pulsing 115,200 Baud
-          │                               │                            │
-          ▼                               ▼                            ▼
- [ Edge AI Warning ]          [ Ultrasonic Chirp / NFC ]      [ Li-Fi Web Demodulator ]
-  TTF < 8 mins: Gates Close   Encodes Blood + GPS Tokens     Zero-RF Congestion Reception
-          │                               │                            │
-          └───────────────────────┬───────┴────────────────────────────┘
+ [ In-Situ IoT Sensors ]      [ Trapped Survivor Device ]       [ Emergency Shelter LED ]
+   MEMS + Pore-Water Sat.       Magnetometer / BLE Spitting        Pulsing 115,200 Baud
+          │                               │                                 │
+          ▼                               ▼                                 ▼
+ [ Edge Slope Warning ]        [ 15ms RF Burst / Audio ]        [ Li-Fi Web Demodulator ]
+  TTF < 8m: Gates Close         Pierces 3-6ft Mud to Drones       Zero-RF Congestion Reception
+          │                               │                                 │
+          └───────────────────────┬───────┴─────────────────────────────────┘
                                   ▼
                    [ Local PWA Store-and-Forward ]
-                   IndexedDB Flash Storage Queue
+                   IndexedDB Flash Storage + WASM PQC
                                   │
           ┌───────────────────────┴───────────────────────┐
           ▼                                               ▼
- [ P2P Multi-Hop Mesh ]                          [ Satellite / Cellular Node ]
-  Phone-to-Phone Audio / BLE                      Starlink LEO / GSAT Batch Upload
+ [ Epidemic Gossip Mesh ]                        [ Satellite / Cellular Node ]
+  Kyber-1024 / Audio / BLE                        Starlink LEO / GSAT Batch Upload
           │                                               │
           └───────────────────────┬───────────────────────┘
                                   ▼
@@ -524,7 +560,7 @@ When 5,000+ displaced citizens crowd into a concrete stadium or underground emer
 
 ---
 
-## 14. HOW TO RUN, TEST & SIMULATE EVERY FEATURE LOCALLY
+## 15. HOW TO RUN, TEST & SIMULATE EVERY FEATURE LOCALLY
 
 ### 1. Installation & Setup
 ```bash
@@ -556,37 +592,16 @@ npm run dev
 * **Extreme Resilience Grid (WASM Supercomputer, E-Ink, Web-NFC, Li-Fi):** `http://localhost:5173/extreme-resilience`
 * **Decentralized Resilience & SAR Radar Suite:** `http://localhost:5173/decentralized-resilience`
 * **Hyper-Speed Autonomous Rescue Suite:** `http://localhost:5173/hyper-speed-rescue`
-* **World-First Deep-Tech Innovations:** `http://localhost:5173/world-first-innovations`
+* **World-First Deep-Tech Innovations (14 Innovations & Zero-Grid Flow):** `http://localhost:5173/world-first-innovations`
 * **NER Topography & Landslide Command Suite:** `http://localhost:5173/ner-topography-suite`
+* **NER Live Landslide Risk Monitoring:** `http://localhost:5173/ner-landslide-monitor`
 * **Zero-Internet P2P Mesh Console:** `http://localhost:5173/zero-internet-mesh`
 * **Live UAV Drone Analytics:** `http://localhost:5173/drone-analytics`
 * **Swiggy-Style Relief Tracker & Blockchain Ledger:** `http://localhost:5173/relief-tracker`
 * **Low-Bandwidth 2G Emergency Mode:** `http://localhost:5173/low-bandwidth`
 * **Anti-Herd Dynamic Evacuation Router:** `http://localhost:5173/dynamic-evacuation`
-
 * **Platform User Reviews & Feedback:** `http://localhost:5173/reviews`
 * **Administrator Command Hub & Review Management:** `http://localhost:5173/administrator`
-
----
-
-## 🌟 Permanent User Review & Administrator Audit System
-
-### 1. Architectural Design & Zero Data Loss Guarantee
-Standard feedback systems store reviews either exclusively in local browser caches (lost when cache clears or not visible to other machines) or fail completely if MongoDB is temporarily unavailable. 
-Our platform implements a **Dual-Layer Permanent Persistence Architecture**:
-1. **Backend Mongo + Disk Fallback (`/api/reviews`)**:
-   - Every review submitted by any citizen or responder is dispatched to `POST /api/reviews`.
-   - The backend validates the submission and writes it simultaneously to **MongoDB** (`Review` collection) and the server's **permanent disk backup** (`Backend/data/reviews.json`).
-   - Even if the database connection restarts or is offline, the review is preserved permanently on disk and automatically re-synced upon reconnection.
-2. **Permanent Storage Guarantee**:
-   - A submitted review can **NEVER be lost, overwritten, or automatically expired**.
-   - It remains permanently stored in the platform until an authorized **Administrator explicitly deletes it** via `DELETE /api/reviews/:id`.
-3. **Administrator Menu Integration (`/administrator` -> ⭐ User Reviews)**:
-   - All reviews across all devices and citizens are displayed centrally in the **Administrator Command Hub**.
-   - Displays average rating score, star rating breakdown distribution (5★ to 1★), category tags, author name, timestamp, and review message.
-   - Highlights new unread reviews with pulsating notification badges in both the Administrator Hub and the global Sidebar navigation.
-   - **One-Click Read Actions**: `✓ Mark Read` and `✓ Mark All as Read` to manage incoming citizen feedback.
-   - **Permanent Deletion Control**: Authorized Administrators can permanently delete invalid, resolved, or abusive reviews with a confirmation prompt, updating MongoDB, disk backup, and frontend state synchronously.
 
 ---
 
