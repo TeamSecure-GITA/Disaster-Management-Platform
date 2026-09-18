@@ -633,7 +633,26 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
-          {/* 4. MAGNETOMETER RUBBLE LOCATOR */}
+          {/* 4. QUANTUM CHAFF DATA MASKING */}
+          <button
+            onClick={() => handleTabChange('quantum-chaff')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'quantum-chaff'
+                ? 'bg-purple-950/80 border-purple-400 text-white shadow-lg shadow-purple-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-purple-400/20 text-purple-300 text-[9px] font-black rounded-full border border-purple-400/40 animate-pulse">
+              WORLD-1ST
+            </div>
+            <Lock className={`w-5 h-5 flex-shrink-0 ${activeTab === 'quantum-chaff' ? 'text-purple-400 animate-bounce' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Quantum Chaff</div>
+              <div className="text-[10px] text-slate-400">3-Node BLE Masking</div>
+            </div>
+          </button>
+
+          {/* 5. MAGNETOMETER RUBBLE LOCATOR */}
           <button
             onClick={() => handleTabChange('magnetometer')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -889,7 +908,12 @@ export default function WorldFirstInnovationsSuite() {
         {activeTab === 'infrasonic-hum' && <InfrasonicEarthHumAlertTab />}
 
         {/* ========================================================= */}
-        {/* 4. MAGNETOMETER: RUBBLE VOID & TRAPPED-HUMAN LOCATOR      */}
+        {/* 4. QUANTUM-SAFE "CHAFF" DATA MASKING (3-NODE BLE QUORUM) */}
+        {/* ========================================================= */}
+        {activeTab === 'quantum-chaff' && <QuantumChaffStorageTab />}
+
+        {/* ========================================================= */}
+        {/* 5. MAGNETOMETER: RUBBLE VOID & TRAPPED-HUMAN LOCATOR      */}
         {/* ========================================================= */}
         {activeTab === 'magnetometer' && <MagnetometerLocatorTab />}
 
