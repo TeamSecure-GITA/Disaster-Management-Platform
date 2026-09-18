@@ -1,21 +1,339 @@
-* {
-  box-sizing: border-box;
+:root {
+  --font-primary: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Disaster Management Palette Tokens */
+  --bg-deep-space: #020617;
+  --bg-cosmic-mesh: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+                     radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
+                     #020617;
+  --glass-bg-card: rgba(15, 23, 42, 0.72);
+  --glass-bg-hover: rgba(30, 41, 59, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(56, 189, 248, 0.4);
+  
+  /* Critical Action Accents */
+  --alert-rose: #f43f5e;
+  --alert-rose-glow: rgba(244, 63, 94, 0.35);
+  --hydro-cyan: #06b6d4;
+  --hydro-cyan-glow: rgba(6, 182, 212, 0.3);
+  --safe-emerald: #10b981;
+  --safe-emerald-glow: rgba(16, 185, 129, 0.3);
+  --caution-amber: #f59e0b;
+  --caution-amber-glow: rgba(245, 158, 11, 0.3);
+  --tactical-purple: #a855f7;
+  --tactical-indigo: #6366f1;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #07111f, #0b1f3a, #123b63);
-  color: white;
-  font-family: Arial, sans-serif;
-}
 * {
   box-sizing: border-box;
 }
 
 html {
-  background: #071A2B;
+  background: var(--bg-deep-space);
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-cosmic-mesh);
+  color: #f8fafc;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Modern Sleek Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(2, 6, 23, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.8);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* Universal Modern Glassmorphic Utilities */
+.glass-panel {
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -10px rgba(6, 182, 212, 0.18);
+}
+
+.glass-card-interactive {
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-interactive:hover {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(56, 189, 248, 0.45);
+  transform: translateY(-3px) scale(1.008);
+  box-shadow: 0 20px 40px -12px rgba(6, 182, 212, 0.25);
+}
+
+/* Luminous Glow Borders */
+.glow-border-cyan {
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 16px -2px rgba(6, 182, 212, 0.25);
+}
+
+.glow-border-rose {
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  box-shadow: 0 0 20px -2px rgba(244, 63, 94, 0.3);
+}
+
+.glow-border-emerald {
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 16px -2px rgba(16, 185, 129, 0.25);
+}
+
+.glow-border-amber {
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 16px -2px rgba(245, 158, 11, 0.25);
+}
+
+/* Dynamic Keyframe Animations */
+@keyframes beacon-pulse {
+  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 14px rgba(244, 63, 94, 0); }
+  100% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
+@keyframes cyan-radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes live-dot-ping {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.8); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes live-ticker-scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-beacon {
+  animation: beacon-pulse 2s infinite ease-in-out;
+}
+
+.animate-radar {
+  animation: cyan-radar-sweep 8s infinite linear;
+}
+
+.animate-live-ping {
+  animation: live-dot-ping 1.8s infinite ease-in-out;
+}
+
+.animate-float {
+  animation: subtle-float 4s infinite ease-in-out;
+}
+
+@keyframes beacon-pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  50% { transform: scale(1.4); opacity: 0.3; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes sound-wave {
+  0%, 100% { height: 6px; }
+  50% { height: 24px; }
+}
+
+@keyframes neon-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes radar-scan-pulse {
+  0% { opacity: 0.2; transform: scale(0.95); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+  100% { opacity: 0.2; transform: scale(0.95); }
+}
+
+.animate-pulse-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid rgba(244, 63, 94, 0.7);
+  animation: beacon-pulse-ring 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+.animate-pulse-ring-cyan {
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid rgba(6, 182, 212, 0.7);
+  animation: beacon-pulse-ring 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+/* Tactical Glassmorphic Cards & HUD Utilities */
+.tactical-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(8, 14, 28, 0.88) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tactical-card:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -12px rgba(14, 165, 233, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.tactical-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono, monospace);
+}
+
+.badge-critical {
+  background: rgba(244, 63, 94, 0.18);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.25);
+}
+
+.badge-high {
+  background: rgba(249, 115, 22, 0.18);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.45);
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.2);
+}
+
+.badge-moderate {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.badge-safe {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+
+.badge-info {
+  background: rgba(6, 182, 212, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(6, 182, 212, 0.45);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+}
+
+/* Quick Dial Hotline Chips */
+.hotline-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  font-family: var(--font-mono, monospace);
+  transition: all 0.18s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.hotline-chip:hover {
+  transform: translateY(-2px) scale(1.03);
+}
+
+.hotline-medical {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+.hotline-medical:hover {
+  background: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+}
+
+.hotline-police {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.4);
+}
+.hotline-police:hover {
+  background: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.4);
+}
+
+.hotline-disaster {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+.hotline-disaster:hover {
+  background: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+}
+
+.hotline-ndrf {
+  background: rgba(168, 85, 247, 0.18);
+  color: #d8b4fe;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+.hotline-ndrf:hover {
+  background: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.4);
+}
+
 
 #root {
   min-height: 100vh;

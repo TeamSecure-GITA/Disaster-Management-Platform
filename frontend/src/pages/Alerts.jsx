@@ -510,38 +510,41 @@ export default function Alerts() {
       <div
         style={{
           display: "flex",
-          gap: "10px",
-          marginBottom: "22px",
-          borderBottom: "1px solid #1e293b",
-          paddingBottom: "12px",
+          gap: "12px",
+          marginBottom: "24px",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          paddingBottom: "14px",
           flexWrap: "wrap",
         }}
       >
         <button
           onClick={() => setActiveTab("official")}
           style={{
-            backgroundColor: activeTab === "official" ? "#2563eb" : "#1e293b",
-            color: activeTab === "official" ? "#ffffff" : "#94a3b8",
-            border: "1px solid",
-            borderColor: activeTab === "official" ? "#3b82f6" : "#334155",
-            padding: "10px 20px",
-            borderRadius: "8px",
+            backgroundColor: activeTab === "official" ? "rgba(37, 99, 235, 0.2)" : "rgba(15, 23, 42, 0.6)",
+            color: activeTab === "official" ? "#60a5fa" : "#94a3b8",
+            border: activeTab === "official" ? "1.5px solid #3b82f6" : "1px solid rgba(255, 255, 255, 0.08)",
+            padding: "10px 22px",
+            borderRadius: "14px",
             fontSize: "0.88rem",
-            fontWeight: "700",
+            fontWeight: "800",
             cursor: "pointer",
             display: "inline-flex",
             alignItems: "center",
-            gap: "8px",
-            transition: "all 0.15s",
+            gap: "10px",
+            boxShadow: activeTab === "official" ? "0 4px 20px -4px rgba(59, 130, 246, 0.4)" : "none",
+            backdropFilter: "blur(12px)",
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           <span>🏛️ Official Programmatic Feeds</span>
           <span
             style={{
-              backgroundColor: "rgba(255,255,255,0.2)",
+              backgroundColor: activeTab === "official" ? "rgba(59, 130, 246, 0.3)" : "rgba(255, 255, 255, 0.08)",
+              color: activeTab === "official" ? "#93c5fd" : "#cbd5e1",
               padding: "2px 8px",
-              borderRadius: "10px",
+              borderRadius: "999px",
               fontSize: "0.72rem",
+              fontWeight: "900",
             }}
           >
             {alerts.length}
@@ -551,28 +554,31 @@ export default function Alerts() {
         <button
           onClick={() => setActiveTab("crowd")}
           style={{
-            backgroundColor: activeTab === "crowd" ? "#d97706" : "#1e293b",
-            color: activeTab === "crowd" ? "#ffffff" : "#94a3b8",
-            border: "1px solid",
-            borderColor: activeTab === "crowd" ? "#f59e0b" : "#334155",
-            padding: "10px 20px",
-            borderRadius: "8px",
+            backgroundColor: activeTab === "crowd" ? "rgba(217, 119, 6, 0.2)" : "rgba(15, 23, 42, 0.6)",
+            color: activeTab === "crowd" ? "#fbbf24" : "#94a3b8",
+            border: activeTab === "crowd" ? "1.5px solid #f59e0b" : "1px solid rgba(255, 255, 255, 0.08)",
+            padding: "10px 22px",
+            borderRadius: "14px",
             fontSize: "0.88rem",
-            fontWeight: "700",
+            fontWeight: "800",
             cursor: "pointer",
             display: "inline-flex",
             alignItems: "center",
-            gap: "8px",
-            transition: "all 0.15s",
+            gap: "10px",
+            boxShadow: activeTab === "crowd" ? "0 4px 20px -4px rgba(245, 158, 11, 0.4)" : "none",
+            backdropFilter: "blur(12px)",
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           <span>🔥 Live Crowd Signals & Media Anomaly Radar</span>
           <span
             style={{
-              backgroundColor: "rgba(255,255,255,0.2)",
+              backgroundColor: activeTab === "crowd" ? "rgba(245, 158, 11, 0.3)" : "rgba(255, 255, 255, 0.08)",
+              color: activeTab === "crowd" ? "#fde68a" : "#cbd5e1",
               padding: "2px 8px",
-              borderRadius: "10px",
+              borderRadius: "999px",
               fontSize: "0.72rem",
+              fontWeight: "900",
             }}
           >
             {crowdSignals.length} Active
@@ -890,15 +896,17 @@ export default function Alerts() {
                 return (
                   <div
                     key={alert._id || alert.externalId || Math.random()}
+                    className="tactical-card"
                     style={{
-                      backgroundColor: "#0f172a",
-                      borderRadius: "12px",
-                      border: `1px solid ${sev.border}`,
+                      backgroundColor: "rgba(15, 23, 42, 0.75)",
+                      backdropFilter: "blur(12px)",
+                      borderRadius: "16px",
+                      border: `1.5px solid ${sev.border}55`,
                       overflow: "hidden",
                       display: "flex",
                       flexDirection: "column",
-                      boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
-                      transition: "transform 0.2s, box-shadow 0.2s",
+                      boxShadow: `0 8px 24px -6px ${sev.border}33`,
+                      transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
                     }}
                   >
                     {/* Card Header */}

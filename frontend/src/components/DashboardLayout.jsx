@@ -65,6 +65,7 @@ export default function DashboardLayout() {
         maxHeight: "100dvh",
         overflow: "hidden",
         backgroundColor: "#020617",
+        backgroundImage: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(14, 165, 233, 0.12), rgba(2, 6, 23, 0.98)), radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.08), transparent)",
         position: "relative",
       }}
     >

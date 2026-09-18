@@ -399,536 +399,958 @@ export default function Dashboard() {
   };
 
   // ─── RENDER ───────────────────────────────────────────────────────────────
+  const completedChecks = checklist.filter((item) => item.checked).length;
+  const checklistPercentage = Math.round((completedChecks / checklist.length) * 100);
+
   return (
-    <div style={{ backgroundColor: "#0b1329", minHeight: "100%", color: "#f8fafc", padding: "clamp(12px, 3vw, 24px)" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ backgroundColor: "#020617", minHeight: "100%", color: "#f8fafc", padding: "clamp(12px, 2.5vw, 24px)" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
 
-        {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "bold" }}>
-              {t.title}
-            </h1>
-            <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.9rem" }}>{t.subtitle}</p>
+        {/* ── 1. Top Mission Command Header ─────────────────────────────────── */}
+        <div
+          className="tactical-card"
+          style={{
+            padding: "20px 24px",
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(8, 14, 28, 0.95) 100%)",
+            border: "1px solid rgba(56, 189, 248, 0.25)",
+            boxShadow: "0 12px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(14, 165, 233, 0.12)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981" }} />
+                <span className="tactical-badge badge-safe">
+                  CRISIS OPERATIONS DECK · ACTIVE TELEMETRY
+                </span>
+              </div>
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: "clamp(1.5rem, 2.5vw, 2.1rem)",
+                  fontWeight: "900",
+                  letterSpacing: "-0.03em",
+                  background: "linear-gradient(135deg, #ffffff 0%, #38bdf8 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                {t.title}
+              </h1>
+              <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.88rem" }}>
+                {t.subtitle}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+              {/* Language Selector */}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "rgba(30, 41, 59, 0.8)", padding: "4px 10px", borderRadius: "8px", border: "1px solid rgba(56, 189, 248, 0.25)" }}>
+                <span style={{ fontSize: "0.85rem" }}>🌐</span>
+                <select
+                  value={lang}
+                  onChange={handleLangChange}
+                  style={{ backgroundColor: "transparent", color: "#f8fafc", border: "none", outline: "none", fontSize: "0.78rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  <option value="en" style={{ background: "#0f172a" }}>English</option>
+                  <option value="hi" style={{ background: "#0f172a" }}>हिन्दी (Hindi)</option>
+                  <option value="or" style={{ background: "#0f172a" }}>ଓଡ଼ିଆ (Odia)</option>
+                </select>
+              </div>
+
+              {/* Direct Speed Dialers */}
+              <a
+                href="tel:112"
+                className="hotline-chip hotline-medical"
+                title="Call National All-Emergency Helpline (112)"
+              >
+                <span>🚨</span>
+                <span>112 All Emergency</span>
+              </a>
+
+              <a
+                href="tel:108"
+                className="hotline-chip hotline-medical"
+                title="Call Medical Emergency Ambulance (108)"
+              >
+                <span>🚑</span>
+                <span>108 Medical</span>
+              </a>
+
+              <a
+                href="tel:1070"
+                className="hotline-chip hotline-disaster"
+                title="Call State Disaster Management Authority (1070)"
+              >
+                <span>📞</span>
+                <span>1070 SDMA</span>
+              </a>
+
+              {/* Account Switcher / Login */}
+              <button
+                onClick={() => navigate("/login")}
+                style={{
+                  backgroundColor: "rgba(14, 165, 233, 0.2)",
+                  color: "#38bdf8",
+                  border: "1px solid rgba(56, 189, 248, 0.4)",
+                  padding: "6px 14px",
+                  borderRadius: "8px",
+                  fontWeight: "700",
+                  fontSize: "0.82rem",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span>🔐</span>
+                <span>{user ? "Switch Account" : "Sign In"}</span>
+              </button>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-            {/* Language Dropdown */}
-            <select
-              value={lang}
-              onChange={handleLangChange}
-              style={{ backgroundColor: "#1e293b", color: "#fff", border: "1px solid #334155", padding: "6px 12px", borderRadius: "6px", cursor: "pointer" }}
-            >
-              <option value="en">English</option>
-              <option value="hi">हिंदी (Hindi)</option>
-              <option value="or">ଓଡ଼ିଆ (Odia)</option>
-            </select>
-            {/* Clickable Emergency Direct Dialers */}
-            <a
-              href="tel:108"
-              title="Call Emergency Medical Ambulance (108)"
-              style={{
-                backgroundColor: "#dc2626",
-                color: "white",
-                padding: "6px 14px",
-                borderRadius: "6px",
-                fontWeight: "bold",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                boxShadow: "0 2px 4px rgba(220,38,38,0.3)",
-                transition: "transform 0.15s, opacity 0.15s",
-                cursor: "pointer"
-              }}
-            >
-              <span>🚑</span>
-              <span>108 (Medical)</span>
-            </a>
 
-            <a
-              href="tel:1070"
-              title="Call State Disaster Management Helpline (1070)"
-              style={{
-                backgroundColor: "#2563eb",
-                color: "white",
-                padding: "6px 14px",
-                borderRadius: "6px",
-                fontWeight: "bold",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                boxShadow: "0 2px 4px rgba(37,99,235,0.3)",
-                transition: "transform 0.15s, opacity 0.15s",
-                cursor: "pointer"
-              }}
-            >
-              <span>📞</span>
-              <span>1070 (Disaster)</span>
-            </a>
-
-            {/* Direct Login Button */}
-            <button
-              onClick={() => navigate("/login")}
-              style={{
-                backgroundColor: "#0284c7",
-                color: "#ffffff",
-                border: "none",
-                padding: "6px 16px",
-                borderRadius: "6px",
-                fontWeight: "bold",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
-              }}
-            >
-              <span>🔐</span>
-              <span>{user ? "Switch / Login" : "Login"}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* ── User Banner ─────────────────────────────────────────────────── */}
-        <div style={{ padding: "12px 18px", backgroundColor: "#1e293b", borderRadius: "8px", border: "1px solid #334155", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-          {loading
-            ? <p style={{ margin: 0, color: "#94a3b8" }}>{t.loadingSession}</p>
-            : (
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#0284c7", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "0.9rem" }}>
-                  {user?.name ? user.name.charAt(0).toUpperCase() : "👤"}
+          {/* User Session Banner Strip */}
+          <div
+            style={{
+              marginTop: "16px",
+              paddingTop: "14px",
+              borderTop: "1px solid rgba(56, 189, 248, 0.12)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(14, 165, 233, 0.25)",
+                  border: "1.5px solid #38bdf8",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "800",
+                  color: "#38bdf8",
+                }}
+              >
+                {user?.name ? user.name.charAt(0).toUpperCase() : "👤"}
+              </div>
+              <div>
+                <div style={{ fontSize: "0.92rem", fontWeight: "800", color: "#f8fafc" }}>
+                  {t.welcomeBack}, <span style={{ color: "#38bdf8" }}>{user ? user.name || user.email : t.emergencyGuest}</span>
                 </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "bold", color: "#38bdf8" }}>
-                    {t.welcomeBack}, {user ? user.name || user.email : t.emergencyGuest}
-                  </h2>
-                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#94a3b8" }}>
-                    Role: <strong style={{ color: "#e2e8f0" }}>{user?.role ? user.role.toUpperCase() : "GUEST / CITIZEN"}</strong> • Session active
-                  </p>
+                <div style={{ fontSize: "0.72rem", color: "#94a3b8", fontFamily: "var(--font-mono, monospace)" }}>
+                  CLEARANCE: <strong style={{ color: "#e2e8f0" }}>{user?.role ? user.role.toUpperCase() : "CITIZEN / GUEST"}</strong> • ENCRYPTED SESSION ACTIVE
                 </div>
               </div>
-            )
-          }
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={() => navigate("/login")}
-              style={{
-                backgroundColor: "#334155",
-                color: "#f8fafc",
-                border: "1px solid #475569",
-                padding: "6px 14px",
-                borderRadius: "6px",
-                fontSize: "0.82rem",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              {user ? "🔄 Switch Account" : "🔑 Sign In to Portal"}
-            </button>
-            <button
-              onClick={() => navigate("/register")}
-              style={{
-                backgroundColor: "#1e293b",
-                color: "#38bdf8",
-                border: "1px solid #0284c7",
-                padding: "6px 14px",
-                borderRadius: "6px",
-                fontSize: "0.82rem",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              📝 Register
-            </button>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => navigate("/profile")}
+                style={{
+                  backgroundColor: "rgba(30, 41, 59, 0.7)",
+                  color: "#cbd5e1",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  padding: "5px 12px",
+                  borderRadius: "6px",
+                  fontSize: "0.78rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                👤 Responder Profile
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                style={{
+                  backgroundColor: "rgba(56, 189, 248, 0.12)",
+                  color: "#38bdf8",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  padding: "5px 12px",
+                  borderRadius: "6px",
+                  fontSize: "0.78rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                }}
+              >
+                📝 Register
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* ── Offline Warning ─────────────────────────────────────────────── */}
+        {/* ── 2. Offline Mode Warning (if offline) ─────────────────────────── */}
         {!isOnline && (
-          <div style={{ backgroundColor: "#854d0e", color: "#fef08a", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-            <span>{t.offlineMode}</span>
-            <span>{t.unsyncedReports}: {pendingSyncCount}</span>
+          <div
+            style={{
+              backgroundColor: "rgba(245, 158, 11, 0.18)",
+              border: "1px solid rgba(245, 158, 11, 0.45)",
+              color: "#fde68a",
+              padding: "12px 18px",
+              borderRadius: "12px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "10px",
+              boxShadow: "0 0 20px rgba(245, 158, 11, 0.2)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "1.2rem" }}>⚠️</span>
+              <span style={{ fontWeight: "700" }}>{t.offlineMode}</span>
+            </div>
+            <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.82rem" }}>
+              {t.unsyncedReports}: <strong>{pendingSyncCount}</strong>
+            </span>
           </div>
         )}
 
-        {/* ── SLA Callback Banner ─────────────────────────────────────────── */}
-        <div style={{ backgroundColor: "#064e3b", border: "1px solid #059669", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-          <div>
-            <strong style={{ color: "#34d399" }}>{t.slaActive}</strong>
-            <p style={{ margin: "2px 0 0 0", fontSize: "0.8rem", color: "#a7f3d0" }}>{t.slaDesc}</p>
-          </div>
-          <button
-            onClick={handleCallback}
-            style={{ backgroundColor: "#059669", color: "white", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}
-          >
-            {callbackRequested ? t.callbackRequested : t.callbackBtn}
-          </button>
-        </div>
-
-        {/* ── SOS Beacon Banner ───────────────────────────────────────────── */}
-        <div style={{ backgroundColor: "#7f1d1d", border: "1px solid #dc2626", padding: "16px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-          <div>
-            <strong style={{ color: "#fca5a5", fontSize: "1.05rem" }}>{t.dangerTitle}</strong>
-            <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#fecaca" }}>{t.dangerDesc}</p>
-            {sosActive && sosCoords && (
-              <p style={{ margin: "6px 0 0 0", fontSize: "0.8rem", color: "#fde68a" }}>
-                📍 Broadcasting: {sosCoords.lat}, {sosCoords.lng}
-              </p>
-            )}
-          </div>
-          <button
-            onClick={broadcastSOS}
-            style={{ backgroundColor: sosActive ? "#450a0a" : "#dc2626", color: "white", border: "none", padding: "10px 20px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", animation: sosActive ? "pulse 1.5s infinite" : "none" }}
-          >
-            {sosActive ? t.sosActive : t.sosBroadcast}
-          </button>
-        </div>
-
-        {/* ── NER Landslide Early Warning Banner ────────────────────────────── */}
-        <div style={{
-          background: "linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)",
-          border: "1.5px solid #6366f1",
-          borderRadius: "10px",
-          padding: "16px 20px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "12px",
-          boxShadow: "0 4px 15px rgba(99, 102, 241, 0.2)"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <span style={{ fontSize: "2rem" }}>⛰️</span>
-            <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(239, 68, 68, 0.25)", padding: "2px 8px", borderRadius: "4px", fontSize: "0.72rem", color: "#fca5a5", fontWeight: "700" }}>
-                SPECIALIZED MODULE · NORTH EASTERN REGION (NER)
+        {/* ── 3. High-Impact SOS & Immediate Danger Command Strip ──────────── */}
+        <div
+          className="tactical-card glow-border-rose"
+          style={{
+            padding: "20px 24px",
+            background: "linear-gradient(135deg, rgba(69, 10, 10, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)",
+            border: "1.5px solid rgba(244, 63, 94, 0.5)",
+            boxShadow: "0 10px 30px rgba(244, 63, 94, 0.25)",
+            position: "relative",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+            <div style={{ maxWidth: "720px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: "rgba(244, 63, 94, 0.25)", border: "1px solid rgba(244, 63, 94, 0.5)", padding: "2px 8px", borderRadius: "999px", fontSize: "0.7rem", color: "#fca5a5", fontWeight: "800", textTransform: "uppercase" }}>
+                <span>🚨</span> LIFE-THREAT TRIAGE SYSTEM
               </div>
-              <h4 style={{ margin: "4px 0 2px 0", color: "#e0e7ff", fontSize: "1.05rem", fontWeight: "700" }}>
-                AI-Powered Landslide & Slope Risk Monitoring Engine
-              </h4>
-              <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8" }}>
-                Real-time IMD rainfall triggers, soil saturation %, road blockage tracking & isolated habitations response for 8 NER states.
+              <h2 style={{ margin: "8px 0 4px 0", fontSize: "1.3rem", fontWeight: "900", color: "#ffffff" }}>
+                {t.dangerTitle}
+              </h2>
+              <p style={{ margin: 0, fontSize: "0.85rem", color: "#fecaca", lineHeight: "1.4" }}>
+                {t.dangerDesc}
               </p>
+              {sosActive && sosCoords && (
+                <div style={{ marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: "rgba(254, 240, 138, 0.2)", border: "1px solid rgba(254, 240, 138, 0.4)", color: "#fef08a", padding: "4px 10px", borderRadius: "6px", fontSize: "0.78rem", fontFamily: "var(--font-mono, monospace)" }}>
+                  <span>📍 GPS ACTIVE:</span> <strong>{sosCoords.lat}, {sosCoords.lng}</strong>
+                </div>
+              )}
             </div>
-          </div>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <Link
-              to="/ar-see-the-risk"
-              style={{
-                backgroundColor: "#0284c7",
-                color: "#ffffff",
-                padding: "10px 18px",
-                borderRadius: "8px",
-                textDecoration: "none",
-                fontWeight: "700",
-                fontSize: "0.88rem",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                border: "1px solid #38bdf8",
-                boxShadow: "0 2px 10px rgba(2, 132, 199, 0.4)"
-              }}
-            >
-              📡 AR See the Risk
-            </Link>
-            <Link
-              to="/ner-landslide-monitor"
-              style={{
-                backgroundColor: "#4f46e5",
-                color: "#ffffff",
-                padding: "10px 18px",
-                borderRadius: "8px",
-                textDecoration: "none",
-                fontWeight: "700",
-                fontSize: "0.88rem",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                boxShadow: "0 2px 10px rgba(79, 70, 229, 0.4)"
-              }}
-            >
-              Launch NER Monitor ➔
-            </Link>
+
+            <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ position: "relative" }}>
+                <div className="animate-pulse-ring" />
+                <button
+                  onClick={broadcastSOS}
+                  style={{
+                    backgroundColor: sosActive ? "#450a0a" : "#dc2626",
+                    color: "#ffffff",
+                    border: "2px solid rgba(255, 255, 255, 0.4)",
+                    padding: "14px 28px",
+                    borderRadius: "12px",
+                    cursor: "pointer",
+                    fontWeight: "900",
+                    fontSize: "0.95rem",
+                    boxShadow: "0 0 25px rgba(220, 38, 38, 0.8)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    letterSpacing: "0.04em",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <span style={{ fontSize: "1.2rem" }}>🚨</span>
+                  <span>{sosActive ? t.sosActive : t.sosBroadcast}</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => navigate("/emergency-sos")}
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                  color: "#f8fafc",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  padding: "14px 20px",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  fontWeight: "700",
+                  fontSize: "0.85rem",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                SOS Center & Siren ➔
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* ── Quick Stats Grid (Responsive 4 -> 2 -> 1) ────────────────────── */}
-        <div className="responsive-stat-grid">
-          {[
-            { label: t.activeAlerts, value: "3 High Priority", color: "#f87171" },
-            { label: t.rescueOps, value: "12 Ongoing", color: "#60a5fa" },
-            { label: t.safeShelters, value: "48 Open", color: "#4ade80" },
-            { label: t.sosRequests, value: "5 Pending", color: "#facc15" },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{ backgroundColor: "#1e293b", padding: "16px", borderRadius: "8px", border: "1px solid #334155" }}>
-              <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>{label}</span>
-              <h3 style={{ margin: "6px 0 0 0", color, fontSize: "1.5rem" }}>{value}</h3>
+        {/* ── 4. Tactical Threat HUD & Zero-Delay SLA Strip ───────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px" }}>
+          
+          {/* Defcon Threat Meter */}
+          <div
+            className="tactical-card"
+            style={{
+              padding: "18px 20px",
+              borderLeft: "4px solid #f59e0b",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#f59e0b", boxShadow: "0 0 8px #f59e0b" }} />
+                <span style={{ fontSize: "0.72rem", fontWeight: "800", color: "#fbbf24", letterSpacing: "0.06em", fontFamily: "var(--font-mono, monospace)" }}>
+                  THREAT CONDITION: DEFCON 2
+                </span>
+              </div>
+              <div style={{ fontWeight: "800", fontSize: "1.05rem", color: "#f8fafc", marginTop: "4px" }}>
+                Elevated Regional Squall & Slope Alert
+              </div>
+              <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginTop: "2px" }}>
+                Precipitation triggering cautionary drainage runoff envelope
+              </div>
             </div>
+            <Link
+              to="/alerts"
+              style={{
+                backgroundColor: "rgba(245, 158, 11, 0.18)",
+                color: "#fde68a",
+                border: "1px solid rgba(245, 158, 11, 0.4)",
+                padding: "8px 14px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                fontWeight: "700",
+                fontSize: "0.8rem",
+              }}
+            >
+              Alert Feeds ➔
+            </Link>
+          </div>
+
+          {/* SLA Zero-Delay Auto Dispatch */}
+          <div
+            className="tactical-card"
+            style={{
+              padding: "18px 20px",
+              borderLeft: "4px solid #10b981",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 8px #10b981" }} />
+                <span style={{ fontSize: "0.72rem", fontWeight: "800", color: "#34d399", letterSpacing: "0.06em", fontFamily: "var(--font-mono, monospace)" }}>
+                  {t.slaActive}
+                </span>
+              </div>
+              <div style={{ fontWeight: "800", fontSize: "1.05rem", color: "#f8fafc", marginTop: "4px" }}>
+                Automated AI Triage & Routing
+              </div>
+              <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginTop: "2px" }}>
+                {t.slaDesc}
+              </div>
+            </div>
+            <button
+              onClick={handleCallback}
+              style={{
+                backgroundColor: "#059669",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "800",
+                fontSize: "0.8rem",
+                boxShadow: "0 2px 10px rgba(5, 150, 105, 0.4)",
+              }}
+            >
+              {callbackRequested ? t.callbackRequested : t.callbackBtn}
+            </button>
+          </div>
+        </div>
+
+        {/* ── 5. Real-Time Telemetry & Weather Grid ────────────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+
+          {/* Meteorological Radar (Open-Meteo) */}
+          <div className="tactical-card" style={{ padding: "18px 20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <span style={{ fontSize: "0.72rem", fontWeight: "800", color: "#38bdf8", fontFamily: "var(--font-mono, monospace)" }}>
+                METEOROLOGY & ATMOSPHERE
+              </span>
+              <span className="tactical-badge badge-info">LIVE</span>
+            </div>
+            {weatherLoading ? (
+              <div style={{ color: "#94a3b8", fontSize: "0.88rem" }}>⏳ {t.weatherLoading}</div>
+            ) : (
+              <div>
+                <div style={{ fontSize: "1.1rem", fontWeight: "800", color: "#ffffff" }}>
+                  {getWeatherAlert(weather.code)}
+                </div>
+                <div style={{ fontSize: "1.6rem", fontWeight: "900", color: "#38bdf8", margin: "6px 0" }}>
+                  {weather.temp !== null ? `${weather.temp}°C` : "--"} <span style={{ fontSize: "0.95rem", color: "#cbd5e1" }}>{weather.desc}</span>
+                </div>
+                <div style={{ fontSize: "0.78rem", color: "#94a3b8" }}>
+                  💨 Wind: {weather.wind} km/h • 📍 GPS Auto-Resolution
+                </div>
+              </div>
+            )}
+            <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid rgba(56, 189, 248, 0.12)" }}>
+              <button
+                onClick={() => window.open("https://www.windy.com/?20.296,85.824,9", "_blank")}
+                style={{
+                  backgroundColor: "rgba(14, 165, 233, 0.15)",
+                  color: "#38bdf8",
+                  border: "1px solid rgba(56, 189, 248, 0.35)",
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  fontSize: "0.78rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  width: "100%",
+                }}
+              >
+                {t.viewRadar} (Windy Satellite) ↗
+              </button>
+            </div>
+          </div>
+
+          {/* Geological & Hill Slope Risk Engine */}
+          <div className="tactical-card" style={{ padding: "18px 20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <span style={{ fontSize: "0.72rem", fontWeight: "800", color: "#c084fc", fontFamily: "var(--font-mono, monospace)" }}>
+                NER HILL SATURATION RADAR
+              </span>
+              <span className="tactical-badge badge-high">64% SAT</span>
+            </div>
+            <div style={{ fontSize: "1.1rem", fontWeight: "800", color: "#ffffff" }}>
+              Slope Moisture & Landslide Risk
+            </div>
+            <div style={{ margin: "8px 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", marginBottom: "4px", color: "#cbd5e1" }}>
+                <span>Soil Saturation Index</span>
+                <span style={{ color: "#fb923c", fontWeight: "700" }}>64% (Cautionary)</span>
+              </div>
+              <div style={{ backgroundColor: "rgba(255, 255, 255, 0.1)", height: "8px", borderRadius: "999px" }}>
+                <div style={{ width: "64%", height: "100%", borderRadius: "999px", background: "linear-gradient(90deg, #38bdf8 0%, #f59e0b 100%)" }} />
+              </div>
+            </div>
+            <div style={{ fontSize: "0.78rem", color: "#94a3b8" }}>
+              IMD Rainfall Triggers active across 8 NER hill highway corridors
+            </div>
+            <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid rgba(56, 189, 248, 0.12)", display: "flex", gap: "8px" }}>
+              <Link
+                to="/ar-see-the-risk"
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  backgroundColor: "rgba(14, 165, 233, 0.15)",
+                  color: "#38bdf8",
+                  border: "1px solid rgba(56, 189, 248, 0.35)",
+                  padding: "6px",
+                  borderRadius: "6px",
+                  fontSize: "0.76rem",
+                  fontWeight: "700",
+                  textDecoration: "none",
+                }}
+              >
+                📡 AR Scanner
+              </Link>
+              <Link
+                to="/ner-landslide-monitor"
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  backgroundColor: "rgba(99, 102, 241, 0.2)",
+                  color: "#a5b4fc",
+                  border: "1px solid rgba(99, 102, 241, 0.4)",
+                  padding: "6px",
+                  borderRadius: "6px",
+                  fontSize: "0.76rem",
+                  fontWeight: "700",
+                  textDecoration: "none",
+                }}
+              >
+                NER Monitor ➔
+              </Link>
+            </div>
+          </div>
+
+          {/* LoRa P2P Mesh Network Telemetry */}
+          <div className="tactical-card" style={{ padding: "18px 20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <span style={{ fontSize: "0.72rem", fontWeight: "800", color: "#34d399", fontFamily: "var(--font-mono, monospace)" }}>
+                ZERO-INTERNET P2P MESH
+              </span>
+              <span className="tactical-badge badge-safe">84 NODES</span>
+            </div>
+            <div style={{ fontSize: "1.1rem", fontWeight: "800", color: "#ffffff" }}>
+              Off-Grid Radio Communications
+            </div>
+            <div style={{ fontSize: "1.6rem", fontWeight: "900", color: "#34d399", margin: "6px 0" }}>
+              84 <span style={{ fontSize: "0.95rem", color: "#cbd5e1" }}>P2P Relays Active</span>
+            </div>
+            <div style={{ fontSize: "0.78rem", color: "#94a3b8" }}>
+              Zero-Internet multi-hop fallback ready for cellular outage
+            </div>
+            <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid rgba(56, 189, 248, 0.12)" }}>
+              <Link
+                to="/mesh-console"
+                style={{
+                  display: "block",
+                  textAlign: "center",
+                  backgroundColor: "rgba(16, 185, 129, 0.15)",
+                  color: "#34d399",
+                  border: "1px solid rgba(16, 185, 129, 0.35)",
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  fontSize: "0.78rem",
+                  fontWeight: "700",
+                  textDecoration: "none",
+                }}
+              >
+                Open Mesh Terminal ➔
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 6. Operational Key Stats (4 Pillars) ────────────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+          {[
+            { label: t.activeAlerts, value: "3 High Priority", color: "#f87171", icon: "🚨", link: "/alerts" },
+            { label: t.rescueOps, value: "12 Ongoing", color: "#60a5fa", icon: "🚁", link: "/rescue-centers" },
+            { label: t.safeShelters, value: "48 Open", color: "#4ade80", icon: "🏥", link: "/shelter-finder" },
+            { label: t.sosRequests, value: "5 Pending", color: "#facc15", icon: "🆘", link: "/emergency-sos" },
+          ].map(({ label, value, color, icon, link }) => (
+            <Link
+              key={label}
+              to={link}
+              className="tactical-card"
+              style={{
+                padding: "16px 18px",
+                textDecoration: "none",
+                display: "block",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.78rem", color: "#94a3b8", fontWeight: "700" }}>{label}</span>
+                <span style={{ fontSize: "1.2rem" }}>{icon}</span>
+              </div>
+              <div style={{ margin: "8px 0 0 0", color, fontSize: "1.45rem", fontWeight: "900", letterSpacing: "-0.02em" }}>
+                {value}
+              </div>
+            </Link>
           ))}
         </div>
 
-        {/* ── Live Weather (Open-Meteo API) ───────────────────────────────── */}
-        <div style={{ backgroundColor: "#1e293b", border: "1px solid #0284c7", padding: "12px 18px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-          <div>
-            {weatherLoading ? (
-              <strong style={{ color: "#38bdf8" }}>⏳ {t.weatherLoading}</strong>
-            ) : (
-              <>
-                <strong style={{ color: "#38bdf8" }}>
-                  {getWeatherAlert(weather.code)}: {weather.desc}
-                </strong>
-                <p style={{ margin: "2px 0 0 0", fontSize: "0.8rem", color: "#cbd5e1" }}>
-                  🌡️ Temp: {weather.temp}°C &nbsp;|&nbsp; 💨 Wind: {weather.wind} km/h &nbsp;|&nbsp; 📍 Live Data
-                </p>
-              </>
-            )}
+        {/* ── 7. Quick Tactical Action Command Grid ────────────────────────── */}
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+            <span style={{ fontSize: "1.1rem" }}>⚡</span>
+            <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: "800", color: "#f8fafc" }}>
+              {t.quickActions} &amp; Rapid Field Operations
+            </h3>
           </div>
-          <button
-            onClick={() => window.open("https://www.windy.com/?20.296,85.824,9", "_blank")}
-            style={{ backgroundColor: "#0284c7", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", cursor: "pointer" }}
-          >
-            {t.viewRadar}
-          </button>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px" }}>
+            {[
+              {
+                title: "Dispatch SOS Team",
+                desc: "Send emergency rescue beacon with GPS coordinates",
+                icon: "🚨",
+                path: "/emergency-sos",
+                color: "#f43f5e",
+                bg: "rgba(244, 63, 94, 0.12)",
+                border: "rgba(244, 63, 94, 0.35)",
+              },
+              {
+                title: "Broadcast Regional Alert",
+                desc: "Transmit official civilian warning bulletin",
+                icon: "📢",
+                path: "/alerts",
+                color: "#38bdf8",
+                bg: "rgba(56, 189, 248, 0.12)",
+                border: "rgba(56, 189, 248, 0.35)",
+              },
+              {
+                title: "AR 'See the Risk' Scanner",
+                desc: "Augmented visual overlay of flood and slide risk",
+                icon: "📡",
+                path: "/ar-see-the-risk",
+                color: "#a855f7",
+                bg: "rgba(168, 85, 247, 0.12)",
+                border: "rgba(168, 85, 247, 0.35)",
+              },
+              {
+                title: "Safe Shelter Finder",
+                desc: "Live capacity tracking and turn-by-turn routing",
+                icon: "🏥",
+                path: "/shelter-finder",
+                color: "#10b981",
+                bg: "rgba(16, 185, 129, 0.12)",
+                border: "rgba(16, 185, 129, 0.35)",
+              },
+              {
+                title: "Family Safety Radar",
+                desc: "Real-time check-in and tracking for family members",
+                icon: "👨‍👩‍👧",
+                path: "/family-safety",
+                color: "#60a5fa",
+                bg: "rgba(96, 165, 250, 0.12)",
+                border: "rgba(96, 165, 250, 0.35)",
+              },
+              {
+                title: "Disaster Safety SOP Guides",
+                desc: "Voice-guided survival SOPs for cyclone, flood, quake",
+                icon: "🎒",
+                path: "/safety-guides",
+                color: "#f59e0b",
+                bg: "rgba(245, 158, 11, 0.12)",
+                border: "rgba(245, 158, 11, 0.35)",
+              },
+            ].map((action) => (
+              <div
+                key={action.title}
+                onClick={() => navigate(action.path)}
+                className="tactical-card"
+                style={{
+                  padding: "16px 18px",
+                  cursor: "pointer",
+                  background: `linear-gradient(135deg, ${action.bg} 0%, rgba(15, 23, 42, 0.8) 100%)`,
+                  borderColor: action.border,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+                  <span style={{ fontSize: "1.4rem" }}>{action.icon}</span>
+                  <span style={{ fontSize: "0.95rem", fontWeight: "800", color: action.color }}>
+                    {action.title}
+                  </span>
+                </div>
+                <div style={{ fontSize: "0.78rem", color: "#94a3b8", lineHeight: "1.35" }}>
+                  {action.desc}
+                </div>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
+                  <span style={{ fontSize: "0.74rem", fontWeight: "700", color: action.color }}>
+                    Launch ➔
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* ── Live Feed & Quick Actions (Responsive 2fr 1fr -> 1 col) ─────── */}
-        <div className="responsive-split-grid">
+        {/* ── 8. Split Grid: Live Incident Feed & Survival Checklist ────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "20px" }}>
 
           {/* Live Incident Feed */}
-          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>{t.liveIncidentFeed}</h3>
+          <div className="tactical-card" style={{ padding: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#38bdf8", boxShadow: "0 0 8px #38bdf8" }} />
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "800", color: "#ffffff" }}>
+                  {t.liveIncidentFeed}
+                </h3>
+              </div>
+              <span className="tactical-badge badge-info">VERIFIED TELEMETRY</span>
+            </div>
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {reports.slice(0, 4).map((r) => (
-                <div key={r.id} style={{ backgroundColor: "#0f172a", padding: "12px", borderRadius: "6px", borderLeft: `4px solid ${r.status === "Verified" ? "#3b82f6" : r.status === "Pending" ? "#f59e0b" : "#ef4444"}` }}>
-                  <strong style={{ fontSize: "0.9rem" }}>{r.text}</strong>
-                  <p style={{ margin: "4px 0 0 0", fontSize: "0.75rem", color: "#94a3b8" }}>{r.time} • {r.status}</p>
+                <div
+                  key={r.id}
+                  style={{
+                    backgroundColor: "rgba(15, 23, 42, 0.8)",
+                    padding: "12px 14px",
+                    borderRadius: "10px",
+                    borderLeft: `4px solid ${r.status === "Verified" ? "#3b82f6" : r.status === "Pending" ? "#f59e0b" : "#ef4444"}`,
+                    border: "1px solid rgba(255, 255, 255, 0.05)",
+                  }}
+                >
+                  <strong style={{ fontSize: "0.88rem", color: "#f8fafc" }}>{r.text}</strong>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px", fontSize: "0.74rem", color: "#94a3b8" }}>
+                    <span>⏱️ {r.time}</span>
+                    <span style={{ color: r.status === "Verified" ? "#60a5fa" : "#fbbf24", fontWeight: "700" }}>
+                      ● {r.status}
+                    </span>
+                  </div>
                 </div>
               ))}
               {reports.length === 0 && (
                 <p style={{ color: "#64748b", fontSize: "0.85rem" }}>No active incidents reported.</p>
               )}
             </div>
-          </div>
 
-          {/* Quick Actions — now with real navigation */}
-          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>{t.quickActions}</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <button
-                onClick={() => navigate("/emergency-sos")}
-                style={{ backgroundColor: "#dc2626", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}
-              >
-                {t.dispatchSOS}
-              </button>
-              <button
-                onClick={() => navigate("/alerts")}
-                style={{ backgroundColor: "#2563eb", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}
-              >
-                {t.broadcastAlert}
-              </button>
-              <button
-                onClick={() => navigate("/ar-see-the-risk")}
-                style={{ backgroundColor: "#0284c7", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
-              >
-                📡 AR "See the Risk" Scanner
-              </button>
-              <button
-                onClick={() => navigate("/shelter-finder")}
-                style={{ backgroundColor: "#059669", color: "white", border: "none", padding: "10px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}
-              >
-                {t.openShelter}
-              </button>
+            {/* Quick Report Trigger */}
+            <div style={{ marginTop: "16px" }}>
+              <div style={{ fontSize: "0.82rem", fontWeight: "700", color: "#e2e8f0", marginBottom: "6px" }}>
+                📢 Report New Hazard (Fallen Wire, Flood, Landslide):
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <input
+                  type="text"
+                  placeholder={t.hazardPlaceholder}
+                  value={reportInput}
+                  onChange={(e) => setReportInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && submitHazardReport()}
+                  style={{
+                    flex: 1,
+                    minWidth: "180px",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    border: "1px solid rgba(56, 189, 248, 0.3)",
+                    borderRadius: "8px",
+                    padding: "8px 12px",
+                    color: "white",
+                    fontSize: "0.82rem",
+                    outline: "none",
+                  }}
+                />
+                <button
+                  onClick={submitHazardReport}
+                  style={{
+                    backgroundColor: "#2563eb",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "700",
+                    fontSize: "0.82rem",
+                  }}
+                >
+                  Submit
+                </button>
+                <button
+                  type="button"
+                  onClick={getCurrentLocation}
+                  style={{
+                    backgroundColor: "rgba(14, 165, 233, 0.2)",
+                    color: "#38bdf8",
+                    fontWeight: "700",
+                    border: "1px solid rgba(56, 189, 248, 0.4)",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "0.82rem",
+                  }}
+                >
+                  📍 Share GPS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => sendWhatsAppAlert(reportInput || "Immediate assistance requested!")}
+                  style={{
+                    backgroundColor: "rgba(34, 197, 94, 0.2)",
+                    color: "#4ade80",
+                    fontWeight: "700",
+                    border: "1px solid rgba(34, 197, 94, 0.4)",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "0.82rem",
+                  }}
+                >
+                  💬 WhatsApp
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ── Safety Radar & Offline SMS (Responsive 1fr 1fr -> 1 col) ───── */}
-        <div className="responsive-two-col-grid">
-          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
-            <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>{t.familySafety}</h3>
-            <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>{t.familySafetyDesc}</p>
-            {[
-              { name: "Prafulla Kumar Behera", status: t.safe + " #1" },
-              { name: "Sanjibita Behera", status: t.safe + " #1" },
-            ].map(({ name, status }) => (
-              <div key={name} style={{ backgroundColor: "#0f172a", padding: "10px", borderRadius: "6px", marginBottom: "8px", display: "flex", justifyContent: "space-between" }}>
-                <span>{name}</span>
-                <span style={{ color: "#4ade80", fontSize: "0.85rem" }}>{status}</span>
+          {/* 72-Hour Survival Kit Readiness */}
+          <div className="tactical-card" style={{ padding: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "1.2rem" }}>🎒</span>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "800", color: "#ffffff" }}>
+                  {t.survivalKit}
+                </h3>
               </div>
-            ))}
-            <button
-              onClick={() => navigate("/family-safety")}
-              style={{ backgroundColor: "#1d4ed8", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", cursor: "pointer", marginTop: "4px", fontSize: "0.8rem" }}
-            >
-              👨‍👩‍👧 Manage Family Tracker
-            </button>
-          </div>
-
-          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
-            <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>{t.offlineSMS}</h3>
-            <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>{t.offlineSMSDesc}</p>
-            <div style={{ backgroundColor: "#0f172a", padding: "12px", borderRadius: "6px", border: "1px dashed #475569" }}>
-              <span style={{ fontSize: "0.85rem", color: "#cbd5e1" }}>
-                Send SMS: <strong>RESCUE [NAME] [LOCATION]</strong> to <strong>56161</strong>
+              <span className="tactical-badge badge-safe">
+                {checklistPercentage}% READY
               </span>
             </div>
-            <a
-              href="sms:56161?body=RESCUE"
-              style={{ display: "inline-block", marginTop: "10px", backgroundColor: "#16a34a", color: "white", padding: "6px 14px", borderRadius: "6px", textDecoration: "none", fontSize: "0.8rem", fontWeight: "bold" }}
-            >
-              📲 Open SMS App
-            </a>
-          </div>
-        </div>
 
-        {/* ── Active Shelters & Survival Kit (Responsive 1fr 1fr -> 1 col) ── */}
-        <div className="responsive-two-col-grid">
-          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>{t.activeShelters}</h3>
-            {[
-              { name: "Community Hall #1 (City Center)", fill: 75, color: "#22c55e", beds: "50 Beds Open" },
-              { name: "Central Stadium Shelter", fill: 88, color: "#eab308", beds: "12 Beds Open" },
-            ].map(({ name, fill, color, beds }) => (
-              <div key={name} style={{ marginBottom: "12px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "4px" }}>
-                  <span>{name}</span>
-                  <span style={{ color }}>{fill}% Full ({beds})</span>
-                </div>
-                <div style={{ backgroundColor: "#334155", height: "8px", borderRadius: "4px" }}>
-                  <div style={{ backgroundColor: color, width: `${fill}%`, height: "100%", borderRadius: "4px" }}></div>
-                </div>
-              </div>
-            ))}
-            <button
-              onClick={() => navigate("/shelter-finder")}
-              style={{ backgroundColor: "#0369a1", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", cursor: "pointer", marginTop: "4px", fontSize: "0.8rem" }}
-            >
-              🏥 View All Shelters
-            </button>
-          </div>
+            <p style={{ margin: "0 0 12px 0", fontSize: "0.78rem", color: "#94a3b8" }}>
+              Vital items required to sustain yourself and family during first 72 hours of total blackout.
+            </p>
 
-          <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "1.1rem" }}>{t.survivalKit}</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {checklist.map(item => (
-                <label key={item.id} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.85rem", cursor: "pointer" }}>
-                  <input type="checkbox" checked={item.checked} onChange={() => toggleCheck(item.id)} />
-                  <span style={{ textDecoration: item.checked ? "line-through" : "none", color: item.checked ? "#94a3b8" : "#f8fafc" }}>
+            {/* Progress Bar */}
+            <div style={{ backgroundColor: "rgba(255, 255, 255, 0.08)", height: "8px", borderRadius: "999px", marginBottom: "14px", overflow: "hidden" }}>
+              <div
+                style={{
+                  width: `${checklistPercentage}%`,
+                  height: "100%",
+                  background: checklistPercentage === 100
+                    ? "linear-gradient(90deg, #10b981, #059669)"
+                    : "linear-gradient(90deg, #0284c7, #38bdf8)",
+                  borderRadius: "999px",
+                  transition: "width 0.3s ease",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {checklist.map((item) => (
+                <label
+                  key={item.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontSize: "0.84rem",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    backgroundColor: item.checked ? "rgba(16, 185, 129, 0.08)" : "rgba(30, 41, 59, 0.4)",
+                    border: `1px solid ${item.checked ? "rgba(16, 185, 129, 0.3)" : "rgba(255, 255, 255, 0.05)"}`,
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={item.checked}
+                    onChange={() => toggleCheck(item.id)}
+                    style={{ cursor: "pointer", accentColor: "#10b981", width: "16px", height: "16px" }}
+                  />
+                  <span
+                    style={{
+                      textDecoration: item.checked ? "line-through" : "none",
+                      color: item.checked ? "#94a3b8" : "#f8fafc",
+                      fontWeight: item.checked ? "500" : "600",
+                    }}
+                  >
                     {item.text}
                   </span>
                 </label>
               ))}
             </div>
+
+            <div style={{ marginTop: "14px" }}>
+              <Link
+                to="/safety-guides"
+                style={{
+                  display: "block",
+                  textAlign: "center",
+                  backgroundColor: "rgba(245, 158, 11, 0.15)",
+                  color: "#fde68a",
+                  border: "1px solid rgba(245, 158, 11, 0.35)",
+                  padding: "8px 14px",
+                  borderRadius: "8px",
+                  fontSize: "0.78rem",
+                  fontWeight: "700",
+                  textDecoration: "none",
+                }}
+              >
+                View Full Disaster Prep Protocols &amp; Guides ➔
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* ── 💡 Core Strategic Strategy: Next-Gen Platform vs. Standard Websites ── */}
+        {/* ── 9. Strategic Advantage Matrix ─────────────────────────────────── */}
         <div
+          className="tactical-card"
           style={{
-            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(7, 21, 39, 0.98))",
-            border: "2px solid rgba(56, 189, 248, 0.35)",
-            borderRadius: "16px",
             padding: "24px",
-            boxShadow: "0 12px 35px rgba(2, 132, 199, 0.15)",
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(7, 21, 39, 0.98))",
+            border: "1.5px solid rgba(56, 189, 248, 0.3)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px", marginBottom: "18px" }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                <span style={{ fontSize: "1.4rem" }}>💡</span>
-                <span style={{ fontSize: "0.75rem", fontWeight: "800", color: "#38bdf8", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                  Core Strategic Competitive Advantage
+                <span style={{ fontSize: "1.3rem" }}>💡</span>
+                <span style={{ fontSize: "0.72rem", fontWeight: "800", color: "#38bdf8", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--font-mono, monospace)" }}>
+                  STRATEGIC ADVANTAGE &amp; MISSION RESILIENCE
                 </span>
               </div>
-              <h2 style={{ margin: 0, fontSize: "1.35rem", fontWeight: "800", color: "#ffffff" }}>
-                Why This Platform Stands Out: Next-Gen vs. Standard Government Portals
+              <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "800", color: "#ffffff" }}>
+                Next-Gen Disaster Platform vs. Legacy Government Websites
               </h2>
-              <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: "0.85rem" }}>
-                Architected from the ground up to outperform legacy emergency websites during total infrastructure failure.
+              <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: "0.82rem" }}>
+                Engineered from the ground up to guarantee continuous life-saving operations even during complete infrastructure collapse.
               </p>
             </div>
-            <span
-              style={{
-                backgroundColor: "rgba(16, 185, 129, 0.15)",
-                border: "1px solid rgba(16, 185, 129, 0.4)",
-                color: "#34d399",
-                padding: "4px 12px",
-                borderRadius: "999px",
-                fontSize: "0.75rem",
-                fontWeight: "800",
-              }}
-            >
-              PROVEN RESILIENCE ARCHITECTURE
+            <span className="tactical-badge badge-safe">
+              PROVEN RESILIENCE
             </span>
           </div>
 
-          {/* Comparison Matrix Table */}
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 8px", fontSize: "0.88rem" }}>
+            <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 8px", fontSize: "0.84rem" }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: "left", padding: "10px 14px", color: "#94a3b8", fontSize: "0.78rem", fontWeight: "700", textTransform: "uppercase", width: "42%" }}>
-                    Standard Official Websites (Legacy)
+                  <th style={{ textAlign: "left", padding: "8px 14px", color: "#94a3b8", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", width: "42%" }}>
+                    Standard Official Portals (Legacy)
                   </th>
                   <th style={{ width: "16px" }}></th>
-                  <th style={{ textAlign: "left", padding: "10px 14px", color: "#38bdf8", fontSize: "0.78rem", fontWeight: "700", textTransform: "uppercase", width: "58%" }}>
-                    Your Next-Gen Platform (Hyper-Resilient)
+                  <th style={{ textAlign: "left", padding: "8px 14px", color: "#38bdf8", fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", width: "58%" }}>
+                    Your Tactical Next-Gen Platform
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {[
                   {
-                    legacy: "Static text updates and PDFs",
-                    legacyNote: "Delayed warnings, non-interactive documents, difficult to parse during frantic evacuations.",
-                    nextGen: "Live, interactive 3D maps and predictive AI",
-                    nextGenNote: "Physics-based digital twin simulations, automated damage forecasting, and real-time corridor overlays.",
+                    legacy: "Static bulletins and PDF circulars",
+                    legacyNote: "Delayed warnings, non-interactive documents, impossible to parse during panic evacuations.",
+                    nextGen: "Live, interactive 3D simulations & predictive AI",
+                    nextGenNote: "Physics-based digital twin simulations, automated damage forecasting, and dynamic AR overlays.",
                     actionLabel: "3D Digital Twin",
                     actionPath: "/digital-twin",
                   },
                   {
-                    legacy: "Top-down communication only",
-                    legacyNote: "Citizens passively wait for broadcasts; no real-time two-way feedback or crowdsourced reports.",
-                    nextGen: "Two-way, crowdsourced peer-to-peer rescue",
-                    nextGenNote: "Crowdsourced infrastructure vulnerability mapping, gamified volunteer micro-tasks, and citizen radar.",
-                    actionLabel: "Volunteer Micro-Tasks",
+                    legacy: "One-way top-down broadcasts",
+                    legacyNote: "Citizens passively wait; zero bidirectional feedback or localized citizen check-ins.",
+                    nextGen: "Two-way crowdsourced peer rescue",
+                    nextGenNote: "Crowdsourced infrastructure hazard mapping, volunteer micro-tasks, and family radar check-ins.",
+                    actionLabel: "Micro-Tasks",
                     actionPath: "/volunteer-tasks",
                   },
                   {
-                    legacy: "Useless without internet/cellular connection",
-                    legacyNote: "Server overloads and severed cell towers render government portals completely inaccessible.",
-                    nextGen: "Works offline using local device mesh networks",
-                    nextGenNote: "Zero-Internet P2P protocol, Bluetooth & Wi-Fi Direct multi-hop relaying, and downloadable offline app.",
-                    actionLabel: "Zero-Internet Mesh",
+                    legacy: "Inoperable without active cellular / 4G connection",
+                    legacyNote: "Severed cell towers and power grid blackouts cause total website blackout.",
+                    nextGen: "Zero-Internet local device mesh network",
+                    nextGenNote: "LoRa P2P radio relays, Wi-Fi Direct multi-hop communication, and offline-first cache.",
+                    actionLabel: "Zero-Grid Mesh",
                     actionPath: "/zero-internet-mesh",
                   },
                   {
-                    legacy: "Opaque donation spending",
-                    legacyNote: "Unknown disbursement timelines, bureaucratic bottlenecks, lack of transparent tracking.",
-                    nextGen: "100% transparent blockchain tracking",
-                    nextGenNote: "Immutable public cryptographic ledger verifying every rupee, ration, and medicine dose to the recipient.",
-                    actionLabel: "Blockchain Aid Ledger",
+                    legacy: "Opaque supply distribution & aid delays",
+                    legacyNote: "Bottlenecks, unknown dispatch timelines, and lack of verified delivery proof.",
+                    nextGen: "100% Cryptographic Blockchain Tracking",
+                    nextGenNote: "Immutable cryptographic ledger verifying every ration, water canister, and medical unit.",
+                    actionLabel: "Aid Ledger",
                     actionPath: "/aid-ledger",
                   },
                 ].map((row, idx) => (
-                  <tr key={idx} style={{ background: "rgba(255,255,255,0.03)" }}>
+                  <tr key={idx}>
                     <td
                       style={{
-                        padding: "14px 16px",
+                        padding: "12px 14px",
                         borderTopLeftRadius: "10px",
                         borderBottomLeftRadius: "10px",
-                        border: "1px solid rgba(239, 68, 68, 0.2)",
+                        border: "1px solid rgba(239, 68, 68, 0.25)",
                         borderRight: "none",
-                        background: "rgba(239, 68, 68, 0.05)",
+                        background: "rgba(239, 68, 68, 0.06)",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", color: "#fca5a5" }}>
                         <span style={{ color: "#ef4444" }}>❌</span>
                         <span>{row.legacy}</span>
                       </div>
-                      <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "4px", paddingLeft: "24px" }}>
+                      <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "3px", paddingLeft: "24px" }}>
                         {row.legacyNote}
                       </div>
                     </td>
@@ -937,12 +1359,12 @@ export default function Dashboard() {
                     </td>
                     <td
                       style={{
-                        padding: "14px 16px",
+                        padding: "12px 14px",
                         borderTopRightRadius: "10px",
                         borderBottomRightRadius: "10px",
-                        border: "1px solid rgba(14, 165, 233, 0.3)",
+                        border: "1px solid rgba(14, 165, 233, 0.35)",
                         borderLeft: "none",
-                        background: "rgba(14, 165, 233, 0.08)",
+                        background: "rgba(14, 165, 233, 0.09)",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
@@ -951,23 +1373,22 @@ export default function Dashboard() {
                             <span style={{ color: "#34d399" }}>✅</span>
                             <span>{row.nextGen}</span>
                           </div>
-                          <div style={{ fontSize: "0.75rem", color: "#cbd5e1", marginTop: "4px", paddingLeft: "24px" }}>
+                          <div style={{ fontSize: "0.72rem", color: "#cbd5e1", marginTop: "3px", paddingLeft: "24px" }}>
                             {row.nextGenNote}
                           </div>
                         </div>
                         <button
                           onClick={() => navigate(row.actionPath)}
                           style={{
-                            padding: "6px 14px",
+                            padding: "6px 12px",
                             borderRadius: "8px",
                             border: "1px solid rgba(56, 189, 248, 0.4)",
                             background: "linear-gradient(135deg, #0284c7, #0369a1)",
                             color: "#ffffff",
-                            fontSize: "0.75rem",
+                            fontSize: "0.74rem",
                             fontWeight: "700",
                             cursor: "pointer",
                             whiteSpace: "nowrap",
-                            boxShadow: "0 2px 8px rgba(2, 132, 199, 0.3)",
                           }}
                         >
                           Explore {row.actionLabel} &rarr;
@@ -981,68 +1402,56 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Hazard Reporting ─────────────────────────────────────────────── */}
-        <div style={{ backgroundColor: "#1e293b", padding: "18px", borderRadius: "8px", border: "1px solid #334155" }}>
-
-          <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem" }}>{t.hazardReport}</h3>
-          <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>{t.hazardDesc}</p>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <input
-              type="text"
-              placeholder={t.hazardPlaceholder}
-              value={reportInput}
-              onChange={(e) => setReportInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && submitHazardReport()}
-              style={{ flex: 1, minWidth: "200px", backgroundColor: "#0f172a", border: "1px solid #475569", borderRadius: "6px", padding: "10px", color: "white" }}
-            />
-            <button
-              onClick={submitHazardReport}
-              style={{ backgroundColor: "#2563eb", color: "white", border: "none", padding: "10px 20px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}
-            >
-              {t.submitHazard}
-            </button>
-            <button
-              type="button"
-              onClick={getCurrentLocation}
-              style={{ backgroundColor: "#0284c7", color: "#ffffff", fontWeight: "bold", border: "none", padding: "10px 16px", borderRadius: "6px", cursor: "pointer" }}
-            >
-              {t.shareLocation}
-            </button>
-            <button
-              type="button"
-              onClick={() => sendWhatsAppAlert(reportInput || "Immediate assistance requested!")}
-              style={{ backgroundColor: "#16a34a", color: "#ffffff", fontWeight: "bold", border: "none", padding: "10px 16px", borderRadius: "6px", cursor: "pointer" }}
-            >
-              {t.sendWhatsApp}
-            </button>
+        {/* ── 10. Technical Support & System Diagnostics ────────────────────── */}
+        <div
+          className="tactical-card"
+          style={{
+            padding: "18px 20px",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+            <h3 style={{ margin: 0, fontSize: "0.95rem", fontWeight: "700", color: "#f8fafc" }}>
+              🛠️ {t.support}
+            </h3>
+            <span style={{ fontSize: "0.7rem", color: "#94a3b8", fontFamily: "var(--font-mono, monospace)" }}>
+              OUTAGE-RESILIENT QUEUE
+            </span>
           </div>
-        </div>
-
-        {/* ── Enable Alerts Button ─────────────────────────────────────────── */}
-        {!pushEnabled && (
-          <button
-            type="button"
-            onClick={handleEnablePush}
-            style={{ backgroundColor: "#dc2626", color: "#ffffff", fontWeight: "bold", border: "none", padding: "10px 18px", borderRadius: "6px", cursor: "pointer", alignSelf: "flex-start" }}
-          >
-            {t.enableAlerts}
-          </button>
-        )}
-
-        {/* ── Technical Support ────────────────────────────────────────────── */}
-        <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "12px", padding: "16px" }}>
-          <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "#f8fafc", marginBottom: "8px" }}>🛠️ {t.support}</h3>
-          <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: "12px" }}>{t.supportDesc}</p>
+          <p style={{ color: "#94a3b8", fontSize: "0.78rem", margin: "0 0 12px 0" }}>
+            {t.supportDesc}
+          </p>
           <form onSubmit={handleSupportTicket}>
             <textarea
               name="issue"
               placeholder={t.supportPlaceholder}
               required
-              style={{ width: "100%", height: "70px", backgroundColor: "#0f172a", color: "#fff", border: "1px solid #334155", borderRadius: "8px", padding: "8px", fontSize: "0.85rem", marginBottom: "8px", boxSizing: "border-box" }}
+              style={{
+                width: "100%",
+                height: "65px",
+                backgroundColor: "rgba(15, 23, 42, 0.9)",
+                color: "#fff",
+                border: "1px solid rgba(56, 189, 248, 0.25)",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                fontSize: "0.82rem",
+                marginBottom: "8px",
+                boxSizing: "border-box",
+                outline: "none",
+              }}
             />
             <button
               type="submit"
-              style={{ backgroundColor: "#38bdf8", color: "#0f172a", fontWeight: "bold", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "0.85rem" }}
+              style={{
+                backgroundColor: "#38bdf8",
+                color: "#0f172a",
+                fontWeight: "800",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.82rem",
+              }}
             >
               {t.submitTicket}
             </button>
