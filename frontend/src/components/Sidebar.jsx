@@ -54,58 +54,66 @@ import {
 
 // ── 🏠 OVERVIEW ──────────────────────────────────────────────────────────────
 const overviewItems = [
-  { key: "nav_dashboard", fallback: "Dashboard",  icon: IconDashboard, path: "/", badge: "LIVE" },
-  { key: "nav_map",       fallback: "Live Map",   icon: IconMap,       path: "/map" },
-  { key: "nav_alerts",    fallback: "Incidents",  icon: IconAlerts,    path: "/alerts" },
+  { key: "nav_dashboard", fallback: "Dashboard",          icon: IconDashboard, path: "/", badge: "LIVE" },
+  { key: "nav_map",       fallback: "Live Situation Map", icon: IconMap,       path: "/map" },
+  { key: "nav_alerts",    fallback: "Active Incidents",   icon: IconAlerts,    path: "/alerts" },
 ];
 
 // ── 🚨 RESPONSE ──────────────────────────────────────────────────────────────
 const responseItems = [
-  { key: "nav_sos",        fallback: "Emergency SOS",     icon: IconSos,        path: "/emergency-sos", badge: "SOS" },
-  { key: "nav_rescue",     fallback: "Rescue Operations", icon: IconRescue,     path: "/rescue-centers" },
-  { key: "nav_evacuation", fallback: "Evacuation",        icon: IconEvacuation, path: "/evacuation-planner" },
-  { key: "nav_shelter",    fallback: "Shelters",          icon: IconShelter,    path: "/shelter-finder" },
-  { key: "nav_damage",     fallback: "Resources",         icon: IconDamage,     path: "/damage-assessment" },
+  { key: "nav_sos",        fallback: "Emergency SOS",      icon: IconSos,        path: "/emergency-sos", badge: "SOS" },
+  { key: "nav_rescue",     fallback: "Rescue Operations",  icon: IconRescue,     path: "/rescue-centers" },
+  { key: "nav_evacuation", fallback: "Evacuation Planner", icon: IconEvacuation, path: "/evacuation-planner" },
+  { key: "nav_shelter",    fallback: "Shelters",           icon: IconShelter,    path: "/shelter-finder" },
+  { key: "nav_damage",     fallback: "Resources",          icon: IconDamage,     path: "/damage-assessment" },
+  { key: "nav_relief",     fallback: "Responder Tracker",  icon: IconDelivery,   path: "/relief-tracker" },
 ];
 
 // ── 🧠 INTELLIGENCE ───────────────────────────────────────────────────────────
 const intelligenceItems = [
-  { key: "nav_ner_landslide",     fallback: "NER Monitor",          icon: IconLandslide,  path: "/ner-landslide-monitor", badge: "AI" },
-  { key: "nav_statistics",        fallback: "Predictions",          icon: IconStatistics, path: "/statistics" },
-  { key: "nav_climate_chronicle", fallback: "Climate Intelligence", icon: IconClimate,    path: "/climate-chronicle" },
-  { key: "nav_analytics",         fallback: "Analytics",            icon: IconAnalytics,  path: "/analytics-reports" },
+  { key: "nav_ner_landslide",     fallback: "NER Monitor",            icon: IconLandslide,  path: "/ner-landslide-monitor", badge: "AI" },
+  { key: "nav_statistics",        fallback: "Risk Prediction",        icon: IconStatistics, path: "/statistics" },
+  { key: "nav_climate_chronicle", fallback: "Disaster Intelligence",  icon: IconClimate,    path: "/climate-chronicle" },
+  { key: "nav_analytics",         fallback: "Analytics",              icon: IconAnalytics,  path: "/analytics-reports" },
+];
+
+// ── 📡 CONNECTIVITY ──────────────────────────────────────────────────────────
+const connectivityItems = [
+  { key: "nav_smart_alerts",  fallback: "Smart Sensors",          icon: IconSensory,     path: "/smart-alerts",       badge: "IoT" },
+  { key: "nav_mesh",          fallback: "LoRa Mesh",              icon: IconMesh,        path: "/mesh-console",       badge: "P2P" },
+  { key: "nav_low_bandwidth", fallback: "Offline Emergency Mode", icon: IconSafeZone,    path: "/low-bandwidth",      badge: "2G" },
+  { key: "nav_zero_net",      fallback: "Zero-Internet Mode",     icon: IconZeroInternet, path: "/zero-internet-mesh", badge: "OFF-GRID" },
+];
+
+// ── 🚁 FIELD ─────────────────────────────────────────────────────────────────
+const fieldItems = [
+  { key: "nav_drone",      fallback: "Drone Operations",   icon: IconDrone,     path: "/drone-analytics",  badge: "UAV" },
+  { key: "nav_tasks",      fallback: "Volunteer Network",  icon: IconMicroTask, path: "/volunteer-tasks" },
+  { key: "nav_incident",   fallback: "Field Reports",      icon: IconReport,    path: "/incident-report" },
 ];
 
 // ── 👥 COMMUNITY ──────────────────────────────────────────────────────────────
 const communityItems = [
-  { key: "nav_family", fallback: "Family Safety", icon: IconFamily, path: "/family-safety" },
-  { key: "nav_qr_id",  fallback: "QR Rescue ID",  icon: IconQrId,   path: "/qr-rescue-id" },
-  { key: "nav_safety", fallback: "Safety Guides", icon: IconSafety, path: "/safety-guides" },
+  { key: "nav_family",    fallback: "Family Safety",   icon: IconFamily,  path: "/family-safety" },
+  { key: "nav_qr_id",     fallback: "QR Rescue ID",    icon: IconQrId,    path: "/qr-rescue-id" },
+  { key: "nav_report_dis", fallback: "Report Disaster", icon: IconAlerts,  path: "/incident-report" },
+  { key: "nav_safety",    fallback: "Safety Guides",   icon: IconSafety,  path: "/safety-guides" },
 ];
 
-// ── 🤖 ASSISTANCE ─────────────────────────────────────────────────────────────
-const assistanceItems = [
-  { key: "nav_ai",    fallback: "AI Assistant",    icon: IconAi,    path: "/ai-assistant", badge: "GENAI" },
-  { key: "nav_voice", fallback: "Voice Assistant", icon: IconVoice, path: "/voice-assistant" },
+// ── 🧪 INNOVATION LAB ─────────────────────────────────────────────────────────
+const innovationItems = [
+  { key: "nav_digital_twin",   fallback: "Digital Twin",                    icon: IconDigitalTwin,    path: "/digital-twin",            badge: "SIM" },
+  { key: "nav_ner_topography", fallback: "Multi-Disaster Simulation",       icon: IconNERSuite,       path: "/ner-topography-suite",    badge: "NER" },
+  { key: "nav_world_first",    fallback: "Advanced Sensing",                icon: IconWorldFirst,     path: "/world-first-innovations", badge: "NOVEL" },
+  { key: "nav_decentralized",  fallback: "Quantum-Inspired Optimization",   icon: IconDecentralized,  path: "/decentralized-resilience" },
+  { key: "nav_extreme_res",    fallback: "Experimental Technologies",       icon: IconExtremeResilience, path: "/extreme-resilience" },
 ];
 
 // ── ⚙ SYSTEM ─────────────────────────────────────────────────────────────────
 const systemItems = [
   { key: "nav_notifications", fallback: "Notifications", icon: IconNotifications, path: "/notifications" },
+  { key: "nav_faq",           fallback: "Help & FAQ",    icon: IconFaq,           path: "/faq" },
   { key: "nav_settings",      fallback: "Settings",      icon: IconAdmin,         path: "/settings" },
-];
-
-// ── Deep-Tech Command Suites (Restricted / Verified) ─────────────────────────
-const tacticalMenuItems = [
-  { key: "nav_ner_topography",     fallback: "NER Topo Command Suite",   icon: IconNERSuite,          path: "/ner-topography-suite", badge: "NER" },
-  { key: "nav_world_first",        fallback: "World-First Deep Tech",    icon: IconWorldFirst,        path: "/world-first-innovations", badge: "NOVEL" },
-  { key: "nav_hyper_speed",        fallback: "Hyper-Speed Rescue Suite", icon: IconHyperSpeed,        path: "/hyper-speed-rescue" },
-  { key: "nav_decentralized",      fallback: "Decentralized Resilience", icon: IconDecentralized,     path: "/decentralized-resilience" },
-  { key: "nav_extreme_resilience", fallback: "Extreme Resilience Grid",  icon: IconExtremeResilience, path: "/extreme-resilience" },
-  { key: "nav_ar_risk",            fallback: "AR See the Risk",          icon: IconAR,                path: "/ar-see-the-risk", badge: "AR" },
-  { key: "nav_mesh",               fallback: "LoRa Mesh Console",        icon: IconMesh,              path: "/mesh-console", badge: "P2P" },
-  { key: "nav_incident",           fallback: "Report Incident",          icon: IconReport,            path: "/incident-report" },
-  { key: "nav_faq",                fallback: "Knowledgebase FAQ",        icon: IconFaq,               path: "/faq" },
 ];
 
 export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose }) {
@@ -605,99 +613,23 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
         {/* 🧠 INTELLIGENCE */}
         {renderNavGroup("INTELLIGENCE", intelligenceItems, "🧠", "grp_intel")}
 
+        {/* 📡 CONNECTIVITY */}
+        {renderNavGroup("CONNECTIVITY", connectivityItems, "📡", "grp_connect")}
+
+        {/* 🚁 FIELD */}
+        {renderNavGroup("FIELD", fieldItems, "🚁", "grp_field")}
+
         {/* 👥 COMMUNITY */}
         {renderNavGroup("COMMUNITY", communityItems, "👥", "grp_community")}
 
-        {/* 🤖 ASSISTANCE */}
-        {renderNavGroup("ASSISTANCE", assistanceItems, "🤖", "grp_assist")}
+        {/* 🧪 INNOVATION LAB */}
+        {renderNavGroup("INNOVATION LAB", innovationItems, "🧪", "grp_lab")}
 
-        {/* ⚙ SYSTEM */}
-        {renderNavGroup("SYSTEM", systemItems, "⚙", "grp_system")}
-
-        {/* ── Tactical Command Suites (Restricted / Verified) ────── */}
-        {isApproved ? (
-          <>
-            {renderNavGroup("SECTOR IV · DEEP-TECH SUITES", tacticalMenuItems, "🌌")}
-
-            {/* Before the Disaster */}
-            {renderNavGroup("PRE-CRISIS SIMULATION", [
-              { key: "nav_digital_twin", fallback: "Digital Twin Sim",    icon: IconDigitalTwin,    path: "/digital-twin" },
-              { key: "nav_vulnerability", fallback: "Vulnerability Map",  icon: IconVulnerability, path: "/vulnerability-map" },
-              { key: "nav_smart_alerts", fallback: "Smart Sensory Alerts",icon: IconSensory,       path: "/smart-alerts" },
-            ], "🔮")}
-
-            {/* During the Disaster */}
-            {renderNavGroup("ACTIVE DISASTER DYNAMICS", [
-              { key: "nav_zero_net",    fallback: "Zero-Internet Mesh",   icon: IconZeroInternet, path: "/zero-internet-mesh", badge: "OFF-GRID" },
-              { key: "nav_drone",       fallback: "Live Drone Analytics",  icon: IconDrone,        path: "/drone-analytics", badge: "UAV" },
-              { key: "nav_relief",      fallback: "Live Relief Tracker",   icon: IconDelivery,     path: "/relief-tracker" },
-              { key: "nav_safe_zone",   fallback: "Safe Zone Perimeter",   icon: IconSafeZone,     path: "/safe-zones" },
-              { key: "nav_dyn_route",   fallback: "AI Evacuation Router",  icon: IconDynRoute,     path: "/dynamic-evacuation" },
-            ], "⚡")}
-
-            {/* After the Disaster */}
-            {renderNavGroup("POST-CRISIS RECONSTRUCTION", [
-              { key: "nav_tasks",       fallback: "Volunteer Micro-Tasks", icon: IconMicroTask,   path: "/volunteer-tasks" },
-              { key: "nav_ledger",      fallback: "Cryptographic Aid Ledger", icon: IconAidLedger, path: "/aid-ledger", badge: "CHAIN" },
-              { key: "nav_reconstruct", fallback: "Reconstruction Board",  icon: IconReconstruct, path: "/reconstruction" },
-            ], "🤝")}
-          </>
-        ) : (
-          <div
-            style={{
-              margin: "8px 4px 14px",
-              padding: "14px",
-              borderRadius: "12px",
-              background: "linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.5) 100%)",
-              border: "1px dashed rgba(148, 163, 184, 0.25)",
-              textAlign: "center",
-              boxShadow: "inset 0 0 20px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.78rem",
-                color: "#e2e8f0",
-                fontWeight: "700",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "6px",
-              }}
-            >
-              <span>🔒</span> Tactical Clearance Required
-            </div>
-            <div
-              style={{
-                fontSize: "0.7rem",
-                color: "#94a3b8",
-                marginTop: "4px",
-                lineHeight: "1.4",
-              }}
-            >
-              Deep-tech suites & drone routing reserved for verified responders.
-            </div>
-            <NavLink
-              to="/login"
-              onClick={handleNavClick}
-              style={{
-                display: "inline-block",
-                marginTop: "10px",
-                fontSize: "0.72rem",
-                color: "#38bdf8",
-                fontWeight: "700",
-                textDecoration: "none",
-                padding: "5px 12px",
-                borderRadius: "8px",
-                background: "rgba(56, 189, 248, 0.12)",
-                border: "1px solid rgba(56, 189, 248, 0.35)",
-                transition: "all 0.15s ease",
-              }}
-            >
-              Sign In / Request Clearance ➔
-            </NavLink>
-          </div>
-        )}
+        {/* ⚙ SYSTEM — Administration only shown to admins */}
+        {renderNavGroup("SYSTEM", [
+          ...systemItems,
+          ...(isAdmin ? [{ key: "nav_admin_hub", fallback: "Administration", icon: IconAdmin, path: "/administrator" }] : []),
+        ], "⚙", "grp_system")}
       </div>
 
       {/* ── Embedded 1-Click Emergency Speed Dialers ────── */}
