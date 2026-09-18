@@ -7,8 +7,9 @@ import {
   Layers, ChevronRight, Cpu, ArrowUpRight, Clock, Info, 
   Sparkles, Sliders, ExternalLink, Award, FileText,
   Wifi, ShieldCheck, Bluetooth, QrCode, BatteryCharging,
-  Waves, Lock, Network
+  Waves, Lock, Network, Atom
 } from 'lucide-react';
+import CosmicRayMuonTrackerTab from '../components/worldfirst/CosmicRayMuonTrackerTab';
 import AtmosphericWifiBendingTab from '../components/worldfirst/AtmosphericWifiBendingTab';
 import PqcOfflineLedgerTab from '../components/worldfirst/PqcOfflineLedgerTab';
 import BleSpittingProtocolTab from '../components/worldfirst/BleSpittingProtocolTab';
@@ -572,7 +573,26 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
-          {/* 1. MAGNETOMETER RUBBLE LOCATOR */}
+          {/* 1. COSMIC-RAY MUON TRACKER */}
+          <button
+            onClick={() => handleTabChange('muon-tracking')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'muon-tracking'
+                ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-400/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-400/40 animate-pulse">
+              WORLD-1ST
+            </div>
+            <Atom className={`w-5 h-5 flex-shrink-0 ${activeTab === 'muon-tracking' ? 'text-cyan-400 animate-spin' : 'text-slate-400'}`} style={{ animationDuration: '6s' }} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Cosmic Muon 3D</div>
+              <div className="text-[10px] text-slate-400">Debris Void CMOS</div>
+            </div>
+          </button>
+
+          {/* 2. MAGNETOMETER RUBBLE LOCATOR */}
           <button
             onClick={() => handleTabChange('magnetometer')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -813,7 +833,12 @@ export default function WorldFirstInnovationsSuite() {
         {activeTab === 'zero-grid-flow' && <ZeroInfrastructureDataFlowTab />}
 
         {/* ========================================================= */}
-        {/* 1. MAGNETOMETER: RUBBLE VOID & TRAPPED-HUMAN LOCATOR      */}
+        {/* 1. COSMIC-RAY MUON TRACKING: DEBRIS THICKNESS & VOID MAP */}
+        {/* ========================================================= */}
+        {activeTab === 'muon-tracking' && <CosmicRayMuonTrackerTab />}
+
+        {/* ========================================================= */}
+        {/* 2. MAGNETOMETER: RUBBLE VOID & TRAPPED-HUMAN LOCATOR      */}
         {/* ========================================================= */}
         {activeTab === 'magnetometer' && <MagnetometerLocatorTab />}
 
