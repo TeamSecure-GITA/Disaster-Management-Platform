@@ -183,13 +183,33 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
   const displayName = user?.name || user?.displayName || (user?.email ? user.email.split("@")[0] : "Responder");
   const avatarUrl = user?.photoUrl || user?.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
 
+  // ── Live Clock & Date State ───────────────────────────────────────────────
+  const [clock, setClock] = useState(() => {
+    const d = new Date();
+    return {
+      time: d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+      date: d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-"),
+    };
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const d = new Date();
+      setClock({
+        time: d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+        date: d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, "-"),
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <header
       className="header-container"
       style={{
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "rgba(6, 11, 23, 0.88)",
+        backgroundColor: "rgba(6, 11, 23, 0.95)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(56, 189, 248, 0.16)",
@@ -197,23 +217,23 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
         position: "sticky",
         top: 0,
         zIndex: 50,
-        boxShadow: "0 4px 24px rgba(0, 0, 0, 0.45)",
+        boxShadow: "0 4px 24px rgba(0, 0, 0, 0.5)",
       }}
     >
-      {/* ── Main Top Row Controls ────────────────────────────────────────── */}
+      {/* ── Main Top Row Controls Matching Photo ─────────────────────────── */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "10px 20px",
+          padding: "8px 18px",
           gap: "12px",
+          flexWrap: "nowrap",
         }}
       >
-        {/* ─────────────── LEFT: Drawer Toggle + Status chips ─────────────── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-
-          {/* Mobile Drawer Toggle */}
+        {/* ─────────────── LEFT: Logo & Platform Identity ─────────────── */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+          {/* Mobile Drawer Toggle (if small screen) */}
           {!isDesktopMode && (
             <button
               type="button"
@@ -224,308 +244,227 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "38px",
-                height: "38px",
+                width: "36px",
+                height: "36px",
                 backgroundColor: "rgba(30, 41, 59, 0.85)",
                 border: "1px solid rgba(56, 189, 248, 0.3)",
-                borderRadius: "10px",
+                borderRadius: "8px",
                 color: "#38bdf8",
                 cursor: "pointer",
-                flexShrink: 0,
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-                transition: "all 0.15s ease",
               }}
             >
-              <Menu size={20} />
+              <Menu size={18} />
             </button>
           )}
 
-          {/* Live Satellite / Network Status */}
+          {/* Hexagon/Cube Logo Icon */}
+          <Link
+            to="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              textDecoration: "none",
+            }}
+          >
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                background: "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
+                border: "1.5px solid rgba(56, 189, 248, 0.6)",
+                boxShadow: "0 0 16px rgba(56, 189, 248, 0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.2rem",
+                color: "#ffffff",
+                flexShrink: 0,
+              }}
+            >
+              ❖
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", lineHeight: "1.15" }}>
+              <span
+                style={{
+                  fontSize: "0.96rem",
+                  fontWeight: "900",
+                  color: "#ffffff",
+                  letterSpacing: "-0.01em",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Disaster Management Platform
+              </span>
+              <span
+                style={{
+                  fontSize: "0.64rem",
+                  color: "#38bdf8",
+                  fontWeight: "700",
+                  letterSpacing: "0.02em",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Predict · Alert · Respond · Rebuild
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* ─────────────── CENTER: Permanent Active Emergency Status Card ─────────────── */}
+        <div
+          onClick={() => navigate("/alerts")}
+          style={{
+            backgroundColor: "rgba(136, 19, 55, 0.28)",
+            border: "1px solid rgba(244, 63, 94, 0.45)",
+            borderRadius: "12px",
+            padding: "5px 14px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            boxShadow: "0 0 20px rgba(225, 29, 72, 0.2)",
+            cursor: "pointer",
+            flexShrink: 1,
+            minWidth: 0,
+          }}
+          title="Click to inspect Active Emergency details"
+        >
           <div
             style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(225, 29, 72, 0.3)",
+              border: "1px solid rgba(244, 63, 94, 0.6)",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
-              backgroundColor: isOnline ? "rgba(16, 185, 129, 0.12)" : "rgba(244, 63, 94, 0.14)",
-              border: `1px solid ${isOnline ? "rgba(16, 185, 129, 0.4)" : "rgba(244, 63, 94, 0.45)"}`,
-              padding: "5px 12px",
-              borderRadius: "999px",
-              fontSize: "0.72rem",
-              fontWeight: "800",
-              color: isOnline ? "#34d399" : "#fda4af",
-              fontFamily: "var(--font-mono, monospace)",
+              justifyContent: "center",
+              color: "#f43f5e",
+              fontSize: "0.9rem",
               flexShrink: 0,
-              boxShadow: isOnline ? "0 0 12px rgba(16, 185, 129, 0.2)" : "0 0 12px rgba(244, 63, 94, 0.25)",
             }}
-            title={isOnline ? "Connected to Disaster Alert Network" : "PWA Offline Mode"}
           >
-            {isOnline ? (
-              <>
-                <span
-                  style={{
-                    width: "7px",
-                    height: "7px",
-                    borderRadius: "50%",
-                    backgroundColor: "#10b981",
-                    boxShadow: "0 0 8px #10b981",
-                    flexShrink: 0,
-                  }}
-                />
-                <span className="header-status-chip-text">SAT-NET ACTIVE</span>
-                <span className="header-status-chip-mobile" style={{ display: "none" }}>ONLINE</span>
-              </>
-            ) : (
-              <>
-                <WifiOff size={13} color="#f43f5e" />
-                <span className="header-status-chip-text">OFFLINE LOCAL CACHE</span>
-                <span className="header-status-chip-mobile" style={{ display: "none" }}>OFFLINE</span>
-              </>
-            )}
+            ⚠️
           </div>
-
-          {/* Quick 1-Tap Emergency SOS Beacon Shortcut */}
-          <Link
-            to="/emergency-sos"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
-              color: "#ffffff",
-              padding: "5px 14px",
-              borderRadius: "999px",
-              fontSize: "0.74rem",
-              fontWeight: "800",
-              textDecoration: "none",
-              border: "1px solid rgba(251, 113, 133, 0.6)",
-              boxShadow: "0 0 14px rgba(225, 29, 72, 0.55)",
-              flexShrink: 0,
-              fontFamily: "var(--font-mono, monospace)",
-              letterSpacing: "0.04em",
-              transition: "transform 0.15s ease, box-shadow 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.04)";
-              e.currentTarget.style.boxShadow = "0 0 20px rgba(225, 29, 72, 0.85)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 0 14px rgba(225, 29, 72, 0.55)";
-            }}
-          >
-            <span>🚨</span>
-            <span>SOS BEACON</span>
-          </Link>
-
-          {/* Emergency Helpline Quick-Bar Popover */}
-          <div ref={hotlineRef} style={{ position: "relative" }}>
-            <button
-              type="button"
-              onClick={() => setHotlineOpen(!hotlineOpen)}
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: "1.2", minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  fontWeight: "900",
+                  color: "#fca5a5",
+                  letterSpacing: "0.04em",
+                  fontFamily: "var(--font-mono, monospace)",
+                }}
+              >
+                ACTIVE EMERGENCY
+              </span>
+              <span style={{ fontSize: "0.82rem", fontWeight: "800", color: "#ffffff" }}>
+                NER Landslide Alert — NH-10
+              </span>
+              <span
+                style={{
+                  fontSize: "0.58rem",
+                  fontWeight: "900",
+                  backgroundColor: "#e11d48",
+                  color: "#ffffff",
+                  padding: "1px 6px",
+                  borderRadius: "4px",
+                }}
+              >
+                CRITICAL
+              </span>
+            </div>
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "6px",
-                backgroundColor: hotlineOpen ? "rgba(239, 68, 68, 0.25)" : "rgba(239, 68, 68, 0.12)",
-                color: "#fca5a5",
-                border: `1px solid ${hotlineOpen ? "#ef4444" : "rgba(239, 68, 68, 0.35)"}`,
-                padding: "5px 12px",
-                borderRadius: "999px",
-                fontSize: "0.74rem",
-                fontWeight: "800",
-                cursor: "pointer",
-                fontFamily: "var(--font-mono, monospace)",
-                transition: "all 0.15s ease",
+                gap: "10px",
+                fontSize: "0.66rem",
+                color: "#cbd5e1",
+                marginTop: "2px",
+                flexWrap: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
-              title="Click to view all official 24x7 emergency helpline numbers"
             >
-              <PhoneCall size={12} color="#ef4444" />
-              <span>HOTLINES 112 / 108</span>
-            </button>
-
-            {hotlineOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "38px",
-                  left: 0,
-                  width: "320px",
-                  maxWidth: "90vw",
-                  backgroundColor: "rgba(10, 16, 32, 0.96)",
-                  backdropFilter: "blur(24px)",
-                  WebkitBackdropFilter: "blur(24px)",
-                  border: "1px solid rgba(239, 68, 68, 0.35)",
-                  borderRadius: "14px",
-                  padding: "14px",
-                  boxShadow: "0 20px 40px rgba(0, 0, 0, 0.85), 0 0 15px rgba(239, 68, 68, 0.2)",
-                  zIndex: 1000,
-                  animation: "fadeInDown 0.18s ease-out",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", paddingBottom: "8px", borderBottom: "1px solid rgba(239, 68, 68, 0.2)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ fontSize: "1rem" }}>📞</span>
-                    <span style={{ fontSize: "0.82rem", fontWeight: "800", color: "#fca5a5" }}>
-                      Emergency Speed Dialers
-                    </span>
-                  </div>
-                  <span style={{ fontSize: "0.62rem", color: "#94a3b8", fontFamily: "var(--font-mono, monospace)" }}>
-                    24x7 TOLL FREE
-                  </span>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                  {[
-                    { num: "112", label: "National Emergency", icon: "🚨", color: "#f87171" },
-                    { num: "108", label: "Medical Ambulance", icon: "🚑", color: "#f87171" },
-                    { num: "101", label: "Fire & Rescue", icon: "🚒", color: "#60a5fa" },
-                    { num: "100", label: "Police Control", icon: "👮", color: "#60a5fa" },
-                    { num: "1070", label: "Disaster (SDMA)", icon: "🏛️", color: "#facc15" },
-                    { num: "1078", label: "NDRF Helpline", icon: "🛡️", color: "#c084fc" },
-                    { num: "1091", label: "Women Helpline", icon: "👩", color: "#ec4899" },
-                    { num: "1912", label: "Electricity / Wire", icon: "⚡", color: "#38bdf8" },
-                  ].map((h) => (
-                    <a
-                      key={h.num}
-                      href={`tel:${h.num}`}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "8px 10px",
-                        borderRadius: "8px",
-                        backgroundColor: "rgba(30, 41, 59, 0.7)",
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
-                        textDecoration: "none",
-                        color: "#f8fafc",
-                        transition: "all 0.15s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
-                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.4)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "rgba(30, 41, 59, 0.7)";
-                        e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)";
-                      }}
-                    >
-                      <span style={{ fontSize: "1.1rem" }}>{h.icon}</span>
-                      <div style={{ lineHeight: "1.2" }}>
-                        <div style={{ fontSize: "0.82rem", fontWeight: "800", color: h.color, fontFamily: "var(--font-mono, monospace)" }}>
-                          {h.num}
-                        </div>
-                        <div style={{ fontSize: "0.64rem", color: "#94a3b8" }}>
-                          {h.label}
-                        </div>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
+              <span>🏠 4 Villages Affected</span>
+              <span>👥 387 People Exposed</span>
+              <span>🛣️ 2 Roads Blocked</span>
+              <span style={{ color: "#94a3b8" }}>⏱️ Updated 21:42</span>
+            </div>
           </div>
+        </div>
 
-          {/* GIS Map Link */}
-          <Link
-            to="/map"
-            className="header-map-shortcut"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              color: "#38bdf8",
-              fontSize: "0.76rem",
-              fontWeight: "700",
-              textDecoration: "none",
-              backgroundColor: "rgba(56, 189, 248, 0.1)",
-              padding: "5px 11px",
-              borderRadius: "8px",
-              border: "1px solid rgba(56, 189, 248, 0.28)",
-              flexShrink: 0,
-              transition: "all 0.15s ease",
-            }}
-          >
-            <MapPin size={13} />
-            <span>{t.nav_map || "GIS Map"}</span>
-          </Link>
-
-          {/* Language Switcher */}
+        {/* ─────────────── RIGHT: Status, Clock, Language, Bell, User ─────────────── */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+          {/* System Online Badge */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "6px",
-              backgroundColor: "rgba(30, 41, 59, 0.7)",
-              padding: "4px 9px",
-              borderRadius: "8px",
-              border: "1px solid rgba(56, 189, 248, 0.2)",
-              flexShrink: 0,
+              gap: "7px",
+              backgroundColor: "rgba(16, 185, 129, 0.12)",
+              border: "1px solid rgba(16, 185, 129, 0.35)",
+              borderRadius: "999px",
+              padding: "4px 10px",
             }}
           >
-            <Globe size={13} color="#38bdf8" />
+            <span
+              style={{
+                width: "7px",
+                height: "7px",
+                borderRadius: "50%",
+                backgroundColor: "#10b981",
+                boxShadow: "0 0 8px #10b981",
+              }}
+            />
+            <div style={{ display: "flex", flexDirection: "column", lineHeight: "1.1", textAlign: "left" }}>
+              <span style={{ fontSize: "0.68rem", fontWeight: "800", color: "#34d399" }}>System Online</span>
+              <span style={{ fontSize: "0.56rem", color: "#94a3b8" }}>All Services Operational</span>
+            </div>
+          </div>
+
+          {/* Live Clock & Date */}
+          <div style={{ display: "flex", flexDirection: "column", textAlign: "center", lineHeight: "1.1", minWidth: "65px" }}>
+            <span style={{ fontSize: "0.98rem", fontWeight: "900", color: "#ffffff", fontFamily: "var(--font-mono, monospace)" }}>
+              {clock.time}
+            </span>
+            <span style={{ fontSize: "0.62rem", color: "#94a3b8" }}>
+              {clock.date}
+            </span>
+          </div>
+
+          {/* Language Switcher Dropdown */}
+          <div
+            style={{
+              backgroundColor: "rgba(30, 41, 59, 0.75)",
+              border: "1px solid rgba(56, 189, 248, 0.25)",
+              borderRadius: "8px",
+              padding: "4px 8px",
+            }}
+          >
             <select
               value={langDisplayName}
               onChange={(e) => setLangByDisplayName(e.target.value)}
-              className="header-lang-select"
               style={{
                 backgroundColor: "transparent",
-                color: "#f8fafc",
+                color: "#ffffff",
                 border: "none",
-                fontSize: "0.75rem",
-                fontWeight: "700",
+                fontSize: "0.74rem",
+                fontWeight: "800",
                 outline: "none",
                 cursor: "pointer",
               }}
             >
-              <option value="English" style={{ background: "#0f172a" }}>English</option>
-              <option value="Hindi" style={{ background: "#0f172a" }}>Hindi (हिन्दी)</option>
-              <option value="Odia" style={{ background: "#0f172a" }}>Odia (ଓଡ଼ିଆ)</option>
-              <option value="Bengali" style={{ background: "#0f172a" }}>Bengali (বাংলা)</option>
-              <option value="Assamese" style={{ background: "#0f172a" }}>Assamese (অসমীয়া)</option>
-              <option value="Manipuri" style={{ background: "#0f172a" }}>Manipuri (মৈতৈলোন্)</option>
-              <option value="Mizo" style={{ background: "#0f172a" }}>Mizo (Mizo ṭawng)</option>
-              <option value="Bodo" style={{ background: "#0f172a" }}>Bodo (बड़ो)</option>
-              <option value="Khasi" style={{ background: "#0f172a" }}>Khasi</option>
-              <option value="Nagamese" style={{ background: "#0f172a" }}>Nagamese</option>
-              <option value="Nepali" style={{ background: "#0f172a" }}>Nepali (नेपाली)</option>
-              <option value="Spanish" style={{ background: "#0f172a" }}>Spanish (Español)</option>
-              <option value="Garo" style={{ background: "#0f172a" }}>Garo (Achik)</option>
-              <option value="Santali" style={{ background: "#0f172a" }}>Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
+              <option value="English" style={{ background: "#0f172a" }}>EN</option>
+              <option value="Hindi" style={{ background: "#0f172a" }}>HI</option>
+              <option value="Odia" style={{ background: "#0f172a" }}>OR</option>
+              <option value="Bengali" style={{ background: "#0f172a" }}>BN</option>
+              <option value="Assamese" style={{ background: "#0f172a" }}>AS</option>
             </select>
           </div>
-
-          {/* ⚡ 2G Ultra-Low Bandwidth Mode */}
-          <button
-            onClick={() => {
-              if (!isLowBandwidth) {
-                toggleLowBandwidth();
-                navigate("/low-bandwidth");
-              } else {
-                toggleLowBandwidth();
-                navigate("/");
-              }
-            }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              backgroundColor: isLowBandwidth ? "#f59e0b" : "rgba(245, 158, 11, 0.12)",
-              border: `1px solid ${isLowBandwidth ? "#d97706" : "rgba(245, 158, 11, 0.35)"}`,
-              color: isLowBandwidth ? "#000000" : "#fbbf24",
-              padding: "4px 10px",
-              borderRadius: "8px",
-              fontSize: "0.72rem",
-              fontWeight: "800",
-              fontFamily: "var(--font-mono, monospace)",
-              cursor: "pointer",
-              flexShrink: 0,
-              transition: "all 0.15s ease",
-            }}
-            title="Ultra-Low Bandwidth Mode: Strips heavy assets for 2G network resilience"
-          >
-            <Zap size={12} />
-            <span>{isLowBandwidth ? "2G ACTIVE" : "2G RESILIENCE"}</span>
-          </button>
         </div>
 
         {/* ─────────────── RIGHT: Notifications & User Profile ─────────────── */}

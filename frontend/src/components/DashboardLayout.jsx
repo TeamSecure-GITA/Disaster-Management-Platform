@@ -59,58 +59,61 @@ export default function DashboardLayout() {
       className={isDesktopMode ? "force-desktop-layout" : "normal-layout"}
       style={{
         display: "flex",
+        flexDirection: "column",
         width: "100%",
         maxWidth: "100vw",
         height: "100vh",
         maxHeight: "100dvh",
         overflow: "hidden",
-        backgroundColor: "#020617",
-        backgroundImage: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(14, 165, 233, 0.12), rgba(2, 6, 23, 0.98)), radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.08), transparent)",
+        backgroundColor: "#060b17",
+        backgroundImage: "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(14, 165, 233, 0.08), rgba(2, 6, 23, 0.98))",
         position: "relative",
       }}
     >
-      {/* ── Mobile Sidebar Backdrop Overlay (only in mobile drawer mode) ── */}
-      {!isDesktopMode && (
-        <div
-          className={`mobile-sidebar-backdrop ${sidebarOpen ? "active" : ""}`}
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* ── Left Navigation Bar (Desktop fixed, Mobile/Tablet slide-in drawer) ── */}
-      <Sidebar
-        isOpen={isDesktopMode || sidebarOpen}
+      {/* ── Top Permanent Navigation & Status Bar (Full Width) ── */}
+      <HeaderTopBar
         isDesktopMode={isDesktopMode}
-        onClose={() => setSidebarOpen(false)}
+        onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
       />
 
-      {/* ── Right-side column: header + emergency banner + content ── */}
+      <CitizenUnsafeEmergencyModal />
+      <LiveNotificationToast />
+
+      {/* ── Main Body: Sidebar + Main Content Row ── */}
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
           flex: 1,
-          minWidth: 0,
+          minHeight: 0,
           overflow: "hidden",
           position: "relative",
         }}
       >
-        <HeaderTopBar
-          isDesktopMode={isDesktopMode}
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-        />
-        <CitizenUnsafeEmergencyModal />
-        <EmergencyAlertBanner />
-        <LiveNotificationToast />
+        {/* Mobile Sidebar Backdrop Overlay (only in mobile drawer mode) */}
+        {!isDesktopMode && (
+          <div
+            className={`mobile-sidebar-backdrop ${sidebarOpen ? "active" : ""}`}
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
+        {/* Left Navigation Bar */}
+        <Sidebar
+          isOpen={isDesktopMode || sidebarOpen}
+          isDesktopMode={isDesktopMode}
+          onClose={() => setSidebarOpen(false)}
+        />
+
+        {/* Main Content Area */}
         <main
           className="app-main-content-scroll"
           style={{
             flex: 1,
+            minWidth: 0,
             overflowY: "auto",
             overflowX: "hidden",
-            padding: "20px 24px",
+            padding: "16px 20px 80px 20px",
             color: "#f8fafc",
             WebkitOverflowScrolling: "touch",
           }}
@@ -118,7 +121,7 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
 
-        {/* ── Mobile Quick Bottom Navigation Bar (< 768px, hidden in desktop mode) ── */}
+        {/* Mobile Quick Bottom Navigation Bar (< 768px, hidden in desktop mode) */}
         {!isDesktopMode && (
           <MobileBottomNav onOpenMenu={() => setSidebarOpen(true)} />
         )}

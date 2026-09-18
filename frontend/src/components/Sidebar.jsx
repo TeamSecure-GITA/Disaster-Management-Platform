@@ -341,21 +341,21 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
         boxShadow: "4px 0 30px rgba(0, 0, 0, 0.45)",
       }}
     >
-      {/* ── Brand & Tactical Header ───────────────────────── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          padding: "16px 18px",
-          borderBottom: "1px solid rgba(56, 189, 248, 0.14)",
-          background: "linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(8, 14, 28, 0.9) 100%)",
-          position: "sticky",
-          top: 0,
-          zIndex: 20,
-          backdropFilter: "blur(16px)",
-        }}
-      >
+      {/* ── Mobile-Only Tactical Header ───────────────────────── */}
+      {!isDesktopMode && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "14px 16px",
+            borderBottom: "1px solid rgba(56, 189, 248, 0.14)",
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(8, 14, 28, 0.95) 100%)",
+            position: "sticky",
+            top: 0,
+            zIndex: 20,
+          }}
+        >
         <div style={{ position: "relative" }}>
           <img
             src={logoImg || "/logo.png"}
@@ -452,94 +452,8 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
             ✕
           </button>
         )}
-      </div>
-
-      {/* ── Search & Filter Input Bar ──────────────────────── */}
-      <div style={{ padding: "10px 14px 4px" }}>
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "rgba(15, 23, 42, 0.7)",
-            border: "1px solid rgba(56, 189, 248, 0.2)",
-            borderRadius: "10px",
-            padding: "4px 10px",
-          }}
-        >
-          <span style={{ fontSize: "0.8rem", marginRight: "6px", opacity: 0.7 }}>🔍</span>
-          <input
-            type="text"
-            placeholder="Search crisis tools..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: "100%",
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              color: "#f8fafc",
-              fontSize: "0.78rem",
-            }}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#94a3b8",
-                cursor: "pointer",
-                fontSize: "0.75rem",
-              }}
-            >
-              ✕
-            </button>
-          )}
         </div>
-      </div>
-
-      {/* ── Tactical Threat Condition HUD Meter ────────────── */}
-      <div style={{ padding: "8px 14px 4px" }}>
-        <div
-          style={{
-            background: "linear-gradient(135deg, rgba(244, 63, 94, 0.14) 0%, rgba(245, 158, 11, 0.12) 100%)",
-            border: "1px solid rgba(244, 63, 94, 0.35)",
-            borderRadius: "10px",
-            padding: "8px 10px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#f43f5e", boxShadow: "0 0 8px #f43f5e", display: "inline-block" }} />
-            <div>
-              <div style={{ fontSize: "0.68rem", fontWeight: "800", color: "#fca5a5", letterSpacing: "0.06em", fontFamily: "var(--font-mono, monospace)" }}>
-                ALERT LEVEL: ELEVATED
-              </div>
-              <div style={{ fontSize: "0.62rem", color: "#cbd5e1" }}>
-                Active IMD Squall & Hill Telemetry
-              </div>
-            </div>
-          </div>
-          <NavLink
-            to="/alerts"
-            onClick={handleNavClick}
-            style={{
-              fontSize: "0.64rem",
-              fontWeight: "800",
-              color: "#38bdf8",
-              textDecoration: "none",
-              background: "rgba(56, 189, 248, 0.15)",
-              padding: "2px 8px",
-              borderRadius: "6px",
-            }}
-          >
-            VIEW ➔
-          </NavLink>
-        </div>
-      </div>
+      )}
 
       {/* ── Navigation Links Container ─────────────────────── */}
       <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
@@ -632,93 +546,46 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
         ], "⚙", "grp_system")}
       </div>
 
-      {/* ── Embedded 1-Click Emergency Speed Dialers ────── */}
-      <div
-        style={{
-          margin: "10px 10px 14px",
-          padding: "12px",
-          borderRadius: "12px",
-          background: "linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%)",
-          border: "1px solid rgba(239, 68, 68, 0.28)",
-          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "8px",
-          }}
-        >
-          <span style={{ fontSize: "0.66rem", fontWeight: "800", color: "#fca5a5", letterSpacing: "0.06em", fontFamily: "var(--font-mono, monospace)" }}>
-            ⚡ EMERGENCY SPEED-DIAL
-          </span>
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#ef4444", boxShadow: "0 0 6px #ef4444" }} />
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-          <a
-            href="tel:112"
-            className="hotline-chip hotline-medical"
-            style={{ fontSize: "0.72rem", padding: "5px 8px", justifyContent: "center" }}
-            title="National All Emergency (112)"
-          >
-            <span>🚨</span>
-            <span>112 All</span>
-          </a>
-          <a
-            href="tel:108"
-            className="hotline-chip hotline-medical"
-            style={{ fontSize: "0.72rem", padding: "5px 8px", justifyContent: "center" }}
-            title="Medical Ambulance (108)"
-          >
-            <span>🚑</span>
-            <span>108 Med</span>
-          </a>
-          <a
-            href="tel:101"
-            className="hotline-chip hotline-police"
-            style={{ fontSize: "0.72rem", padding: "5px 8px", justifyContent: "center" }}
-            title="Fire Brigade (101)"
-          >
-            <span>🚒</span>
-            <span>101 Fire</span>
-          </a>
-          <a
-            href="tel:1070"
-            className="hotline-chip hotline-disaster"
-            style={{ fontSize: "0.72rem", padding: "5px 8px", justifyContent: "center" }}
-            title="State Disaster Helpline (1070)"
-          >
-            <span>📞</span>
-            <span>1070 SDMA</span>
-          </a>
-        </div>
-      </div>
-
-      {/* ── Footer Telemetry & System Diagnostics ───────────── */}
+      {/* ── Footer Branding: Together for a Safer Tomorrow ───────────── */}
       <div
         style={{
           marginTop: "auto",
           padding: "14px 16px",
-          borderTop: "1px solid rgba(56, 189, 248, 0.14)",
-          background: "rgba(5, 9, 18, 0.9)",
-          fontSize: "0.68rem",
-          color: "#64748b",
-          fontFamily: "var(--font-mono, monospace)",
+          borderTop: "1px solid rgba(56, 189, 248, 0.12)",
+          background: "rgba(5, 9, 18, 0.95)",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "#34d399", fontWeight: "700" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 6px #10b981" }} />
-            GRID RESILIENT
-          </span>
-          <span style={{ color: "#94a3b8" }}>v2.4-TACTICAL</span>
+        <div
+          style={{
+            width: "24px",
+            height: "24px",
+            borderRadius: "6px",
+            background: "linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(99, 102, 241, 0.35) 100%)",
+            border: "1px solid rgba(56, 189, 248, 0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "0.8rem",
+            flexShrink: 0,
+            boxShadow: "0 0 10px rgba(56, 189, 248, 0.3)",
+          }}
+        >
+          ❄️
         </div>
-        <div style={{ color: "#475569", fontSize: "0.62rem" }}>
-          NER Disaster Response · SAT-LINK SECURE
-        </div>
+        <span
+          style={{
+            fontSize: "0.74rem",
+            fontWeight: "600",
+            color: "#94a3b8",
+            letterSpacing: "-0.01em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Together for a Safer Tomorrow
+        </span>
       </div>
     </aside>
   );
