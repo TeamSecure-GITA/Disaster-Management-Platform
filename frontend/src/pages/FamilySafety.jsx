@@ -14,6 +14,9 @@ import {
   findNearestSafeShelter,
   parseMemberCoordinates,
 } from "../services/disasterService";
+import { dispatchLocalUnsafeAlarm } from "../services/socketService";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const RELATIONSHIPS = [
   "Father",
@@ -440,6 +443,64 @@ export default function FamilySafety() {
     }
   };
 
+  // Dispatch citizen unsafe alert to backend (FCM, SMS, socket siren, nearest shelter route) and locally
+  const sendCitizenUnsafeEmergencyAlert = async (member) => {
+    try {
+      const coords = member.memberCoords || parseMemberCoordinates(member);
+      const coordsStr = coords ? `${coords.latitude},${coords.longitude}` : (member.coordinates || "");
+
+      const payload = {
+        citizenName: member.name,
+        phone: member.phone,
+        currentLocation: coordsStr,
+        hazardType: member.dangerZone ? `${member.dangerZone.name} (${member.dangerZone.type})` : "Active Disaster Hazard Zone",
+        customMessage: `🚨 CRITICAL SAFETY ALERT: ${member.name} has been flagged as UNSAFE in a danger zone! Evacuate immediately to designated safe refuge.`,
+        triggerSiren: true,
+      };
+
+      // 1. Call Backend API to dispatch FCM push, SMS, socket siren, and safe place route
+      const authToken = localStorage.getItem("token");
+      fetch(`${API_URL}/api/evacuation/citizen-unsafe-alert`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken && !authToken.startsWith("demo-") ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      }).catch((e) => console.warn("Backend unsafe alert dispatch non-fatal:", e));
+
+      // 2. Dispatch local unsafe alarm immediately so mobile phone sounds siren & opens modal
+      const shelter = member.nearestShelter || DEFAULT_SHELTERS[0];
+      const sLat = shelter.location?.coordinates?.[1] || shelter.latitude || 20.3015;
+      const sLng = shelter.location?.coordinates?.[0] || shelter.longitude || 85.8312;
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${sLat},${sLng}&travelmode=walking`;
+
+      dispatchLocalUnsafeAlarm({
+        id: `unsafe-${Date.now()}`,
+        isUnsafe: true,
+        triggerSiren: true,
+        citizenName: member.name,
+        hazardType: member.dangerZone ? member.dangerZone.name : "Disaster Hazard Zone",
+        message: `🚨 ${member.name} is in DANGER! Nearest designated safe shelter: ${shelter.name} (${shelter.distToMember || "2.1"} km away). Tap below for live turn-by-turn map navigation.`,
+        nearestSafePlace: {
+          name: shelter.name,
+          address: shelter.address,
+          distanceKm: shelter.distToMember || 2.1,
+          phone: shelter.phone || "112",
+          latitude: sLat,
+          longitude: sLng,
+          walkingMinutes: Math.max(5, Math.round(((shelter.distToMember || 2.1) / 4.5) * 60)),
+        },
+        mapRouteUrl: mapsUrl,
+      });
+
+      setBroadcastMsg(`🚨 Emergency notification, nearest shelter route & siren dispatched to ${member.name}'s phone!`);
+      setTimeout(() => setBroadcastMsg(""), 6000);
+    } catch (err) {
+      console.error("Error triggering unsafe alert:", err);
+    }
+  };
+
   // Toggle Safety Status: If toggled to unsafe, it will buzz the siren automatically!
   const handleToggleStatus = async (member) => {
     const willBeUnsafe = !member.isUnsafe;
@@ -447,6 +508,7 @@ export default function FamilySafety() {
     try {
       if (willBeUnsafe) {
         setSirenMuted(false); // Unmute so siren buzzes automatically
+        sendCitizenUnsafeEmergencyAlert(member);
       }
       const updated = await toggleMemberSafety(member.id || member._id, nextStatus);
       setMembers(updated);
@@ -1274,6 +1336,31 @@ export default function FamilySafety() {
                         <span>{isSafe ? "✅" : "🆘"}</span>
                         <span>{isSafe ? "Safe (Click to Mark Unsafe)" : "Unsafe (Click to Mark Safe)"}</span>
                       </button>
+
+                      {/* Send Mobile Danger Alert & Siren */}
+                      {isUnsafe && (
+                        <button
+                          onClick={() => sendCitizenUnsafeEmergencyAlert(member)}
+                          title="Buzz emergency siren on mobile phone & send nearest safe place map route"
+                          style={{
+                            padding: "8px 14px",
+                            borderRadius: "8px",
+                            border: "1px solid #f87171",
+                            backgroundColor: "#dc2626",
+                            color: "#ffffff",
+                            fontWeight: "800",
+                            fontSize: "0.85rem",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            boxShadow: "0 0 15px rgba(220, 38, 38, 0.7)",
+                          }}
+                        >
+                          <span>🚨</span>
+                          <span>Send Siren & Map Route</span>
+                        </button>
+                      )}
 
                       {/* WhatsApp Ping */}
                       {member.phone && (

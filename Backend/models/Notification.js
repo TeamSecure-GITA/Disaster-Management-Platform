@@ -56,6 +56,8 @@ const notificationSchema = new mongoose.Schema(
         "weather",
         "system",
         "general",
+        "disaster_alert",
+        "emergency_danger",
       ],
       default: "general",
     },

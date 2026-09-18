@@ -38,21 +38,32 @@ messaging.onBackgroundMessage((payload) => {
   const icon  = payload.notification?.icon  || "/pwa-192x192.png";
   const badge = "/pwa-192x192.png";
 
+  const isSirenAlarm = payload.data?.siren === "true" || payload.data?.type === "CITIZEN_UNSAFE_ALARM";
+  const mapUrl = payload.data?.mapUrl || payload.data?.url || "/evacuation-planner";
+
   const notificationOptions = {
     body,
     icon,
     badge,
-    tag: `disaster-alert-${Date.now()}`,
+    tag: isSirenAlarm ? `danger-siren-${Date.now()}` : `disaster-alert-${Date.now()}`,
     requireInteraction: true,
-    vibrate: [200, 100, 200, 100, 200],
+    // Strong vibration alert on mobile phones when in danger
+    vibrate: isSirenAlarm ? [500, 200, 500, 200, 500, 200, 1000] : [200, 100, 200, 100, 200],
     data: {
-      url: payload.data?.url || "/notifications",
+      url: mapUrl,
+      mapUrl: payload.data?.mapUrl,
+      isSirenAlarm,
       ...payload.data,
     },
-    actions: [
-      { action: "view",   title: "View Alert" },
-      { action: "dismiss", title: "Dismiss" },
-    ],
+    actions: isSirenAlarm
+      ? [
+          { action: "map",     title: "🗺️ Go to Safe Place" },
+          { action: "dismiss", title: "Dismiss" },
+        ]
+      : [
+          { action: "view",    title: "View Alert" },
+          { action: "dismiss", title: "Dismiss" },
+        ],
   };
 
   self.registration.showNotification(title, notificationOptions);
@@ -64,12 +75,21 @@ self.addEventListener("notificationclick", (event) => {
 
   if (event.action === "dismiss") return;
 
-  const targetUrl = event.notification.data?.url || "/notifications";
+  // If clicked 'map' action or clicked unsafe alarm notification, route directly to mapUrl
+  const targetUrl = (event.action === "map" && event.notification.data?.mapUrl)
+    ? event.notification.data.mapUrl
+    : (event.notification.data?.mapUrl || event.notification.data?.url || "/notifications");
 
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((windowClients) => {
+        // If it's an external Google Maps link, open new window
+        if (targetUrl.startsWith("http://") || targetUrl.startsWith("https://")) {
+          if (clients.openWindow) {
+            return clients.openWindow(targetUrl);
+          }
+        }
         // If the app is already open, focus it and navigate
         for (const client of windowClients) {
           if (client.url.includes(self.location.origin) && "focus" in client) {

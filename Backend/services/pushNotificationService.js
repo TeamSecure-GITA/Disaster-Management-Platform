@@ -114,6 +114,24 @@ const sendToToken = async (token, title, message, data = {}) => {
         const payload = {
             token,
             notification: { title, body: message },
+            android: {
+                priority: "high",
+                notification: {
+                    sound: "default",
+                    channelId: "emergency_siren_alerts",
+                    priority: "max",
+                    defaultVibrateTimings: true,
+                },
+            },
+            webpush: {
+                headers: {
+                    Urgency: "high",
+                },
+                notification: {
+                    requireInteraction: true,
+                    vibrate: [500, 200, 500, 200, 500, 200, 1000],
+                },
+            },
             // FCM data payloads must be string:string maps
             data: Object.entries(data).reduce((acc, [key, value]) => {
                 acc[key] = String(value);

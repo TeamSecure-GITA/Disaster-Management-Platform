@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import HeaderTopBar from "./HeaderTopBar";
 import EmergencyAlertBanner from "./EmergencyAlertBanner";
 import LiveNotificationToast from "./LiveNotificationToast";
+import CitizenUnsafeEmergencyModal from "./CitizenUnsafeEmergencyModal";
 import MobileBottomNav from "./MobileBottomNav";
 import OfflineStatusWidget from "./OfflineStatusWidget";
 import { detectDesktopMode } from "../utils/browserMode";
@@ -98,6 +99,7 @@ export default function DashboardLayout() {
           isDesktopMode={isDesktopMode}
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         />
+        <CitizenUnsafeEmergencyModal />
         <EmergencyAlertBanner />
         <LiveNotificationToast />
 

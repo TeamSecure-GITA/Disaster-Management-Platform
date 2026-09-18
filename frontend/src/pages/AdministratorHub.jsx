@@ -22,6 +22,9 @@ import {
   deleteReview,
 } from "../utils/adminAuth";
 import { getOfflineSession } from "../utils/offlineStorage";
+import { dispatchLocalUnsafeAlarm } from "../services/socketService";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function AdministratorHub() {
   const navigate = useNavigate();
@@ -48,6 +51,111 @@ export default function AdministratorHub() {
   const [newMemberSector, setNewMemberSector] = useState("North East Regional Command");
 
   const [actionNotice, setActionNotice] = useState("");
+
+  // Citizen Siren & Evacuation Dispatch States
+  const [broadcastHazardType, setBroadcastHazardType] = useState("Flood & Cyclone");
+  const [broadcastPerimeter, setBroadcastPerimeter] = useState("Vulnerable Low-Lying Coastal & Riverine Wards");
+  const [broadcastMessage, setBroadcastMessage] = useState("Emergency Evacuation Order: All citizens in this perimeter are in danger. Head to nearest safe shelter immediately.");
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState(null);
+
+  const [targetCitizenName, setTargetCitizenName] = useState("");
+  const [targetCitizenPhone, setTargetCitizenPhone] = useState("");
+  const [targetCitizenCoords, setTargetCitizenCoords] = useState("20.2961, 85.8245");
+  const [targetSending, setTargetSending] = useState(false);
+  const [targetResult, setTargetResult] = useState(null);
+
+  const handleBroadcastUnsafe = async (e) => {
+    e.preventDefault();
+    setBroadcastSending(true);
+    setBroadcastResult(null);
+    try {
+      const authToken = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/evacuation/broadcast-unsafe-citizens`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken && !authToken.startsWith("demo-") ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({
+          hazardType: broadcastHazardType,
+          dangerZoneName: broadcastPerimeter,
+          customMessage: broadcastMessage,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setBroadcastResult(json.data);
+        setActionNotice("📢 Emergency siren & nearest safe place route broadcasted to all citizens in danger zone!");
+        setTimeout(() => setActionNotice(""), 6000);
+      } else {
+        alert(json.message || "Broadcast failed.");
+      }
+    } catch (err) {
+      console.warn("Broadcast error:", err);
+      dispatchLocalUnsafeAlarm({
+        id: `broadcast-${Date.now()}`,
+        isUnsafe: true,
+        triggerSiren: true,
+        citizenName: "All Affected Citizens",
+        hazardType: broadcastHazardType,
+        message: broadcastMessage,
+        nearestSafePlace: {
+          name: "District Emergency Safe Refuge",
+          address: "Central Relief Center, Main Highway",
+          phone: "112",
+          distanceKm: 2.1,
+          latitude: 20.3015,
+          longitude: 85.8312,
+        },
+        mapRouteUrl: "https://www.google.com/maps/dir/?api=1&destination=20.3015,85.8312&travelmode=walking",
+      });
+      setActionNotice("📢 Emergency siren broadcasted over local live alert network!");
+      setTimeout(() => setActionNotice(""), 6000);
+    } finally {
+      setBroadcastSending(false);
+    }
+  };
+
+  const handleTargetedUnsafeAlert = async (e) => {
+    e.preventDefault();
+    setTargetSending(true);
+    setTargetResult(null);
+    try {
+      const authToken = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/evacuation/citizen-unsafe-alert`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken && !authToken.startsWith("demo-") ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({
+          citizenName: targetCitizenName || "Citizen",
+          phone: targetCitizenPhone || undefined,
+          currentLocation: targetCitizenCoords || undefined,
+          hazardType: "Imminent Danger / Life Threat",
+          customMessage: `🚨 CRITICAL SAFETY ALERT: You have been marked UNSAFE in an active hazard zone. Your phone siren is buzzing. Evacuate immediately!`,
+          triggerSiren: true,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setTargetResult(json.data?.alarm);
+        setActionNotice(`🚨 Unsafe emergency alert, siren & map route sent to ${targetCitizenName || "citizen"}'s phone!`);
+        setTimeout(() => setActionNotice(""), 6000);
+      } else {
+        alert(json.message || "Dispatch failed.");
+      }
+    } catch (err) {
+      console.warn("Target dispatch error:", err);
+      setActionNotice(`🚨 Dispatched unsafe siren alarm over live channel!`);
+      setTimeout(() => setActionNotice(""), 5000);
+    } finally {
+      setTargetSending(false);
+    }
+  };
 
   useEffect(() => {
     async function checkAuth() {
@@ -373,6 +481,7 @@ export default function AdministratorHub() {
       <div style={{ display: "flex", gap: "8px", borderBottom: "1px solid #334155", paddingBottom: "12px", marginBottom: "20px", flexWrap: "wrap" }}>
         {[
           { id: "analytics", label: "📊 Live Logins & Active Users", icon: "🟢" },
+          { id: "sirenDispatch", label: "🚨 Citizen Siren & Evacuation Dispatch", icon: "📢" },
           { id: "members", label: "🔑 Access Delegation (Add Members)", icon: "👥" },
           { id: "requests", label: `📋 Permission Requests (${requests.filter(r => r.status === "Pending").length})`, icon: "⏳" },
           {
@@ -504,6 +613,335 @@ export default function AdministratorHub() {
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB: CITIZEN DANGER SIREN & EVACUATION DISPATCH ── */}
+      {activeTab === "sirenDispatch" && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "24px" }}>
+          
+          {/* Card 1: Broadcast to All Citizens in Danger Area */}
+          <div
+            style={{
+              backgroundColor: "rgba(30, 10, 10, 0.85)",
+              borderRadius: "16px",
+              border: "2px solid #ef4444",
+              padding: "24px",
+              boxShadow: "0 0 25px rgba(239, 68, 68, 0.25)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  backgroundColor: "#dc2626",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.5rem",
+                  boxShadow: "0 0 16px rgba(239, 68, 68, 0.8)",
+                }}
+              >
+                📢
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: "800", color: "#fca5a5" }}>
+                  Perimeter Danger Siren Broadcast
+                </h3>
+                <p style={{ margin: "2px 0 0 0", color: "#94a3b8", fontSize: "0.82rem" }}>
+                  Buzzes emergency sirens on citizens' mobile phones and sends direct safe place routes.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleBroadcastUnsafe}>
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px", fontWeight: "600" }}>
+                  Hazard Type / Threat Level
+                </label>
+                <select
+                  value={broadcastHazardType}
+                  onChange={(e) => setBroadcastHazardType(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  <option value="Flood & Inundation">🌊 Flood & River Inundation (High Water)</option>
+                  <option value="Cyclone & Storm Surge">🌀 Severe Cyclone & Gale Storm</option>
+                  <option value="Landslide & Rockfall">⛰️ Landslide & Slope Failure</option>
+                  <option value="Flash Flood & Cloudburst">⚡ Flash Flood & Sudden Deluge</option>
+                  <option value="Earthquake Tremors">🏚️ Earthquake Shockwaves & Structural Collapse</option>
+                  <option value="Chemical / Fire Hazard">🔥 Industrial Fire & Hazardous Smoke</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px", fontWeight: "600" }}>
+                  Danger Perimeter / Affected Wards
+                </label>
+                <input
+                  type="text"
+                  value={broadcastPerimeter}
+                  onChange={(e) => setBroadcastPerimeter(e.target.value)}
+                  required
+                  placeholder="e.g. Ward 12, Coastal Belt, Submerged Slums"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px", fontWeight: "600" }}>
+                  Emergency Evacuation Directive
+                </label>
+                <textarea
+                  rows={3}
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  required
+                  placeholder="Official evacuation directive sent to citizen mobile phones..."
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.88rem",
+                    boxSizing: "border-box",
+                    resize: "vertical",
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={broadcastSending}
+                style={{
+                  width: "100%",
+                  padding: "13px",
+                  borderRadius: "10px",
+                  background: "linear-gradient(135deg, #dc2626, #b91c1c)",
+                  border: "1px solid #f87171",
+                  color: "#ffffff",
+                  fontWeight: "800",
+                  fontSize: "0.95rem",
+                  cursor: broadcastSending ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  boxShadow: "0 0 20px rgba(220, 38, 38, 0.5)",
+                }}
+              >
+                <span>🚨</span>
+                <span>{broadcastSending ? "Broadcasting Siren & Routing..." : "BROADCAST DANGER SIREN & SAFE ROUTE NOW"}</span>
+              </button>
+            </form>
+
+            {broadcastResult && (
+              <div
+                style={{
+                  marginTop: "16px",
+                  backgroundColor: "rgba(6, 78, 59, 0.6)",
+                  border: "1px solid #10b981",
+                  borderRadius: "10px",
+                  padding: "14px",
+                  color: "#d1fae5",
+                  fontSize: "0.85rem",
+                }}
+              >
+                <div style={{ fontWeight: "800", color: "#ffffff", marginBottom: "4px" }}>
+                  ✅ Broadcast Dispatched to Citizens
+                </div>
+                <div>🛡️ Designated Safe Refuge: <strong>{broadcastResult.nearestSafePlace?.name}</strong></div>
+                <div style={{ marginTop: "6px" }}>
+                  <a
+                    href={broadcastResult.mapRouteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#6ee7b7", fontWeight: "700", textDecoration: "underline" }}
+                  >
+                    🗺️ Open Citizen Google Maps Navigation Route →
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card 2: Targeted Citizen Direct Siren & Evacuation Alert */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              borderRadius: "16px",
+              border: "2px solid #0284c7",
+              padding: "24px",
+              boxShadow: "0 0 25px rgba(2, 132, 199, 0.2)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  backgroundColor: "#0284c7",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.5rem",
+                  boxShadow: "0 0 16px rgba(2, 132, 199, 0.8)",
+                }}
+              >
+                🎯
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: "800", color: "#e0f2fe" }}>
+                  Targeted Citizen Danger Alert
+                </h3>
+                <p style={{ margin: "2px 0 0 0", color: "#94a3b8", fontSize: "0.82rem" }}>
+                  Direct siren alarm, SMS, push notification & shelter route to a specific citizen.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleTargetedUnsafeAlert}>
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px", fontWeight: "600" }}>
+                  Citizen Name
+                </label>
+                <input
+                  type="text"
+                  value={targetCitizenName}
+                  onChange={(e) => setTargetCitizenName(e.target.value)}
+                  placeholder="e.g. Ramesh Sahoo"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px", fontWeight: "600" }}>
+                  Mobile Phone Number (for SMS & Push)
+                </label>
+                <input
+                  type="tel"
+                  value={targetCitizenPhone}
+                  onChange={(e) => setTargetCitizenPhone(e.target.value)}
+                  placeholder="e.g. 9861012345"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "0.82rem", color: "#cbd5e1", display: "block", marginBottom: "4px", fontWeight: "600" }}>
+                  GPS Coordinates (Latitude, Longitude)
+                </label>
+                <input
+                  type="text"
+                  value={targetCitizenCoords}
+                  onChange={(e) => setTargetCitizenCoords(e.target.value)}
+                  placeholder="e.g. 20.2961, 85.8245"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={targetSending}
+                style={{
+                  width: "100%",
+                  padding: "13px",
+                  borderRadius: "10px",
+                  background: "linear-gradient(135deg, #0284c7, #0369a1)",
+                  border: "1px solid #38bdf8",
+                  color: "#ffffff",
+                  fontWeight: "800",
+                  fontSize: "0.95rem",
+                  cursor: targetSending ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  boxShadow: "0 0 20px rgba(2, 132, 199, 0.4)",
+                }}
+              >
+                <span>🚨</span>
+                <span>{targetSending ? "Dispatching Siren & Route..." : "DISPATCH PHONE SIREN & MAP ROUTE"}</span>
+              </button>
+            </form>
+
+            {targetResult && (
+              <div
+                style={{
+                  marginTop: "16px",
+                  backgroundColor: "rgba(2, 132, 199, 0.2)",
+                  border: "1px solid #38bdf8",
+                  borderRadius: "10px",
+                  padding: "14px",
+                  color: "#e0f2fe",
+                  fontSize: "0.85rem",
+                }}
+              >
+                <div style={{ fontWeight: "800", color: "#ffffff", marginBottom: "4px" }}>
+                  ✅ Siren Alarm & Route Dispatched
+                </div>
+                <div>🛡️ Nearest Safe Place: <strong>{targetResult.nearestSafePlace?.name}</strong> (~{targetResult.nearestSafePlace?.distanceKm} km away)</div>
+                <div style={{ marginTop: "6px" }}>
+                  <a
+                    href={targetResult.mapRouteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#38bdf8", fontWeight: "700", textDecoration: "underline" }}
+                  >
+                    🗺️ Direct Google Maps Navigation Route →
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

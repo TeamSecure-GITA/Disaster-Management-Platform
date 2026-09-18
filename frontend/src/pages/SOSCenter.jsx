@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { sendDataToBackend, flushOfflineSOSQueue } from "../utils/sosService";
 import { getWhatsAppUrl } from "../utils/phoneUtils";
+import { dispatchLocalUnsafeAlarm } from "../services/socketService";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ─── Emergency contact list ───────────────────────────────────────────────────
 const CONTACTS = [
@@ -162,6 +165,87 @@ function SOSCenter() {
     }
   };
 
+  const [unsafeLoading, setUnsafeLoading] = useState(false);
+  const [unsafeResult, setUnsafeResult] = useState(null);
+
+  const triggerUnsafeCitizenAlarm = async () => {
+    setUnsafeLoading(true);
+    try {
+      const { lat, lng } = await getCurrentPosition();
+      const coordsStr = lat && lng ? `${lat}, ${lng}` : "";
+
+      const authToken = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/evacuation/citizen-unsafe-alert`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken && !authToken.startsWith("demo-") ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({
+          currentLocation: coordsStr || undefined,
+          hazardType: "Life-Threat Emergency / Unsafe Citizen",
+          dangerSeverity: "critical",
+          customMessage: "🚨 Citizen flagged as UNSAFE in hazard danger zone. High-decibel emergency siren activated.",
+          triggerSiren: true,
+        }),
+      });
+
+      let data = null;
+      if (res.ok) {
+        const json = await res.json();
+        data = json.data?.alarm;
+      }
+
+      const defaultShelter = {
+        name: "District Emergency Safe Refuge & Assembly Zone",
+        address: "Central Collectorate & Relief Ground, Main Highway",
+        distanceKm: 2.1,
+        phone: "112",
+        latitude: 20.3015,
+        longitude: 85.8312,
+      };
+
+      const finalShelter = data?.nearestSafePlace || defaultShelter;
+      const finalMapsUrl = data?.mapRouteUrl || `https://www.google.com/maps/dir/?api=1&destination=${finalShelter.latitude},${finalShelter.longitude}&travelmode=walking`;
+
+      dispatchLocalUnsafeAlarm({
+        id: `sos-unsafe-${Date.now()}`,
+        isUnsafe: true,
+        triggerSiren: true,
+        citizenName: "Citizen",
+        hazardType: "Life-Threat Hazard Zone",
+        message: "🚨 EMERGENCY: YOU ARE IN DANGER! Your mobile phone siren is buzzing. Evacuate immediately to the nearest safe refuge via the map navigation route.",
+        nearestSafePlace: finalShelter,
+        mapRouteUrl: finalMapsUrl,
+      });
+
+      setUnsafeResult({
+        shelter: finalShelter,
+        mapUrl: finalMapsUrl,
+      });
+    } catch (e) {
+      console.warn("Unsafe alert error:", e);
+      dispatchLocalUnsafeAlarm({
+        id: `sos-unsafe-${Date.now()}`,
+        isUnsafe: true,
+        triggerSiren: true,
+        citizenName: "Citizen",
+        hazardType: "Emergency Hazard Alert",
+        message: "🚨 EMERGENCY: YOU ARE IN DANGER! Proceed to nearest designated safe shelter immediately.",
+        nearestSafePlace: {
+          name: "District Emergency Safe Refuge",
+          address: "Central Relief Center, Highway Junction",
+          distanceKm: 2.1,
+          phone: "112",
+          latitude: 20.3015,
+          longitude: 85.8312,
+        },
+        mapRouteUrl: "https://www.google.com/maps/dir/?api=1&destination=20.3015,85.8312&travelmode=walking",
+      });
+    } finally {
+      setUnsafeLoading(false);
+    }
+  };
 
   // ─── Button label & disabled state ────────────────────────────────────────
   const buttonLabel =
@@ -175,8 +259,134 @@ function SOSCenter() {
   return (
     <div className="sos-page">
       <div className="sos-header">
-        <h1>🚨 Emergency SOS Center</h1>
-        <p>Quick access to emergency assistance and safety actions.</p>
+        <h1>🚨 Emergency SOS & Citizen Danger Center</h1>
+        <p>Immediate siren buzzer, safe shelter navigation, and life-saving rescue dispatch.</p>
+      </div>
+
+      {/* ── CITIZEN UNSAFE PHONE SIREN & SAFE SHELTER ROUTING CARD ── */}
+      <div
+        style={{
+          backgroundColor: "#2a0909",
+          border: "2px solid #ef4444",
+          borderRadius: "16px",
+          padding: "24px",
+          marginBottom: "24px",
+          boxShadow: "0 0 30px rgba(239, 68, 68, 0.35)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                backgroundColor: "#dc2626",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "2rem",
+                boxShadow: "0 0 20px rgba(239, 68, 68, 0.8)",
+                flexShrink: 0,
+              }}
+            >
+              📢
+            </div>
+            <div>
+              <span
+                style={{
+                  backgroundColor: "#7f1d1d",
+                  border: "1px solid #ef4444",
+                  color: "#fecaca",
+                  padding: "2px 10px",
+                  borderRadius: "20px",
+                  fontSize: "0.72rem",
+                  fontWeight: "900",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                AUTOMATIC LIFE-SAFETY SIREN & MAP ROUTE
+              </span>
+              <h2 style={{ margin: "6px 0 2px 0", fontSize: "1.35rem", fontWeight: "900", color: "#ffffff" }}>
+                I Am Unsafe / In Danger (Buzz Phone Siren & Navigate)
+              </h2>
+              <p style={{ margin: 0, fontSize: "0.85rem", color: "#fca5a5" }}>
+                Instantly activates the acoustic emergency siren on your mobile phone, alerts emergency services, and displays the direct map navigation route to the nearest safe place.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={triggerUnsafeCitizenAlarm}
+            disabled={unsafeLoading}
+            style={{
+              backgroundColor: unsafeLoading ? "#7f1d1d" : "#ef4444",
+              border: "2px solid #fecaca",
+              color: "#ffffff",
+              padding: "14px 28px",
+              borderRadius: "12px",
+              fontWeight: "900",
+              fontSize: "1rem",
+              cursor: unsafeLoading ? "not-allowed" : "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              boxShadow: "0 0 25px rgba(239, 68, 68, 0.7)",
+              transition: "transform 0.15s, background-color 0.15s",
+            }}
+          >
+            <span>🚨</span>
+            <span>{unsafeLoading ? "Activating Siren & Routing..." : "BUZZ SIREN & ROUTE TO SAFE PLACE"}</span>
+          </button>
+        </div>
+
+        {unsafeResult && (
+          <div
+            style={{
+              marginTop: "16px",
+              backgroundColor: "#064e3b",
+              border: "1px solid #10b981",
+              borderRadius: "10px",
+              padding: "16px",
+              color: "#d1fae5",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: "800", color: "#ffffff", fontSize: "1rem" }}>
+                🛡️ Nearest Safe Place: {unsafeResult.shelter.name} (~{unsafeResult.shelter.distanceKm} km away)
+              </div>
+              <div style={{ fontSize: "0.82rem", color: "#a7f3d0", marginTop: "2px" }}>
+                📍 {unsafeResult.shelter.address} • Phone: {unsafeResult.shelter.phone || "112"}
+              </div>
+            </div>
+            <a
+              href={unsafeResult.mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                backgroundColor: "#22c55e",
+                color: "#052e16",
+                padding: "10px 18px",
+                borderRadius: "8px",
+                fontWeight: "900",
+                fontSize: "0.85rem",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span>🗺️</span>
+              <span>Open Map Route →</span>
+            </a>
+          </div>
+        )}
       </div>
 
       {/* ── SOS Card ──────────────────────────────────────────────────────── */}

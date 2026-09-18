@@ -137,7 +137,46 @@ export function getSocket() {
     });
   });
 
+  // Listen for citizen unsafe emergency sirens & safe place routing
+  socketInstance.on("citizenUnsafeAlarm", (alarmData) => {
+    console.log("[SocketService] 🚨 CRITICAL CITIZEN UNSAFE SIREN ALARM:", alarmData);
+    unsafeAlarmListeners.forEach((callback) => {
+      try {
+        callback(alarmData);
+      } catch (err) {
+        console.error("Citizen unsafe alarm listener error:", err);
+      }
+    });
+  });
+
   return socketInstance;
+}
+
+const unsafeAlarmListeners = new Set();
+
+/**
+ * Subscribe to citizen unsafe alarms and mobile phone siren triggers
+ * Returns unsubscribe function
+ */
+export function subscribeToCitizenUnsafeAlarms(callback) {
+  getSocket(); // Ensure connected
+  unsafeAlarmListeners.add(callback);
+  return () => {
+    unsafeAlarmListeners.delete(callback);
+  };
+}
+
+/**
+ * Manually dispatch an unsafe alarm to all registered listeners (for local simulation/testing)
+ */
+export function dispatchLocalUnsafeAlarm(alarmData) {
+  unsafeAlarmListeners.forEach((callback) => {
+    try {
+      callback(alarmData);
+    } catch (err) {
+      console.error("Local unsafe alarm dispatch error:", err);
+    }
+  });
 }
 
 /**
