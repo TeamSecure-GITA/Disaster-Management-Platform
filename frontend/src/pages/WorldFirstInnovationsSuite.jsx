@@ -7,9 +7,11 @@ import {
   Layers, ChevronRight, Cpu, ArrowUpRight, Clock, Info, 
   Sparkles, Sliders, ExternalLink, Award, FileText,
   Wifi, ShieldCheck, Bluetooth, QrCode, BatteryCharging,
-  Waves, Lock, Network, Atom
+  Waves, Lock, Network, Atom, Magnet
 } from 'lucide-react';
 import CosmicRayMuonTrackerTab from '../components/worldfirst/CosmicRayMuonTrackerTab';
+import GeomagneticRuptureNavigationTab from '../components/worldfirst/GeomagneticRuptureNavigationTab';
+import InfrasonicEarthHumAlertTab from '../components/worldfirst/InfrasonicEarthHumAlertTab';
 import AtmosphericWifiBendingTab from '../components/worldfirst/AtmosphericWifiBendingTab';
 import PqcOfflineLedgerTab from '../components/worldfirst/PqcOfflineLedgerTab';
 import BleSpittingProtocolTab from '../components/worldfirst/BleSpittingProtocolTab';
@@ -592,7 +594,26 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
-          {/* 2. MAGNETOMETER RUBBLE LOCATOR */}
+          {/* 2. GEOMAGNETIC RUPTURE NAVIGATION */}
+          <button
+            onClick={() => handleTabChange('geomagnetic-nav')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'geomagnetic-nav'
+                ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-sky-400/20 text-sky-300 text-[9px] font-black rounded-full border border-sky-400/40 animate-pulse">
+              WORLD-1ST
+            </div>
+            <Magnet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'geomagnetic-nav' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Geomagnetic Nav</div>
+              <div className="text-[10px] text-slate-400">Rupture Blueprint 3D</div>
+            </div>
+          </button>
+
+          {/* 3. MAGNETOMETER RUBBLE LOCATOR */}
           <button
             onClick={() => handleTabChange('magnetometer')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -838,7 +859,12 @@ export default function WorldFirstInnovationsSuite() {
         {activeTab === 'muon-tracking' && <CosmicRayMuonTrackerTab />}
 
         {/* ========================================================= */}
-        {/* 2. MAGNETOMETER: RUBBLE VOID & TRAPPED-HUMAN LOCATOR      */}
+        {/* 2. GEOMAGNETIC FIELD RUPTURE NAVIGATION (COMPASS-FREE)    */}
+        {/* ========================================================= */}
+        {activeTab === 'geomagnetic-nav' && <GeomagneticRuptureNavigationTab />}
+
+        {/* ========================================================= */}
+        {/* 3. MAGNETOMETER: RUBBLE VOID & TRAPPED-HUMAN LOCATOR      */}
         {/* ========================================================= */}
         {activeTab === 'magnetometer' && <MagnetometerLocatorTab />}
 
