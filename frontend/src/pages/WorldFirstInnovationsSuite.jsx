@@ -633,7 +633,7 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
-          {/* 4. QUANTUM CHAFF DATA MASKING */}
+          {/* 4. MULTI-DEVICE POST-QUANTUM CHAFF DATA MASKING */}
           <button
             onClick={() => handleTabChange('quantum-chaff')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -643,12 +643,12 @@ export default function WorldFirstInnovationsSuite() {
             }`}
           >
             <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-purple-400/20 text-purple-300 text-[9px] font-black rounded-full border border-purple-400/40 animate-pulse">
-              WORLD-1ST
+              #4 WORLD-1ST
             </div>
             <Lock className={`w-5 h-5 flex-shrink-0 ${activeTab === 'quantum-chaff' ? 'text-purple-400 animate-bounce' : 'text-slate-400'}`} />
             <div>
-              <div className="text-xs font-bold leading-tight">Quantum Chaff</div>
-              <div className="text-[10px] text-slate-400">3-Node BLE Masking</div>
+              <div className="text-xs font-bold leading-tight">Post-Quantum Chaff</div>
+              <div className="text-[10px] text-slate-400">ML-KEM Kyber-1024</div>
             </div>
           </button>
 

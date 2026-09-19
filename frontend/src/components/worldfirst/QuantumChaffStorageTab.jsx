@@ -196,21 +196,18 @@ export default function QuantumChaffStorageTab() {
                 WORLD-FIRST INNOVATION #4
               </span>
               <span className="flex items-center gap-1.5 text-xs text-purple-300 font-semibold bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-700/50">
-                <Lock className="w-3.5 h-3.5 text-purple-400" /> Information-Theoretic Theft Protection
+                <Lock className="w-3.5 h-3.5 text-purple-400" /> ML-KEM (Kyber-1024) • Post-Quantum Cryptography
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2 flex items-center gap-3">
-              Quantum-Safe "Chaff" Data Masking
+              Multi-Device Post-Quantum "Chaff" Data Masking
               <span className="text-base font-normal text-purple-300 bg-purple-900/40 px-3 py-1 rounded-xl border border-purple-500/20">
-                IndexedDB WebAssembly
+                IndexedDB Engine
               </span>
             </h1>
             <p className="text-sm text-slate-300 max-w-3xl mt-2 leading-relaxed">
-              In extended disaster blackouts, rescue workers carry devices containing critical medicine registries, vulnerable orphan rosters, 
-              and strategic fuel coordinates. If a phone is physically stolen by looters, standard disk encryption can be coerced or cold-boot attacked. 
-              Our platform splits databases into <strong>mathematically incomplete polynomial shares</strong> submerged in millions of strings of 
-              <strong> digital chaff (noise)</strong> inside the browser's IndexedDB. A single phone contains 0 readable bytes. The full file 
-              can only be reconstructed when <strong>three authorized rescue team phones</strong> pass each other via Bluetooth and cryptographically handshake.
+              During extended regional grid failures, physical security breaks down. If a rescue worker’s phone is lost or stolen by bad actors, 
+              critical medical registries, strategic supply locations, and high-value emergency financial ledgers can be compromised or altered.
             </p>
           </div>
 
@@ -243,6 +240,36 @@ export default function QuantumChaffStorageTab() {
                 <Flame className="w-4 h-4" /> Simulate Hostile Phone Seizure
               </button>
             )}
+          </div>
+        </div>
+
+        {/* 3 Core Pillars: The Concept, How It Works, The World-First Edge */}
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3.5 border-t border-purple-500/20 pt-4 text-xs">
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-purple-500/20">
+            <div className="text-purple-400 font-bold flex items-center gap-1.5 mb-1">
+              <Activity className="w-3.5 h-3.5" /> 1. The Concept
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              During extended regional grid failures, physical security breaks down. If a rescue worker’s phone is lost or stolen by bad actors, critical medical registries, strategic supply locations, and high-value emergency financial ledgers can be compromised or altered.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-purple-500/20">
+            <div className="text-purple-400 font-bold flex items-center gap-1.5 mb-1">
+              <Cpu className="w-3.5 h-3.5" /> 2. How It Works
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              We build a localized, quantum-resistant file fragmentation protocol directly into the browser's <strong>IndexedDB</strong> engine using <strong>ML-KEM (Kyber-1024)</strong> post-quantum lattice encryption to encapsulate and shard data shares.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-purple-500/20">
+            <div className="text-purple-400 font-bold flex items-center gap-1.5 mb-1">
+              <Sparkles className="w-3.5 h-3.5" /> 3. The World-First Edge
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              Instead of encrypting a file locally on one phone, our platform breaks the database into thousands of microscopic, mathematically incomplete fragments mixed with millions of strings of digital "chaff". A single device holds zero readable information until <strong>three team phones physically pass within Bluetooth range</strong> to recombine shares and dissolve the chaff.
+            </p>
           </div>
         </div>
       </div>
@@ -502,32 +529,32 @@ export default function QuantumChaffStorageTab() {
           {/* Cryptographic Architecture Card */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-indigo-400" /> The Chaffing &amp; Winnowing Protocol
+              <Cpu className="w-4 h-4 text-indigo-400" /> ML-KEM (Kyber-1024) &amp; Chaff Winnowing
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Originated by MIT cryptographer Ronald Rivest and expanded for decentralized disaster meshes, this protocol achieves 
-              <strong> information-theoretic confidentiality without encryption keys</strong> on a single physical host:
+              Operating inside IndexedDB, this protocol combines NIST FIPS 203 <strong>ML-KEM (Kyber-1024)</strong> post-quantum key encapsulation with 
+              microscopic file fragmentation and digital chaffing:
             </p>
             <div className="mt-3 space-y-2 text-xs font-mono text-slate-300 bg-slate-950/70 p-3 rounded-xl border border-slate-800">
               <div className="flex items-start gap-2">
                 <span className="text-purple-400 font-bold">1.</span>
-                <span>Plaintext split into 3 polynomial shares: $f(x) \in \text{GF}(2^8)$</span>
+                <span>Core DB split into thousands of microscopic polynomial fragments</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-purple-400 font-bold">2.</span>
-                <span>Each shard padded with 6,140 pseudorandom decoy strings</span>
+                <span>Fragments submerged in millions of strings of digital "chaff" (noise)</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-purple-400 font-bold">3.</span>
-                <span>Local IndexedDB stores identical-entropy noise</span>
+                <span>IndexedDB on a single phone stores 0 readable or decryptable information</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-purple-400 font-bold">4.</span>
-                <span>3-node BLE mutual MAC exchange winnows true shards</span>
+                <span>3 devices in Bluetooth range run ML-KEM (Kyber-1024) mutual handshake</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">5.</span>
-                <span>Ephemeral Lagrange interpolation unlocks records in RAM</span>
+                <span>Digital chaff dissolves; database materializes strictly in ephemeral RAM</span>
               </div>
             </div>
           </div>

@@ -169,6 +169,10 @@ export default function App() {
             <Route path="/geomagnetic-rupture" element={<Navigate to="/world-first-innovations?tab=geomagnetic-nav" replace />} />
             <Route path="/geomagnetic-navigation" element={<Navigate to="/world-first-innovations?tab=geomagnetic-nav" replace />} />
             <Route path="/uncalibrated-geomagnetic" element={<Navigate to="/world-first-innovations?tab=geomagnetic-nav" replace />} />
+            <Route path="/quantum-chaff" element={<Navigate to="/world-first-innovations?tab=quantum-chaff" replace />} />
+            <Route path="/post-quantum-chaff" element={<Navigate to="/world-first-innovations?tab=quantum-chaff" replace />} />
+            <Route path="/chaff-data-masking" element={<Navigate to="/world-first-innovations?tab=quantum-chaff" replace />} />
+            <Route path="/ml-kem-chaff" element={<Navigate to="/world-first-innovations?tab=quantum-chaff" replace />} />
             <Route path="/quantum-gossip-routing" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
             <Route path="/quantum-gossip" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
             <Route path="/sound-wave-chirp" element={<Navigate to="/world-first-innovations" replace />} />
