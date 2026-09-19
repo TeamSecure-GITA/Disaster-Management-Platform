@@ -263,11 +263,10 @@ export default function App() {
             {/* Notifications are now merged into Disaster Alert */}
             <Route path="/notifications" element={<Navigate to="/alerts?tab=notifications" replace />} />
 
-            {/* Chatbot — both route names */}
+            {/* AI Assistant & Voice Assistant Unified Hub */}
             <Route path="/ai-assistant" element={<AIAssistant />} />
             <Route path="/chatbot" element={<AIAssistant />} />
-
-            <Route path="/voice-assistant" element={<VoiceAssistant />} />
+            <Route path="/voice-assistant" element={<AIAssistant initialTab="voice" />} />
             <Route path="/damage-assessment" element={<DamageAssessment />} />
 
             {/* Analytics — both route names */}

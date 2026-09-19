@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { askGemini } from "../services/geminiService";
+import VoiceAssistant from "./VoiceAssistant";
 
 const SUGGESTED_QUERIES = [
   "🫀 Adult CPR (Step-by-Step)",
@@ -14,7 +16,31 @@ const SUGGESTED_QUERIES = [
   "📞 National Emergency Helplines (India)",
 ];
 
-function Chatbot() {
+function Chatbot({ initialTab = null }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  const [activeTab, setActiveTab] = useState(() => {
+    if (initialTab) return initialTab;
+    const tabParam = searchParams.get("tab") || searchParams.get("mode");
+    if (tabParam === "voice" || location.pathname === "/voice-assistant") return "voice";
+    return "chat";
+  });
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab") || searchParams.get("mode");
+    if (tabParam === "voice" || location.pathname === "/voice-assistant") {
+      setActiveTab("voice");
+    } else if (tabParam === "chat" || location.pathname === "/chatbot") {
+      setActiveTab("chat");
+    }
+  }, [searchParams, location.pathname]);
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    setSearchParams({ tab: newTab });
+  };
+
   const [messages, setMessages] = useState([
     {
       sender: "bot",
@@ -178,182 +204,275 @@ function Chatbot() {
   };
 
   return (
-    <div className="chatbot-page">
-      <div className="chatbot-header">
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            <h1 style={{ margin: 0 }}>🤖 In-House Emergency AI Assistant</h1>
-            <span
-              style={{
-                backgroundColor: isOnline ? "#059669" : "#d97706",
-                color: "#ffffff",
-                fontSize: "0.74rem",
-                padding: "3px 10px",
-                borderRadius: "999px",
-                fontWeight: "700",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <span>{isOnline ? "●" : "⚡"}</span>
-              <span>{isOnline ? "Hybrid AI (Online + Offline Brain)" : "100% Offline Autonomous AI Brain"}</span>
-            </span>
-          </div>
-          <p>
-            Autonomous life-safety engine: Answers all emergency questions, medical first-aid, evacuation instructions, and survival protocols with zero network dependency.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={clearChat}
-          style={{
-            background: "none",
-            border: "1px solid #334155",
-            color: "#94a3b8",
-            padding: "6px 12px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "0.8rem",
-          }}
-        >
-          🗑️ Clear Chat
-        </button>
-      </div>
-
-      {/* Suggestion Chips */}
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px", minHeight: "100%" }}>
+      {/* ── TOP UNIFIED MODE SWITCHER (AI CHATBOT & VOICE ASSISTANCE) ── */}
       <div
         style={{
           display: "flex",
-          gap: "8px",
-          flexWrap: "wrap",
-          marginBottom: "16px",
+          gap: "10px",
+          backgroundColor: "rgba(15, 23, 42, 0.85)",
+          padding: "6px",
+          borderRadius: "14px",
+          border: "1px solid rgba(56, 189, 248, 0.2)",
+          backdropFilter: "blur(12px)",
         }}
       >
-        {SUGGESTED_QUERIES.map((chip, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => sendMessage(chip)}
-            disabled={loading}
+        <button
+          type="button"
+          onClick={() => handleTabChange("chat")}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            padding: "12px 18px",
+            borderRadius: "10px",
+            border: activeTab === "chat" ? "1px solid rgba(56, 189, 248, 0.6)" : "1px solid transparent",
+            backgroundColor: activeTab === "chat" ? "rgba(2, 132, 199, 0.22)" : "transparent",
+            color: activeTab === "chat" ? "#38bdf8" : "#94a3b8",
+            cursor: "pointer",
+            fontWeight: "800",
+            fontSize: "0.92rem",
+            boxShadow: activeTab === "chat" ? "0 4px 16px rgba(2, 132, 199, 0.3)" : "none",
+            transition: "all 0.2s ease",
+          }}
+        >
+          <span style={{ fontSize: "1.1rem" }}>💬</span>
+          <span>AI Emergency Chatbot</span>
+          <span
             style={{
-              padding: "6px 12px",
-              backgroundColor: "#1e293b",
-              border: "1px solid #334155",
-              color: "#38bdf8",
+              fontSize: "0.68rem",
+              padding: "2px 8px",
               borderRadius: "999px",
-              fontSize: "0.78rem",
-              cursor: loading ? "wait" : "pointer",
-              transition: "background 0.15s",
+              backgroundColor: activeTab === "chat" ? "rgba(56, 189, 248, 0.25)" : "rgba(255, 255, 255, 0.05)",
+              color: activeTab === "chat" ? "#38bdf8" : "#64748b",
+              fontWeight: "700",
             }}
           >
-            {chip}
-          </button>
-        ))}
-      </div>
+            Text & Quick Protocols
+          </span>
+        </button>
 
-      <div className="chatbot-box">
-        <div className="chatbot-messages" style={{ minHeight: "380px", maxHeight: "550px", overflowY: "auto" }}>
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={
-                message.sender === "user"
-                  ? "message user-message"
-                  : "message bot-message"
-              }
-              style={{ position: "relative" }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <strong>
-                  {message.sender === "user" ? "👤 You" : "✨ In-House AI Emergency Brain"}
-                </strong>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
-                    {message.timestamp}
-                  </span>
-                  {message.sender === "bot" && (
-                    <button
-                      type="button"
-                      onClick={() => handleSpeak(message.text, index)}
-                      title={speakingIndex === index ? "Stop voice" : "Read aloud"}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: speakingIndex === index ? "#ef4444" : "#38bdf8",
-                        cursor: "pointer",
-                        fontSize: "0.85rem",
-                        padding: "0 4px",
-                      }}
-                    >
-                      {speakingIndex === index ? "⏹️ Stop" : "🔊 Read"}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.5" }}>
-                {message.text}
-              </div>
-            </div>
-          ))}
-
-          {loading && (
-            <div className="message bot-message" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <strong>✨ In-House AI Assistant:</strong>
-              <span style={{ color: "#38bdf8", fontStyle: "italic" }}>
-                Retrieving life-safety emergency protocols...
-              </span>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className="chatbot-input-area" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <input
-            type="text"
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={loading}
-            placeholder={
-              isOnline
-                ? "Ask anything in any language (e.g., 'CPR steps', 'Cyclone shelter', 'Purify water')..."
-                : "⚡ Offline Mode: Ask about CPR, floods, earthquakes, helplines, bleeding, water..."
-            }
-          />
-
-          {/* Voice Input Mic Button */}
-          <button
-            type="button"
-            onClick={toggleListening}
-            title={isListening ? "Listening... Click to stop" : "Voice input"}
+        <button
+          type="button"
+          onClick={() => handleTabChange("voice")}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            padding: "12px 18px",
+            borderRadius: "10px",
+            border: activeTab === "voice" ? "1px solid rgba(244, 63, 94, 0.6)" : "1px solid transparent",
+            backgroundColor: activeTab === "voice" ? "rgba(225, 29, 72, 0.22)" : "transparent",
+            color: activeTab === "voice" ? "#fb7185" : "#94a3b8",
+            cursor: "pointer",
+            fontWeight: "800",
+            fontSize: "0.92rem",
+            boxShadow: activeTab === "voice" ? "0 4px 16px rgba(225, 29, 72, 0.3)" : "none",
+            transition: "all 0.2s ease",
+          }}
+        >
+          <span style={{ fontSize: "1.1rem" }}>🎙️</span>
+          <span>Voice Assistance</span>
+          <span
             style={{
-              padding: "10px 14px",
-              backgroundColor: isListening ? "#dc2626" : "#1e293b",
-              border: `1px solid ${isListening ? "#ef4444" : "#334155"}`,
-              borderRadius: "8px",
-              color: "#fff",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              animation: isListening ? "pulse 1.2s infinite" : "none",
+              fontSize: "0.68rem",
+              padding: "2px 8px",
+              borderRadius: "999px",
+              backgroundColor: activeTab === "voice" ? "rgba(244, 63, 94, 0.25)" : "rgba(255, 255, 255, 0.05)",
+              color: activeTab === "voice" ? "#fb7185" : "#64748b",
+              fontWeight: "700",
             }}
           >
-            {isListening ? "🔴 Speak..." : "🎙️"}
-          </button>
+            18+ Dialects • Zero-Typing Dispatch
+          </span>
+        </button>
+      </div>
 
-          <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
-            {loading ? "Thinking..." : "Send ➤"}
-          </button>
+      {activeTab === "voice" ? (
+        <VoiceAssistant />
+      ) : (
+        <div className="chatbot-page">
+          <div className="chatbot-header">
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <h1 style={{ margin: 0 }}>🤖 In-House Emergency AI Assistant</h1>
+                <span
+                  style={{
+                    backgroundColor: isOnline ? "#059669" : "#d97706",
+                    color: "#ffffff",
+                    fontSize: "0.74rem",
+                    padding: "3px 10px",
+                    borderRadius: "999px",
+                    fontWeight: "700",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>{isOnline ? "●" : "⚡"}</span>
+                  <span>{isOnline ? "Hybrid AI (Online + Offline Brain)" : "100% Offline Autonomous AI Brain"}</span>
+                </span>
+              </div>
+              <p>
+                Autonomous life-safety engine: Answers all emergency questions, medical first-aid, evacuation instructions, and survival protocols with zero network dependency.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={clearChat}
+              style={{
+                background: "none",
+                border: "1px solid #334155",
+                color: "#94a3b8",
+                padding: "6px 12px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "0.8rem",
+              }}
+            >
+              🗑️ Clear Chat
+            </button>
+          </div>
+
+          {/* Suggestion Chips */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              flexWrap: "wrap",
+              marginBottom: "16px",
+            }}
+          >
+            {SUGGESTED_QUERIES.map((chip, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => sendMessage(chip)}
+                disabled={loading}
+                style={{
+                  padding: "6px 12px",
+                  backgroundColor: "#1e293b",
+                  border: "1px solid #334155",
+                  color: "#38bdf8",
+                  borderRadius: "999px",
+                  fontSize: "0.78rem",
+                  cursor: loading ? "wait" : "pointer",
+                  transition: "background 0.15s",
+                }}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+
+          <div className="chatbot-box">
+            <div className="chatbot-messages" style={{ minHeight: "380px", maxHeight: "550px", overflowY: "auto" }}>
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={
+                    message.sender === "user"
+                      ? "message user-message"
+                      : "message bot-message"
+                  }
+                  style={{ position: "relative" }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <strong>
+                      {message.sender === "user" ? "👤 You" : "✨ In-House AI Emergency Brain"}
+                    </strong>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
+                        {message.timestamp}
+                      </span>
+                      {message.sender === "bot" && (
+                        <button
+                          type="button"
+                          onClick={() => handleSpeak(message.text, index)}
+                          title={speakingIndex === index ? "Stop voice" : "Read aloud"}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: speakingIndex === index ? "#ef4444" : "#38bdf8",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            padding: "0 4px",
+                          }}
+                        >
+                          {speakingIndex === index ? "⏹️ Stop" : "🔊 Read"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.5" }}>
+                    {message.text}
+                  </div>
+                </div>
+              ))}
+
+              {loading && (
+                <div className="message bot-message" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <strong>✨ In-House AI Assistant:</strong>
+                  <span style={{ color: "#38bdf8", fontStyle: "italic" }}>
+                    Retrieving life-safety emergency protocols...
+                  </span>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            <div className="chatbot-input-area" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <input
+                type="text"
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={loading}
+                placeholder={
+                  isOnline
+                    ? "Ask anything in any language (e.g., 'CPR steps', 'Cyclone shelter', 'Purify water')..."
+                    : "⚡ Offline Mode: Ask about CPR, floods, earthquakes, helplines, bleeding, water..."
+                }
+              />
+
+              {/* Voice Input Mic Button */}
+              <button
+                type="button"
+                onClick={toggleListening}
+                title={isListening ? "Listening... Click to stop" : "Voice input"}
+                style={{
+                  padding: "10px 14px",
+                  backgroundColor: isListening ? "#dc2626" : "#1e293b",
+                  border: `1px solid ${isListening ? "#ef4444" : "#334155"}`,
+                  borderRadius: "8px",
+                  color: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  animation: isListening ? "pulse 1.2s infinite" : "none",
+                }}
+              >
+                {isListening ? "🔴 Speak..." : "🎙️"}
+              </button>
+
+              <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
+                {loading ? "Thinking..." : "Send ➤"}
+              </button>
+            </div>
+          </div>
+
+          <div className="chatbot-warning">
+            🚨 <strong>Emergency Disclaimer:</strong> For immediate life danger, call <strong>112</strong> (National All-Emergency) or <strong>108</strong> (Ambulance). Obey all official evacuation directives.
+          </div>
         </div>
-      </div>
-
-      <div className="chatbot-warning">
-        🚨 <strong>Emergency Disclaimer:</strong> For immediate life danger, call <strong>112</strong> (National All-Emergency) or <strong>108</strong> (Ambulance). Obey all official evacuation directives.
-      </div>
+      )}
     </div>
   );
 }

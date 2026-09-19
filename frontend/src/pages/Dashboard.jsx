@@ -20,6 +20,9 @@ import {
   PhoneCall,
   Activity,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
   X,
   Droplets,
   Thermometer,
@@ -30,7 +33,10 @@ import {
   Maximize2,
   RefreshCw,
   Crosshair,
-  Navigation
+  Navigation,
+  Move,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react";
 import {
   INDIA_MAP_OUTLINE_PATH,
@@ -69,11 +75,16 @@ export default function Dashboard() {
   });
   const [layersOpen, setLayersOpen] = useState(true);
 
-  // ─── MAP REGION & VIEWPORT STATE (PAN-INDIA & NER) ────────────────────────
+  // ─── MAP REGION, VIEWPORT & INTERACTIVE CAMERA STATE ────────────────────
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [activeZone, setActiveZone] = useState(() => INDIA_RISK_ZONES[0]); // NH-10 baseline
   const [inspectedZone, setInspectedZone] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, initialPanX: 0, initialPanY: 0, didDrag: false });
+  const touchStartRef = useRef({ x: 0, y: 0, initialPanX: 0, initialPanY: 0, pinchDist: 0 });
+  const mapContainerRef = useRef(null);
 
   // ─── MODALS & OVERLAYS ───────────────────────────────────────────────────
   const [whyCriticalOpen, setWhyCriticalOpen] = useState(false);
@@ -110,46 +121,161 @@ export default function Dashboard() {
     }
   };
 
+  // ─── MAP MOUSE WHEEL SCROLL-TO-ZOOM LISTENER ──────────────────────────────
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY < 0 ? 0.18 : -0.18;
+      setZoomLevel((prev) => {
+        const next = Math.max(0.8, Math.min(6.0, Number((prev + zoomDelta).toFixed(2))));
+        return next;
+      });
+    };
+
+    container.addEventListener("wheel", onWheel, { passive: false });
+    return () => container.removeEventListener("wheel", onWheel);
+  }, []);
+
   // ─── DYNAMIC MAP VIEWPORT & CAMERA COMPUTATION ────────────────────────────
   const currentViewport = REGION_VIEWPORTS[selectedRegion] || REGION_VIEWPORTS.all;
 
   const getActiveViewBox = () => {
-    if (selectedRegion === "all" && zoomLevel === 1) return "0 0 1000 680";
-    if (selectedRegion === "ner" && zoomLevel === 1) return "540 120 360 360";
-    if (selectedRegion === "himalayas" && zoomLevel === 1) return "260 30 260 190";
-    if (selectedRegion === "south" && zoomLevel === 1) return "260 480 180 200";
-    if (selectedRegion === "east" && zoomLevel === 1) return "440 330 190 160";
-
     const parts = (currentViewport.viewBox || "0 0 1000 680").split(" ").map(Number);
     const [x, y, w, h] = parts;
-    const factor = zoomLevel;
+    const factor = Math.max(0.7, zoomLevel);
     const newW = w / factor;
     const newH = h / factor;
-    const newX = x + (w - newW) / 2;
-    const newY = y + (h - newH) / 2;
+    const newX = x + (w - newW) / 2 + panOffset.x;
+    const newY = y + (h - newH) / 2 + panOffset.y;
     return `${newX} ${newY} ${newW} ${newH}`;
   };
 
   const handleZoomIn = () => {
-    setZoomLevel((prev) => Math.min(prev + 0.35, 3.2));
+    setZoomLevel((prev) => Math.min(Number((prev + 0.35).toFixed(2)), 6.0));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel((prev) => Math.max(prev - 0.35, 1));
+    setZoomLevel((prev) => Math.max(Number((prev - 0.35).toFixed(2)), 0.8));
+  };
+
+  const handlePan = (dx, dy) => {
+    setPanOffset((prev) => ({
+      x: Math.max(-950, Math.min(950, prev.x + dx)),
+      y: Math.max(-750, Math.min(750, prev.y + dy)),
+    }));
   };
 
   const handleResetView = () => {
     setSelectedRegion("all");
     setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
     setActiveZone(INDIA_RISK_ZONES[0]);
     setInspectedZone(null);
   };
 
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return;
+    if (
+      e.target.closest("button") ||
+      e.target.closest("input") ||
+      e.target.closest("label") ||
+      e.target.closest(".no-pan")
+    ) {
+      return;
+    }
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      initialPanX: panOffset.x,
+      initialPanY: panOffset.y,
+      didDrag: false,
+    };
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !mapContainerRef.current) return;
+    const rect = mapContainerRef.current.getBoundingClientRect();
+    const baseViewBox = (REGION_VIEWPORTS[selectedRegion] || REGION_VIEWPORTS.all).viewBox || "0 0 1000 680";
+    const [, , w] = baseViewBox.split(" ").map(Number);
+    const currentSvgW = w / zoomLevel;
+    const scaleRatio = currentSvgW / rect.width;
+
+    const dx = (e.clientX - dragStartRef.current.x) * scaleRatio;
+    const dy = (e.clientY - dragStartRef.current.y) * scaleRatio;
+
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      dragStartRef.current.didDrag = true;
+    }
+
+    setPanOffset({
+      x: Math.max(-1000, Math.min(1000, dragStartRef.current.initialPanX - dx)),
+      y: Math.max(-800, Math.min(800, dragStartRef.current.initialPanY - dy)),
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        initialPanX: panOffset.x,
+        initialPanY: panOffset.y,
+        pinchDist: 0,
+      };
+      dragStartRef.current.didDrag = false;
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      touchStartRef.current.pinchDist = Math.hypot(dx, dy);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!mapContainerRef.current) return;
+    if (e.touches.length === 1) {
+      const rect = mapContainerRef.current.getBoundingClientRect();
+      const baseViewBox = (REGION_VIEWPORTS[selectedRegion] || REGION_VIEWPORTS.all).viewBox || "0 0 1000 680";
+      const [, , w] = baseViewBox.split(" ").map(Number);
+      const scaleRatio = (w / zoomLevel) / rect.width;
+
+      const dx = (e.touches[0].clientX - touchStartRef.current.x) * scaleRatio;
+      const dy = (e.touches[0].clientY - touchStartRef.current.y) * scaleRatio;
+
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        dragStartRef.current.didDrag = true;
+      }
+
+      setPanOffset({
+        x: Math.max(-1000, Math.min(1000, touchStartRef.current.initialPanX - dx)),
+        y: Math.max(-800, Math.min(800, touchStartRef.current.initialPanY - dy)),
+      });
+    } else if (e.touches.length === 2 && touchStartRef.current.pinchDist > 0) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const newDist = Math.hypot(dx, dy);
+      const factor = newDist / touchStartRef.current.pinchDist;
+      if (Math.abs(factor - 1) > 0.04) {
+        setZoomLevel((prev) => Math.max(0.8, Math.min(6.0, Number((prev * (factor > 1 ? 1.05 : 0.95)).toFixed(2)))));
+        touchStartRef.current.pinchDist = newDist;
+      }
+    }
+  };
+
   const handleSelectZone = (zone) => {
+    if (dragStartRef.current?.didDrag) return;
     setActiveZone(zone);
     setInspectedZone(zone);
     if (zone.region && zone.region !== selectedRegion && selectedRegion !== "all") {
       setSelectedRegion(zone.region);
+      setPanOffset({ x: 0, y: 0 });
     }
   };
 
@@ -491,6 +617,7 @@ export default function Dashboard() {
                     onClick={() => {
                       setSelectedRegion(key);
                       setZoomLevel(1);
+                      setPanOffset({ x: 0, y: 0 });
                       if (key === "ner") {
                         setActiveZone(INDIA_RISK_ZONES[0]); // NH-10
                       }
@@ -572,18 +699,29 @@ export default function Dashboard() {
 
           {/* ── MAP VIEWPORT CANVAS (INDIA VECTOR & HAZARD OVERLAYS) ── */}
           <div
+            ref={mapContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={() => setIsDragging(false)}
             style={{
               position: "relative",
-              height: "520px",
+              height: "540px",
               width: "100%",
               overflow: "hidden",
-              backgroundColor: "#061019",
+              backgroundColor: "#050e18",
               backgroundImage: `
-                radial-gradient(ellipse at 72% 36%, rgba(225, 29, 72, 0.22) 0%, transparent 45%),
-                radial-gradient(ellipse at 38% 18%, rgba(245, 158, 11, 0.16) 0%, transparent 40%),
-                radial-gradient(circle at 35% 76%, rgba(16, 185, 129, 0.12) 0%, transparent 35%),
-                linear-gradient(135deg, #07151e 0%, #05131b 40%, #030b14 100%)
+                radial-gradient(ellipse at 72% 36%, rgba(225, 29, 72, 0.24) 0%, transparent 45%),
+                radial-gradient(ellipse at 38% 18%, rgba(245, 158, 11, 0.18) 0%, transparent 40%),
+                radial-gradient(circle at 35% 76%, rgba(16, 185, 129, 0.14) 0%, transparent 35%),
+                linear-gradient(135deg, #071524 0%, #05101c 40%, #030a12 100%)
               `,
+              cursor: isDragging ? "grabbing" : "grab",
+              userSelect: "none",
+              touchAction: "none",
             }}
           >
             {/* Topographic Elevation Contours Simulation & Geographic India Base */}
@@ -594,14 +732,14 @@ export default function Dashboard() {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                transition: "viewBox 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
+                transition: isDragging ? "none" : "viewBox 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
               viewBox={getActiveViewBox()}
               preserveAspectRatio="xMidYMid meet"
             >
               <defs>
                 <pattern id="contourGrid" width="30" height="30" patternUnits="userSpaceOnUse">
-                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(56, 189, 248, 0.04)" strokeWidth="1" />
+                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(56, 189, 248, 0.05)" strokeWidth="1" />
                 </pattern>
                 {/* Glowing hazard pulse filter */}
                 <filter id="hazardGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -609,7 +747,7 @@ export default function Dashboard() {
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
                 <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
-                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feGaussianBlur stdDeviation="4.5" result="blur" />
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
@@ -617,12 +755,35 @@ export default function Dashboard() {
               {/* Background Grid */}
               <rect x="0" y="0" width="1000" height="680" fill="url(#contourGrid)" />
 
-              {/* ── INDIA GEOGRAPHIC LANDMASS SILHOUETTE ── */}
+              {/* ── GEOGRAPHIC LABELS & OCEANIC WATERMARKS (ENHANCED CLARITY) ── */}
+              <text x="120" y="520" fill="rgba(56, 189, 248, 0.28)" fontSize="13" fontWeight="900" letterSpacing="5" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+                ARABIAN SEA
+              </text>
+              <text x="590" y="520" fill="rgba(56, 189, 248, 0.28)" fontSize="13" fontWeight="900" letterSpacing="5" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+                BAY OF BENGAL
+              </text>
+              <text x="320" y="668" fill="rgba(56, 189, 248, 0.24)" fontSize="11" fontWeight="900" letterSpacing="6" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+                INDIAN OCEAN
+              </text>
+              <text x="270" y="45" fill="rgba(34, 197, 94, 0.45)" fontSize="9.5" fontWeight="900" letterSpacing="4" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+                ▲ HIMALAYAN TECTONIC ARC (SEISMIC ZONE IV & V)
+              </text>
+
+              {/* ── INDIA GEOGRAPHIC LANDMASS SILHOUETTE (HIGH CLARITY VECTOR) ── */}
+              {/* Vibrant Outer Neon Glow Stroke */}
               <path
                 d={INDIA_MAP_OUTLINE_PATH}
-                fill="rgba(11, 23, 38, 0.88)"
-                stroke={selectedRegion === "ner" ? "rgba(56, 189, 248, 0.3)" : "rgba(56, 189, 248, 0.55)"}
-                strokeWidth={selectedRegion === "all" ? 1.6 : 1}
+                fill="none"
+                stroke="rgba(56, 189, 248, 0.45)"
+                strokeWidth="4.5"
+                filter="url(#cyanGlow)"
+              />
+              {/* Sharp Navy Landmass with Crisp Sky-Blue Border */}
+              <path
+                d={INDIA_MAP_OUTLINE_PATH}
+                fill="#08182b"
+                stroke="#38bdf8"
+                strokeWidth={selectedRegion === "all" ? 1.8 : 1.4}
                 strokeLinejoin="round"
                 strokeLinecap="round"
               />
@@ -1300,17 +1461,27 @@ export default function Dashboard() {
                   stroke="#0284c7"
                   strokeWidth="1.2"
                 />
-                {/* Red Target bounding box indicating active viewport */}
-                <rect
-                  x={selectedRegion === "ner" ? 58 : selectedRegion === "himalayas" ? 28 : selectedRegion === "south" ? 28 : selectedRegion === "east" ? 48 : 18}
-                  y={selectedRegion === "ner" ? 14 : selectedRegion === "himalayas" ? 4 : selectedRegion === "south" ? 48 : selectedRegion === "east" ? 33 : 4}
-                  width={selectedRegion === "all" ? 68 : 30}
-                  height={selectedRegion === "all" ? 60 : 26}
-                  fill="rgba(239, 68, 68, 0.35)"
-                  stroke="#ef4444"
-                  strokeWidth="1.2"
-                  rx="2"
-                />
+                {/* Dynamic Real-time Red Target bounding box indicating active viewport */}
+                {(() => {
+                  const parts = getActiveViewBox().split(" ").map(Number);
+                  const [vx, vy, vw, vh] = parts;
+                  const rectX = Math.max(0, Math.min(95, (vx / 1000) * 100));
+                  const rectY = Math.max(0, Math.min(65, (vy / 680) * 70));
+                  const rectW = Math.max(6, Math.min(100 - rectX, (vw / 1000) * 100));
+                  const rectH = Math.max(6, Math.min(70 - rectY, (vh / 680) * 70));
+                  return (
+                    <rect
+                      x={rectX}
+                      y={rectY}
+                      width={rectW}
+                      height={rectH}
+                      fill="rgba(239, 68, 68, 0.35)"
+                      stroke="#ef4444"
+                      strokeWidth="1.2"
+                      rx="2"
+                    />
+                  );
+                })()}
               </svg>
               <span style={{ fontSize: "0.52rem", color: "#38bdf8", fontWeight: "800", textTransform: "uppercase" }}>
                 {selectedRegion}
@@ -1371,69 +1542,236 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* ── ZOOM CONTROLS (TOP RIGHT) ── */}
+            {/* ── INTERACTIVE CAMERA CONTROLS & HUD (TOP RIGHT) ── */}
             <div
+              className="no-pan"
               style={{
                 position: "absolute",
                 top: "14px",
                 right: "14px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "4px",
-                zIndex: 20,
+                alignItems: "center",
+                gap: "5px",
+                zIndex: 25,
+                backgroundColor: "rgba(10, 16, 32, 0.92)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(56, 189, 248, 0.35)",
+                borderRadius: "10px",
+                padding: "6px",
+                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.6)",
               }}
             >
-              <button
-                onClick={handleZoomIn}
+              {/* Zoom % Readout */}
+              <div
                 style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "6px",
-                  backgroundColor: "rgba(15, 23, 42, 0.9)",
-                  border: "1px solid rgba(56, 189, 248, 0.3)",
-                  color: "#ffffff",
-                  fontSize: "0.9rem",
-                  cursor: "pointer",
-                }}
-                title="Zoom In"
-              >
-                +
-              </button>
-              <button
-                onClick={handleZoomOut}
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "6px",
-                  backgroundColor: "rgba(15, 23, 42, 0.9)",
-                  border: "1px solid rgba(56, 189, 248, 0.3)",
-                  color: "#ffffff",
-                  fontSize: "0.9rem",
-                  cursor: "pointer",
-                }}
-                title="Zoom Out"
-              >
-                -
-              </button>
-              <button
-                onClick={handleResetView}
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "6px",
-                  backgroundColor: "rgba(15, 23, 42, 0.9)",
-                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  fontSize: "0.62rem",
+                  fontWeight: "900",
                   color: "#38bdf8",
-                  fontSize: "0.7rem",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  fontFamily: "monospace",
+                  backgroundColor: "rgba(2, 132, 199, 0.18)",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  borderRadius: "4px",
+                  padding: "2px 6px",
+                  textAlign: "center",
+                  width: "100%",
                 }}
-                title="Reset Map to Pan-India"
+                title="Active Zoom Scale"
               >
-                <RefreshCw size={12} />
-              </button>
+                {Math.round(zoomLevel * 100)}%
+              </div>
+
+              {/* Zoom In & Out */}
+              <div style={{ display: "flex", gap: "4px" }}>
+                <button
+                  onClick={handleZoomIn}
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "6px",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    border: "1px solid rgba(56, 189, 248, 0.3)",
+                    color: "#ffffff",
+                    fontSize: "0.95rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  title="Zoom In (Scroll wheel up)"
+                >
+                  <ZoomIn size={14} />
+                </button>
+                <button
+                  onClick={handleZoomOut}
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "6px",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    border: "1px solid rgba(56, 189, 248, 0.3)",
+                    color: "#ffffff",
+                    fontSize: "0.95rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  title="Zoom Out (Scroll wheel down)"
+                >
+                  <ZoomOut size={14} />
+                </button>
+              </div>
+
+              {/* D-Pad Pan Navigation Controls */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 22px)",
+                  gridTemplateRows: "repeat(3, 22px)",
+                  gap: "2px",
+                  marginTop: "2px",
+                }}
+              >
+                <div />
+                <button
+                  onClick={() => handlePan(0, -70)}
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "4px",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    border: "1px solid rgba(56, 189, 248, 0.25)",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                  }}
+                  title="Pan Up"
+                >
+                  <ChevronUp size={13} />
+                </button>
+                <div />
+
+                <button
+                  onClick={() => handlePan(-70, 0)}
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "4px",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    border: "1px solid rgba(56, 189, 248, 0.25)",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                  }}
+                  title="Pan Left"
+                >
+                  <ChevronLeft size={13} />
+                </button>
+
+                <button
+                  onClick={handleResetView}
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "4px",
+                    backgroundColor: "rgba(2, 132, 199, 0.25)",
+                    border: "1px solid rgba(56, 189, 248, 0.4)",
+                    color: "#38bdf8",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                  }}
+                  title="Reset View & Pan (Centering)"
+                >
+                  <RefreshCw size={11} />
+                </button>
+
+                <button
+                  onClick={() => handlePan(70, 0)}
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "4px",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    border: "1px solid rgba(56, 189, 248, 0.25)",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                  }}
+                  title="Pan Right"
+                >
+                  <ChevronRight size={13} />
+                </button>
+
+                <div />
+                <button
+                  onClick={() => handlePan(0, 70)}
+                  style={{
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "4px",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    border: "1px solid rgba(56, 189, 248, 0.25)",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                  }}
+                  title="Pan Down"
+                >
+                  <ChevronDown size={13} />
+                </button>
+                <div />
+              </div>
+            </div>
+
+            {/* ── FLOATING BOTTOM CONTROLS HINT PILL ── */}
+            <div
+              className="no-pan"
+              style={{
+                position: "absolute",
+                bottom: "14px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "rgba(9, 17, 34, 0.88)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(56, 189, 248, 0.28)",
+                borderRadius: "20px",
+                padding: "4px 14px",
+                fontSize: "0.66rem",
+                color: "#cbd5e1",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                zIndex: 20,
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.5)",
+                pointerEvents: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span>🖱️ <strong>Drag</strong> to Pan</span>
+              <span style={{ color: "#475569" }}>•</span>
+              <span>📜 <strong>Scroll Wheel</strong> to Zoom</span>
+              <span style={{ color: "#475569" }}>•</span>
+              <span>🔍 <strong>{Math.round(zoomLevel * 100)}%</strong> Zoom</span>
+              <span style={{ color: "#475569" }}>•</span>
+              <span>📍 <strong>Click Pins</strong> for Telemetry</span>
             </div>
           </div>
         </div>
