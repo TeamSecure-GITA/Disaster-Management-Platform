@@ -103,8 +103,8 @@ const communityItems = [
 const innovationItems = [
   { key: "nav_digital_twin",   fallback: "Digital Twin",                    icon: IconDigitalTwin,    path: "/digital-twin",            badge: "SIM" },
   { key: "nav_ner_topography", fallback: "Multi-Disaster Simulation",       icon: IconNERSuite,       path: "/ner-topography-suite",    badge: "NER" },
-  { key: "nav_world_first",    fallback: "Advanced Sensing",                icon: IconWorldFirst,     path: "/world-first-innovations", badge: "NOVEL" },
-  { key: "nav_decentralized",  fallback: "Quantum-Inspired Optimization",   icon: IconDecentralized,  path: "/decentralized-resilience" },
+  { key: "nav_world_first",    fallback: "World-First Innovations",         icon: IconWorldFirst,     path: "/world-first-innovations", badge: "NOVEL" },
+  { key: "nav_decentralized",  fallback: "Decentralized Resilience & SAR Radar", icon: IconDecentralized,  path: "/decentralized-resilience", badge: "SAR" },
   { key: "nav_extreme_res",    fallback: "Experimental Technologies",       icon: IconExtremeResilience, path: "/extreme-resilience" },
 ];
 

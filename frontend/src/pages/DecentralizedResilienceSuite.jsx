@@ -1,120 +1,183 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   Volume2, Radio, Activity, Globe, Eye, ShieldAlert, 
   Send, RefreshCw, Play, Square, CheckCircle, AlertTriangle, 
   MapPin, Heart, Zap, Sliders, ArrowUpRight, Clock, Sparkles, 
   Database, Network, Cpu, Layers, HardDrive, Share2, Compass, 
-  Waves, Lock, Fingerprint, Users
+  Waves, Lock, Fingerprint, Users, CloudRain, Navigation,
+  ArrowRight, X, PhoneCall, Shield, Bell, Check, ChevronRight,
+  AlertOctagon, CheckCircle2, ChevronDown, Flame, Search, Siren
 } from 'lucide-react';
 
 export default function DecentralizedResilienceSuite() {
-  const [activeTab, setActiveTab] = useState('ultrasonic');
+  const navigate = useNavigate();
 
-  // -------------------------------------------------------------
-  // TAB 1: ULTRASONIC "CHIRP" MESH MULTI-HOP RELAY
-  // -------------------------------------------------------------
-  const [audioMode, setAudioMode] = useState('ultrasonic'); // 'ultrasonic' (19.2 kHz) vs 'diagnostic' (2.4 kHz)
-  const [isRelaying, setIsRelaying] = useState(false);
-  const [activeHop, setActiveHop] = useState(0); // 0 to 3
-  const [hopNodes, setHopNodes] = useState([
-    {
-      id: 'NODE-0',
-      role: 'Trapped Survivor (Originator)',
-      device: 'Redmi 9 (Low-End Android)',
-      lat: 28.0642,
-      lng: 95.3318,
-      location: 'Submerged Siang Gorge Pocket A',
-      status: 'TRANSMITTING',
-      hopIndex: 0,
-      bloodGroup: 'O-Negative',
-      triage: 'CRITICAL_BLEEDING',
-      snrDb: '+22 dB'
-    },
-    {
-      id: 'NODE-1',
-      role: 'Valley Relay Repeater #1',
-      device: 'Samsung M12 (Villager on Ridge)',
-      lat: 28.0710,
-      lng: 95.3340,
-      location: 'Pangin Ridge Trail',
-      status: 'REPEATER_ACTIVE',
-      hopIndex: 1,
-      bloodGroup: 'O-Negative',
-      triage: 'RELAYED',
-      snrDb: '+18 dB'
-    },
-    {
-      id: 'NODE-2',
-      role: 'Valley Relay Repeater #2',
-      device: 'JioPhone 4G (High Mountain Pass)',
-      lat: 28.0820,
-      lng: 95.3385,
-      location: 'Yembung Bamboo Outpost',
-      status: 'REPEATER_ACTIVE',
-      hopIndex: 2,
-      bloodGroup: 'O-Negative',
-      triage: 'RELAYED',
-      snrDb: '+14 dB'
-    },
-    {
-      id: 'NODE-3',
-      role: 'Disaster Gateway Base (Uplink)',
-      device: 'SDRF Central Solar Terminal',
-      lat: 28.0950,
-      lng: 95.3420,
-      location: 'Pasighat Emergency HQ',
-      status: 'INTERNET_SYNC_SUCCESS',
-      hopIndex: 3,
-      bloodGroup: 'O-Negative',
-      triage: 'DISPATCHED_TO_NDRF',
-      snrDb: '+26 dB'
-    }
-  ]);
+  // ─── CLOCK & TIMESTAMPS ───────────────────────────────────────────────────
+  const [currentTime, setCurrentTime] = useState(() => {
+    const d = new Date();
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  });
 
-  const audioCanvasRef = useRef(null);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const d = new Date();
+      setCurrentTime(d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // ─── EMERGENCY MODE STATE ─────────────────────────────────────────────────
+  const [emergencyMode, setEmergencyMode] = useState(false);
+  const [sosModalOpen, setSosModalOpen] = useState(false);
+  const [liveMapModalOpen, setLiveMapModalOpen] = useState(false);
+  const [activeCapabilityModal, setActiveCapabilityModal] = useState(null);
+
+  // ─── LIVE OPERATIONAL FLOW STATE ──────────────────────────────────────────
+  const [activeFlowStep, setActiveFlowStep] = useState(2); // 0: Detect, 1: Predict, 2: Alert, 3: Evacuate, 4: Rescue, 5: Recover
+
+  // ─── LIVE SIMULATION ENGINE STATE ─────────────────────────────────────────
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simProgress, setSimProgress] = useState(0);
+  const [simStageText, setSimStageText] = useState("Standing By");
+  const simIntervalRef = useRef(null);
+
+  // ─── METRICS COUNTERS (LIVE REACTIVE) ─────────────────────────────────────
+  const [peopleAffected, setPeopleAffected] = useState(1240);
+  const [peopleEvacuated, setPeopleEvacuated] = useState(387);
+  const [activeIncidentsCount, setActiveIncidentsCount] = useState(3);
+  const [responseUnitsCount, setResponseUnitsCount] = useState(14);
+  const [shelterCapacityPercent, setShelterCapacityPercent] = useState(72);
+
+  // ─── WEB AUDIO CONTEXT REF FOR CHIRP & SIREN ──────────────────────────────
   const audioContextRef = useRef(null);
 
-  // Play synthetic acoustic audio chirp
+  const playChirpSound = (freq = 2400, duration = 0.25) => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!audioContextRef.current) audioContextRef.current = new AudioCtx();
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {
+      console.warn("Audio feedback fallback:", e);
+    }
+  };
+
+  const playEmergencyAlertSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!audioContextRef.current) audioContextRef.current = new AudioCtx();
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      [880, 1174, 880, 1174].forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, ctx.currentTime + idx * 0.16);
+        gain.gain.setValueAtTime(0.001, ctx.currentTime + idx * 0.16);
+        gain.gain.exponentialRampToValueAtTime(0.09, ctx.currentTime + idx * 0.16 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.16 + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.16);
+        osc.stop(ctx.currentTime + idx * 0.16 + 0.15);
+      });
+    } catch (e) {
+      console.warn("Emergency audio warning fallback:", e);
+    }
+  };
+
+  // Toggle Emergency Mode
+  const handleToggleEmergencyMode = () => {
+    const nextState = !emergencyMode;
+    setEmergencyMode(nextState);
+    if (nextState) {
+      playEmergencyAlertSound();
+    }
+  };
+
+  // Run Real-Time Disaster Simulation
+  const handleRunSimulation = () => {
+    if (isSimulating) return;
+    setIsSimulating(true);
+    setSimProgress(0);
+    setActiveFlowStep(0);
+    setSimStageText("SAR Beam Scanning & Sentinel-1 InSAR Coherence Ingest...");
+    playChirpSound(1800, 0.3);
+
+    let progress = 0;
+    if (simIntervalRef.current) clearInterval(simIntervalRef.current);
+
+    simIntervalRef.current = setInterval(() => {
+      progress += 10;
+      setSimProgress(progress);
+
+      if (progress === 20) {
+        setActiveFlowStep(1);
+        setSimStageText("AI Risk Prediction: 94% LSI Landslide Trigger Confirmed.");
+        playChirpSound(2200, 0.2);
+      } else if (progress === 40) {
+        setActiveFlowStep(2);
+        setSimStageText("Broadcasting Multi-Channel SOS & Ultrasonic Audio Beacons...");
+        playChirpSound(2600, 0.25);
+      } else if (progress === 60) {
+        setActiveFlowStep(3);
+        setSimStageText("Evacuation Corridor (NH-10 Teesta bypass) Activated.");
+        setPeopleEvacuated(prev => prev + 120);
+        playChirpSound(3100, 0.2);
+      } else if (progress === 80) {
+        setActiveFlowStep(4);
+        setSimStageText("NDRF Rescue Unit #4 Arrived on GPS Coordinates.");
+        setResponseUnitsCount(prev => prev + 2);
+        playChirpSound(3400, 0.2);
+      } else if (progress >= 100) {
+        clearInterval(simIntervalRef.current);
+        setActiveFlowStep(5);
+        setSimStageText("Simulation Complete: All 387 victims safeguarded.");
+        setIsSimulating(false);
+        playEmergencyAlertSound();
+      }
+    }, 900);
+  };
+
+  // ─── DEEP-TECH TOOL 1: ULTRASONIC MESH RELAY ENGINE ───────────────────────
+  const [audioMode, setAudioMode] = useState('ultrasonic'); // 'ultrasonic' vs 'diagnostic'
+  const [isRelaying, setIsRelaying] = useState(false);
+  const [activeHop, setActiveHop] = useState(0);
+  const [hopNodes, setHopNodes] = useState([
+    { id: 'NODE-0', role: 'Trapped Survivor (Originator)', device: 'Redmi 9 (Low-End Android)', lat: 28.0642, lng: 95.3318, location: 'Submerged Siang Gorge Pocket A', status: 'TRANSMITTING', hopIndex: 0, bloodGroup: 'O-Negative', triage: 'CRITICAL_BLEEDING', snrDb: '+22 dB' },
+    { id: 'NODE-1', role: 'Valley Relay Repeater #1', device: 'Samsung M12 (Villager on Ridge)', lat: 28.0710, lng: 95.3340, location: 'Pangin Ridge Trail', status: 'REPEATER_ACTIVE', hopIndex: 1, bloodGroup: 'O-Negative', triage: 'RELAYED', snrDb: '+18 dB' },
+    { id: 'NODE-2', role: 'Valley Relay Repeater #2', device: 'JioPhone 4G (High Mountain Pass)', lat: 28.0820, lng: 95.3385, location: 'Yembung Bamboo Outpost', status: 'REPEATER_ACTIVE', hopIndex: 2, bloodGroup: 'O-Negative', triage: 'RELAYED', snrDb: '+14 dB' },
+    { id: 'NODE-3', role: 'Disaster Gateway Base (Uplink)', device: 'SDRF Central Solar Terminal', lat: 28.0950, lng: 95.3420, location: 'Pasighat Emergency HQ', status: 'INTERNET_SYNC_SUCCESS', hopIndex: 3, bloodGroup: 'O-Negative', triage: 'DISPATCHED_TO_NDRF', snrDb: '+26 dB' }
+  ]);
+
   const handleStartHopRelay = () => {
     if (isRelaying) return;
     setIsRelaying(true);
     setActiveHop(0);
+    playChirpSound(audioMode === 'ultrasonic' ? 19200 : 2400, 0.4);
 
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) {
-        if (!audioContextRef.current) audioContextRef.current = new AudioCtx();
-        const ctx = audioContextRef.current;
-        if (ctx.state === 'suspended') ctx.resume();
-
-        // Multi-hop tone burst frequencies
-        const baseFreq = audioMode === 'ultrasonic' ? 19200 : 2400;
-        const freqs = [baseFreq, baseFreq + 350, baseFreq - 200, baseFreq + 600];
-
-        freqs.forEach((f, idx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(f, ctx.currentTime + idx * 0.4);
-          gain.gain.setValueAtTime(0.001, ctx.currentTime + idx * 0.4);
-          gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + idx * 0.4 + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.4 + 0.35);
-
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + idx * 0.4);
-          osc.stop(ctx.currentTime + idx * 0.4 + 0.38);
-        });
-      }
-    } catch (e) {
-      console.warn("Web Audio Synthesis fallback:", e);
-    }
-
-    // Step through the 3-hop acoustic repeaters
     let current = 0;
     const interval = setInterval(() => {
       current++;
       setActiveHop(current);
+      playChirpSound(audioMode === 'ultrasonic' ? 19200 + current * 400 : 2400 + current * 300, 0.3);
       if (current >= 3) {
         clearInterval(interval);
         setTimeout(() => setIsRelaying(false), 800);
@@ -122,965 +185,1999 @@ export default function DecentralizedResilienceSuite() {
     }, 1100);
   };
 
-  // Waterfall canvas animation
-  useEffect(() => {
-    const canvas = audioCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animId;
-    let t = 0;
+  // ─── DEEP-TECH TOOL 2: SAR RADAR & DISPLACEMENT MATRIX ────────────────────
+  const [sarCoherence, setSarCoherence] = useState(0.88);
+  const [isProcessingSar, setIsProcessingSar] = useState(false);
+  const [sarBaselineBperp, setSarBaselineBperp] = useState(142.5); // meters
+  const [displacementAlert, setDisplacementAlert] = useState(false);
 
-    const render = () => {
-      ctx.fillStyle = '#060d19';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const bands = 32;
-      const w = canvas.width / bands;
-      for (let i = 0; i < bands; i++) {
-        const isCarrier = (i > 12 && i < 20);
-        const noise = Math.sin(t * 0.08 + i * 0.3) * 0.25 + 0.25;
-        const amp = isRelaying ? (isCarrier ? 0.92 : noise * 0.4) : noise * 0.2;
-        const h = amp * (canvas.height * 0.8);
-
-        const grad = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - h);
-        if (isRelaying) {
-          grad.addColorStop(0, '#10b981');
-          grad.addColorStop(1, '#06b6d4');
-        } else {
-          grad.addColorStop(0, '#1e293b');
-          grad.addColorStop(1, '#3b82f6');
-        }
-
-        ctx.fillStyle = grad;
-        ctx.fillRect(i * w + 1.5, canvas.height - h, w - 3, h);
-      }
-
-      t++;
-      animId = requestAnimationFrame(render);
-    };
-
-    render();
-    return () => cancelAnimationFrame(animId);
-  }, [isRelaying]);
-
-  // -------------------------------------------------------------
-  // TAB 2: TERRESTRIAL FM/AM RADIO WEB-TRIANGULATION
-  // -------------------------------------------------------------
-  const [radioTowers, setRadioTowers] = useState([
-    { id: 'AIR-ITANAGAR', name: 'AIR Itanagar (Prasar Bharati)', freq: '100.1 MHz', powerKw: 50, lat: 27.0844, lng: 93.6053, rssi: -72, solvedDistKm: 34.2 },
-    { id: 'AIR-DIBRUGARH', name: 'AIR Dibrugarh Super-Station', freq: '101.3 MHz', powerKw: 100, lat: 27.4728, lng: 94.9120, rssi: -66, solvedDistKm: 28.5 },
-    { id: 'AIR-PASIGHAT', name: 'AIR Pasighat Valley Repeater', freq: '102.5 MHz', powerKw: 10, lat: 28.0664, lng: 95.3262, rssi: -54, solvedDistKm: 14.8 }
-  ]);
-  const [triangulating, setTriangulating] = useState(false);
-  const [solvedRadioCoord, setSolvedRadioCoord] = useState({
-    lat: 28.0645,
-    lng: 95.3312,
-    accuracyM: 32,
-    confidence: 95.4,
-    status: 'TRIANGULATED_OFFLINE',
-    gorgeShadowDampening: '1,400m Vertical Canyon (0 GPS Satellites Reached)'
-  });
-
-  const handleRecalculateRadioGPS = () => {
-    setTriangulating(true);
+  const handleProcessSar = () => {
+    setIsProcessingSar(true);
+    playChirpSound(1600, 0.3);
     setTimeout(() => {
-      setTriangulating(false);
-      setSolvedRadioCoord(prev => ({
-        ...prev,
-        lat: Number((28.0645 + (Math.random() - 0.5) * 0.0015).toFixed(4)),
-        lng: Number((95.3312 + (Math.random() - 0.5) * 0.0015).toFixed(4)),
-        accuracyM: Math.floor(28 + Math.random() * 10),
-        confidence: Number((94 + Math.random() * 5).toFixed(1))
-      }));
-    }, 1100);
-  };
-
-  // -------------------------------------------------------------
-  // TAB 3: WEBHID BIO-SENSING & CAMERA PPG TRIAGE HEATMAP
-  // -------------------------------------------------------------
-  const [ppgScanning, setPpgScanning] = useState(false);
-  const [scannedHeartRate, setScannedHeartRate] = useState(138);
-  const [scannedSpo2, setScannedSpo2] = useState(82);
-  const [triageFilter, setTriageFilter] = useState('ALL'); // 'ALL', 'RED', 'YELLOW', 'GREEN'
-  const [triagePatients, setTriagePatients] = useState([
-    {
-      id: 'PT-101',
-      name: 'Rongsen Ao (Age 58)',
-      location: 'Mawlynnong Sector 4 Debris',
-      hr: 146,
-      spo2: 79,
-      shockG: 5.2,
-      status: 'RED_CRITICAL',
-      condition: 'Acute Crush Syndrome & River Surge Hypothermia',
-      priorityRank: 1
-    },
-    {
-      id: 'PT-102',
-      name: 'Chinglen Meitei (Age 32)',
-      location: 'Loktak Lake Perimeter Ridge',
-      hr: 112,
-      spo2: 91,
-      shockG: 1.4,
-      status: 'YELLOW_STABLE',
-      condition: 'Compound Tibial Fracture, Conscious, Alert',
-      priorityRank: 2
-    },
-    {
-      id: 'PT-103',
-      name: 'Grace Lalremruati (Age 24)',
-      location: 'Aizawl Upper High School Camp',
-      hr: 72,
-      spo2: 98,
-      shockG: 0.1,
-      status: 'GREEN_SAFE',
-      condition: 'Normal vitals, Minor laceration on right forearm',
-      priorityRank: 3
-    }
-  ]);
-
-  const handleSimulateCameraPPG = () => {
-    setPpgScanning(true);
-    setTimeout(() => {
-      setPpgScanning(false);
-      const newHr = Math.floor(74 + Math.random() * 65);
-      const newSpo2 = Math.floor(82 + Math.random() * 16);
-      setScannedHeartRate(newHr);
-      setScannedSpo2(newSpo2);
+      setIsProcessingSar(false);
+      setSarCoherence(0.94);
+      setDisplacementAlert(true);
+      playChirpSound(2800, 0.2);
     }, 1400);
   };
 
-  // -------------------------------------------------------------
-  // TAB 4: IPFS-BASED DECENTRALIZED DISASTER WEB-MIRRORING
-  // -------------------------------------------------------------
-  const [ipfsPeers, setIpfsPeers] = useState(42);
-  const [resilienceScore, setResilienceScore] = useState(99.4);
-  const [pinnedSizeMb, setPinnedSizeMb] = useState(18.4);
-  const [simulatedSpike, setSimulatedSpike] = useState(false);
-  const [ipfsCIDs, setIpfsCIDs] = useState([
-    { name: 'Core Disaster App Bundle (JS/WASM)', cid: 'QmZtmD2qtQgR9z58YJ6vM3qX7Y9n8p4u1r6w5v3s2t1', size: '6.4 MB', peersHolding: 42 },
-    { name: 'Offline Vector Terrain Map (Northeast India)', cid: 'QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco', size: '9.2 MB', peersHolding: 38 },
-    { name: 'Indigenous Language Translation Models', cid: 'QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR', size: '2.8 MB', peersHolding: 41 }
+  // ─── DEEP-TECH TOOL 3: RADIO SDR / LORA TRIANGULATION ─────────────────────
+  const [radioFreq, setRadioFreq] = useState(868.1); // MHz
+  const [isScanningRadio, setIsScanningRadio] = useState(false);
+  const [radioTowers, setRadioTowers] = useState([
+    { id: 'TOWER-A', name: 'NH-10 Mile 12 Repeater', rssi: -72, snr: '+11 dB', dist: '1.2 km', lock: true },
+    { id: 'TOWER-B', name: 'Teesta Gorge Mast-4', rssi: -84, snr: '+6 dB', dist: '2.8 km', lock: true },
+    { id: 'TOWER-C', name: 'Singtam Ridge Node', rssi: -95, snr: '+2 dB', dist: '4.1 km', lock: true }
   ]);
 
-  const handleTriggerPanicSpike = () => {
-    setSimulatedSpike(true);
-    setIpfsPeers(prev => prev + 128);
-    setResilienceScore(99.99);
+  const handleScanRadio = () => {
+    setIsScanningRadio(true);
+    playChirpSound(2100, 0.25);
     setTimeout(() => {
-      setSimulatedSpike(false);
-    }, 3000);
+      setIsScanningRadio(false);
+      setRadioTowers(prev => prev.map(t => ({ ...t, rssi: Math.min(-60, t.rssi + Math.floor(Math.random() * 8) - 4) })));
+    }, 1200);
   };
 
-  // -------------------------------------------------------------
-  // TAB 5: SYNTHETIC APERTURE RADAR (SAR) RAW DATA RENDER ENGINE
-  // -------------------------------------------------------------
-  const [radarThresholdDb, setRadarThresholdDb] = useState(-18); // dB
-  const [polarization, setPolarization] = useState('VV'); // 'VV' vs 'VH'
-  const [satelliteSource, setSatelliteSource] = useState('Sentinel-1 C-Band (5.405 GHz)');
-  const [breachCount, setBreachCount] = useState(3);
+  // ─── ACTIVE INCIDENTS LIST ────────────────────────────────────────────────
+  const activeIncidents = [
+    {
+      id: 1,
+      title: "Landslide - NH-10",
+      severity: "CRITICAL",
+      badgeColor: "#ef4444",
+      location: "Bargarh, Odisha / Sikkim Border",
+      exposed: "387 exposed",
+      villages: "4 villages",
+      roads: "2 roads",
+      eta: "08 min",
+      details: "Severe slope failure near Teesta confluence. 4 villages cutoff. Evacuation route active.",
+    },
+    {
+      id: 2,
+      title: "Flood - Sector 4",
+      severity: "HIGH",
+      badgeColor: "#f97316",
+      location: "Jagatsinghpur, Odisha",
+      exposed: "612 affected",
+      villages: "2 shelters",
+      roads: "1 road",
+      eta: "16 min",
+      details: "Mahanadi delta embankment overflow. Water level +1.4m above critical baseline.",
+    },
+    {
+      id: 3,
+      title: "Road Blockage - Zone B",
+      severity: "MEDIUM",
+      badgeColor: "#eab308",
+      location: "Rourkela, Odisha",
+      exposed: "241 affected",
+      villages: "1 shelter",
+      roads: "1 road",
+      eta: "24 min",
+      details: "Debris boulder obstruction on arterial connector. JCB clearance units dispatched.",
+    },
+  ];
 
-  const sarCanvasRef = useRef(null);
+  // ─── INCIDENT TIMELINE ────────────────────────────────────────────────────
+  const timelineEvents = [
+    { time: "21:12", text: "Sensor anomaly detected", color: "#ef4444" },
+    { time: "21:20", text: "Rainfall threshold exceeded", color: "#f97316" },
+    { time: "21:30", text: "Alert broadcast to NDRF", color: "#eab308" },
+    { time: "21:35", text: "Siren activated in SIMUL1-4", color: "#38bdf8" },
+    { time: "21:42", text: "Public alert released", color: "#a855f7" },
+    { time: "21:50", text: "Evacuation initiated", color: "#22c55e" },
+    { time: "22:04", text: "Rescue unit #4 dispatched", color: "#94a3b8" },
+    { time: "22:20", text: "Unit arrived at location", color: "#10b981" },
+  ];
 
-  // Render WebGL / Canvas Microwave Radar Specular Bounce
-  useEffect(() => {
-    const canvas = sarCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animId;
-    let sweep = 0;
+  // ─── 9 KEY CAPABILITIES ───────────────────────────────────────────────────
+  const keyCapabilities = [
+    {
+      id: "ner",
+      title: "NER Monitor",
+      badge: "LIVE",
+      badgeType: "live",
+      icon: "🏔️",
+      desc: "Real-time landslide & hazard monitoring for NER region.",
+      route: "/ner-landslide-monitor"
+    },
+    {
+      id: "risk",
+      title: "AI Risk Prediction",
+      badge: "LIVE",
+      badgeType: "live",
+      icon: "🧠",
+      desc: "ML-powered early warning and risk assessment.",
+      route: "/statistics"
+    },
+    {
+      id: "sos",
+      title: "Emergency SOS",
+      badge: "LIVE",
+      badgeType: "live",
+      icon: "🚨",
+      desc: "One-tap distress signal with GPS & nearest responder.",
+      action: () => setSosModalOpen(true)
+    },
+    {
+      id: "sensors",
+      title: "Smart Sensors",
+      badge: "LIVE",
+      badgeType: "live",
+      icon: "📡",
+      desc: "IoT-based environmental & structural monitoring.",
+      route: "/smart-alerts"
+    },
+    {
+      id: "digital_twin",
+      title: "Digital Twin",
+      badge: "PROTOTYPE",
+      badgeType: "proto",
+      icon: "🧊",
+      desc: "Simulate disasters & test response strategies.",
+      route: "/digital-twin"
+    },
+    {
+      id: "zero_net",
+      title: "Zero-Internet Mode",
+      badge: "RESEARCH",
+      badgeType: "res",
+      icon: "📶",
+      desc: "Mesh + offline communication for no-network zones.",
+      action: () => setActiveCapabilityModal("ultrasonic")
+    },
+    {
+      id: "drone",
+      title: "Drone Analytics",
+      badge: "LIVE",
+      badgeType: "live",
+      icon: "🚁",
+      desc: "Aerial surveillance & real-time assessment.",
+      route: "/drone-analytics"
+    },
+    {
+      id: "quantum",
+      title: "Quantum-Inspired Optimization",
+      badge: "RESEARCH",
+      badgeType: "res",
+      icon: "⚛️",
+      desc: "Optimized resource & evacuation planning using quantum algorithms.",
+      action: () => setActiveCapabilityModal("quantum")
+    },
+    {
+      id: "wifi_csi",
+      title: "RF/WiFi SOS & Survivor Detection",
+      badge: "PROTOTYPE",
+      badgeType: "proto",
+      icon: "📶",
+      desc: "Camera-free detection using WiFi/CSI signals.",
+      action: () => setActiveCapabilityModal("csi")
+    },
+  ];
 
-    const render = () => {
-      ctx.fillStyle = '#060f1e';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // ─── 6 OPERATIONAL FLOW STEPS ─────────────────────────────────────────────
+  const flowSteps = [
+    { step: 1, name: "Detect", sub: "Sensors & Satellite Data", icon: "📡" },
+    { step: 2, name: "Predict", sub: "AI Risk Analysis & LSI", icon: "🧠" },
+    { step: 3, name: "Alert", sub: "Multi-Channel Notifications", icon: "🔔" },
+    { step: 4, name: "Evacuate", sub: "Safe Routes & Shelters", icon: "🏃" },
+    { step: 5, name: "Rescue", sub: "Dispatch & On-ground Teams", icon: "🚑" },
+    { step: 6, name: "Recover", sub: "Assessment & Rebuild", icon: "🛡️" },
+  ];
 
-      const w = canvas.width;
-      const h = canvas.height;
-
-      // Draw simulated synthetic aperture radar raster scanlines
-      ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 1;
-      for (let y = 0; y < h; y += 16) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
-      }
-
-      // Draw Brahmaputra River Basin Swelling (Specular Radar Bounce: Dark = Water, Bright = Rough Terrain)
-      // Water absorbs/reflects microwave away from sensor -> low backscatter (-22 dB to -16 dB)
-      ctx.fillStyle = '#0369a1';
-      ctx.beginPath();
-      ctx.moveTo(0, h * 0.45);
-      ctx.bezierCurveTo(w * 0.3, h * 0.25, w * 0.6, h * 0.65, w, h * 0.35);
-      ctx.lineTo(w, h * 0.65);
-      ctx.bezierCurveTo(w * 0.6, h * 0.85, w * 0.3, h * 0.55, 0, h * 0.7);
-      ctx.closePath();
-      ctx.fill();
-
-      // Breached flood zones (expanding over sandbars & villages)
-      ctx.fillStyle = 'rgba(14, 165, 233, 0.5)';
-      ctx.beginPath();
-      ctx.arc(w * 0.38, h * 0.42, 45, 0, Math.PI * 2); // Majuli Island breach
-      ctx.arc(w * 0.68, h * 0.58, 38, 0, Math.PI * 2); // Kaziranga lowlands breach
-      ctx.fill();
-
-      // Breach alert markers
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.arc(w * 0.38, h * 0.42, 6, 0, Math.PI * 2);
-      ctx.arc(w * 0.68, h * 0.58, 6, 0, Math.PI * 2);
-      ctx.fill();
-
-      // SAR Radar Sweep Beam
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      const sweepX = (sweep % (w + 40)) - 20;
-      ctx.moveTo(sweepX, 0);
-      ctx.lineTo(sweepX, h);
-      ctx.stroke();
-
-      sweep += 3;
-      animId = requestAnimationFrame(render);
-    };
-
-    render();
-    return () => cancelAnimationFrame(animId);
-  }, [radarThresholdDb, polarization]);
+  // ─── RECENT ALERTS LIST ───────────────────────────────────────────────────
+  const recentAlerts = [
+    { title: "Landslide Risk - NH-10", severity: "Critical", time: "21:42", dot: "#ef4444" },
+    { title: "Heavy Rainfall Warning", severity: "High", time: "20:17", dot: "#f97316" },
+    { title: "Road Blockage - Zone B", severity: "Medium", time: "19:32", dot: "#eab308" },
+    { title: "Flood Alert - Sector 4", severity: "Medium", time: "18:45", dot: "#eab308" },
+    { title: "Weather Report: Update", severity: "Low", time: "16:20", dot: "#38bdf8" },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-8">
-      {/* Header Banner */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 bg-violet-500/20 text-violet-400 text-xs font-bold rounded-full border border-violet-500/30 flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5" /> DECENTRALIZED & ZERO-INFRASTRUCTURE RESILIENT
-              </span>
-              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30">
-                P2P MULTI-HOP ENABLED
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight flex items-center gap-3">
-              Decentralized Resilience & SAR Radar Suite
-            </h1>
-            <p className="text-slate-400 text-sm sm:text-base mt-1 max-w-3xl">
-              World-first disaster technologies eliminating centralized single-points-of-failure: multi-hop sound-wave relays, satellite-free radio GPS, WebHID triage heatmaps, un-crashable IPFS web-mirroring, and raw WebGL SAR radar mapping.
-            </p>
+    <div 
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "14px",
+        minHeight: "100%",
+        backgroundColor: emergencyMode ? "#1a0508" : "#060d19",
+        color: "#ffffff",
+        transition: "background-color 0.4s ease",
+        padding: "4px",
+      }}
+    >
+      {/* ── TOP ACTIVE EMERGENCY NOTIFICATION BAR ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "12px",
+          padding: "8px 16px",
+          borderRadius: "14px",
+          backgroundColor: emergencyMode ? "rgba(225, 29, 72, 0.28)" : "rgba(15, 23, 42, 0.85)",
+          border: emergencyMode ? "1.5px solid #ef4444" : "1px solid rgba(225, 29, 72, 0.35)",
+          boxShadow: emergencyMode ? "0 0 25px rgba(239, 68, 68, 0.4)" : "0 4px 18px rgba(0,0,0,0.4)",
+          animation: emergencyMode ? "pulseEmergency 1.8s infinite" : "none",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          {/* Active Emergency Badge */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              backgroundColor: "rgba(225, 29, 72, 0.25)",
+              border: "1px solid #ef4444",
+              borderRadius: "8px",
+              padding: "4px 10px",
+            }}
+          >
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#ef4444", boxShadow: "0 0 8px #ef4444" }} />
+            <span style={{ fontSize: "0.74rem", fontWeight: "900", color: "#fca5a5", letterSpacing: "0.04em" }}>
+              ACTIVE EMERGENCY
+            </span>
           </div>
 
-          <div className="flex items-center gap-3 self-start md:self-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-violet-400 animate-pulse"></div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.82rem" }}>
+            <span style={{ fontWeight: "800", color: "#ffffff" }}>
+              NER Landslide Risk — NH-10
+            </span>
+            <span
+              style={{
+                backgroundColor: "#ef4444",
+                color: "#ffffff",
+                fontSize: "0.62rem",
+                fontWeight: "900",
+                padding: "2px 6px",
+                borderRadius: "4px",
+              }}
+            >
+              CRITICAL
+            </span>
+          </div>
+
+          {/* Affected Stats */}
+          <div style={{ display: "flex", alignItems: "center", gap: "14px", fontSize: "0.72rem", color: "#cbd5e1" }}>
+            <span>⚠️ <strong>4</strong> Villages Affected</span>
+            <span>👥 <strong>387</strong> People Exposed</span>
+            <span>🛣️ <strong>2</strong> Roads Blocked</span>
+            <span style={{ color: "#94a3b8" }}>🕒 Updated {currentTime.slice(0, 5)}</span>
+          </div>
+        </div>
+
+        {/* Right Status Controls */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              backgroundColor: "rgba(16, 185, 129, 0.15)",
+              border: "1px solid rgba(16, 185, 129, 0.35)",
+              borderRadius: "20px",
+              padding: "3px 10px",
+              fontSize: "0.68rem",
+              fontWeight: "700",
+              color: "#34d399",
+            }}
+          >
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#10b981", boxShadow: "0 0 6px #10b981" }} />
+            <span>All Services Operational</span>
+          </div>
+
+          <span style={{ fontSize: "0.72rem", color: "#94a3b8", fontWeight: "600" }}>EN ▾</span>
+
+          <button
+            onClick={() => navigate('/alerts?tab=notifications')}
+            style={{
+              background: "rgba(15, 23, 42, 0.8)",
+              border: "1px solid rgba(56, 189, 248, 0.2)",
+              borderRadius: "8px",
+              padding: "5px 8px",
+              color: "#38bdf8",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              position: "relative",
+            }}
+            title="Notifications"
+          >
+            <Bell size={14} />
+            <span
+              style={{
+                position: "absolute",
+                top: "-4px",
+                right: "-4px",
+                backgroundColor: "#ef4444",
+                color: "#ffffff",
+                fontSize: "0.55rem",
+                fontWeight: "900",
+                width: "14px",
+                height: "14px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              1
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── 2-COLUMN MAIN DASHBOARD GRID ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1fr) 340px",
+          gap: "16px",
+          alignItems: "start",
+        }}
+      >
+        {/* ════════════════════ LEFT COLUMN (PRIMARY SUITE) ════════════════════ */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+          {/* ── 1. HERO BANNER CARD ── */}
+          <div
+            style={{
+              position: "relative",
+              borderRadius: "20px",
+              overflow: "hidden",
+              background: "linear-gradient(135deg, rgba(8, 20, 38, 0.96) 0%, rgba(5, 14, 28, 0.98) 100%)",
+              border: "1px solid rgba(56, 189, 248, 0.28)",
+              padding: "24px 28px",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.6)",
+              display: "grid",
+              gridTemplateColumns: "1fr 340px",
+              gap: "24px",
+              alignItems: "center",
+            }}
+          >
+            {/* Left Content */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", zIndex: 5 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <span
+                  style={{
+                    backgroundColor: "rgba(16, 185, 129, 0.18)",
+                    color: "#34d399",
+                    border: "1px solid rgba(16, 185, 129, 0.4)",
+                    padding: "3px 10px",
+                    borderRadius: "6px",
+                    fontSize: "0.68rem",
+                    fontWeight: "800",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  <span>🌿</span>
+                  <span>NEXT-GEN DISASTER RESPONSE</span>
+                </span>
+                <span
+                  style={{
+                    backgroundColor: "rgba(56, 189, 248, 0.15)",
+                    color: "#38bdf8",
+                    border: "1px solid rgba(56, 189, 248, 0.3)",
+                    padding: "3px 8px",
+                    borderRadius: "6px",
+                    fontSize: "0.64rem",
+                    fontWeight: "800",
+                  }}
+                >
+                  SITE: 1
+                </span>
+                <span style={{ fontSize: "0.66rem", color: "#94a3b8", fontFamily: "monospace" }}>
+                  LAST UPDATED: {currentTime}
+                </span>
+              </div>
+
               <div>
-                <div className="text-xs text-slate-400">IPFS Mesh Swarm</div>
-                <div className="text-xs font-bold text-violet-300">{ipfsPeers} Active Seeding Nodes</div>
+                <h1
+                  style={{
+                    margin: "0 0 6px 0",
+                    fontSize: "1.75rem",
+                    fontWeight: "900",
+                    letterSpacing: "-0.02em",
+                    background: "linear-gradient(135deg, #ffffff 40%, #bae6fd 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Decentralized Resilience & SAR Radar Suite
+                </h1>
+                <div style={{ color: "#38bdf8", fontWeight: "700", fontSize: "0.92rem", marginBottom: "4px" }}>
+                  AI-driven. Sensor-powered. Community-focused.
+                </div>
+                <p style={{ margin: 0, color: "#94a3b8", fontSize: "0.82rem", lineHeight: "1.5", maxWidth: "560px" }}>
+                  From early warning to rescue — one integrated platform for a safe and more resilient future.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginTop: "4px" }}>
+                <button
+                  onClick={() => setLiveMapModalOpen(true)}
+                  style={{
+                    background: "linear-gradient(135deg, #0284c7, #2563eb)",
+                    border: "none",
+                    borderRadius: "10px",
+                    color: "#ffffff",
+                    padding: "10px 18px",
+                    fontSize: "0.82rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: "0 4px 16px rgba(2, 132, 199, 0.4)",
+                  }}
+                >
+                  <Globe size={16} />
+                  <span>View Live Map</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("key-capabilities-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  style={{
+                    background: "rgba(15, 23, 42, 0.8)",
+                    border: "1px solid rgba(56, 189, 248, 0.35)",
+                    borderRadius: "10px",
+                    color: "#cbd5e1",
+                    padding: "10px 18px",
+                    fontSize: "0.82rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Compass size={16} />
+                  <span>Explore Features</span>
+                </button>
+
+                <button
+                  onClick={handleRunSimulation}
+                  disabled={isSimulating}
+                  style={{
+                    background: isSimulating ? "rgba(16, 185, 129, 0.3)" : "linear-gradient(135deg, #10b981, #059669)",
+                    border: "none",
+                    borderRadius: "10px",
+                    color: "#ffffff",
+                    padding: "10px 18px",
+                    fontSize: "0.82rem",
+                    fontWeight: "800",
+                    cursor: isSimulating ? "wait" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
+                  }}
+                >
+                  <Play size={16} fill="#ffffff" />
+                  <span>{isSimulating ? `Simulating ${simProgress}%` : "Run Demo"}</span>
+                </button>
+              </div>
+
+              {isSimulating && (
+                <div style={{ marginTop: "4px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.72rem", color: "#34d399", fontWeight: "700", marginBottom: "4px" }}>
+                    <span>{simStageText}</span>
+                    <span>{simProgress}%</span>
+                  </div>
+                  <div style={{ width: "100%", height: "6px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "999px", overflow: "hidden" }}>
+                    <div style={{ width: `${simProgress}%`, height: "100%", backgroundColor: "#10b981", transition: "width 0.4s ease" }} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Aerial Graphic with SAR Radar Overlay */}
+            <div
+              style={{
+                position: "relative",
+                height: "210px",
+                borderRadius: "16px",
+                overflow: "hidden",
+                border: "1px solid rgba(56, 189, 248, 0.35)",
+                backgroundImage: "url('/images/mountain_corridor.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.7)",
+              }}
+            >
+              {/* Radial Dark Vignette */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "radial-gradient(circle at center, transparent 30%, rgba(5, 12, 24, 0.7) 100%)",
+                }}
+              />
+
+              {/* Rotating SAR Radar Sweep Beam */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  width: "260px",
+                  height: "260px",
+                  marginLeft: "-130px",
+                  marginTop: "-130px",
+                  borderRadius: "50%",
+                  border: "1px dashed rgba(56, 189, 248, 0.4)",
+                  pointerEvents: "none",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "50%",
+                    background: "conic-gradient(from 0deg, rgba(56, 189, 248, 0.4) 0deg, rgba(56, 189, 248, 0) 60deg)",
+                    animation: "rotateRadar 4s linear infinite",
+                  }}
+                />
+              </div>
+
+              {/* Landslide Risk Marker (Red Pulse) */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "28%",
+                  right: "18%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  backgroundColor: "rgba(225, 29, 72, 0.9)",
+                  border: "1px solid #ffffff",
+                  borderRadius: "20px",
+                  padding: "4px 10px",
+                  boxShadow: "0 0 15px rgba(225, 29, 72, 0.8)",
+                  animation: "pulseWarning 1.5s infinite",
+                  cursor: "pointer",
+                }}
+                onClick={() => setLiveMapModalOpen(true)}
+              >
+                <AlertTriangle size={12} color="#ffffff" />
+                <div style={{ fontSize: "0.62rem", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap" }}>
+                  Landslide Risk (94% LSI)
+                </div>
+              </div>
+
+              {/* Evacuation Route Path Overlay */}
+              <svg
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+                viewBox="0 0 340 210"
+              >
+                <path
+                  d="M 50,180 Q 140,110 220,90 T 300,50"
+                  fill="none"
+                  stroke="#38bdf8"
+                  strokeWidth="2.5"
+                  strokeDasharray="6,4"
+                  filter="drop-shadow(0 0 6px #38bdf8)"
+                />
+              </svg>
+
+              {/* Rescue Unit Marker (Blue) */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "22%",
+                  left: "22%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  backgroundColor: "rgba(2, 132, 199, 0.9)",
+                  border: "1px solid #ffffff",
+                  borderRadius: "20px",
+                  padding: "4px 10px",
+                  boxShadow: "0 0 15px rgba(2, 132, 199, 0.8)",
+                  cursor: "pointer",
+                }}
+                onClick={() => setLiveMapModalOpen(true)}
+              >
+                <Navigation size={12} color="#ffffff" />
+                <div style={{ fontSize: "0.62rem", fontWeight: "900", color: "#ffffff", whiteSpace: "nowrap" }}>
+                  Rescue Unit (GPS Locked)
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Tab Navigation */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-6">
-          <button
-            onClick={() => setActiveTab('ultrasonic')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'ultrasonic'
-                ? 'bg-emerald-950/50 border-emerald-500 text-white shadow-lg shadow-emerald-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
+          {/* ── 2. METRICS ROW (4 KPI CARDS) ── */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "12px",
+            }}
           >
-            <Volume2 className={`w-5 h-5 flex-shrink-0 ${activeTab === 'ultrasonic' ? 'text-emerald-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Ultrasonic Mesh</div>
-              <div className="text-[10px] text-slate-400">Sound-Wave Multi-Hop</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('radio')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'radio'
-                ? 'bg-sky-950/50 border-sky-500 text-white shadow-lg shadow-sky-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Radio className={`w-5 h-5 flex-shrink-0 ${activeTab === 'radio' ? 'text-sky-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Radio Web-GPS</div>
-              <div className="text-[10px] text-slate-400">Terrestrial AIR Triangulation</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('triage')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'triage'
-                ? 'bg-rose-950/50 border-rose-500 text-white shadow-lg shadow-rose-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Activity className={`w-5 h-5 flex-shrink-0 ${activeTab === 'triage' ? 'text-rose-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">WebHID Triage Map</div>
-              <div className="text-[10px] text-slate-400">Camera PPG Vitals</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('ipfs')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'ipfs'
-                ? 'bg-violet-950/50 border-violet-500 text-white shadow-lg shadow-violet-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Network className={`w-5 h-5 flex-shrink-0 ${activeTab === 'ipfs' ? 'text-violet-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">IPFS Web-Mirror</div>
-              <div className="text-[10px] text-slate-400">Un-Crashable P2P Swarm</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('sar')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'sar'
-                ? 'bg-cyan-950/50 border-cyan-500 text-white shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'sar' ? 'text-cyan-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">SAR Radar WebGL</div>
-              <div className="text-[10px] text-slate-400">Cloud-Piercing Flood Engine</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto">
-        {/* ========================================================= */}
-        {/* TAB 1: ULTRASONIC "CHIRP" MESH MULTI-HOP RELAY            */}
-        {/* ========================================================= */}
-        {activeTab === 'ultrasonic' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Volume2 className="w-6 h-6 text-emerald-400" />
-                    <h2 className="text-xl font-bold text-white">Ultrasonic "Chirp" Multi-Hop Sound-Wave Relay</h2>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Bypasses dead Bluetooth and RF interference. Trapped victims emit an ultrasonic audio chirp; nearby phones act as physical audio repeaters, bouncing the beacon across the valley to an internet gateway.
-                  </p>
+            {/* Metric 1 */}
+            <div
+              style={{
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                borderRadius: "14px",
+                padding: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "10px",
+                  backgroundColor: "rgba(239, 68, 68, 0.15)",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#ef4444",
+                }}
+              >
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <div style={{ fontSize: "0.68rem", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase" }}>
+                  Active Incidents
                 </div>
-
-                <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-                  <button
-                    onClick={() => setAudioMode('ultrasonic')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      audioMode === 'ultrasonic' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Silent Ultrasonic (19.2 kHz)
-                  </button>
-                  <button
-                    onClick={() => setAudioMode('diagnostic')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      audioMode === 'diagnostic' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Audible FSK (2.4 kHz)
-                  </button>
+                <div style={{ fontSize: "1.4rem", fontWeight: "900", color: "#ffffff" }}>
+                  {activeIncidentsCount}
+                </div>
+                <div style={{ fontSize: "0.65rem", color: "#f87171", fontWeight: "700" }}>
+                  1 Critical · 2 High
                 </div>
               </div>
+            </div>
 
-              {/* Multi-Hop Relay Visualizer */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left: 4-Node Valley Relay Chain */}
-                <div className="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-mono font-bold text-slate-300">
-                      Physical Sound-Wave Relay Chain (Valley Path)
-                    </span>
-                    <span className="text-[11px] font-mono text-emerald-400">
-                      Carrier: {audioMode === 'ultrasonic' ? '19.2 kHz Inaudible' : '2.4 kHz FSK'}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {hopNodes.map((node, idx) => (
-                      <div
-                        key={node.id}
-                        className={`p-3.5 rounded-xl border transition-all ${
-                          activeHop === idx
-                            ? 'bg-emerald-950/60 border-emerald-500 shadow-lg shadow-emerald-950/40'
-                            : activeHop > idx
-                            ? 'bg-slate-900/90 border-slate-700'
-                            : 'bg-slate-900/40 border-slate-800/80 opacity-60'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2.5">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
-                              activeHop === idx ? 'bg-emerald-500 text-slate-950 animate-pulse' : 'bg-slate-800 text-slate-300'
-                            }`}>
-                              H#{node.hopIndex}
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-white flex items-center gap-2">
-                                {node.role}
-                                <span className="text-[10px] font-mono text-slate-400 font-normal">({node.device})</span>
-                              </div>
-                              <div className="text-[11px] text-slate-400 mt-0.5">{node.location}</div>
-                            </div>
-                          </div>
-
-                          <div className="text-right">
-                            <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${
-                              node.status.includes('SUCCESS') || node.status.includes('DISPATCHED')
-                                ? 'bg-emerald-500/20 text-emerald-400'
-                                : 'bg-sky-500/20 text-sky-400'
-                            }`}>
-                              {node.status}
-                            </span>
-                            <div className="text-[10px] font-mono text-slate-500 mt-1">SNR: {node.snrDb}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Waterfall Spectrogram */}
-                  <div className="mt-4 pt-3 border-t border-slate-800">
-                    <div className="text-[10px] font-mono text-slate-400 mb-1 flex items-center justify-between">
-                      <span>Live Microphone Acoustic Waterfall FFT</span>
-                      <span className="text-emerald-400 font-mono">Store-and-Forward Mesh Active</span>
-                    </div>
-                    <canvas
-                      ref={audioCanvasRef}
-                      width={560}
-                      height={90}
-                      className="w-full h-24 rounded-lg border border-slate-800 bg-[#060d19]"
-                    />
-                  </div>
+            {/* Metric 2 */}
+            <div
+              style={{
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(56, 189, 248, 0.25)",
+                borderRadius: "14px",
+                padding: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "10px",
+                  backgroundColor: "rgba(2, 132, 199, 0.15)",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#38bdf8",
+                }}
+              >
+                <Users size={20} />
+              </div>
+              <div>
+                <div style={{ fontSize: "0.68rem", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase" }}>
+                  People Affected
                 </div>
+                <div style={{ fontSize: "1.4rem", fontWeight: "900", color: "#ffffff" }}>
+                  {peopleAffected.toLocaleString()}
+                </div>
+                <div style={{ fontSize: "0.65rem", color: "#38bdf8", fontWeight: "700" }}>
+                  {peopleEvacuated} Evacuated
+                </div>
+              </div>
+            </div>
 
-                {/* Right: Trigger & Payload Architecture */}
-                <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                      Acoustic SOS Packet Bitstream
-                    </h3>
+            {/* Metric 3 */}
+            <div
+              style={{
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(16, 185, 129, 0.25)",
+                borderRadius: "14px",
+                padding: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "10px",
+                  backgroundColor: "rgba(16, 185, 129, 0.15)",
+                  border: "1px solid rgba(16, 185, 129, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#10b981",
+                }}
+              >
+                <Navigation size={20} />
+              </div>
+              <div>
+                <div style={{ fontSize: "0.68rem", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase" }}>
+                  Response Units
+                </div>
+                <div style={{ fontSize: "1.4rem", fontWeight: "900", color: "#ffffff" }}>
+                  {responseUnitsCount}
+                </div>
+                <div style={{ fontSize: "0.65rem", color: "#34d399", fontWeight: "700" }}>
+                  10 In Route · 4 On Site
+                </div>
+              </div>
+            </div>
 
-                    <div className="space-y-3 text-xs">
-                      <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
-                        <div className="text-slate-400 mb-1">Encoded Audio Token:</div>
-                        <div className="font-mono text-emerald-400 font-bold break-all bg-slate-950 p-2 rounded border border-slate-800 text-[11px]">
-                          CHIRP-SOS#BLOOD:O_NEG#GPS:28.064,95.331#TRIAGE:CRITICAL_BLEEDING#HOP:0
-                        </div>
-                      </div>
+            {/* Metric 4 */}
+            <div
+              style={{
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(168, 85, 247, 0.25)",
+                borderRadius: "14px",
+                padding: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "10px",
+                  backgroundColor: "rgba(168, 85, 247, 0.15)",
+                  border: "1px solid rgba(168, 85, 247, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#c084fc",
+                }}
+              >
+                <Shield size={20} />
+              </div>
+              <div>
+                <div style={{ fontSize: "0.68rem", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase" }}>
+                  Shelter Capacity
+                </div>
+                <div style={{ fontSize: "1.4rem", fontWeight: "900", color: "#ffffff" }}>
+                  {shelterCapacityPercent}%
+                </div>
+                <div style={{ fontSize: "0.65rem", color: "#c084fc", fontWeight: "700" }}>
+                  1,152 / 1,600 Occupied
+                </div>
+              </div>
+            </div>
+          </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-[11px]">
-                        <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
-                          <span className="text-slate-400">Victim Blood Group:</span>
-                          <div className="font-bold text-rose-400 mt-0.5">O-Negative</div>
-                        </div>
-                        <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
-                          <span className="text-slate-400">Medical Need:</span>
-                          <div className="font-bold text-amber-400 mt-0.5">Hemostatic Trauma Kit</div>
-                        </div>
-                      </div>
+          {/* ── 3. KEY CAPABILITIES (3x3 GRID) ── */}
+          <div id="key-capabilities-section" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ margin: 0, fontSize: "1.05rem", fontWeight: "900", color: "#ffffff", letterSpacing: "-0.01em" }}>
+                Key Capabilities
+              </h2>
+              <button
+                onClick={() => setLiveMapModalOpen(true)}
+                style={{ background: "none", border: "none", color: "#38bdf8", fontSize: "0.74rem", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                <span>View All Features</span>
+                <ArrowUpRight size={13} />
+              </button>
+            </div>
 
-                      <div className="p-3 bg-slate-900/80 rounded-lg border border-slate-800 text-[11px] text-slate-300">
-                        💡 <strong>Physical Sound Repeater Concept:</strong> When phones receive this sound packet, they save it locally, increment the hop counter, and automatically emit the audio forward to the next device.
-                      </div>
-                    </div>
-                  </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "12px",
+              }}
+            >
+              {keyCapabilities.map((cap) => {
+                const badgeBg = cap.badgeType === 'live' 
+                  ? 'rgba(16, 185, 129, 0.2)' 
+                  : cap.badgeType === 'proto' 
+                  ? 'rgba(245, 158, 11, 0.2)' 
+                  : 'rgba(168, 85, 247, 0.2)';
+                const badgeColor = cap.badgeType === 'live' 
+                  ? '#34d399' 
+                  : cap.badgeType === 'proto' 
+                  ? '#fbbf24' 
+                  : '#c084fc';
 
-                  <div className="mt-4 pt-3 border-t border-slate-800">
-                    <button
-                      onClick={handleStartHopRelay}
-                      disabled={isRelaying}
-                      className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 transition-all disabled:opacity-50"
+                return (
+                  <div
+                    key={cap.id}
+                    onClick={() => {
+                      if (cap.action) {
+                        cap.action();
+                      } else if (cap.route) {
+                        navigate(cap.route);
+                      }
+                    }}
+                    style={{
+                      backgroundColor: "rgba(15, 23, 42, 0.75)",
+                      border: "1px solid rgba(56, 189, 248, 0.16)",
+                      borderRadius: "14px",
+                      padding: "16px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-3px)";
+                      e.currentTarget.style.borderColor = "rgba(56, 189, 248, 0.4)";
+                      e.currentTarget.style.boxShadow = "0 8px 25px rgba(2, 132, 199, 0.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.borderColor = "rgba(56, 189, 248, 0.16)";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "38px",
+                        height: "38px",
+                        borderRadius: "10px",
+                        backgroundColor: "rgba(2, 132, 199, 0.15)",
+                        border: "1px solid rgba(56, 189, 248, 0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "1.2rem",
+                        flexShrink: 0,
+                      }}
                     >
-                      <Volume2 className="w-4 h-4" />
-                      {isRelaying ? 'Bouncing Sound-Wave Across Valley...' : 'Simulate Ultrasonic 3-Hop Valley Relay'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================= */}
-        {/* TAB 2: TERRESTRIAL FM/AM RADIO WEB-TRIANGULATION           */}
-        {/* ========================================================= */}
-        {activeTab === 'radio' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Radio className="w-6 h-6 text-sky-400" />
-                    <h2 className="text-xl font-bold text-white">Terrestrial FM/AM Radio Web-Triangulation (Satellite-Free GPS)</h2>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Calculates exact geographic coordinates inside GPS-blind mountain canyons using hardware radio signal attenuation from pre-cached All India Radio (AIR) towers.
-                  </p>
-                </div>
-
-                <button
-                  onClick={handleRecalculateRadioGPS}
-                  disabled={triangulating}
-                  className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-all shadow-lg shadow-sky-950/50 disabled:opacity-50"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${triangulating ? 'animate-spin' : ''}`} />
-                  {triangulating ? 'Solving Nonlinear Radio Arcs...' : 'Recalculate Radio Position'}
-                </button>
-              </div>
-
-              {/* Trilateration Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left: Pre-Cached Transmitter Registry */}
-                <div className="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-mono font-bold text-slate-300">
-                      Pre-Cached Regional Prasar Bharati Transmitters
-                    </span>
-                    <span className="text-[11px] px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded font-mono border border-rose-500/30">
-                      SATELLITE GPS BLIND (0/12 LOCKED)
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {radioTowers.map(tower => (
-                      <div key={tower.id} className="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="font-bold text-white flex items-center gap-2">
-                            <Radio className="w-3.5 h-3.5 text-sky-400" /> {tower.name}
-                          </span>
-                          <span className="font-mono text-sky-400 font-bold">{tower.rssi} dBm</span>
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-                          <span>Freq: {tower.freq} • Power: {tower.powerKw} kW</span>
-                          <span className="font-mono text-slate-300">Solved Distance: ~{tower.solvedDistKm} km</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 p-3 bg-slate-900/80 rounded-lg border border-slate-800 text-[11px] text-slate-400">
-                    📐 <strong>Logarithmic Attenuation Model:</strong> Solves $PL(d) = PL(d_0) + 10n \log_{10}(d/d_0)$ using hardware RSSI feedback from the device's FM chip web receiver.
-                  </div>
-                </div>
-
-                {/* Right: Solved Coordinate Card */}
-                <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-                      <span>Radio-Triangulated Fix</span>
-                      <span className="text-emerald-400 font-mono">Confidence: {solvedRadioCoord.confidence}%</span>
-                    </h3>
-
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                      <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                        <div className="text-[10px] text-slate-400">Latitude</div>
-                        <div className="text-base font-mono font-bold text-white">{solvedRadioCoord.lat}° N</div>
-                      </div>
-                      <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                        <div className="text-[10px] text-slate-400">Longitude</div>
-                        <div className="text-base font-mono font-bold text-white">{solvedRadioCoord.lng}° E</div>
-                      </div>
-                      <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                        <div className="text-[10px] text-slate-400">RF Uncertainty Margin</div>
-                        <div className="text-base font-mono font-bold text-emerald-400">±{solvedRadioCoord.accuracyM} meters</div>
-                      </div>
-                      <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                        <div className="text-[10px] text-slate-400">Environment</div>
-                        <div className="text-xs font-bold text-slate-300 mt-1">Deep Siang Gorge</div>
-                      </div>
+                      {cap.icon}
                     </div>
 
-                    <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 text-[11px] text-slate-300">
-                      <div>Terrain Shadowing:</div>
-                      <div className="text-slate-400 text-[10px] mt-0.5">{solvedRadioCoord.gorgeShadowDampening}</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-800">
-                    <button className="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2">
-                      <MapPin className="w-4 h-4" /> Export Triangulated Fix to Offline Vector Map
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================= */}
-        {/* TAB 3: WEBHID BIO-SENSING & CAMERA PPG TRIAGE HEATMAP      */}
-        {/* ========================================================= */}
-        {activeTab === 'triage' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-6 h-6 text-rose-400" />
-                    <h2 className="text-xl font-bold text-white">WebHID Bio-Sensing & Camera PPG Triage Priority Heatmaps</h2>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Direct WebHID wearable integration and phone camera photoplethysmography (PPG) pulse scanning to sort victims on command heatmaps by physiological urgency.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleSimulateCameraPPG}
-                    disabled={ppgScanning}
-                    className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-rose-950/50 transition-all disabled:opacity-50"
-                  >
-                    <Fingerprint className={`w-4 h-4 ${ppgScanning ? 'animate-pulse' : ''}`} />
-                    {ppgScanning ? 'Scanning Finger Pulse...' : 'Test Camera PPG Pulse Scan'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Triage Protocol Categories */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left: Triage List & Scanner Feedback */}
-                <div className="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-mono font-bold text-slate-300">
-                      Live Biometric Triage Queue (START Protocol)
-                    </span>
-                    <span className="text-[11px] font-mono text-rose-400">
-                      Sorted by Physiological Risk
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {triagePatients.map(pt => (
-                      <div
-                        key={pt.id}
-                        className={`p-3.5 rounded-xl border transition-all ${
-                          pt.status === 'RED_CRITICAL'
-                            ? 'bg-rose-950/40 border-rose-500/60 shadow-lg shadow-rose-950/40'
-                            : pt.status === 'YELLOW_STABLE'
-                            ? 'bg-amber-950/40 border-amber-500/40'
-                            : 'bg-slate-900 border-slate-800'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-white text-sm">{pt.name}</span>
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
-                                pt.status.includes('RED') ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'
-                              }`}>
-                                {pt.status.replace('_', ' ')}
-                              </span>
-                            </div>
-                            <div className="text-xs text-slate-400 mt-0.5">{pt.location}</div>
-                            <div className="text-xs text-rose-300 font-medium mt-1">⚠️ {pt.condition}</div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2 bg-slate-900/90 p-2 rounded-lg border border-slate-800 text-center font-mono">
-                            <div>
-                              <div className="text-[9px] text-slate-400">HR</div>
-                              <div className="text-xs font-bold text-white">{pt.hr} bpm</div>
-                            </div>
-                            <div>
-                              <div className="text-[9px] text-slate-400">SpO2</div>
-                              <div className={`text-xs font-bold ${pt.spo2 < 85 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                                {pt.spo2}%
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Right: Camera PPG Optical Feedback */}
-                <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-                      <span>Camera Lens Photoplethysmography (PPG)</span>
-                      <span className="text-emerald-400 font-mono">WebHID Ready</span>
-                    </h3>
-
-                    <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 text-center">
-                      <div className="w-16 h-16 rounded-full bg-rose-500/20 border-2 border-rose-500 mx-auto flex items-center justify-center mb-3">
-                        <Heart className={`w-8 h-8 text-rose-500 ${ppgScanning ? 'animate-ping' : ''}`} />
-                      </div>
-
-                      <div className="text-xs text-slate-300 font-bold">
-                        {ppgScanning ? 'Analyzing Capillary Absorption...' : 'Scanned Vital Telemetry'}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3 mt-3 font-mono">
-                        <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                          <div className="text-[10px] text-slate-400">Heart Rate</div>
-                          <div className="text-base font-bold text-white">{scannedHeartRate} bpm</div>
-                        </div>
-                        <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                          <div className="text-[10px] text-slate-400">Oxygen (SpO2)</div>
-                          <div className={`text-base font-bold ${scannedSpo2 < 85 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                            {scannedSpo2}%
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-[11px] text-slate-400 mt-3">
-                      💡 Measures micro-vascular blood volume changes using the device camera LED flash directly through the skin with zero external hardware.
-                    </p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-800">
-                    <button className="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2">
-                      <Zap className="w-4 h-4" /> Elevate Patient to Master Triage Map Top Priority
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================= */}
-        {/* TAB 4: IPFS-BASED DECENTRALIZED DISASTER WEB-MIRRORING     */}
-        {/* ========================================================= */}
-        {activeTab === 'ipfs' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Network className="w-6 h-6 text-violet-400" />
-                    <h2 className="text-xl font-bold text-white">IPFS Decentralized Disaster Web-Mirroring</h2>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Peer-to-peer browser hosting on the InterPlanetary File System. Every citizen who opens the portal seeds it to nearby peers, making the website completely immune to server crashes during mass panic.
-                  </p>
-                </div>
-
-                <button
-                  onClick={handleTriggerPanicSpike}
-                  disabled={simulatedSpike}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-violet-950/50 transition-all disabled:opacity-50"
-                >
-                  <Users className="w-3.5 h-3.5" />
-                  {simulatedSpike ? 'Swarm Expanding...' : 'Simulate 10,000 Panicking Citizens'}
-                </button>
-              </div>
-
-              {/* IPFS Node Swarm Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left: Swarm Stats & CID Registry */}
-                <div className="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-mono font-bold text-slate-300">
-                      Content-Addressed Disaster Assets (IPFS DHT)
-                    </span>
-                    <span className="text-[11px] font-mono text-emerald-400">
-                      Seeding Active ({pinnedSizeMb} MB)
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {ipfsCIDs.map(item => (
-                      <div key={item.cid} className="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
-                        <div className="flex items-center justify-between text-xs font-bold mb-1">
-                          <span className="text-white">{item.name}</span>
-                          <span className="text-emerald-400 font-mono">{item.peersHolding} Seeders</span>
-                        </div>
-                        <div className="font-mono text-[10px] text-violet-400 break-all bg-slate-950 p-2 rounded border border-slate-800 mt-1.5">
-                          {item.cid}
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mt-2">
-                          <span>Size: {item.size}</span>
-                          <span className="text-emerald-400">100% Pinned Locally</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Right: Inverse Load Scaling Metrics */}
-                <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                      Inverse Scaling Telemetry
-                    </h3>
-
-                    <div className="space-y-3 font-mono text-xs">
-                      <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
-                        <span className="text-slate-400">Connected P2P Peers:</span>
-                        <span className="text-lg font-bold text-violet-400">{ipfsPeers}</span>
-                      </div>
-
-                      <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
-                        <span className="text-slate-400">Uptime / Resilience Index:</span>
-                        <span className="text-lg font-bold text-emerald-400">{resilienceScore}%</span>
-                      </div>
-
-                      <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
-                        <span className="text-slate-400">Central Server Dependency:</span>
-                        <span className="text-sm font-bold text-emerald-400">0.0% (Decentralized)</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 p-3 bg-violet-950/40 border border-violet-500/30 rounded-lg text-[11px] text-violet-200">
-                      ⚡ <strong>Inverse Load Scaling:</strong> Traditional central government websites crash under sudden high traffic. On IPFS, each new visitor acts as a seed node, making the network faster and more resilient.
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-800">
-                    <button className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2">
-                      <Share2 className="w-4 h-4" /> Export Offline PWA Mirror Bundle to USB / SD Card
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================= */}
-        {/* TAB 5: SYNTHETIC APERTURE RADAR (SAR) RAW DATA RENDER      */}
-        {/* ========================================================= */}
-        {activeTab === 'sar' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Waves className="w-6 h-6 text-cyan-400" />
-                    <h2 className="text-xl font-bold text-white">Synthetic Aperture Radar (SAR) Raw Data Render Engine</h2>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Client-side WebGL radar engine rendering raw microwave backscatter from Sentinel-1 and NISAR to reveal expanding river floodzones through impenetrable monsoon cloud cover.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-                  <button
-                    onClick={() => setPolarization('VV')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      polarization === 'VV' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    VV Polarization (Water Boundary)
-                  </button>
-                  <button
-                    onClick={() => setPolarization('VH')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      polarization === 'VH' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    VH Polarization (Urban Roughness)
-                  </button>
-                </div>
-              </div>
-
-              {/* WebGL Canvas & Backscatter Sliders */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left: WebGL Radar Backscatter Canvas */}
-                <div className="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-mono font-bold text-slate-300">
-                      Live Microwave Specular Backscatter Scan (Brahmaputra Basin)
-                    </span>
-                    <span className="text-[11px] px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded font-mono border border-cyan-500/30">
-                      100% CLOUD-PIERCING RADAR
-                    </span>
-                  </div>
-
-                  <canvas
-                    ref={sarCanvasRef}
-                    width={560}
-                    height={220}
-                    className="w-full h-56 rounded-lg border border-slate-800 bg-[#060f1e]"
-                  />
-
-                  {/* Embankment Breach Telemetry */}
-                  <div className="grid grid-cols-3 gap-3 mt-4 text-xs font-mono">
-                    <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                      <div className="text-[10px] text-slate-400">Water Backscatter</div>
-                      <div className="text-sm font-bold text-cyan-400 mt-0.5">-22.4 dB (Specular)</div>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                      <div className="text-[10px] text-slate-400">Identified Breaches</div>
-                      <div className="text-sm font-bold text-rose-400 mt-0.5">{breachCount} Active Breaches</div>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                      <div className="text-[10px] text-slate-400">River Surge Level</div>
-                      <div className="text-sm font-bold text-amber-400 mt-0.5">+4.8m Above Danger</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Radar Controls */}
-                <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-                      <Sliders className="w-4 h-4 text-cyan-400" /> Radar Parameter Tuning
-                    </h3>
-
-                    <div className="space-y-4 text-xs">
-                      <div>
-                        <div className="flex justify-between text-slate-300 mb-1">
-                          <span>Water Threshold Cutoff</span>
-                          <span className="font-mono text-cyan-400 font-bold">{radarThresholdDb} dB</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="-30"
-                          max="-10"
-                          value={radarThresholdDb}
-                          onChange={e => setRadarThresholdDb(Number(e.target.value))}
-                          className="w-full accent-cyan-500 cursor-pointer"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-slate-400 block mb-1">Radar Satellite Constellation</label>
-                        <select
-                          value={satelliteSource}
-                          onChange={e => setSatelliteSource(e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white"
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "0.85rem", fontWeight: "800", color: "#ffffff" }}>
+                          {cap.title}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.58rem",
+                            fontWeight: "900",
+                            backgroundColor: badgeBg,
+                            color: badgeColor,
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            letterSpacing: "0.03em",
+                          }}
                         >
-                          <option value="Sentinel-1 C-Band (5.405 GHz)">Sentinel-1 C-Band (5.405 GHz, ESA)</option>
-                          <option value="ISRO-NASA NISAR L-Band (1.25 GHz)">ISRO-NASA NISAR L-Band (1.25 GHz)</option>
-                        </select>
+                          {cap.badge}
+                        </span>
                       </div>
-
-                      <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 text-[11px] text-slate-300">
-                        🛰️ <strong>Why SAR Succeeds When Google Maps Fails:</strong> Optical satellites capture visible light and are rendered 100% blind by heavy monsoon clouds. SAR emits its own microwave pulse that penetrates straight through clouds, rain, and darkness.
-                      </div>
+                      <p style={{ margin: 0, fontSize: "0.72rem", color: "#94a3b8", lineHeight: "1.4" }}>
+                        {cap.desc}
+                      </p>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-800">
-                    <button className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-2">
-                      <Waves className="w-4 h-4" /> Overlay Radar Water Boundaries on Master Evacuation Map
-                    </button>
+          {/* ── 4. OPERATIONAL FLOW (PIPELINE STEPPER) ── */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.8)",
+              border: "1px solid rgba(56, 189, 248, 0.2)",
+              borderRadius: "16px",
+              padding: "16px 20px",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ color: "#38bdf8" }}>⚡</span>
+                <span style={{ fontSize: "0.92rem", fontWeight: "900", color: "#ffffff" }}>
+                  Operational Flow
+                </span>
+                <span style={{ fontSize: "0.7rem", color: "#64748b" }}>
+                  (From Alert to Recovery)
+                </span>
+              </div>
+              <span style={{ fontSize: "0.68rem", color: "#34d399", fontWeight: "700" }}>
+                Phase {activeFlowStep + 1} of 6 Active
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(6, 1fr)",
+                gap: "8px",
+                position: "relative",
+              }}
+            >
+              {flowSteps.map((step, idx) => {
+                const isActive = activeFlowStep === idx;
+                const isPast = activeFlowStep > idx;
+
+                return (
+                  <div
+                    key={step.step}
+                    onClick={() => {
+                      setActiveFlowStep(idx);
+                      playChirpSound(2000 + idx * 300, 0.2);
+                    }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "8px",
+                      borderRadius: "10px",
+                      backgroundColor: isActive ? "rgba(2, 132, 199, 0.22)" : "transparent",
+                      border: isActive ? "1px solid #38bdf8" : "1px solid transparent",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        borderRadius: "50%",
+                        backgroundColor: isActive 
+                          ? "#0284c7" 
+                          : isPast 
+                          ? "rgba(16, 185, 129, 0.2)" 
+                          : "rgba(30, 41, 59, 0.8)",
+                        border: `1.5px solid ${isActive ? "#ffffff" : isPast ? "#10b981" : "#475569"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "1rem",
+                        marginBottom: "6px",
+                        boxShadow: isActive ? "0 0 14px rgba(56, 189, 248, 0.8)" : "none",
+                      }}
+                    >
+                      {step.icon}
+                    </div>
+                    <div style={{ fontSize: "0.78rem", fontWeight: "800", color: isActive ? "#38bdf8" : isPast ? "#34d399" : "#cbd5e1" }}>
+                      {step.step}. {step.name}
+                    </div>
+                    <div style={{ fontSize: "0.62rem", color: "#94a3b8", marginTop: "2px" }}>
+                      {step.sub}
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── 5. BOTTOM GRID: QUICK ACTIONS, DEMO SCENARIO, RECENT ALERTS ── */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.2fr 1fr 1fr",
+              gap: "12px",
+            }}
+          >
+            {/* Quick Actions */}
+            <div
+              style={{
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(56, 189, 248, 0.2)",
+                borderRadius: "16px",
+                padding: "16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <div style={{ fontSize: "0.85rem", fontWeight: "900", color: "#ffffff" }}>
+                Quick Actions
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                <button
+                  onClick={() => setSosModalOpen(true)}
+                  style={{
+                    background: "linear-gradient(135deg, #dc2626, #b91c1c)",
+                    border: "none",
+                    borderRadius: "10px",
+                    color: "#ffffff",
+                    padding: "10px",
+                    fontSize: "0.74rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                    boxShadow: "0 4px 12px rgba(220, 38, 38, 0.3)",
+                  }}
+                >
+                  <AlertTriangle size={16} />
+                  <span>Send SOS</span>
+                  <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>Panic Broadcast</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/evacuation-planner')}
+                  style={{
+                    background: "linear-gradient(135deg, #0284c7, #1d4ed8)",
+                    border: "none",
+                    borderRadius: "10px",
+                    color: "#ffffff",
+                    padding: "10px",
+                    fontSize: "0.74rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                    boxShadow: "0 4px 12px rgba(2, 132, 199, 0.3)",
+                  }}
+                >
+                  <Navigation size={16} />
+                  <span>Evacuation Planner</span>
+                  <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>Find Safe Route</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/incident-report')}
+                  style={{
+                    background: "linear-gradient(135deg, #0d9488, #059669)",
+                    border: "none",
+                    borderRadius: "10px",
+                    color: "#ffffff",
+                    padding: "10px",
+                    fontSize: "0.74rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <Eye size={16} />
+                  <span>Report Disaster</span>
+                  <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>Citizen Ground Intel</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/ai-assistant')}
+                  style={{
+                    background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                    border: "none",
+                    borderRadius: "10px",
+                    color: "#ffffff",
+                    padding: "10px",
+                    fontSize: "0.74rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <Sparkles size={16} />
+                  <span>AI Assistant</span>
+                  <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>Ask Life-Safety</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => navigate('/voice-assistant')}
+                style={{
+                  background: "rgba(30, 41, 59, 0.9)",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  borderRadius: "10px",
+                  color: "#38bdf8",
+                  padding: "8px",
+                  fontSize: "0.74rem",
+                  fontWeight: "800",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                }}
+              >
+                <Volume2 size={14} />
+                <span>Voice Assistant (18+ Dialects)</span>
+              </button>
+            </div>
+
+            {/* Demo Scenario */}
+            <div
+              style={{
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(56, 189, 248, 0.2)",
+                borderRadius: "16px",
+                padding: "14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "0.82rem", fontWeight: "900", color: "#ffffff" }}>
+                  Demo Scenario
+                </span>
+                <span style={{ fontSize: "0.62rem", color: "#34d399", fontWeight: "800" }}>
+                  NH-10 Sector
+                </span>
+              </div>
+
+              {/* Scenic thumbnail */}
+              <div
+                style={{
+                  height: "85px",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  backgroundImage: "url('/images/mountain_corridor.jpg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  position: "relative",
+                }}
+              >
+                <div style={{ position: "absolute", bottom: "4px", left: "6px", backgroundColor: "rgba(0,0,0,0.75)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.6rem", color: "#fff" }}>
+                  Teesta Valley Gorge
                 </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: "0.78rem", fontWeight: "800", color: "#ffffff" }}>
+                  NER Landslide Simulation
+                </div>
+                <div style={{ display: "flex", gap: "6px", fontSize: "0.62rem", color: "#94a3b8", marginTop: "2px" }}>
+                  <span>Rainfall: 110mm</span> · <span>Risk: Critical</span> · <span>180min</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleRunSimulation}
+                disabled={isSimulating}
+                style={{
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#ffffff",
+                  padding: "8px",
+                  fontSize: "0.76rem",
+                  fontWeight: "800",
+                  cursor: isSimulating ? "wait" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  marginTop: "auto",
+                }}
+              >
+                <Play size={13} fill="#fff" />
+                <span>{isSimulating ? `Progress ${simProgress}%` : "Run Simulation"}</span>
+              </button>
+            </div>
+
+            {/* Recent Alerts */}
+            <div
+              style={{
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(56, 189, 248, 0.2)",
+                borderRadius: "16px",
+                padding: "14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "0.82rem", fontWeight: "900", color: "#ffffff" }}>
+                  Recent Alerts
+                </span>
+                <button
+                  onClick={() => navigate('/alerts')}
+                  style={{ background: "none", border: "none", color: "#38bdf8", fontSize: "0.64rem", fontWeight: "700", cursor: "pointer" }}
+                >
+                  View All ↗
+                </button>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {recentAlerts.map((alert, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "4px 6px",
+                      borderRadius: "6px",
+                      backgroundColor: "rgba(255,255,255,0.03)",
+                      fontSize: "0.68rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: alert.dot }} />
+                      <span style={{ color: "#cbd5e1", fontWeight: "700" }}>{alert.title}</span>
+                    </div>
+                    <span style={{ color: "#64748b", fontFamily: "monospace" }}>{alert.time}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* ════════════════════ RIGHT COLUMN (OPERATIONAL RAIL) ════════════════════ */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+
+          {/* ── 1. WEATHER WIDGET ── */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              border: "1px solid rgba(56, 189, 248, 0.25)",
+              borderRadius: "16px",
+              padding: "14px 16px",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <CloudRain size={26} color="#38bdf8" />
+                <div>
+                  <div style={{ fontSize: "1.4rem", fontWeight: "900", color: "#ffffff", lineHeight: 1 }}>
+                    27°C
+                  </div>
+                  <div style={{ fontSize: "0.68rem", color: "#94a3b8" }}>
+                    Heavy Rain (112 mm)
+                  </div>
+                </div>
+              </div>
+              <span style={{ fontSize: "0.65rem", color: "#38bdf8", fontWeight: "700" }}>
+                7-day History
+              </span>
+            </div>
+            <div style={{ fontSize: "0.64rem", color: "#64748b" }}>
+              📍 Sikkim Teesta Basin · Soil Moisture: 91% (CRITICAL)
+            </div>
+          </div>
+
+          {/* ── 2. ACTIVE ZONE RISK CARD (NH-10) ── */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              border: "1px solid rgba(239, 68, 68, 0.35)",
+              borderRadius: "16px",
+              padding: "14px 16px",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ color: "#ef4444" }}>⚠️</span>
+                <span style={{ fontSize: "0.78rem", fontWeight: "900", color: "#ffffff" }}>
+                  LANDSLIDE RISK (NH-10)
+                </span>
+              </div>
+              <span style={{ backgroundColor: "#ef4444", color: "#ffffff", fontSize: "0.58rem", fontWeight: "900", padding: "2px 6px", borderRadius: "4px" }}>
+                CRITICAL
+              </span>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <span style={{ fontSize: "0.72rem", color: "#cbd5e1", fontWeight: "700" }}>Risk Score:</span>
+              <span style={{ fontSize: "0.92rem", fontWeight: "900", color: "#ef4444" }}>87%</span>
+            </div>
+
+            <div style={{ width: "100%", height: "7px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "999px", overflow: "hidden", marginBottom: "6px" }}>
+              <div style={{ width: "87%", height: "100%", backgroundColor: "#ef4444", boxShadow: "0 0 10px #ef4444" }} />
+            </div>
+
+            <div style={{ fontSize: "0.62rem", color: "#94a3b8" }}>
+              🕒 Updated {currentTime.slice(0, 5)} · Slope: 48° · FoS: 0.91
+            </div>
+          </div>
+
+          {/* ── 3. SYSTEM HEALTH STATUS ── */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              border: "1px solid rgba(56, 189, 248, 0.2)",
+              borderRadius: "16px",
+              padding: "14px 16px",
+            }}
+          >
+            <div style={{ fontSize: "0.82rem", fontWeight: "900", color: "#ffffff", marginBottom: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
+              <Shield size={14} color="#34d399" />
+              <span>System Health</span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "0.7rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#94a3b8" }}>API Services</span>
+                <span style={{ color: "#34d399", fontWeight: "800" }}>● Online</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#94a3b8" }}>Database</span>
+                <span style={{ color: "#34d399", fontWeight: "800" }}>● Online</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#94a3b8" }}>Socket.IO</span>
+                <span style={{ color: "#34d399", fontWeight: "800" }}>● Online</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#94a3b8" }}>Satellite Feed</span>
+                <span style={{ color: "#34d399", fontWeight: "800" }}>● Online</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#94a3b8" }}>Sensor Network</span>
+                <span style={{ color: "#34d399", fontWeight: "800" }}>114/116 Online</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── 4. ACTIVE INCIDENTS ACCORDION ── */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              border: "1px solid rgba(56, 189, 248, 0.2)",
+              borderRadius: "16px",
+              padding: "14px 16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+              <div style={{ fontSize: "0.82rem", fontWeight: "900", color: "#ffffff" }}>
+                Active Incidents
+              </div>
+              <span style={{ fontSize: "0.64rem", color: "#38bdf8", fontWeight: "700", cursor: "pointer" }} onClick={() => navigate('/alerts')}>
+                View All ↗
+              </span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {activeIncidents.map((inc) => (
+                <div
+                  key={inc.id}
+                  style={{
+                    backgroundColor: "rgba(30, 41, 59, 0.6)",
+                    border: `1px solid ${inc.badgeColor}44`,
+                    borderRadius: "10px",
+                    padding: "8px 10px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setLiveMapModalOpen(true)}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: inc.badgeColor }} />
+                      <span style={{ fontSize: "0.76rem", fontWeight: "800", color: "#ffffff" }}>{inc.title}</span>
+                    </div>
+                    <span style={{ fontSize: "0.58rem", fontWeight: "900", color: inc.badgeColor, backgroundColor: `${inc.badgeColor}22`, padding: "1px 5px", borderRadius: "4px" }}>
+                      {inc.severity}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: "0.64rem", color: "#94a3b8", marginTop: "2px" }}>
+                    {inc.location}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.62rem", color: "#cbd5e1", marginTop: "4px" }}>
+                    <span>👥 {inc.exposed}</span>
+                    <span style={{ color: "#38bdf8", fontWeight: "800" }}>ETA: {inc.eta}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── 5. INCIDENT TIMELINE ── */}
+          <div
+            style={{
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              border: "1px solid rgba(56, 189, 248, 0.2)",
+              borderRadius: "16px",
+              padding: "14px 16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+              <div style={{ fontSize: "0.82rem", fontWeight: "900", color: "#ffffff" }}>
+                Incident Timeline
+              </div>
+              <span style={{ fontSize: "0.64rem", color: "#64748b" }}>
+                Live Stream
+              </span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", position: "relative", paddingLeft: "10px" }}>
+              {/* Vertical timeline line */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: "14px",
+                  top: "6px",
+                  bottom: "6px",
+                  width: "2px",
+                  backgroundColor: "rgba(56, 189, 248, 0.2)",
+                }}
+              />
+
+              {timelineEvents.map((evt, idx) => (
+                <div key={idx} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.68rem", zIndex: 2 }}>
+                  <span
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: evt.color,
+                      boxShadow: `0 0 6px ${evt.color}`,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span style={{ color: "#64748b", fontFamily: "monospace", width: "35px" }}>
+                    {evt.time}
+                  </span>
+                  <span style={{ color: "#cbd5e1", fontWeight: "600" }}>
+                    {evt.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── 6. EMERGENCY MODE CARD ── */}
+          <div
+            style={{
+              backgroundColor: emergencyMode ? "rgba(225, 29, 72, 0.3)" : "rgba(15, 23, 42, 0.85)",
+              border: emergencyMode ? "1.5px solid #ef4444" : "1px solid rgba(225, 29, 72, 0.3)",
+              borderRadius: "16px",
+              padding: "16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              boxShadow: emergencyMode ? "0 0 20px rgba(225, 29, 72, 0.4)" : "none",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Zap size={18} color="#ef4444" fill={emergencyMode ? "#ef4444" : "none"} />
+              <span style={{ fontSize: "0.85rem", fontWeight: "900", color: "#ffffff" }}>
+                Emergency Mode
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: "0.68rem", color: "#94a3b8", lineHeight: "1.4" }}>
+              Simplified high-contrast view for critical situations.
+            </p>
+
+            <button
+              onClick={handleToggleEmergencyMode}
+              style={{
+                background: emergencyMode ? "linear-gradient(135deg, #10b981, #059669)" : "linear-gradient(135deg, #e11d48, #be123c)",
+                border: "none",
+                borderRadius: "10px",
+                color: "#ffffff",
+                padding: "10px",
+                fontSize: "0.78rem",
+                fontWeight: "900",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                boxShadow: emergencyMode ? "0 4px 15px rgba(16, 185, 129, 0.4)" : "0 4px 15px rgba(225, 29, 72, 0.4)",
+              }}
+            >
+              <Siren size={15} />
+              <span>{emergencyMode ? "Deactivate Emergency Mode" : "Activate Emergency Mode"}</span>
+            </button>
+          </div>
+
+          {/* Quick Access Footer */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 14px",
+              borderRadius: "12px",
+              backgroundColor: "rgba(15, 23, 42, 0.6)",
+              fontSize: "0.68rem",
+              color: "#64748b",
+            }}
+          >
+            <span style={{ cursor: "pointer", color: "#38bdf8" }} onClick={() => navigate('/map')}>Maps</span>
+            <span style={{ cursor: "pointer", color: "#ef4444" }} onClick={() => setSosModalOpen(true)}>SOS</span>
+            <span style={{ cursor: "pointer", color: "#f59e0b" }} onClick={() => navigate('/alerts')}>Alerts</span>
+            <span style={{ cursor: "pointer" }} onClick={() => setLiveMapModalOpen(true)}>More ▾</span>
+          </div>
+        </div>
       </div>
+
+      {/* ════════════════════ MODALS & WORKING FUNCTIONAL SUITES ════════════════════ */}
+
+      {/* ── MODAL 1: LIVE SAR RADAR & MAP INTERFACING ── */}
+      {liveMapModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(10px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => setLiveMapModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#0b162a",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              borderRadius: "20px",
+              width: "100%",
+              maxWidth: "920px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "24px",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Waves size={24} color="#38bdf8" />
+                <div>
+                  <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: "900", color: "#fff" }}>
+                    Synthetic Aperture Radar (SAR) Interferometry & Live GIS Map
+                  </h2>
+                  <div style={{ fontSize: "0.74rem", color: "#94a3b8" }}>
+                    Sentinel-1 C-Band Phase Coherence · Cloud-Piercing Landslide Radar
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setLiveMapModalOpen(false)}
+                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Radar Viewport */}
+            <div
+              style={{
+                position: "relative",
+                height: "360px",
+                borderRadius: "14px",
+                overflow: "hidden",
+                border: "1px solid rgba(56, 189, 248, 0.3)",
+                backgroundImage: "url('/images/mountain_corridor.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                marginBottom: "16px",
+              }}
+            >
+              {/* Radar grid and concentric rings */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage: "radial-gradient(circle at center, transparent 0%, rgba(6,16,28,0.75) 100%)",
+                }}
+              />
+
+              {/* 360 Sweep */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  width: "320px",
+                  height: "320px",
+                  marginLeft: "-160px",
+                  marginTop: "-160px",
+                  borderRadius: "50%",
+                  border: "1px dashed rgba(56, 189, 248, 0.4)",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "50%",
+                    background: "conic-gradient(from 0deg, rgba(56, 189, 248, 0.5) 0deg, rgba(56, 189, 248, 0) 60deg)",
+                    animation: "rotateRadar 3s linear infinite",
+                  }}
+                />
+              </div>
+
+              {/* Telemetry Readout */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "12px",
+                  left: "14px",
+                  backgroundColor: "rgba(11, 22, 42, 0.9)",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  fontSize: "0.72rem",
+                }}
+              >
+                <div>📍 GPS: 28.0642° N, 95.3318° E (NH-10 Corridor)</div>
+                <div>📡 Coherence γ: <strong style={{ color: "#38bdf8" }}>{sarCoherence}</strong> · Bperp: {sarBaselineBperp}m</div>
+                <div>⚡ Surface Phase Shift: <strong style={{ color: "#ef4444" }}>-4.2 cm Displacement</strong></div>
+              </div>
+            </div>
+
+            {/* Radar Controls */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  onClick={handleProcessSar}
+                  disabled={isProcessingSar}
+                  style={{
+                    background: "linear-gradient(135deg, #0284c7, #2563eb)",
+                    border: "none",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    padding: "8px 16px",
+                    fontSize: "0.78rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                  }}
+                >
+                  {isProcessingSar ? "Computing InSAR Interferogram..." : "Run Sentinel-1 Pass Analysis"}
+                </button>
+                <button
+                  onClick={() => navigate('/map')}
+                  style={{
+                    background: "rgba(30, 41, 59, 0.8)",
+                    border: "1px solid rgba(56, 189, 248, 0.3)",
+                    borderRadius: "8px",
+                    color: "#38bdf8",
+                    padding: "8px 16px",
+                    fontSize: "0.78rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                  }}
+                >
+                  Open Full GIS Map ↗
+                </button>
+              </div>
+
+              <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
+                Synthetic Aperture Radar · Sentinel-1 C-Band Radar Pass Active
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL 2: WORKING CAPABILITY MODAL (ULTRASONIC / QUANTUM / CSI) ── */}
+      {activeCapabilityModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(10px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => setActiveCapabilityModal(null)}
+        >
+          <div
+            style={{
+              backgroundColor: "#0b162a",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              borderRadius: "20px",
+              width: "100%",
+              maxWidth: "880px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "24px",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                {activeCapabilityModal === 'ultrasonic' && <Volume2 size={24} color="#10b981" />}
+                {activeCapabilityModal === 'quantum' && <Cpu size={24} color="#a855f7" />}
+                {activeCapabilityModal === 'csi' && <Radio size={24} color="#f59e0b" />}
+
+                <div>
+                  <h2 style={{ margin: 0, fontSize: "1.15rem", fontWeight: "900", color: "#fff" }}>
+                    {activeCapabilityModal === 'ultrasonic' && "Ultrasonic 'Chirp' Multi-Hop Sound-Wave Mesh"}
+                    {activeCapabilityModal === 'quantum' && "Quantum-Inspired Optimization Engine"}
+                    {activeCapabilityModal === 'csi' && "RF / WiFi CSI Breathing & Doppler Survivor Detector"}
+                  </h2>
+                  <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
+                    {activeCapabilityModal === 'ultrasonic' && "Zero-Internet Autonomous Acoustic Relay across Mountain Valleys"}
+                    {activeCapabilityModal === 'quantum' && "Simulated Annealing Evacuation & Resource Allocation"}
+                    {activeCapabilityModal === 'csi' && "Sub-wall human breathing detection without cameras"}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveCapabilityModal(null)}
+                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* TAB 1: ULTRASONIC MODAL CONTENT */}
+            {activeCapabilityModal === 'ultrasonic' && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "rgba(15,23,42,0.7)", padding: "12px", borderRadius: "10px" }}>
+                  <div style={{ fontSize: "0.78rem", color: "#cbd5e1" }}>
+                    Sound Wave Carrier: <strong>{audioMode === 'ultrasonic' ? '19.2 kHz (Silent Ultrasonic)' : '2.4 kHz (Audible Diagnostic)'}</strong>
+                  </div>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      onClick={() => setAudioMode('ultrasonic')}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: "6px",
+                        border: "none",
+                        backgroundColor: audioMode === 'ultrasonic' ? '#10b981' : '#1e293b',
+                        color: audioMode === 'ultrasonic' ? '#061019' : '#94a3b8',
+                        fontWeight: "800",
+                        fontSize: "0.7rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      19.2 kHz Silent
+                    </button>
+                    <button
+                      onClick={() => setAudioMode('diagnostic')}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: "6px",
+                        border: "none",
+                        backgroundColor: audioMode === 'diagnostic' ? '#0284c7' : '#1e293b',
+                        color: audioMode === 'diagnostic' ? '#061019' : '#94a3b8',
+                        fontWeight: "800",
+                        fontSize: "0.7rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      2.4 kHz Audible
+                    </button>
+                  </div>
+                </div>
+
+                {/* Nodes list */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {hopNodes.map((n, i) => (
+                    <div
+                      key={n.id}
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "10px",
+                        backgroundColor: activeHop === i ? "rgba(16, 185, 129, 0.2)" : "rgba(30, 41, 59, 0.5)",
+                        border: activeHop === i ? "1px solid #10b981" : "1px solid rgba(255,255,255,0.06)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontSize: "0.74rem",
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: "800", color: activeHop === i ? "#34d399" : "#ffffff" }}>
+                          Hop #{i}: {n.role}
+                        </div>
+                        <div style={{ color: "#94a3b8", fontSize: "0.66rem" }}>
+                          {n.device} · {n.location}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <span style={{ color: activeHop === i ? "#34d399" : "#64748b", fontWeight: "800" }}>
+                          {n.status}
+                        </span>
+                        <div style={{ fontSize: "0.64rem", color: "#94a3b8" }}>
+                          SNR: {n.snrDb}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <button
+                    onClick={handleStartHopRelay}
+                    disabled={isRelaying}
+                    style={{
+                      background: "linear-gradient(135deg, #10b981, #059669)",
+                      border: "none",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      padding: "10px 20px",
+                      fontSize: "0.8rem",
+                      fontWeight: "800",
+                      cursor: isRelaying ? "wait" : "pointer",
+                    }}
+                  >
+                    {isRelaying ? `Transmitting Hop #${activeHop}...` : "Emit Ultrasonic SOS Audio Chirp"}
+                  </button>
+                  <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
+                    Physical Audio Multi-Hop · Zero GSM required
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: QUANTUM OPTIMIZATION CONTENT */}
+            {activeCapabilityModal === 'quantum' && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#94a3b8" }}>
+                  Solves NP-hard emergency resource distribution and dynamic multi-corridor evacuation bottlenecks using Quantum-Inspired Annealing algorithms.
+                </p>
+                <div style={{ backgroundColor: "rgba(15,23,42,0.8)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: "10px", padding: "14px" }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: "800", color: "#c084fc", marginBottom: "8px" }}>
+                    Live Simulated Annealing Results:
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "0.72rem" }}>
+                    <div>Route Clearance Efficiency: <strong style={{ color: "#34d399" }}>+38.4% faster</strong></div>
+                    <div>Bottleneck Reduction: <strong style={{ color: "#38bdf8" }}>-54% congestion</strong></div>
+                    <div>Ambulance Dispatch Latency: <strong style={{ color: "#c084fc" }}>04.2 min avg</strong></div>
+                    <div>Convergence Iterations: <strong>1,024 spins / 12ms</strong></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: CSI SURVIVOR DETECTION CONTENT */}
+            {activeCapabilityModal === 'csi' && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#94a3b8" }}>
+                  Analyzes Wi-Fi Channel State Information (CSI) multipath attenuation and Doppler phase shifts to detect chest cavity breathing of survivors buried under rubble.
+                </p>
+                <div style={{ backgroundColor: "rgba(15,23,42,0.8)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "10px", padding: "14px" }}>
+                  <div style={{ fontSize: "0.8rem", fontWeight: "800", color: "#fbbf24", marginBottom: "8px" }}>
+                    CSI Breathing Telemetry:
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "0.72rem" }}>
+                    <div>Subcarrier Frequency: <strong>5.18 GHz (Wi-Fi 6)</strong></div>
+                    <div>Respiration Rate: <strong style={{ color: "#34d399" }}>16 breaths/min (Human Detected)</strong></div>
+                    <div>Estimated Depth: <strong style={{ color: "#38bdf8" }}>2.4m under reinforced concrete</strong></div>
+                    <div>Confidence Metric: <strong style={{ color: "#fbbf24" }}>96.8% Biological Signal</strong></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL 3: EMERGENCY SOS DISPATCH MODAL ── */}
+      {sosModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(10px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => setSosModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#19080b",
+              border: "2px solid #ef4444",
+              borderRadius: "20px",
+              width: "100%",
+              maxWidth: "500px",
+              padding: "24px",
+              boxShadow: "0 20px 50px rgba(239, 68, 68, 0.5)",
+              textAlign: "center",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: "rgba(239, 68, 68, 0.2)", border: "2px solid #ef4444", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px auto" }}>
+              <AlertTriangle size={32} color="#ef4444" />
+            </div>
+
+            <h2 style={{ margin: "0 0 6px 0", fontSize: "1.3rem", fontWeight: "900", color: "#fff" }}>
+              EMERGENCY SOS BROADCAST
+            </h2>
+            <p style={{ margin: "0 0 16px 0", fontSize: "0.8rem", color: "#fca5a5" }}>
+              Instant distress beacon with live GPS coordinates, medical profile, and nearest NDRF responder dispatch.
+            </p>
+
+            <div style={{ backgroundColor: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "12px", marginBottom: "18px", textAlign: "left", fontSize: "0.74rem" }}>
+              <div>📍 <strong>Live GPS:</strong> 28.0642° N, 95.3318° E</div>
+              <div>🚨 <strong>Status:</strong> Immediate Distress Broadcast Active</div>
+              <div>📞 <strong>National Dispatch:</strong> 112 / 108 Emergency Lines Connected</div>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => {
+                  playEmergencyAlertSound();
+                  alert("SOS Distress Signal Sent! NDRF and SDRF teams have received your coordinates.");
+                  setSosModalOpen(false);
+                }}
+                style={{
+                  flex: 1,
+                  background: "linear-gradient(135deg, #ef4444, #b91c1c)",
+                  border: "none",
+                  borderRadius: "10px",
+                  color: "#fff",
+                  padding: "12px",
+                  fontSize: "0.85rem",
+                  fontWeight: "900",
+                  cursor: "pointer",
+                }}
+              >
+                Confirm SOS Broadcast
+              </button>
+              <button
+                onClick={() => setSosModalOpen(false)}
+                style={{
+                  padding: "12px 18px",
+                  background: "rgba(255,255,255,0.1)",
+                  border: "none",
+                  borderRadius: "10px",
+                  color: "#fff",
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CSS KEYFRAME ANIMATIONS ── */}
+      <style>{`
+        @keyframes rotateRadar {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes pulseWarning {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.06); opacity: 0.9; }
+        }
+        @keyframes pulseEmergency {
+          0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+          50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.7); }
+        }
+      `}</style>
     </div>
   );
 }
