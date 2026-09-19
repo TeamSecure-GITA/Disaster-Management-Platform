@@ -1766,473 +1766,565 @@ export default function Map() {
         </div>
       )}
 
-      {/* ── Map Container ── */}
+      {/* ── 2-Column Responsive Layout: Map on the LEFT, Scrollable Telemetry Bar on the RIGHT ── */}
       <div
         style={{
-          position: "relative",
-          borderRadius: "16px",
-          overflow: "hidden",
-          border: "1px solid #334155",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1.8fr) minmax(360px, 1.2fr)",
+          gap: "18px",
+          alignItems: "stretch",
           marginBottom: "20px",
         }}
       >
-        <MapContainer
-          center={mapCenter}
-          zoom={mapZoom}
-          scrollWheelZoom={true}
-          style={{ height: "620px", width: "100%" }}
+        {/* ── LEFT FRAME: RESPONSE MAP ── */}
+        <div
+          style={{
+            position: "relative",
+            borderRadius: "16px",
+            overflow: "hidden",
+            border: "1px solid #334155",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+            height: "720px",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          <MapController center={mapCenter} zoom={mapZoom} />
+          <MapContainer
+            center={mapCenter}
+            zoom={mapZoom}
+            scrollWheelZoom={true}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <MapController center={mapCenter} zoom={mapZoom} />
 
-          {/* BASE TILE LAYERS */}
-          {baseLayer === "satellite" && (
-            <TileLayer
-              attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              maxZoom={19}
-            />
-          )}
+            {/* BASE TILE LAYERS */}
+            {baseLayer === "satellite" && (
+              <TileLayer
+                attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                maxZoom={19}
+              />
+            )}
 
-          {baseLayer === "streets" && (
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maxZoom={19}
-            />
-          )}
+            {baseLayer === "streets" && (
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+              />
+            )}
 
-          {/* User Location / Family Member Location Marker */}
-          {userLocation && (
-            <>
-              <Marker
-                position={userLocation}
-                icon={createCustomIcon(evacBannerInfo ? "#ef4444" : "#10b981", evacBannerInfo ? "⚠️" : "👤")}
-              >
-                <Popup>
-                  <div style={{ color: "#0f172a", textAlign: "center" }}>
-                    <strong>{evacBannerInfo ? `⚠️ ${evacBannerInfo.memberName} (UNSAFE)` : "📍 Your Current Location"}</strong>
-                    <div style={{ fontSize: "0.8rem", color: evacBannerInfo ? "#dc2626" : "#64748b", fontWeight: evacBannerInfo ? "bold" : "normal" }}>
-                      {evacBannerInfo ? `Danger Zone: ${evacBannerInfo.hazard}` : `GPS: ${userLocation[0].toFixed(4)}, ${userLocation[1].toFixed(4)}`}
+            {/* User Location / Family Member Location Marker */}
+            {userLocation && (
+              <>
+                <Marker
+                  position={userLocation}
+                  icon={createCustomIcon(evacBannerInfo ? "#ef4444" : "#10b981", evacBannerInfo ? "⚠️" : "👤")}
+                >
+                  <Popup>
+                    <div style={{ color: "#0f172a", textAlign: "center" }}>
+                      <strong>{evacBannerInfo ? `⚠️ ${evacBannerInfo.memberName} (UNSAFE)` : "📍 Your Current Location"}</strong>
+                      <div style={{ fontSize: "0.8rem", color: evacBannerInfo ? "#dc2626" : "#64748b", fontWeight: evacBannerInfo ? "bold" : "normal" }}>
+                        {evacBannerInfo ? `Danger Zone: ${evacBannerInfo.hazard}` : `GPS: ${userLocation[0].toFixed(4)}, ${userLocation[1].toFixed(4)}`}
+                      </div>
                     </div>
+                  </Popup>
+                </Marker>
+                <Circle
+                  center={userLocation}
+                  radius={evacBannerInfo ? 1500 : 2500}
+                  pathOptions={{
+                    color: evacBannerInfo ? "#ef4444" : "#10b981",
+                    fillColor: evacBannerInfo ? "#ef4444" : "#10b981",
+                    fillOpacity: evacBannerInfo ? 0.25 : 0.12,
+                  }}
+                />
+              </>
+            )}
+
+            {/* IN-APP EVACUATION ROUTE LINE (NO REDIRECT TO GOOGLE MAPS) */}
+            {userLocation && activeRouteTarget && (
+              <>
+                <Polyline
+                  positions={[
+                    userLocation,
+                    [activeRouteTarget.lat, activeRouteTarget.lng],
+                  ]}
+                  pathOptions={{
+                    color: evacBannerInfo ? "#22c55e" : "#38bdf8",
+                    weight: evacBannerInfo ? 5 : 4,
+                    dashArray: evacBannerInfo ? "8, 6" : "10, 10",
+                  }}
+                />
+              </>
+            )}
+
+            {/* SATELLITE WEATHER DETECTION RISK ZONES (Circles + Badges with colors & %) */}
+            {filteredRiskZones.map((zone) => (
+              <React.Fragment key={zone.id}>
+                {/* Highlight Area Circle */}
+                <Circle
+                  center={[zone.lat, zone.lng]}
+                  radius={zone.radius}
+                  pathOptions={{
+                    color: zone.color,
+                    fillColor: zone.color,
+                    fillOpacity: zone.riskPercent > 80 ? 0.45 : 0.32,
+                    weight: zone.riskPercent > 80 ? 3 : 2,
+                  }}
+                />
+
+                {/* Marker Badge with Risk % */}
+                <Marker
+                  position={[zone.lat, zone.lng]}
+                  icon={createRiskBadgeIcon(zone.riskPercent, zone.color)}
+                >
+                  <Popup>
+                    <div style={{ color: "#0f172a", maxWidth: "300px", padding: "2px", lineHeight: "1.4" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <span style={{ fontSize: "0.8rem", fontWeight: "800", color: zone.color, textTransform: "uppercase" }}>
+                          {zone.categoryLabel}
+                        </span>
+                        <span
+                          style={{
+                            backgroundColor: zone.color,
+                            color: "#fff",
+                            fontSize: "0.72rem",
+                            fontWeight: "800",
+                            padding: "2px 7px",
+                            borderRadius: "10px",
+                          }}
+                        >
+                          {zone.riskPercent}% Risk
+                        </span>
+                      </div>
+
+                      <strong style={{ fontSize: "0.95rem", color: "#0f172a", display: "block", marginBottom: "4px" }}>
+                        {zone.name}
+                      </strong>
+
+                      <p style={{ fontSize: "0.78rem", color: "#475569", margin: "4px 0 8px 0" }}>
+                        {zone.advisory}
+                      </p>
+
+                      {/* Sensor Telemetry Box */}
+                      <div
+                        style={{
+                          backgroundColor: "#f1f5f9",
+                          padding: "8px",
+                          borderRadius: "8px",
+                          fontSize: "0.75rem",
+                          color: "#334155",
+                          marginBottom: "10px",
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "4px",
+                        }}
+                      >
+                        {Object.entries(zone.weather).map(([k, v]) => (
+                          <div key={k}>
+                            <span style={{ textTransform: "capitalize", color: "#64748b" }}>{k}: </span>
+                            <strong>{v}</strong>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", padding: "6px 8px", borderRadius: "6px", fontSize: "0.75rem", color: "#b91c1c", marginBottom: "10px" }}>
+                        <strong>🚨 Action:</strong> {zone.action}
+                      </div>
+
+                      {/* IN-APP ROUTING ACTION */}
+                      <button
+                        type="button"
+                        onClick={() => handleStartInAppNavigation(zone)}
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          backgroundColor: "#2563eb",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontWeight: "700",
+                          fontSize: "0.8rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        📍 Navigate to Safe Perimeter Inside App
+                      </button>
+                    </div>
+                  </Popup>
+                </Marker>
+              </React.Fragment>
+            ))}
+
+            {/* EMERGENCY FACILITIES MARKERS */}
+            {filteredFacilities.map((facility) => {
+              const facIcon =
+                facility.type === "hospital"
+                  ? hospitalIcon
+                  : facility.type === "shelter"
+                  ? shelterIcon
+                  : facility.type === "office"
+                  ? officeIcon
+                  : fireIcon;
+
+              return (
+                <Marker
+                  key={facility.id}
+                  position={[facility.lat, facility.lng]}
+                  icon={facIcon}
+                >
+                  <Popup>
+                    <div style={{ color: "#0f172a", maxWidth: "290px", padding: "2px", lineHeight: "1.4" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "1.1rem" }}>
+                          {facility.type === "hospital" ? "🏥" : facility.type === "shelter" ? "⛺" : facility.type === "office" ? "🏛️" : "🚒"}
+                        </span>
+                        <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{facility.name}</strong>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", fontSize: "0.75rem", marginBottom: "4px" }}>
+                        <span style={{ color: "#1d4ed8", fontWeight: "700" }}>{facility.category}</span>
+                        <span>•</span>
+                        <span style={{ color: "#16a34a", fontWeight: "600" }}>{facility.status}</span>
+                        {facility.region === "ner" && (
+                          <span style={{ backgroundColor: "#065f46", color: "#a7f3d0", fontSize: "0.68rem", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                            NER • {facility.state || "North East"}
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={{ fontSize: "0.78rem", color: "#475569", marginBottom: "4px" }}>
+                        📍 {facility.address}
+                      </div>
+
+                      <div style={{ fontSize: "0.78rem", color: "#334155", marginBottom: "6px" }}>
+                        👥 <strong>Capacity:</strong> {facility.capacity}
+                      </div>
+
+                      <div style={{ fontSize: "0.8rem", color: "#b91c1c", fontWeight: "700", marginBottom: "10px" }}>
+                        📞 <strong>Helpline:</strong>{" "}
+                        <a href={`tel:${facility.emergencyPhone.replace(/[^0-9]/g, "")}`} style={{ color: "#dc2626", textDecoration: "underline" }}>
+                          {facility.emergencyPhone}
+                        </a>
+                      </div>
+
+                      {/* IN-APP NAVIGATION (PRIMARY - NO EXTERNAL REDIRECT) */}
+                      <button
+                        type="button"
+                        onClick={() => handleStartInAppNavigation(facility)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 10px",
+                          backgroundColor: "#16a34a",
+                          color: "#ffffff",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontSize: "0.82rem",
+                          fontWeight: "700",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          marginBottom: "6px",
+                        }}
+                      >
+                        <Navigation size={14} /> Navigate on Live Disaster Map (In-App)
+                      </button>
+
+                      {/* Only if online, provide external google maps as secondary optional link */}
+                      {isOnline ? (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${facility.lat},${facility.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: "block",
+                            textAlign: "center",
+                            fontSize: "0.72rem",
+                            color: "#64748b",
+                            textDecoration: "underline",
+                            padding: "2px",
+                          }}
+                        >
+                          External Google Maps Link (Online Optional)
+                        </a>
+                      ) : (
+                        <div style={{ fontSize: "0.7rem", color: "#94a3b8", textAlign: "center", fontStyle: "italic" }}>
+                          Offline PWA Mode: In-app routing active
+                        </div>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </MapContainer>
+
+          {/* ── FLOATING IN-MAP ROUTE HUD (WHEN A DESTINATION IS SELECTED) ── */}
+          {activeRouteTarget && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "20px",
+                left: "20px",
+                zIndex: 1000,
+                backgroundColor: "rgba(15, 23, 42, 0.94)",
+                border: "1.5px solid #38bdf8",
+                borderRadius: "14px",
+                padding: "16px 20px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+                color: "#fff",
+                maxWidth: "340px",
+                backdropFilter: "blur(8px)",
+                animation: "slideIn 0.2s ease-out",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Navigation size={18} color="#38bdf8" />
+                  <strong style={{ fontSize: "0.95rem", color: "#f8fafc" }}>
+                    In-App Disaster Route HUD
+                  </strong>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveRouteTarget(null)}
+                  style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", padding: "2px" }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div style={{ fontSize: "0.85rem", color: "#38bdf8", fontWeight: "700", marginBottom: "4px" }}>
+                🎯 {activeRouteTarget.name}
+              </div>
+
+              {userLocation ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px", fontSize: "0.82rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: "#cbd5e1" }}>
+                    <span>Direct GPS Distance:</span>
+                    <strong style={{ color: "#34d399", fontSize: "0.92rem" }}>{routeDistance} km</strong>
                   </div>
-                </Popup>
-              </Marker>
-              <Circle
-                center={userLocation}
-                radius={evacBannerInfo ? 1500 : 2500}
-                pathOptions={{
-                  color: evacBannerInfo ? "#ef4444" : "#10b981",
-                  fillColor: evacBannerInfo ? "#ef4444" : "#10b981",
-                  fillOpacity: evacBannerInfo ? 0.25 : 0.12,
-                }}
-              />
-            </>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: "#cbd5e1" }}>
+                    <span>Compass Bearing:</span>
+                    <strong>{routeBearing} Heading</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: "#cbd5e1" }}>
+                    <span>Est. Evacuation Transit:</span>
+                    <strong>~{estimatedDriveMin} min drive / ~{estimatedWalkMin} min walk</strong>
+                  </div>
+                  <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "4px", backgroundColor: "#1e293b", padding: "6px 8px", borderRadius: "6px" }}>
+                    ℹ️ Dashed cyan line on the map indicates direct bearing to destination. No external redirect required.
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: "0.8rem", color: "#fca5a5", marginTop: "8px" }}>
+                  GPS position pending. Click "Locate My GPS" at top right to calculate distance and bearing.
+                </div>
+              )}
+            </div>
           )}
 
-          {/* IN-APP EVACUATION ROUTE LINE (NO REDIRECT TO GOOGLE MAPS) */}
-          {userLocation && activeRouteTarget && (
-            <>
-              <Polyline
-                positions={[
-                  userLocation,
-                  [activeRouteTarget.lat, activeRouteTarget.lng],
-                ]}
-                pathOptions={{
-                  color: evacBannerInfo ? "#22c55e" : "#38bdf8",
-                  weight: evacBannerInfo ? 5 : 4,
-                  dashArray: evacBannerInfo ? "8, 6" : "10, 10",
-                }}
-              />
-            </>
-          )}
+          {/* ── GOOGLE WEATHER MAP STYLE COLOR SCALE LEGEND ── */}
+          <div
+            style={{
+              position: "absolute",
+              top: "16px",
+              right: "16px",
+              zIndex: 1000,
+              backgroundColor: "rgba(15, 23, 42, 0.9)",
+              border: "1px solid #334155",
+              borderRadius: "12px",
+              padding: "12px 14px",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
+              backdropFilter: "blur(6px)",
+              fontSize: "0.75rem",
+              maxWidth: "200px",
+            }}
+          >
+            <div style={{ fontWeight: "800", color: "#f1f5f9", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+              <CloudRain size={14} color="#38bdf8" /> Weather Risk Scale
+            </div>
 
-          {/* SATELLITE WEATHER DETECTION RISK ZONES (Circles + Badges with colors & %) */}
-          {filteredRiskZones.map((zone) => (
-            <React.Fragment key={zone.id}>
-              {/* Highlight Area Circle */}
-              <Circle
-                center={[zone.lat, zone.lng]}
-                radius={zone.radius}
-                pathOptions={{
-                  color: zone.color,
-                  fillColor: zone.color,
-                  fillOpacity: zone.riskPercent > 80 ? 0.45 : 0.32,
-                  weight: zone.riskPercent > 80 ? 3 : 2,
-                }}
-              />
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#dc2626" }} />
+                <span style={{ color: "#f87171", fontWeight: "700" }}>80% - 100% Severe Alert</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#ea580c" }} />
+                <span style={{ color: "#fb923c", fontWeight: "700" }}>60% - 79% High Hazard</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#eab308" }} />
+                <span style={{ color: "#fde047", fontWeight: "700" }}>40% - 59% Moderate Risk</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#10b981" }} />
+                <span style={{ color: "#34d399", fontWeight: "700" }}>0% - 39% Low / Monitored</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-              {/* Marker Badge with Risk % */}
-              <Marker
-                position={[zone.lat, zone.lng]}
-                icon={createRiskBadgeIcon(zone.riskPercent, zone.color)}
+        {/* ── RIGHT FRAME: SCROLLABLE TELEMETRY & HAZARDS DIRECTORY BAR ── */}
+        <div
+          style={{
+            backgroundColor: "#0f172a",
+            border: "1px solid #1e293b",
+            borderRadius: "16px",
+            padding: "16px 18px",
+            display: "flex",
+            flexDirection: "column",
+            height: "720px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Header */}
+          <div style={{ borderBottom: "1px solid #1e293b", paddingBottom: "12px", marginBottom: "14px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <h2 style={{ fontSize: "1.05rem", fontWeight: "800", color: "#f8fafc", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                📡 Hazards & Telemetry
+              </h2>
+              <span
+                style={{
+                  backgroundColor: "rgba(56, 189, 248, 0.15)",
+                  color: "#38bdf8",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  borderRadius: "999px",
+                  fontSize: "0.72rem",
+                  fontWeight: "800",
+                  padding: "2px 8px",
+                }}
               >
-                <Popup>
-                  <div style={{ color: "#0f172a", maxWidth: "300px", padding: "2px", lineHeight: "1.4" }}>
+                {filteredRiskZones.length} Sectors
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: "0.76rem", color: "#94a3b8" }}>
+              Live satellite radar, sensor readings, and ground hazard alerts with 1-click map centering.
+            </p>
+          </div>
+
+          {/* Scrollable Items Container */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              paddingRight: "6px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            {filteredRiskZones.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "40px 10px", color: "#64748b" }}>
+                <p style={{ fontSize: "1.2rem", margin: "0 0 6px 0" }}>🔍</p>
+                <p style={{ fontSize: "0.85rem", margin: 0 }}>No hazard sectors match the active filters.</p>
+              </div>
+            ) : (
+              filteredRiskZones.map((zone) => (
+                <div
+                  key={zone.id}
+                  style={{
+                    backgroundColor: "#1e293b",
+                    borderRadius: "12px",
+                    border: `1.5px solid ${zone.color}44`,
+                    padding: "14px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.3)",
+                    transition: "transform 0.15s, border-color 0.15s",
+                  }}
+                >
+                  <div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "0.8rem", fontWeight: "800", color: zone.color, textTransform: "uppercase" }}>
+                      <span style={{ fontSize: "0.74rem", fontWeight: "800", color: zone.color, textTransform: "uppercase" }}>
                         {zone.categoryLabel}
                       </span>
                       <span
                         style={{
-                          backgroundColor: zone.color,
-                          color: "#fff",
-                          fontSize: "0.72rem",
+                          backgroundColor: `${zone.color}22`,
+                          color: zone.color,
+                          border: `1px solid ${zone.color}`,
+                          fontSize: "0.7rem",
                           fontWeight: "800",
                           padding: "2px 7px",
-                          borderRadius: "10px",
+                          borderRadius: "12px",
                         }}
                       >
-                        {zone.riskPercent}% Risk
+                        {zone.riskPercent}% RISK
                       </span>
                     </div>
 
-                    <strong style={{ fontSize: "0.95rem", color: "#0f172a", display: "block", marginBottom: "4px" }}>
+                    <div style={{ fontWeight: "700", fontSize: "0.9rem", color: "#f8fafc", marginBottom: "4px" }}>
                       {zone.name}
-                    </strong>
+                    </div>
 
-                    <p style={{ fontSize: "0.78rem", color: "#475569", margin: "4px 0 8px 0" }}>
+                    <div style={{ fontSize: "0.76rem", color: "#94a3b8", lineHeight: "1.4", marginBottom: "8px" }}>
                       {zone.advisory}
-                    </p>
-
-                    {/* Sensor Telemetry Box */}
-                    <div
-                      style={{
-                        backgroundColor: "#f1f5f9",
-                        padding: "8px",
-                        borderRadius: "8px",
-                        fontSize: "0.75rem",
-                        color: "#334155",
-                        marginBottom: "10px",
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "4px",
-                      }}
-                    >
-                      {Object.entries(zone.weather).map(([k, v]) => (
-                        <div key={k}>
-                          <span style={{ textTransform: "capitalize", color: "#64748b" }}>{k}: </span>
-                          <strong>{v}</strong>
-                        </div>
-                      ))}
                     </div>
 
-                    <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", padding: "6px 8px", borderRadius: "6px", fontSize: "0.75rem", color: "#b91c1c", marginBottom: "10px" }}>
-                      <strong>🚨 Action:</strong> {zone.action}
-                    </div>
-
-                    {/* IN-APP ROUTING ACTION */}
-                    <button
-                      type="button"
-                      onClick={() => handleStartInAppNavigation(zone)}
-                      style={{
-                        width: "100%",
-                        padding: "8px",
-                        backgroundColor: "#2563eb",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        fontWeight: "700",
-                        fontSize: "0.8rem",
-                        cursor: "pointer",
-                      }}
-                    >
-                      📍 Navigate to Safe Perimeter Inside App
-                    </button>
-                  </div>
-                </Popup>
-              </Marker>
-            </React.Fragment>
-          ))}
-
-          {/* EMERGENCY FACILITIES MARKERS */}
-          {filteredFacilities.map((facility) => {
-            const facIcon =
-              facility.type === "hospital"
-                ? hospitalIcon
-                : facility.type === "shelter"
-                ? shelterIcon
-                : facility.type === "office"
-                ? officeIcon
-                : fireIcon;
-
-            return (
-              <Marker
-                key={facility.id}
-                position={[facility.lat, facility.lng]}
-                icon={facIcon}
-              >
-                <Popup>
-                  <div style={{ color: "#0f172a", maxWidth: "290px", padding: "2px", lineHeight: "1.4" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                      <span style={{ fontSize: "1.1rem" }}>
-                        {facility.type === "hospital" ? "🏥" : facility.type === "shelter" ? "⛺" : facility.type === "office" ? "🏛️" : "🚒"}
-                      </span>
-                      <strong style={{ fontSize: "0.95rem", color: "#0f172a" }}>{facility.name}</strong>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", fontSize: "0.75rem", marginBottom: "4px" }}>
-                      <span style={{ color: "#1d4ed8", fontWeight: "700" }}>{facility.category}</span>
-                      <span>•</span>
-                      <span style={{ color: "#16a34a", fontWeight: "600" }}>{facility.status}</span>
-                      {facility.region === "ner" && (
-                        <span style={{ backgroundColor: "#065f46", color: "#a7f3d0", fontSize: "0.68rem", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
-                          NER • {facility.state || "North East"}
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ fontSize: "0.78rem", color: "#475569", marginBottom: "4px" }}>
-                      📍 {facility.address}
-                    </div>
-
-                    <div style={{ fontSize: "0.78rem", color: "#334155", marginBottom: "6px" }}>
-                      👥 <strong>Capacity:</strong> {facility.capacity}
-                    </div>
-
-                    <div style={{ fontSize: "0.8rem", color: "#b91c1c", fontWeight: "700", marginBottom: "10px" }}>
-                      📞 <strong>Helpline:</strong>{" "}
-                      <a href={`tel:${facility.emergencyPhone.replace(/[^0-9]/g, "")}`} style={{ color: "#dc2626", textDecoration: "underline" }}>
-                        {facility.emergencyPhone}
-                      </a>
-                    </div>
-
-                    {/* IN-APP NAVIGATION (PRIMARY - NO EXTERNAL REDIRECT) */}
-                    <button
-                      type="button"
-                      onClick={() => handleStartInAppNavigation(facility)}
-                      style={{
-                        width: "100%",
-                        padding: "8px 10px",
-                        backgroundColor: "#16a34a",
-                        color: "#ffffff",
-                        border: "none",
-                        borderRadius: "6px",
-                        fontSize: "0.82rem",
-                        fontWeight: "700",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      <Navigation size={14} /> Navigate on Live Disaster Map (In-App)
-                    </button>
-
-                    {/* Only if online, provide external google maps as secondary optional link */}
-                    {isOnline ? (
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${facility.lat},${facility.lng}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {/* Sensor / Weather Readings Mini Grid */}
+                    {zone.weather && (
+                      <div
                         style={{
-                          display: "block",
-                          textAlign: "center",
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "4px",
+                          backgroundColor: "#0f172a",
+                          padding: "6px 8px",
+                          borderRadius: "6px",
                           fontSize: "0.72rem",
-                          color: "#64748b",
-                          textDecoration: "underline",
-                          padding: "2px",
+                          marginBottom: "8px",
+                          border: "1px solid rgba(255,255,255,0.05)",
                         }}
                       >
-                        External Google Maps Link (Online Optional)
-                      </a>
-                    ) : (
-                      <div style={{ fontSize: "0.7rem", color: "#94a3b8", textAlign: "center", fontStyle: "italic" }}>
-                        Offline PWA Mode: In-app routing active
+                        {Object.entries(zone.weather).map(([k, v]) => (
+                          <div key={k} style={{ color: "#cbd5e1" }}>
+                            <span style={{ color: "#64748b", textTransform: "capitalize" }}>{k}:</span>{" "}
+                            <strong style={{ color: "#38bdf8" }}>{v}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {zone.action && (
+                      <div style={{ fontSize: "0.74rem", color: "#4ade80", backgroundColor: "rgba(34, 197, 94, 0.1)", padding: "4px 8px", borderRadius: "4px", marginBottom: "4px" }}>
+                        <strong>Action:</strong> {zone.action}
                       </div>
                     )}
                   </div>
-                </Popup>
-              </Marker>
-            );
-          })}
-        </MapContainer>
 
-        {/* ── FLOATING IN-MAP ROUTE HUD (WHEN A DESTINATION IS SELECTED) ── */}
-        {activeRouteTarget && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "20px",
-              left: "20px",
-              zIndex: 1000,
-              backgroundColor: "rgba(15, 23, 42, 0.94)",
-              border: "1.5px solid #38bdf8",
-              borderRadius: "14px",
-              padding: "16px 20px",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
-              color: "#fff",
-              maxWidth: "380px",
-              backdropFilter: "blur(8px)",
-              animation: "slideIn 0.2s ease-out",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "8px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Navigation size={18} color="#38bdf8" />
-                <strong style={{ fontSize: "0.95rem", color: "#f8fafc" }}>
-                  In-App Disaster Route HUD
-                </strong>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveRouteTarget(null)}
-                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", padding: "2px" }}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div style={{ fontSize: "0.85rem", color: "#38bdf8", fontWeight: "700", marginBottom: "4px" }}>
-              🎯 {activeRouteTarget.name}
-            </div>
-
-            {userLocation ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px", fontSize: "0.82rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#cbd5e1" }}>
-                  <span>Direct GPS Distance:</span>
-                  <strong style={{ color: "#34d399", fontSize: "0.92rem" }}>{routeDistance} km</strong>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#cbd5e1" }}>
-                  <span>Compass Bearing:</span>
-                  <strong>{routeBearing} Heading</strong>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#cbd5e1" }}>
-                  <span>Est. Evacuation Transit:</span>
-                  <strong>~{estimatedDriveMin} min drive / ~{estimatedWalkMin} min walk</strong>
-                </div>
-                <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "4px", backgroundColor: "#1e293b", padding: "6px 8px", borderRadius: "6px" }}>
-                  ℹ️ Dashed cyan line on the map indicates direct bearing to destination. No external redirect required.
-                </div>
-              </div>
-            ) : (
-              <div style={{ fontSize: "0.8rem", color: "#fca5a5", marginTop: "8px" }}>
-                GPS position pending. Click "Locate My GPS" at top right to calculate distance and bearing.
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── GOOGLE WEATHER MAP STYLE COLOR SCALE LEGEND ── */}
-        <div
-          style={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            zIndex: 1000,
-            backgroundColor: "rgba(15, 23, 42, 0.9)",
-            border: "1px solid #334155",
-            borderRadius: "12px",
-            padding: "12px 14px",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
-            backdropFilter: "blur(6px)",
-            fontSize: "0.75rem",
-            maxWidth: "220px",
-          }}
-        >
-          <div style={{ fontWeight: "800", color: "#f1f5f9", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
-            <CloudRain size={14} color="#38bdf8" /> Weather Risk Scale
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#dc2626" }} />
-              <span style={{ color: "#f87171", fontWeight: "700" }}>80% - 100% Severe Alert</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#ea580c" }} />
-              <span style={{ color: "#fb923c", fontWeight: "700" }}>60% - 79% High Hazard</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#eab308" }} />
-              <span style={{ color: "#fde047", fontWeight: "700" }}>40% - 59% Moderate Risk</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: "#10b981" }} />
-              <span style={{ color: "#34d399", fontWeight: "700" }}>0% - 39% Low / Monitored</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Bottom Section: Active Satellite Hazards Directory ── */}
-      <div style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "16px", padding: "20px" }}>
-        <h2 style={{ fontSize: "1.15rem", fontWeight: "700", color: "#f8fafc", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
-          📡 Satellite Weather & Ground Hazard Telemetry ({filteredRiskZones.length} Sectors Detected)
-        </h2>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "14px" }}>
-          {filteredRiskZones.map((zone) => (
-            <div
-              key={zone.id}
-              style={{
-                backgroundColor: "#1e293b",
-                borderRadius: "12px",
-                border: `1.5px solid ${zone.color}44`,
-                padding: "16px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                gap: "10px",
-                transition: "transform 0.15s, border-color 0.15s",
-              }}
-            >
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                  <span style={{ fontSize: "0.78rem", fontWeight: "800", color: zone.color, textTransform: "uppercase" }}>
-                    {zone.categoryLabel}
-                  </span>
-                  <span
+                  <button
+                    type="button"
+                    onClick={() => handleStartInAppNavigation(zone)}
                     style={{
-                      backgroundColor: `${zone.color}22`,
-                      color: zone.color,
-                      border: `1px solid ${zone.color}`,
-                      fontSize: "0.72rem",
-                      fontWeight: "800",
-                      padding: "2px 8px",
-                      borderRadius: "12px",
+                      width: "100%",
+                      padding: "7px",
+                      backgroundColor: "#2563eb",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: "700",
+                      fontSize: "0.78rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      transition: "background-color 0.15s",
                     }}
                   >
-                    {zone.riskPercent}% RISK
-                  </span>
+                    <Crosshair size={13} /> Focus on Map & Plan Evacuation
+                  </button>
                 </div>
-
-                <div style={{ fontWeight: "700", fontSize: "0.92rem", color: "#f8fafc", marginBottom: "4px" }}>
-                  {zone.name}
-                </div>
-
-                <div style={{ fontSize: "0.78rem", color: "#94a3b8", lineHeight: "1.4" }}>
-                  {zone.advisory}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
-                <button
-                  type="button"
-                  onClick={() => handleStartInAppNavigation(zone)}
-                  style={{
-                    flex: 1,
-                    padding: "8px",
-                    backgroundColor: "#2563eb",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: "700",
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                  }}
-                >
-                  <Crosshair size={14} /> Focus on Map
-                </button>
-              </div>
-            </div>
-          ))}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
