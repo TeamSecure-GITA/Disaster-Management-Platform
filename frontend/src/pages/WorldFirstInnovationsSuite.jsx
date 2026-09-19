@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Volume2, Radio, Activity, Mountain, Trees, ShieldAlert, 
   Send, RefreshCw, Play, Square, CheckCircle, AlertTriangle, 
@@ -7,7 +7,9 @@ import {
   Layers, ChevronRight, Cpu, ArrowUpRight, Clock, Info, 
   Sparkles, Sliders, ExternalLink, Award, FileText,
   Wifi, ShieldCheck, Bluetooth, QrCode, BatteryCharging,
-  Waves, Lock, Network, Atom, Magnet, Thermometer, Droplet
+  Waves, Lock, Network, Atom, Magnet, Thermometer, Droplet,
+  Bell, User, Car, ArrowRight, X, ChevronDown, Check, Share2, Search,
+  SlidersHorizontal, Radar, Smartphone, Satellite
 } from 'lucide-react';
 import CosmicRayMuonTrackerTab from '../components/worldfirst/CosmicRayMuonTrackerTab';
 import GeomagneticRuptureNavigationTab from '../components/worldfirst/GeomagneticRuptureNavigationTab';
@@ -26,22 +28,104 @@ import CmosDarkCurrentThermometerTab from '../components/worldfirst/CmosDarkCurr
 import MicroInfrasonicInterferometryTab from '../components/worldfirst/MicroInfrasonicInterferometryTab';
 import PhotonicWaterProfilerTab from '../components/worldfirst/PhotonicWaterProfilerTab';
 import ScreenCoilParasiticRfBeaconTab from '../components/worldfirst/ScreenCoilParasiticRfBeaconTab';
+import WorldFirstDeckOverview from '../components/worldfirst/WorldFirstDeckOverview';
 
 export default function WorldFirstInnovationsSuite() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'zero-grid-flow';
+  const requestedTab = searchParams.get('tab');
+  const [viewMode, setViewMode] = useState(requestedTab ? 'lab' : 'deck');
+  const initialTab = requestedTab || 'zero-grid-flow';
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Deck specific interactive state
+  const [heroSlide, setHeroSlide] = useState(0); // 0, 1, 2
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [isCapabilityModalOpen, setIsCapabilityModalOpen] = useState(false);
+  const [selectedCapability, setSelectedCapability] = useState(null);
+  const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
+  const [isTechStackModalOpen, setIsTechStackModalOpen] = useState(false);
+  const [isHealthModalOpen, setIsHealthModalOpen] = useState(false);
+  const [isSimulationActive, setIsSimulationActive] = useState(false);
+  const [simulationStep, setSimulationStep] = useState(0); // 0 to 5
+  const [simulationProgress, setSimulationProgress] = useState(0);
+  const [sarCoherence, setSarCoherence] = useState(0.92);
+  const [currentClock, setCurrentClock] = useState('21:42');
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [selectedAlert, setSelectedAlert] = useState(null);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState('EN');
+  const [liveMetrics, setLiveMetrics] = useState({
+    villagesAffected: 4,
+    peopleExposed: 387,
+    roadsBlocked: 2,
+    evacuated: 387,
+    etaMinutes: 6
+  });
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentClock(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStartSimulation = () => {
+    if (isSimulationActive) return;
+    setIsSimulationActive(true);
+    setSimulationStep(0);
+    setSimulationProgress(0);
+
+    // Audio chime cue
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        if (!audioContextRef.current) audioContextRef.current = new AudioCtx();
+        const ctx = audioContextRef.current;
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 4;
+      setSimulationProgress(Math.min(progress, 100));
+      const stepIdx = Math.min(Math.floor((progress / 100) * 6), 5);
+      setSimulationStep(stepIdx);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => setIsSimulationActive(false), 2500);
+      }
+    }, 200);
+  };
 
   // Sync tab with URL search parameter
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (tabParam && tabParam !== activeTab) {
       setActiveTab(tabParam);
+      setViewMode('lab');
     }
   }, [searchParams]);
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
+    setViewMode('lab');
     setSearchParams({ tab: tabId });
   };
 
@@ -512,470 +596,411 @@ export default function WorldFirstInnovationsSuite() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-8">
-      {/* Header Banner */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> WORLD-FIRST RESCUE PROTOCOLS
-              </span>
-              <span className="px-3 py-1 bg-sky-500/20 text-sky-400 text-xs font-bold rounded-full border border-sky-500/30">
-                ZERO-INFRASTRUCTURE RESILIENT
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight flex items-center gap-3">
-              Deep-Tech Autonomous Disaster Suite
-            </h1>
-            <p className="text-slate-400 text-sm sm:text-base mt-1 max-w-3xl">
-              Breakthrough survival technologies solving total cellular blackout, GPS gorge blindness, triage prioritization, sub-surface mountain liquefaction, and indigenous natural infrastructure protection.
-            </p>
-
-            {/* SIH Grand Jury Executive Pitch Mic-Drop Card */}
-            <div className="mt-4 p-3.5 bg-gradient-to-r from-indigo-950/80 via-purple-950/40 to-slate-900 border border-indigo-500/40 rounded-xl relative overflow-hidden shadow-lg">
-              <div className="flex items-start gap-3">
-                <span className="text-xl">💡</span>
-                <div>
-                  <div className="text-[11px] font-mono uppercase tracking-widest text-amber-400 font-bold">
-                    SIH Grand Jury Pitch Thesis:
-                  </div>
-                  <p className="text-xs text-slate-200 italic mt-0.5 leading-relaxed">
-                    "The world's current disaster platforms assume the internet will always come back. <strong className="text-white not-italic underline decoration-amber-400">We built our platform for the day it doesn't.</strong> By turning the ambient environment, sound waves, radio echoes, and the collective computing power of everyday smartphones into a self-healing rescue grid, we have created a platform that cannot be knocked offline by any natural disaster on Earth."
-                  </p>
-                </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-5 lg:p-6 selection:bg-cyan-500/30">
+      {viewMode === 'deck' ? (
+        <WorldFirstDeckOverview 
+          onSwitchToLab={() => setViewMode('lab')}
+          onSelectTab={(tabId) => {
+            setActiveTab(tabId);
+            setViewMode('lab');
+            setSearchParams({ tab: tabId });
+          }}
+        />
+      ) : (
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Lab Header & Back to Deck button */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> WORLD-FIRST RESCUE PROTOCOLS
+                </span>
+                <span className="px-3 py-1 bg-sky-500/20 text-sky-400 text-xs font-bold rounded-full border border-sky-500/30">
+                  ZERO-INFRASTRUCTURE RESILIENT
+                </span>
               </div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight flex items-center gap-3">
+                Deep-Tech Innovations Lab (22 Breakthroughs)
+              </h1>
+              <p className="text-slate-400 text-sm mt-1 max-w-3xl">
+                Select any breakthrough innovation below to inspect its live mathematical models, WASM simulators, and local on-device hardware engines.
+              </p>
             </div>
+
+            <button
+              onClick={() => setViewMode('deck')}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all self-start md:self-auto cursor-pointer"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>Back to Command Overview Deck</span>
+            </button>
           </div>
 
-          <div className="flex items-center gap-3 self-start md:self-auto">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          {/* Tab Navigation - World-First Deep-Tech Pillars (22 Tabs) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            {/* ZERO-GRID FLOW */}
+            <button
+              onClick={() => handleTabChange('zero-grid-flow')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'zero-grid-flow'
+                  ? 'bg-indigo-950/60 border-indigo-500 text-white shadow-lg shadow-indigo-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 text-[9px] font-bold rounded-full border border-indigo-500/30">
+                CORE
+              </div>
+              <Cpu className={`w-5 h-5 flex-shrink-0 ${activeTab === 'zero-grid-flow' ? 'text-indigo-400 animate-pulse' : 'text-slate-400'}`} />
               <div>
-                <div className="text-xs text-slate-400">Offline PWA Engine</div>
-                <div className="text-xs font-bold text-slate-200">Autonomous Active</div>
+                <div className="text-xs font-bold leading-tight">Zero-Grid Flow</div>
+                <div className="text-[10px] text-slate-400">Master Architecture</div>
               </div>
-            </div>
+            </button>
+
+            {/* 1. COSMIC-RAY MUON TRACKER */}
+            <button
+              onClick={() => handleTabChange('muon-tracking')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'muon-tracking'
+                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-400/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-400/40 animate-pulse">
+                #1 WORLD-1ST
+              </div>
+              <Atom className={`w-5 h-5 flex-shrink-0 ${activeTab === 'muon-tracking' ? 'text-cyan-400 animate-spin' : 'text-slate-400'}`} style={{ animationDuration: '6s' }} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Subatomic Muon</div>
+                <div className="text-[10px] text-slate-400">Debris Density WASM</div>
+              </div>
+            </button>
+
+            {/* 2. GEOMAGNETIC RUPTURE NAVIGATION */}
+            <button
+              onClick={() => handleTabChange('geomagnetic-nav')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'geomagnetic-nav'
+                  ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Magnet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'geomagnetic-nav' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Geomagnetic Nav</div>
+                <div className="text-[10px] text-slate-400">Compass-Free Routing</div>
+              </div>
+            </button>
+
+            {/* 3. INFRASONIC EARTH HUM ALERT */}
+            <button
+              onClick={() => handleTabChange('infrasonic-hum')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'infrasonic-hum'
+                  ? 'bg-orange-950/80 border-orange-400 text-white shadow-lg shadow-orange-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'infrasonic-hum' ? 'text-orange-400 animate-pulse' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Infrasonic Hum</div>
+                <div className="text-[10px] text-slate-400">0.05-20Hz Waveguide</div>
+              </div>
+            </button>
+
+            {/* 4. QUANTUM CHAFF STORAGE */}
+            <button
+              onClick={() => handleTabChange('quantum-chaff')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'quantum-chaff'
+                  ? 'bg-purple-950/80 border-purple-400 text-white shadow-lg shadow-purple-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Lock className={`w-5 h-5 flex-shrink-0 ${activeTab === 'quantum-chaff' ? 'text-purple-400 animate-bounce' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Quantum Chaff</div>
+                <div className="text-[10px] text-slate-400">BLE Sharding Quorum</div>
+              </div>
+            </button>
+
+            {/* 5. MAGNETOMETER LOCATOR */}
+            <button
+              onClick={() => handleTabChange('magnetometer')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'magnetometer'
+                  ? 'bg-indigo-950/80 border-indigo-400 text-white shadow-lg shadow-indigo-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Compass className={`w-5 h-5 flex-shrink-0 ${activeTab === 'magnetometer' ? 'text-indigo-400 animate-spin' : 'text-slate-400'}`} style={{ animationDuration: '8s' }} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Magnetometer</div>
+                <div className="text-[10px] text-slate-400">Rubble Void Locator</div>
+              </div>
+            </button>
+
+            {/* 6. THERMOELECTRIC TAP */}
+            <button
+              onClick={() => handleTabChange('thermal-tap')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'thermal-tap'
+                  ? 'bg-amber-950/80 border-amber-400 text-white shadow-lg shadow-amber-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <BatteryCharging className={`w-5 h-5 flex-shrink-0 ${activeTab === 'thermal-tap' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Thermal Tap</div>
+                <div className="text-[10px] text-slate-400">Low-Power Alerting</div>
+              </div>
+            </button>
+
+            {/* 7. BAROMETRIC FLASH FLOOD */}
+            <button
+              onClick={() => handleTabChange('barometric')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'barometric'
+                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'barometric' ? 'text-cyan-400 animate-bounce' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Barometric Wave</div>
+                <div className="text-[10px] text-slate-400">Flash-Flood Warning</div>
+              </div>
+            </button>
+
+            {/* 8. QUANTUM GOSSIP */}
+            <button
+              onClick={() => handleTabChange('quantum-gossip')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'quantum-gossip'
+                  ? 'bg-purple-950/80 border-purple-400 text-white shadow-lg shadow-purple-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Lock className={`w-5 h-5 flex-shrink-0 ${activeTab === 'quantum-gossip' ? 'text-purple-400 animate-pulse' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Quantum Gossip</div>
+                <div className="text-[10px] text-slate-400">Epidemic Routing</div>
+              </div>
+            </button>
+
+            {/* 9. NFC TRIAGE */}
+            <button
+              onClick={() => handleTabChange('nfc-triage')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'nfc-triage'
+                  ? 'bg-rose-950/80 border-rose-400 text-white shadow-lg shadow-rose-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Zap className={`w-5 h-5 flex-shrink-0 ${activeTab === 'nfc-triage' ? 'text-rose-400 animate-pulse' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Web-NFC Triage</div>
+                <div className="text-[10px] text-slate-400">Skin-Safe Digital Stamp</div>
+              </div>
+            </button>
+
+            {/* 10. WI-FI BENDING */}
+            <button
+              onClick={() => handleTabChange('wifi-bending')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'wifi-bending'
+                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Wifi className={`w-5 h-5 flex-shrink-0 ${activeTab === 'wifi-bending' ? 'text-cyan-400 animate-pulse' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Wi-Fi Bending</div>
+                <div className="text-[10px] text-slate-400">CSI Density Analysis</div>
+              </div>
+            </button>
+
+            {/* 11. PQC LEDGER */}
+            <button
+              onClick={() => handleTabChange('pqc-ledger')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'pqc-ledger'
+                  ? 'bg-purple-950/80 border-purple-400 text-white shadow-lg shadow-purple-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <ShieldCheck className={`w-5 h-5 flex-shrink-0 ${activeTab === 'pqc-ledger' ? 'text-purple-400' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">PQC Offline Ledger</div>
+                <div className="text-[10px] text-slate-400">Dilithium-5 Signatures</div>
+              </div>
+            </button>
+
+            {/* 12. BLE SPITTING */}
+            <button
+              onClick={() => handleTabChange('ble-spitting')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'ble-spitting'
+                  ? 'bg-amber-950/80 border-amber-400 text-white shadow-lg shadow-amber-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Bluetooth className={`w-5 h-5 flex-shrink-0 ${activeTab === 'ble-spitting' ? 'text-amber-400' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">BLE Spitting</div>
+                <div className="text-[10px] text-slate-400">Micro-Burst Relay</div>
+              </div>
+            </button>
+
+            {/* 13. CMOS THERMAL */}
+            <button
+              onClick={() => handleTabChange('cmos-thermal')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'cmos-thermal'
+                  ? 'bg-indigo-950/80 border-indigo-400 text-white shadow-lg shadow-indigo-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Thermometer className={`w-5 h-5 flex-shrink-0 ${activeTab === 'cmos-thermal' ? 'text-indigo-400 animate-pulse' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">CMOS Dark-Current</div>
+                <div className="text-[10px] text-slate-400">Debris Temp Sensor</div>
+              </div>
+            </button>
+
+            {/* 14. MICRO-INFRASONIC */}
+            <button
+              onClick={() => handleTabChange('micro-infrasonic')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'micro-infrasonic'
+                  ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'micro-infrasonic' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Micro-Infrasonic</div>
+                <div className="text-[10px] text-slate-400">Bridge Interferometry</div>
+              </div>
+            </button>
+
+            {/* 15. WATER PROFILER */}
+            <button
+              onClick={() => handleTabChange('water-profiler')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'water-profiler'
+                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Droplet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'water-profiler' ? 'text-cyan-400 animate-bounce' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Photonic Water</div>
+                <div className="text-[10px] text-slate-400">Refraction Profiler</div>
+              </div>
+            </button>
+
+            {/* 16. PARASITIC RF */}
+            <button
+              onClick={() => handleTabChange('parasitic-rf')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
+                activeTab === 'parasitic-rf'
+                  ? 'bg-amber-950/80 border-amber-400 text-white shadow-lg shadow-amber-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Radio className={`w-5 h-5 flex-shrink-0 ${activeTab === 'parasitic-rf' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Screen-Coil RF</div>
+                <div className="text-[10px] text-slate-400">Parasitic Beacon</div>
+              </div>
+            </button>
+
+            {/* 17. CHIRP PROTOCOL */}
+            <button
+              onClick={() => setActiveTab('chirp')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                activeTab === 'chirp'
+                  ? 'bg-emerald-950/50 border-emerald-500 text-white shadow-lg shadow-emerald-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Volume2 className={`w-5 h-5 flex-shrink-0 ${activeTab === 'chirp' ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Acoustic Chirp</div>
+                <div className="text-[10px] text-slate-400">Sound-Wave Modem</div>
+              </div>
+            </button>
+
+            {/* 18. REVERSE GPS */}
+            <button
+              onClick={() => setActiveTab('reverse-gps')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                activeTab === 'reverse-gps'
+                  ? 'bg-sky-950/50 border-sky-500 text-white shadow-lg shadow-sky-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Radio className={`w-5 h-5 flex-shrink-0 ${activeTab === 'reverse-gps' ? 'text-sky-400' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Reverse GPS</div>
+                <div className="text-[10px] text-slate-400">Radio Triangulation</div>
+              </div>
+            </button>
+
+            {/* 19. CITIZEN VITALS */}
+            <button
+              onClick={() => setActiveTab('vitals')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                activeTab === 'vitals'
+                  ? 'bg-rose-950/50 border-rose-500 text-white shadow-lg shadow-rose-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Activity className={`w-5 h-5 flex-shrink-0 ${activeTab === 'vitals' ? 'text-rose-400' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Citizen Vitals</div>
+                <div className="text-[10px] text-slate-400">Bio-Sensing Crowd-Map</div>
+              </div>
+            </button>
+
+            {/* 20. MUDSLIDE FLUID PRECURSOR */}
+            <button
+              onClick={() => setActiveTab('mudslide')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                activeTab === 'mudslide'
+                  ? 'bg-amber-950/50 border-amber-500 text-white shadow-lg shadow-amber-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Mountain className={`w-5 h-5 flex-shrink-0 ${activeTab === 'mudslide' ? 'text-amber-400' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Mudslide Fluidics</div>
+                <div className="text-[10px] text-slate-400">Pore Pressure WASM</div>
+              </div>
+            </button>
+
+            {/* 21. LIVING ROOT BRIDGES */}
+            <button
+              onClick={() => setActiveTab('root-bridge')}
+              className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                activeTab === 'root-bridge'
+                  ? 'bg-teal-950/50 border-teal-500 text-white shadow-lg shadow-teal-950/50'
+                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              }`}
+            >
+              <Trees className={`w-5 h-5 flex-shrink-0 ${activeTab === 'root-bridge' ? 'text-teal-400' : 'text-slate-400'}`} />
+              <div>
+                <div className="text-xs font-bold leading-tight">Living Root Bridges</div>
+                <div className="text-[10px] text-slate-400">Bio-Structural Ledger</div>
+              </div>
+            </button>
           </div>
-        </div>
 
-        {/* Tab Navigation - World-First Deep-Tech Pillars */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-6">
-          {/* ZERO-GRID FLOW */}
-          <button
-            onClick={() => handleTabChange('zero-grid-flow')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'zero-grid-flow'
-                ? 'bg-indigo-950/60 border-indigo-500 text-white shadow-lg shadow-indigo-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 text-[9px] font-bold rounded-full border border-indigo-500/30">
-              CORE
-            </div>
-            <Cpu className={`w-5 h-5 flex-shrink-0 ${activeTab === 'zero-grid-flow' ? 'text-indigo-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Zero-Grid Flow</div>
-              <div className="text-[10px] text-slate-400">Master Architecture</div>
-            </div>
-          </button>
-
-          {/* 1. COSMIC-RAY MUON TRACKER */}
-          <button
-            onClick={() => handleTabChange('muon-tracking')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'muon-tracking'
-                ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-400/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-400/40 animate-pulse">
-              #1 WORLD-1ST
-            </div>
-            <Atom className={`w-5 h-5 flex-shrink-0 ${activeTab === 'muon-tracking' ? 'text-cyan-400 animate-spin' : 'text-slate-400'}`} style={{ animationDuration: '6s' }} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Subatomic Muon</div>
-              <div className="text-[10px] text-slate-400">Debris Density WASM</div>
-            </div>
-          </button>
-
-          {/* 2. SUB-20HZ INFRASONIC EARTH-HUM ALERT */}
-          <button
-            onClick={() => handleTabChange('infrasonic-hum')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'infrasonic-hum'
-                ? 'bg-orange-950/80 border-orange-400 text-white shadow-lg shadow-orange-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-orange-400/20 text-orange-300 text-[9px] font-black rounded-full border border-orange-400/40 animate-pulse">
-              #2 WORLD-1ST
-            </div>
-            <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'infrasonic-hum' ? 'text-orange-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Infrasonic Hum</div>
-              <div className="text-[10px] text-slate-400">15-Phone 5km Quorum</div>
-            </div>
-          </button>
-
-          {/* 3. UNCALIBRATED GEOMAGNETIC RUPTURE NAVIGATION */}
-          <button
-            onClick={() => handleTabChange('geomagnetic-nav')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'geomagnetic-nav'
-                ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-sky-400/20 text-sky-300 text-[9px] font-black rounded-full border border-sky-400/40 animate-pulse">
-              #3 WORLD-1ST
-            </div>
-            <Magnet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'geomagnetic-nav' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Geomagnetic Nav</div>
-              <div className="text-[10px] text-slate-400">Zero-GPS Rupture 3D</div>
-            </div>
-          </button>
-
-          {/* 4. MULTI-DEVICE POST-QUANTUM CHAFF DATA MASKING */}
-          <button
-            onClick={() => handleTabChange('quantum-chaff')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'quantum-chaff'
-                ? 'bg-purple-950/80 border-purple-400 text-white shadow-lg shadow-purple-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-purple-400/20 text-purple-300 text-[9px] font-black rounded-full border border-purple-400/40 animate-pulse">
-              #4 WORLD-1ST
-            </div>
-            <Lock className={`w-5 h-5 flex-shrink-0 ${activeTab === 'quantum-chaff' ? 'text-purple-400 animate-bounce' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Post-Quantum Chaff</div>
-              <div className="text-[10px] text-slate-400">ML-KEM Kyber-1024</div>
-            </div>
-          </button>
-
-          {/* 5. MAGNETOMETER RUBBLE LOCATOR */}
-          <button
-            onClick={() => handleTabChange('magnetometer')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'magnetometer'
-                ? 'bg-indigo-950/80 border-indigo-400 text-white shadow-lg shadow-indigo-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-indigo-400/20 text-indigo-300 text-[9px] font-black rounded-full border border-indigo-400/40 animate-pulse">
-              NEW
-            </div>
-            <Compass className={`w-5 h-5 flex-shrink-0 ${activeTab === 'magnetometer' ? 'text-indigo-400 animate-spin' : 'text-slate-400'}`} style={{ animationDuration: '8s' }} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Magnetometer 3D</div>
-              <div className="text-[10px] text-slate-400">Trapped-Human Locator</div>
-            </div>
-          </button>
-
-          {/* 2. THERMOELECTRIC THERMAL-TAP */}
-          <button
-            onClick={() => handleTabChange('thermal-tap')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'thermal-tap'
-                ? 'bg-amber-950/80 border-amber-400 text-white shadow-lg shadow-amber-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-amber-400/20 text-amber-300 text-[9px] font-black rounded-full border border-amber-400/40">
-              NEW
-            </div>
-            <BatteryCharging className={`w-5 h-5 flex-shrink-0 ${activeTab === 'thermal-tap' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Thermal-Tap Seebeck</div>
-              <div className="text-[10px] text-slate-400">Sub-1% Deep Sleep SOS</div>
-            </div>
-          </button>
-
-          {/* 3. BAROMETRIC FLASH-FLOOD LOOP */}
-          <button
-            onClick={() => handleTabChange('barometric')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'barometric'
-                ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-400/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-400/40 animate-pulse">
-              NEW
-            </div>
-            <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'barometric' ? 'text-cyan-400 animate-bounce' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Barometric Warning</div>
-              <div className="text-[10px] text-slate-400">Flash-Flood Shockwave</div>
-            </div>
-          </button>
-
-          {/* 4. QUANTUM GOSSIP ROUTING */}
-          <button
-            onClick={() => handleTabChange('quantum-gossip')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'quantum-gossip'
-                ? 'bg-purple-950/80 border-purple-400 text-white shadow-lg shadow-purple-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-purple-400/20 text-purple-300 text-[9px] font-black rounded-full border border-purple-400/40">
-              NEW
-            </div>
-            <Lock className={`w-5 h-5 flex-shrink-0 ${activeTab === 'quantum-gossip' ? 'text-purple-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Quantum Gossip P2P</div>
-              <div className="text-[10px] text-slate-400">Kyber-1024 Lattice Mesh</div>
-            </div>
-          </button>
-
-          {/* WEB-NFC TRIAGE */}
-          <button
-            onClick={() => setActiveTab('nfc-triage')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'nfc-triage'
-                ? 'bg-rose-950/60 border-rose-500 text-white shadow-lg shadow-rose-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-rose-500/20 text-rose-300 text-[9px] font-bold rounded-full border border-rose-500/30">
-              NEW
-            </div>
-            <Zap className={`w-5 h-5 flex-shrink-0 ${activeTab === 'nfc-triage' ? 'text-rose-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Web-NFC Triage</div>
-              <div className="text-[10px] text-slate-400">Skin Digital Stamps</div>
-            </div>
-          </button>
-
-          {/* FINAL SUITE INNOVATION 1: WI-FI BENDING */}
-          <button
-            onClick={() => setActiveTab('wifi-bending')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'wifi-bending'
-                ? 'bg-cyan-950/60 border-cyan-500 text-white shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-500/20 text-cyan-300 text-[9px] font-bold rounded-full border border-cyan-500/30">
-              NEW
-            </div>
-            <Wifi className={`w-5 h-5 flex-shrink-0 ${activeTab === 'wifi-bending' ? 'text-cyan-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Wi-Fi CSI Bending</div>
-              <div className="text-[10px] text-slate-400">Passive Human Density</div>
-            </div>
-          </button>
-
-          {/* FINAL SUITE INNOVATION 2: PQC LEDGER */}
-          <button
-            onClick={() => setActiveTab('pqc-ledger')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'pqc-ledger'
-                ? 'bg-purple-950/60 border-purple-500 text-white shadow-lg shadow-purple-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-purple-500/20 text-purple-300 text-[9px] font-bold rounded-full border border-purple-500/30">
-              NEW
-            </div>
-            <ShieldCheck className={`w-5 h-5 flex-shrink-0 ${activeTab === 'pqc-ledger' ? 'text-purple-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">PQC Offline Ledger</div>
-              <div className="text-[10px] text-slate-400">ML-DSA Lattice Aid</div>
-            </div>
-          </button>
-
-          {/* FINAL SUITE INNOVATION 3: BLE SPITTING */}
-          <button
-            onClick={() => setActiveTab('ble-spitting')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'ble-spitting'
-                ? 'bg-amber-950/60 border-amber-500 text-white shadow-lg shadow-amber-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-amber-500/20 text-amber-300 text-[9px] font-bold rounded-full border border-amber-500/30">
-              NEW
-            </div>
-            <Bluetooth className={`w-5 h-5 flex-shrink-0 ${activeTab === 'ble-spitting' ? 'text-amber-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">BLE "Spitting" Burst</div>
-              <div className="text-[10px] text-slate-400">Debris Soil Penetration</div>
-            </div>
-          </button>
-
-          {/* 14. CMOS DARK-CURRENT THERMAL THERMOMETER */}
-          <button
-            onClick={() => handleTabChange('cmos-thermal')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'cmos-thermal'
-                ? 'bg-indigo-950/80 border-indigo-400 text-white shadow-lg shadow-indigo-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 text-[9px] font-black rounded-full border border-indigo-500/30 animate-pulse">
-              #14 WORLD-1ST
-            </div>
-            <Thermometer className={`w-5 h-5 flex-shrink-0 ${activeTab === 'cmos-thermal' ? 'text-indigo-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">CMOS Dark-Current</div>
-              <div className="text-[10px] text-slate-400">Ambient Debris Void Map</div>
-            </div>
-          </button>
-
-          {/* 15. MICRO-INFRASONIC STRUCTURAL INTERFEROMETRY */}
-          <button
-            onClick={() => handleTabChange('micro-infrasonic')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'micro-infrasonic'
-                ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-sky-500/20 text-sky-300 text-[9px] font-black rounded-full border border-sky-500/30 animate-pulse">
-              #15 WORLD-1ST
-            </div>
-            <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'micro-infrasonic' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Micro-Infrasonic</div>
-              <div className="text-[10px] text-slate-400">Bridge & Slope Health</div>
-            </div>
-          </button>
-
-          {/* 16. DISPLAY-PLANE PHOTONIC WATER PROFILER */}
-          <button
-            onClick={() => handleTabChange('water-profiler')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'water-profiler'
-                ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-500/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-500/30 animate-pulse">
-              #16 WORLD-1ST
-            </div>
-            <Droplet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'water-profiler' ? 'text-cyan-400 animate-bounce' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Photonic Water Refraction</div>
-              <div className="text-[10px] text-slate-400">Turbidity & Sludge Analyzer</div>
-            </div>
-          </button>
-
-          {/* 17. SCREEN-COIL PARASITIC RF BEACON */}
-          <button
-            onClick={() => handleTabChange('parasitic-rf')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'parasitic-rf'
-                ? 'bg-amber-950/80 border-amber-400 text-white shadow-lg shadow-amber-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-amber-500/20 text-amber-300 text-[9px] font-black rounded-full border border-amber-500/30 animate-pulse">
-              #17 WORLD-1ST
-            </div>
-            <Radio className={`w-5 h-5 flex-shrink-0 ${activeTab === 'parasitic-rf' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Parasitic RF Beacon</div>
-              <div className="text-[10px] text-slate-400">AM Inductive SOS Pulse</div>
-            </div>
-          </button>
-
-          {/* SOUND-WAVE CHIRP */}
-          <button
-            onClick={() => setActiveTab('chirp')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'chirp'
-                ? 'bg-emerald-950/50 border-emerald-500 text-white shadow-lg shadow-emerald-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Volume2 className={`w-5 h-5 flex-shrink-0 ${activeTab === 'chirp' ? 'text-emerald-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Sound-Wave Chirp</div>
-              <div className="text-[10px] text-slate-400">Acoustic SOS Modem</div>
-            </div>
-          </button>
-
-          {/* REVERSE GPS */}
-          <button
-            onClick={() => setActiveTab('reverse-gps')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'reverse-gps'
-                ? 'bg-sky-950/50 border-sky-500 text-white shadow-lg shadow-sky-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Radio className={`w-5 h-5 flex-shrink-0 ${activeTab === 'reverse-gps' ? 'text-sky-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Reverse GPS Radio</div>
-              <div className="text-[10px] text-slate-400">FM/AM Gorge Trilateration</div>
-            </div>
-          </button>
-
-          {/* CITIZEN VITALS */}
-          <button
-            onClick={() => setActiveTab('vitals')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'vitals'
-                ? 'bg-rose-950/50 border-rose-500 text-white shadow-lg shadow-rose-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Activity className={`w-5 h-5 flex-shrink-0 ${activeTab === 'vitals' ? 'text-rose-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Citizen Vitals Map</div>
-              <div className="text-[10px] text-slate-400">WebHID Triage Mesh</div>
-            </div>
-          </button>
-
-          {/* FLUID MUDSLIDE AI */}
-          <button
-            onClick={() => setActiveTab('mudslide')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'mudslide'
-                ? 'bg-amber-950/50 border-amber-500 text-white shadow-lg shadow-amber-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Mountain className={`w-5 h-5 flex-shrink-0 ${activeTab === 'mudslide' ? 'text-amber-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Fluid Mudslide AI</div>
-              <div className="text-[10px] text-slate-400">Pore Pressure WASM</div>
-            </div>
-          </button>
-
-          {/* LIVING ROOT BRIDGES */}
-          <button
-            onClick={() => setActiveTab('root-bridge')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
-              activeTab === 'root-bridge'
-                ? 'bg-teal-950/50 border-teal-500 text-white shadow-lg shadow-teal-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <Trees className={`w-5 h-5 flex-shrink-0 ${activeTab === 'root-bridge' ? 'text-teal-400' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Living Root Bridges</div>
-              <div className="text-[10px] text-slate-400">Bio-Structural Ledger</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto">
-        {/* ========================================================= */}
-        {/* ZERO-GRID FLOW: THE ULTIMATE ZERO-INFRASTRUCTURE PIPELINE  */}
-        {/* ========================================================= */}
-        {activeTab === 'zero-grid-flow' && <ZeroInfrastructureDataFlowTab />}
-
-        {/* ========================================================= */}
-        {/* 1. COSMIC-RAY MUON TRACKING: DEBRIS THICKNESS & VOID MAP */}
-        {/* ========================================================= */}
-        {activeTab === 'muon-tracking' && <CosmicRayMuonTrackerTab />}
+          {/* Active Tab Component Body */}
+          <div className="pt-2">
+            {activeTab === 'zero-grid-flow' && <ZeroInfrastructureDataFlowTab />}
+            {activeTab === 'muon-tracking' && <CosmicRayMuonTrackerTab />}
 
         {/* ========================================================= */}
         {/* 2. GEOMAGNETIC FIELD RUPTURE NAVIGATION (COMPASS-FREE)    */}
@@ -1837,7 +1862,9 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </div>
         )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
