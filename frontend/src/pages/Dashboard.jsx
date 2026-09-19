@@ -27,8 +27,17 @@ import {
   Radio,
   Eye,
   ArrowRight,
-  Maximize2
+  Maximize2,
+  RefreshCw,
+  Crosshair,
+  Navigation
 } from "lucide-react";
+import {
+  INDIA_MAP_OUTLINE_PATH,
+  INDIA_REGION_PATHS,
+  REGION_VIEWPORTS,
+  INDIA_RISK_ZONES
+} from "../Data/indiaRiskZones";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -59,6 +68,12 @@ export default function Dashboard() {
     weather: false,
   });
   const [layersOpen, setLayersOpen] = useState(true);
+
+  // ─── MAP REGION & VIEWPORT STATE (PAN-INDIA & NER) ────────────────────────
+  const [selectedRegion, setSelectedRegion] = useState("all");
+  const [activeZone, setActiveZone] = useState(() => INDIA_RISK_ZONES[0]); // NH-10 baseline
+  const [inspectedZone, setInspectedZone] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   // ─── MODALS & OVERLAYS ───────────────────────────────────────────────────
   const [whyCriticalOpen, setWhyCriticalOpen] = useState(false);
@@ -92,6 +107,49 @@ export default function Dashboard() {
     setSosProgress(0);
     if (holdTimerRef.current) {
       clearInterval(holdTimerRef.current);
+    }
+  };
+
+  // ─── DYNAMIC MAP VIEWPORT & CAMERA COMPUTATION ────────────────────────────
+  const currentViewport = REGION_VIEWPORTS[selectedRegion] || REGION_VIEWPORTS.all;
+
+  const getActiveViewBox = () => {
+    if (selectedRegion === "all" && zoomLevel === 1) return "0 0 1000 680";
+    if (selectedRegion === "ner" && zoomLevel === 1) return "540 120 360 360";
+    if (selectedRegion === "himalayas" && zoomLevel === 1) return "260 30 260 190";
+    if (selectedRegion === "south" && zoomLevel === 1) return "260 480 180 200";
+    if (selectedRegion === "east" && zoomLevel === 1) return "440 330 190 160";
+
+    const parts = (currentViewport.viewBox || "0 0 1000 680").split(" ").map(Number);
+    const [x, y, w, h] = parts;
+    const factor = zoomLevel;
+    const newW = w / factor;
+    const newH = h / factor;
+    const newX = x + (w - newW) / 2;
+    const newY = y + (h - newH) / 2;
+    return `${newX} ${newY} ${newW} ${newH}`;
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 0.35, 3.2));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 0.35, 1));
+  };
+
+  const handleResetView = () => {
+    setSelectedRegion("all");
+    setZoomLevel(1);
+    setActiveZone(INDIA_RISK_ZONES[0]);
+    setInspectedZone(null);
+  };
+
+  const handleSelectZone = (zone) => {
+    setActiveZone(zone);
+    setInspectedZone(zone);
+    if (zone.region && zone.region !== selectedRegion && selectedRegion !== "all") {
+      setSelectedRegion(zone.region);
     }
   };
 
@@ -355,11 +413,13 @@ export default function Dashboard() {
               alignItems: "center",
               justifyContent: "space-between",
               backgroundColor: "rgba(10, 18, 36, 0.7)",
+              flexWrap: "wrap",
+              gap: "8px",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <span style={{ fontSize: "0.96rem", fontWeight: "800", color: "#f8fafc" }}>
-                Live Disaster Map
+                Live Disaster Map — India & NER Risk Command
               </span>
               <span
                 style={{
@@ -387,29 +447,146 @@ export default function Dashboard() {
                 />
                 LIVE
               </span>
+              <span
+                style={{
+                  backgroundColor: selectedRegion === "ner" ? "rgba(239, 68, 68, 0.15)" : "rgba(56, 189, 248, 0.15)",
+                  color: selectedRegion === "ner" ? "#f87171" : "#38bdf8",
+                  border: `1px solid ${selectedRegion === "ner" ? "rgba(239, 68, 68, 0.35)" : "rgba(56, 189, 248, 0.35)"}`,
+                  borderRadius: "6px",
+                  fontSize: "0.62rem",
+                  fontWeight: "800",
+                  padding: "2px 6px",
+                }}
+              >
+                {currentViewport.badge}
+              </span>
             </div>
             <div style={{ fontSize: "0.72rem", color: "#94a3b8", fontFamily: "var(--font-mono, monospace)" }}>
               Last updated: {currentTime}
             </div>
           </div>
 
-          {/* Map Viewport Canvas with Topo Imagery & SVG Interactive Overlays */}
+          {/* ── REGION QUICK-JUMP TOOLBAR ── */}
+          <div
+            style={{
+              padding: "7px 14px",
+              backgroundColor: "rgba(8, 14, 28, 0.85)",
+              borderBottom: "1px solid rgba(56, 189, 248, 0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "8px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.66rem", fontWeight: "800", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: "4px" }}>
+                Regions:
+              </span>
+              {Object.entries(REGION_VIEWPORTS).map(([key, v]) => {
+                const isActive = selectedRegion === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setSelectedRegion(key);
+                      setZoomLevel(1);
+                      if (key === "ner") {
+                        setActiveZone(INDIA_RISK_ZONES[0]); // NH-10
+                      }
+                    }}
+                    style={{
+                      background: isActive
+                        ? key === "ner"
+                          ? "linear-gradient(135deg, rgba(225, 29, 72, 0.35) 0%, rgba(15, 23, 42, 0.8) 100%)"
+                          : "linear-gradient(135deg, rgba(2, 132, 199, 0.35) 0%, rgba(15, 23, 42, 0.8) 100%)"
+                        : "rgba(15, 23, 42, 0.6)",
+                      border: `1px solid ${isActive ? (key === "ner" ? "#ef4444" : "#38bdf8") : "rgba(255, 255, 255, 0.1)"}`,
+                      borderRadius: "6px",
+                      color: isActive ? "#ffffff" : "#94a3b8",
+                      fontSize: "0.68rem",
+                      fontWeight: isActive ? "800" : "600",
+                      padding: "3px 9px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      boxShadow: isActive ? (key === "ner" ? "0 0 12px rgba(239, 68, 68, 0.4)" : "0 0 12px rgba(56, 189, 248, 0.3)") : "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <span>{v.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <button
+                onClick={handleResetView}
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(148, 163, 184, 0.2)",
+                  borderRadius: "5px",
+                  color: "#94a3b8",
+                  fontSize: "0.64rem",
+                  padding: "2px 7px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  cursor: "pointer",
+                }}
+                title="Reset View to Full India"
+              >
+                <RefreshCw size={10} />
+                <span>Reset View</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ── ACTIVE CORRIDOR STATUS INTEL RIBBON ── */}
+          <div
+            style={{
+              padding: "4px 14px",
+              backgroundColor: "rgba(6, 12, 24, 0.9)",
+              borderBottom: "1px solid rgba(56, 189, 248, 0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: "0.66rem",
+              color: "#cbd5e1",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ color: "#ef4444", fontWeight: "800" }}>⚠️ Active Corridor:</span>
+              <span style={{ fontWeight: "700", color: "#ffffff" }}>{activeZone?.name}</span>
+              <span style={{ color: "#64748b" }}>·</span>
+              <span style={{ color: "#38bdf8" }}>{activeZone?.highway} ({activeZone?.state})</span>
+              <span style={{ color: "#64748b" }}>·</span>
+              <span style={{ color: activeZone?.levelColor, fontWeight: "800" }}>{activeZone?.lsi}</span>
+            </div>
+            <span style={{ color: "#94a3b8", fontSize: "0.62rem" }}>
+              {selectedRegion === "ner" ? "🏔️ 8 NER Critical Corridors Active" : "🌐 Click any Risk Zone Pin to inspect telemetry"}
+            </span>
+          </div>
+
+          {/* ── MAP VIEWPORT CANVAS (INDIA VECTOR & HAZARD OVERLAYS) ── */}
           <div
             style={{
               position: "relative",
-              height: "440px",
+              height: "520px",
               width: "100%",
               overflow: "hidden",
-              backgroundColor: "#0a1917",
+              backgroundColor: "#061019",
               backgroundImage: `
-                radial-gradient(ellipse at 48% 42%, rgba(225, 29, 72, 0.28) 0%, transparent 45%),
-                radial-gradient(ellipse at 60% 65%, rgba(245, 158, 11, 0.22) 0%, transparent 40%),
-                radial-gradient(circle at 35% 70%, rgba(16, 185, 129, 0.15) 0%, transparent 35%),
-                linear-gradient(135deg, #0d2818 0%, #041f1e 40%, #081a24 100%)
+                radial-gradient(ellipse at 72% 36%, rgba(225, 29, 72, 0.22) 0%, transparent 45%),
+                radial-gradient(ellipse at 38% 18%, rgba(245, 158, 11, 0.16) 0%, transparent 40%),
+                radial-gradient(circle at 35% 76%, rgba(16, 185, 129, 0.12) 0%, transparent 35%),
+                linear-gradient(135deg, #07151e 0%, #05131b 40%, #030b14 100%)
               `,
             }}
           >
-            {/* Topographic Elevation Contours Simulation */}
+            {/* Topographic Elevation Contours Simulation & Geographic India Base */}
             <svg
               style={{
                 position: "absolute",
@@ -417,322 +594,605 @@ export default function Dashboard() {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                pointerEvents: "none",
-                opacity: 0.65,
+                transition: "viewBox 0.55s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
-              viewBox="0 0 800 440"
-              preserveAspectRatio="none"
+              viewBox={getActiveViewBox()}
+              preserveAspectRatio="xMidYMid meet"
             >
               <defs>
-                <pattern id="contourGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(56, 189, 248, 0.05)" strokeWidth="1" />
+                <pattern id="contourGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(56, 189, 248, 0.04)" strokeWidth="1" />
                 </pattern>
                 {/* Glowing hazard pulse filter */}
-                <filter id="hazardGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="6" result="blur" />
+                <filter id="hazardGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="7" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
 
-              <rect width="800" height="440" fill="url(#contourGrid)" />
+              {/* Background Grid */}
+              <rect x="0" y="0" width="1000" height="680" fill="url(#contourGrid)" />
 
-              {/* Mountain ridge elevation lines */}
-              <path d="M 50,180 Q 200,60 400,120 T 750,90" fill="none" stroke="rgba(34, 197, 94, 0.18)" strokeWidth="1.5" />
-              <path d="M 30,220 Q 250,110 450,170 T 780,160" fill="none" stroke="rgba(34, 197, 94, 0.2)" strokeWidth="1.5" />
-              <path d="M 80,310 Q 320,240 520,290 T 790,260" fill="none" stroke="rgba(34, 197, 94, 0.16)" strokeWidth="1.5" />
+              {/* ── INDIA GEOGRAPHIC LANDMASS SILHOUETTE ── */}
+              <path
+                d={INDIA_MAP_OUTLINE_PATH}
+                fill="rgba(11, 23, 38, 0.88)"
+                stroke={selectedRegion === "ner" ? "rgba(56, 189, 248, 0.3)" : "rgba(56, 189, 248, 0.55)"}
+                strokeWidth={selectedRegion === "all" ? 1.6 : 1}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
 
-              {/* ── 1. LAYER: DISASTER RISK ZONES ── */}
+              {/* ── GEOGRAPHIC CORRIDORS & RIVERS (BRAHMAPUTRA, TEESTA, GANGA) ── */}
+              {INDIA_REGION_PATHS.map((item) => (
+                <path
+                  key={item.id}
+                  d={item.d}
+                  fill="none"
+                  stroke={item.stroke}
+                  strokeWidth={item.width || "1.5"}
+                  strokeDasharray={item.dash !== "none" ? item.dash : undefined}
+                  strokeLinecap="round"
+                />
+              ))}
+
+              {/* Prominent NER Region Boundary Highlight */}
+              <polygon
+                points="575,200 660,140 880,140 880,330 790,450 690,400 575,280"
+                fill={selectedRegion === "ner" ? "rgba(225, 29, 72, 0.06)" : "rgba(56, 189, 248, 0.03)"}
+                stroke={selectedRegion === "ner" ? "rgba(239, 68, 68, 0.5)" : "rgba(56, 189, 248, 0.25)"}
+                strokeWidth="1.2"
+                strokeDasharray="4,4"
+              />
+
+              {/* ── 1. LAYER: DISASTER RISK ZONES (POLYGONS LIKE NH-10) ── */}
               {mapLayers.disasterRisk && (
                 <>
-                  {/* Medium Risk Amber Area */}
-                  <polygon
-                    points="260,180 380,140 470,190 410,260 280,240"
-                    fill="rgba(245, 158, 11, 0.22)"
-                    stroke="#f59e0b"
-                    strokeWidth="1.8"
-                    strokeDasharray="4,4"
-                  />
-
-                  {/* Critical Risk Red Hazard Zone */}
-                  <polygon
-                    points="320,110 440,90 480,160 370,185 300,150"
-                    fill="rgba(239, 68, 68, 0.38)"
-                    stroke="#ef4444"
-                    strokeWidth="2.5"
-                    filter="url(#hazardGlow)"
-                  />
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isCurrent = activeZone?.id === zone.id;
+                    return (
+                      <g key={`zone-poly-${zone.id}`}>
+                        {/* Warning Amber Perimeter */}
+                        {zone.polygons?.warning && (
+                          <polygon
+                            points={zone.polygons.warning}
+                            fill="rgba(245, 158, 11, 0.18)"
+                            stroke="#f59e0b"
+                            strokeWidth="1.5"
+                            strokeDasharray="4,4"
+                          />
+                        )}
+                        {/* Critical Risk Red Hazard Zone with Pulsing Glow */}
+                        {zone.polygons?.critical && (
+                          <polygon
+                            points={zone.polygons.critical}
+                            fill={zone.level === "CRITICAL" ? "rgba(239, 68, 68, 0.36)" : "rgba(249, 115, 22, 0.28)"}
+                            stroke={zone.levelColor}
+                            strokeWidth={isCurrent ? "3" : "1.8"}
+                            filter="url(#hazardGlow)"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleSelectZone(zone)}
+                          />
+                        )}
+                      </g>
+                    );
+                  })}
                 </>
               )}
 
-              {/* ── 2. LAYER: ROADS & EVACUATION ROUTE ── */}
+              {/* ── 2. LAYER: ROADS & EVACUATION HIGHWAYS (LIKE NH-10) ── */}
               {mapLayers.roads && (
                 <>
-                  {/* Background road network */}
-                  <path
-                    d="M 120,380 Q 260,340 380,270 T 560,190 T 720,130"
-                    fill="none"
-                    stroke="#334155"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                  />
-                  {/* Evacuation Route NH-10 (glowing dashed line) */}
-                  <path
-                    d="M 120,380 Q 260,340 380,270 T 560,190 T 720,130"
-                    fill="none"
-                    stroke="#38bdf8"
-                    strokeWidth="3.5"
-                    strokeDasharray="8,6"
-                    strokeLinecap="round"
-                  />
-                  {/* Secondary route */}
-                  <path
-                    d="M 280,140 Q 350,220 440,310 T 620,360"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="3"
-                    strokeDasharray="6,4"
-                  />
+                  {INDIA_RISK_ZONES.map((zone) => (
+                    <g key={`roads-${zone.id}`}>
+                      {/* Underlying Road Bed */}
+                      {zone.evacuationRoad && (
+                        <path
+                          d={zone.evacuationRoad}
+                          fill="none"
+                          stroke="#1e293b"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                        />
+                      )}
+                      {/* Evacuation Route (Cyan Glowing Dashed Line) */}
+                      {zone.evacuationRoad && (
+                        <path
+                          d={zone.evacuationRoad}
+                          fill="none"
+                          stroke="#38bdf8"
+                          strokeWidth="2.8"
+                          strokeDasharray="7,5"
+                          strokeLinecap="round"
+                          filter="url(#cyanGlow)"
+                        />
+                      )}
+                      {/* Secondary Alternate Route (Green Dashed Line) */}
+                      {zone.secondaryRoad && (
+                        <path
+                          d={zone.secondaryRoad}
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="2"
+                          strokeDasharray="5,4"
+                        />
+                      )}
+                    </g>
+                  ))}
+                </>
+              )}
+
+              {/* ── 3. LAYER: INTERACTIVE RISK ZONE CALLOUT MARKERS (LIKE NH-10) ── */}
+              {mapLayers.disasterRisk && (
+                <>
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isCurrent = activeZone?.id === zone.id;
+                    const isNer = zone.region === "ner";
+                    // Scale badges in zoomed modes vs Pan-India
+                    const boxW = selectedRegion === "all" ? 170 : 130;
+                    const boxH = selectedRegion === "all" ? 44 : 36;
+                    const fontSize = selectedRegion === "all" ? "10px" : "8px";
+                    const iconSize = selectedRegion === "all" ? 13 : 10;
+
+                    return (
+                      <foreignObject
+                        key={`pin-${zone.id}`}
+                        x={zone.center.x - boxW / 2}
+                        y={zone.center.y - boxH}
+                        width={boxW}
+                        height={boxH + 10}
+                        style={{ overflow: "visible", pointerEvents: "auto" }}
+                      >
+                        <div
+                          onClick={() => handleSelectZone(zone)}
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            transform: isCurrent ? "scale(1.12)" : "scale(1)",
+                            transition: "transform 0.18s ease",
+                          }}
+                          title={`${zone.name} — ${zone.subtitle} (${zone.level})`}
+                        >
+                          <div
+                            style={{
+                              backgroundColor: zone.level === "CRITICAL" ? "rgba(225, 29, 72, 0.95)" : "rgba(217, 119, 6, 0.95)",
+                              color: "#ffffff",
+                              padding: selectedRegion === "all" ? "4px 8px" : "2px 6px",
+                              borderRadius: "7px",
+                              fontSize: fontSize,
+                              fontWeight: "800",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              boxShadow: isCurrent ? "0 0 20px rgba(225, 29, 72, 0.95)" : "0 2px 10px rgba(0,0,0,0.6)",
+                              border: isCurrent ? "1.5px solid #ffffff" : "1px solid rgba(255, 255, 255, 0.6)",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <AlertTriangle size={iconSize} color="#ffffff" />
+                            <span>{zone.name}</span>
+                          </div>
+                          {/* Triangle Pointer */}
+                          <div
+                            style={{
+                              width: selectedRegion === "all" ? "9px" : "7px",
+                              height: selectedRegion === "all" ? "9px" : "7px",
+                              backgroundColor: zone.levelColor,
+                              transform: "rotate(45deg) translateY(-4px)",
+                            }}
+                          />
+                        </div>
+                      </foreignObject>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* ── 4. LAYER: AFFECTED POPULATION & VILLAGE BADGES (LIKE NH-10) ── */}
+              {mapLayers.affectedPopulation && (
+                <>
+                  {INDIA_RISK_ZONES.map((zone) =>
+                    zone.villages?.map((village, vIdx) => {
+                      const vW = selectedRegion === "all" ? 140 : 110;
+                      const vH = selectedRegion === "all" ? 28 : 22;
+                      const vFontSize = selectedRegion === "all" ? "9.5px" : "7px";
+
+                      return (
+                        <foreignObject
+                          key={`v-${zone.id}-${vIdx}`}
+                          x={village.x - vW / 2}
+                          y={village.y - vH / 2}
+                          width={vW}
+                          height={vH}
+                          style={{ overflow: "visible", pointerEvents: "none" }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              backgroundColor: "rgba(15, 23, 42, 0.9)",
+                              border: `1px solid ${village.color}88`,
+                              borderRadius: "14px",
+                              padding: "2px 6px",
+                              fontSize: vFontSize,
+                              color: "#f8fafc",
+                              fontWeight: "700",
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
+                              whiteSpace: "nowrap",
+                              width: "max-content",
+                            }}
+                          >
+                            <span>🏘️</span>
+                            <span>
+                              {village.name} <strong style={{ color: village.color }}>{village.pop}</strong>
+                            </span>
+                          </div>
+                        </foreignObject>
+                      );
+                    })
+                  )}
+                </>
+              )}
+
+              {/* ── 5. LAYER: RESCUE UNITS (BLUE VEHICLES LIKE NH-10) ── */}
+              {mapLayers.rescueUnits && (
+                <>
+                  {INDIA_RISK_ZONES.map((zone) =>
+                    zone.rescueUnits?.map((unit) => {
+                      const uSize = selectedRegion === "all" ? 24 : 18;
+                      const iconSize = selectedRegion === "all" ? 12 : 9;
+                      return (
+                        <foreignObject
+                          key={`ru-${unit.id}`}
+                          x={unit.x - uSize / 2}
+                          y={unit.y - uSize / 2}
+                          width={uSize}
+                          height={uSize}
+                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                        >
+                          <div
+                            onClick={() => handleSelectZone(zone)}
+                            style={{
+                              width: `${uSize}px`,
+                              height: `${uSize}px`,
+                              borderRadius: "50%",
+                              backgroundColor: "#0284c7",
+                              border: "1.8px solid #ffffff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxShadow: "0 0 12px rgba(2, 132, 199, 0.9)",
+                              color: "#ffffff",
+                              cursor: "pointer",
+                            }}
+                            title={`${unit.name} (${unit.status}) — ETA: ${unit.eta}`}
+                          >
+                            <Truck size={iconSize} />
+                          </div>
+                        </foreignObject>
+                      );
+                    })
+                  )}
+                </>
+              )}
+
+              {/* ── 6. LAYER: SAFE SHELTERS (GREEN HOUSES LIKE NH-10) ── */}
+              {mapLayers.shelters && (
+                <>
+                  {INDIA_RISK_ZONES.map((zone) =>
+                    zone.shelters?.map((shelter) => {
+                      const sSize = selectedRegion === "all" ? 22 : 16;
+                      const iconSize = selectedRegion === "all" ? 11 : 8;
+                      return (
+                        <foreignObject
+                          key={`sh-${shelter.id}`}
+                          x={shelter.x - sSize / 2}
+                          y={shelter.y - sSize / 2}
+                          width={sSize}
+                          height={sSize}
+                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                        >
+                          <div
+                            onClick={() => handleSelectZone(zone)}
+                            style={{
+                              width: `${sSize}px`,
+                              height: `${sSize}px`,
+                              borderRadius: "50%",
+                              backgroundColor: "#16a34a",
+                              border: "1.8px solid #ffffff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#ffffff",
+                              boxShadow: "0 0 10px rgba(22, 163, 74, 0.9)",
+                              cursor: "pointer",
+                            }}
+                            title={`${shelter.name} — Capacity: ${shelter.capacity}`}
+                          >
+                            <Home size={iconSize} />
+                          </div>
+                        </foreignObject>
+                      );
+                    })
+                  )}
+                </>
+              )}
+
+              {/* ── 7. LAYER: ROAD BLOCKS (RED BADGES LIKE NH-10) ── */}
+              {mapLayers.roads && (
+                <>
+                  {INDIA_RISK_ZONES.map((zone) =>
+                    zone.blockedPoints?.map((bp) => {
+                      const bSize = selectedRegion === "all" ? 20 : 15;
+                      const bFontSize = selectedRegion === "all" ? "10px" : "7.5px";
+                      return (
+                        <foreignObject
+                          key={`bp-${bp.id}`}
+                          x={bp.x - bSize / 2}
+                          y={bp.y - bSize / 2}
+                          width={bSize}
+                          height={bSize}
+                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                        >
+                          <div
+                            style={{
+                              width: `${bSize}px`,
+                              height: `${bSize}px`,
+                              borderRadius: "50%",
+                              backgroundColor: "#dc2626",
+                              border: "1.5px solid #ffffff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#ffffff",
+                              fontSize: bFontSize,
+                              boxShadow: "0 0 12px rgba(220, 38, 38, 0.9)",
+                              cursor: "pointer",
+                            }}
+                            title={`Road Blocked: ${bp.name} (${bp.road})`}
+                          >
+                            ⛔
+                          </div>
+                        </foreignObject>
+                      );
+                    })
+                  )}
+                </>
+              )}
+
+              {/* ── 8. LAYER: IOT SENSORS (PURPLE NODES) ── */}
+              {mapLayers.iotSensors && (
+                <>
+                  {INDIA_RISK_ZONES.map((zone) =>
+                    zone.iotSensors?.map((sensor) => {
+                      const sensSize = selectedRegion === "all" ? 22 : 16;
+                      const iconSize = selectedRegion === "all" ? 11 : 8;
+                      return (
+                        <foreignObject
+                          key={`iot-${sensor.id}`}
+                          x={sensor.x - sensSize / 2}
+                          y={sensor.y - sensSize / 2}
+                          width={sensSize}
+                          height={sensSize}
+                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                        >
+                          <div
+                            style={{
+                              width: `${sensSize}px`,
+                              height: `${sensSize}px`,
+                              borderRadius: "50%",
+                              backgroundColor: "#8b5cf6",
+                              border: "1.8px solid #ffffff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#ffffff",
+                              boxShadow: "0 0 12px rgba(139, 92, 246, 0.9)",
+                              cursor: "pointer",
+                            }}
+                            title={`IoT Node: ${sensor.name} | Saturation: ${sensor.sat} | Tilt: ${sensor.tilt}`}
+                          >
+                            <Radio size={iconSize} />
+                          </div>
+                        </foreignObject>
+                      );
+                    })
+                  )}
                 </>
               )}
             </svg>
 
-            {/* ── INTERACTIVE PINS & LABELS OVER MAP ── */}
-            {/* 1. Critical Landslide Alert Marker */}
-            {mapLayers.disasterRisk && (
+            {/* ── FLOATING TACTICAL HUD DRAWER (SELECTED RISK ZONE INTELLIGENCE) ── */}
+            {inspectedZone && (
               <div
                 style={{
                   position: "absolute",
-                  top: "24%",
-                  left: "44%",
-                  transform: "translate(-50%, -50%)",
+                  bottom: "12px",
+                  left: "115px",
+                  right: "175px",
+                  backgroundColor: "rgba(9, 17, 34, 0.95)",
+                  backdropFilter: "blur(14px)",
+                  border: `1.5px solid ${inspectedZone.levelColor}`,
+                  borderRadius: "12px",
+                  padding: "12px 16px",
+                  boxShadow: `0 8px 30px rgba(0, 0, 0, 0.8), 0 0 18px ${inspectedZone.levelColor}44`,
+                  zIndex: 25,
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "center",
-                  zIndex: 10,
+                  gap: "8px",
+                  animation: "fadeIn 0.2s ease",
                 }}
               >
+                {/* HUD Top Bar */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                    <span
+                      style={{
+                        backgroundColor: inspectedZone.levelColor,
+                        color: "#ffffff",
+                        fontSize: "0.62rem",
+                        fontWeight: "900",
+                        padding: "2px 7px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      {inspectedZone.level}
+                    </span>
+                    <span style={{ fontSize: "0.88rem", fontWeight: "900", color: "#ffffff" }}>
+                      {inspectedZone.name}
+                    </span>
+                    <span style={{ fontSize: "0.72rem", color: "#38bdf8", fontWeight: "700" }}>
+                      {inspectedZone.subtitle}
+                    </span>
+                    <span
+                      style={{
+                        backgroundColor: "rgba(56, 189, 248, 0.15)",
+                        color: "#38bdf8",
+                        border: "1px solid rgba(56, 189, 248, 0.3)",
+                        padding: "1px 6px",
+                        borderRadius: "4px",
+                        fontSize: "0.62rem",
+                        fontWeight: "800",
+                      }}
+                    >
+                      {inspectedZone.lsi}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setInspectedZone(null)}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#94a3b8",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "2px",
+                    }}
+                    title="Dismiss Zone HUD"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+
+                {/* HUD 3-Column Metrics Grid */}
                 <div
                   style={{
-                    backgroundColor: "rgba(225, 29, 72, 0.95)",
-                    color: "#ffffff",
-                    padding: "6px 12px",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+                    gap: "10px",
+                    fontSize: "0.68rem",
+                    backgroundColor: "rgba(15, 23, 42, 0.6)",
+                    padding: "8px 10px",
                     borderRadius: "8px",
-                    fontSize: "0.72rem",
-                    fontWeight: "800",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    boxShadow: "0 0 20px rgba(225, 29, 72, 0.8)",
-                    border: "1.5px solid #fecdd3",
+                    border: "1px solid rgba(255, 255, 255, 0.06)",
                   }}
                 >
-                  <AlertTriangle size={15} color="#ffffff" />
-                  <span>Landslide Risk Zone NH-10</span>
-                </div>
-                <div
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    backgroundColor: "#ef4444",
-                    transform: "rotate(45deg) translateY(-5px)",
-                  }}
-                />
-              </div>
-            )}
+                  {/* Col 1: Population & Settlements */}
+                  <div>
+                    <div style={{ color: "#94a3b8", fontWeight: "700", marginBottom: "2px" }}>
+                      👥 Population at Risk ({inspectedZone.details?.exposed} exposed):
+                    </div>
+                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginTop: "4px" }}>
+                      {inspectedZone.villages?.map((v, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            backgroundColor: "rgba(245, 158, 11, 0.15)",
+                            color: "#fbbf24",
+                            padding: "1px 5px",
+                            borderRadius: "4px",
+                            fontSize: "0.62rem",
+                            fontWeight: "700",
+                          }}
+                        >
+                          {v.name} ({v.pop})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
 
-            {/* 2. Villages & Population Pins */}
-            {mapLayers.affectedPopulation && (
-              <>
-                {/* Towang Village */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "33%",
-                    left: "30%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    backgroundColor: "rgba(15, 23, 42, 0.88)",
-                    border: "1px solid rgba(245, 158, 11, 0.5)",
-                    borderRadius: "20px",
-                    padding: "3px 9px",
-                    fontSize: "0.66rem",
-                    color: "#f8fafc",
-                    fontWeight: "700",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  <span style={{ color: "#f59e0b" }}>🏘️</span>
-                  <span>Towang village <strong style={{ color: "#fbbf24" }}>98 people</strong></span>
-                </div>
+                  {/* Col 2: Highway & Road Breach */}
+                  <div>
+                    <div style={{ color: "#94a3b8", fontWeight: "700", marginBottom: "2px" }}>
+                      🛣️ Corridor Status ({inspectedZone.highway}):
+                    </div>
+                    <div style={{ color: "#f87171", fontWeight: "800", marginTop: "2px" }}>
+                      ⛔ {inspectedZone.blockedPoints?.[0]?.name || "Road block alert active"}
+                    </div>
+                    <div style={{ color: "#38bdf8", fontSize: "0.62rem", marginTop: "2px" }}>
+                      ✅ Cyan Dashed Evacuation Corridor open
+                    </div>
+                  </div>
 
-                {/* Khero Village */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "56%",
-                    left: "42%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    backgroundColor: "rgba(15, 23, 42, 0.88)",
-                    border: "1px solid rgba(245, 158, 11, 0.5)",
-                    borderRadius: "20px",
-                    padding: "3px 9px",
-                    fontSize: "0.66rem",
-                    color: "#f8fafc",
-                    fontWeight: "700",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  <span style={{ color: "#f59e0b" }}>🏘️</span>
-                  <span>Khero village <strong style={{ color: "#fbbf24" }}>212 people</strong></span>
+                  {/* Col 3: Sensor & Environmental Intel */}
+                  <div>
+                    <div style={{ color: "#94a3b8", fontWeight: "700", marginBottom: "2px" }}>
+                      🌧️ Environmental & Sensor Readings:
+                    </div>
+                    <div style={{ color: "#cbd5e1" }}>
+                      Rainfall: <strong style={{ color: "#38bdf8" }}>{inspectedZone.details?.rainfall}</strong> · Soil: <strong style={{ color: "#f87171" }}>{inspectedZone.details?.soilSaturation}</strong>
+                    </div>
+                    <div style={{ color: "#a78bfa", fontSize: "0.62rem", marginTop: "2px" }}>
+                      📡 {inspectedZone.iotSensors?.[0]?.name}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Ranipur Village */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "68%",
-                    left: "55%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    backgroundColor: "rgba(15, 23, 42, 0.88)",
-                    border: "1px solid rgba(34, 197, 94, 0.5)",
-                    borderRadius: "20px",
-                    padding: "3px 9px",
-                    fontSize: "0.66rem",
-                    color: "#f8fafc",
-                    fontWeight: "700",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  <span style={{ color: "#22c55e" }}>🏘️</span>
-                  <span>Ranipur village <strong style={{ color: "#4ade80" }}>161 people</strong></span>
+                {/* HUD Action Buttons */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "2px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <button
+                      onClick={() => setSosModalOpen(true)}
+                      style={{
+                        backgroundColor: "#e11d48",
+                        border: "none",
+                        borderRadius: "6px",
+                        color: "#ffffff",
+                        padding: "5px 12px",
+                        fontSize: "0.68rem",
+                        fontWeight: "800",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <AlertTriangle size={12} />
+                      <span>Issue Evacuation Broadcast</span>
+                    </button>
+                    <Link
+                      to={`/map?zone=${inspectedZone.id}`}
+                      style={{
+                        backgroundColor: "rgba(2, 132, 199, 0.25)",
+                        border: "1px solid rgba(56, 189, 248, 0.5)",
+                        borderRadius: "6px",
+                        color: "#38bdf8",
+                        padding: "5px 12px",
+                        fontSize: "0.68rem",
+                        fontWeight: "800",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <Navigation size={12} />
+                      <span>Open in In-App GIS</span>
+                    </Link>
+                  </div>
+                  <div style={{ color: "#94a3b8", fontSize: "0.64rem" }}>
+                    Response ETA: <strong style={{ color: "#38bdf8" }}>{inspectedZone.details?.clearingEta}</strong>
+                  </div>
                 </div>
-              </>
-            )}
-
-            {/* 3. Rescue Units (Blue vehicles) */}
-            {mapLayers.rescueUnits && (
-              <>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "28%",
-                    left: "24%",
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    backgroundColor: "#0284c7",
-                    border: "2px solid #ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 0 14px rgba(2, 132, 199, 0.8)",
-                    color: "#ffffff",
-                    cursor: "pointer",
-                  }}
-                  title="Rescue Unit 07 (En Route)"
-                >
-                  <Truck size={14} />
-                </div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "43%",
-                    left: "58%",
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    backgroundColor: "#0284c7",
-                    border: "2px solid #ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 0 14px rgba(2, 132, 199, 0.8)",
-                    color: "#ffffff",
-                    cursor: "pointer",
-                  }}
-                  title="Rescue Unit 12 (On Site)"
-                >
-                  <Truck size={14} />
-                </div>
-              </>
-            )}
-
-            {/* 4. Safe Shelters (Green pins) */}
-            {mapLayers.shelters && (
-              <>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "38%",
-                    left: "45%",
-                    width: "26px",
-                    height: "26px",
-                    borderRadius: "50%",
-                    backgroundColor: "#16a34a",
-                    border: "2px solid #ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#ffffff",
-                    boxShadow: "0 0 12px rgba(22, 163, 74, 0.8)",
-                  }}
-                  title="Safe Shelter Alpha (Capacity: 450)"
-                >
-                  <Home size={13} />
-                </div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "58%",
-                    left: "33%",
-                    width: "26px",
-                    height: "26px",
-                    borderRadius: "50%",
-                    backgroundColor: "#16a34a",
-                    border: "2px solid #ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#ffffff",
-                    boxShadow: "0 0 12px rgba(22, 163, 74, 0.8)",
-                  }}
-                  title="Safe Shelter Beta"
-                >
-                  <Home size={13} />
-                </div>
-              </>
-            )}
-
-            {/* 5. Blocked Road Indicator */}
-            {mapLayers.roads && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "48%",
-                  left: "58%",
-                  width: "22px",
-                  height: "22px",
-                  borderRadius: "50%",
-                  backgroundColor: "#dc2626",
-                  border: "2px solid #ffffff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#ffffff",
-                  fontSize: "0.75rem",
-                  fontWeight: "900",
-                  boxShadow: "0 0 10px rgba(220, 38, 38, 0.8)",
-                }}
-                title="Road Blocked (Debris on NH-10)"
-              >
-                ⛔
               </div>
             )}
 
@@ -784,7 +1244,7 @@ export default function Dashboard() {
                     { key: "affectedPopulation", label: "Affected Population" },
                     { key: "rescueUnits", label: "Rescue Units" },
                     { key: "shelters", label: "Shelters" },
-                    { key: "roads", label: "Roads" },
+                    { key: "roads", label: "Roads & Evac" },
                     { key: "iotSensors", label: "IoT Sensors" },
                     { key: "satellite", label: "Satellite" },
                     { key: "weather", label: "Weather" },
@@ -819,35 +1279,42 @@ export default function Dashboard() {
                 bottom: "14px",
                 left: "14px",
                 width: "90px",
-                height: "65px",
+                height: "68px",
                 backgroundColor: "rgba(8, 14, 28, 0.92)",
                 border: "1px solid rgba(56, 189, 248, 0.3)",
                 borderRadius: "8px",
                 padding: "4px",
                 boxShadow: "0 4px 15px rgba(0, 0, 0, 0.6)",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "space-between",
+                zIndex: 20,
               }}
             >
-              <svg viewBox="0 0 100 70" width="100%" height="100%">
+              <svg viewBox="0 0 100 70" width="100%" height="52">
+                {/* Mini India silhouette */}
                 <path
-                  d="M 15,20 L 45,10 L 80,18 L 88,48 L 65,62 L 25,58 Z"
-                  fill="rgba(56, 189, 248, 0.12)"
+                  d="M 32,2 L 40,8 L 47,18 L 58,23 L 60,20 L 68,16 L 85,16 L 87,22 L 82,33 L 78,42 L 72,40 L 65,33 L 57,36 L 52,40 L 46,48 L 40,57 L 36,65 L 34,60 L 29,50 L 25,38 L 17,37 L 16,33 L 21,21 L 26,12 Z"
+                  fill="rgba(56, 189, 248, 0.15)"
                   stroke="#0284c7"
-                  strokeWidth="1.5"
+                  strokeWidth="1.2"
                 />
-                {/* Red Target bounding box */}
+                {/* Red Target bounding box indicating active viewport */}
                 <rect
-                  x="42"
-                  y="26"
-                  width="18"
-                  height="14"
+                  x={selectedRegion === "ner" ? 58 : selectedRegion === "himalayas" ? 28 : selectedRegion === "south" ? 28 : selectedRegion === "east" ? 48 : 18}
+                  y={selectedRegion === "ner" ? 14 : selectedRegion === "himalayas" ? 4 : selectedRegion === "south" ? 48 : selectedRegion === "east" ? 33 : 4}
+                  width={selectedRegion === "all" ? 68 : 30}
+                  height={selectedRegion === "all" ? 60 : 26}
                   fill="rgba(239, 68, 68, 0.35)"
                   stroke="#ef4444"
-                  strokeWidth="1.5"
+                  strokeWidth="1.2"
+                  rx="2"
                 />
               </svg>
+              <span style={{ fontSize: "0.52rem", color: "#38bdf8", fontWeight: "800", textTransform: "uppercase" }}>
+                {selectedRegion}
+              </span>
             </div>
 
             {/* ── FLOATING OVERLAY: LEGEND (BOTTOM RIGHT) ── */}
@@ -871,7 +1338,7 @@ export default function Dashboard() {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#ef4444" }} />
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#ef4444", boxShadow: "0 0 6px #ef4444" }} />
                 <span>Critical Risk</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -883,28 +1350,28 @@ export default function Dashboard() {
                 <span>Medium Risk</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#22c55e" }} />
-                <span>Safe Zone</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <span style={{ color: "#38bdf8" }}>🚑</span>
                 <span>Rescue Unit</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <span style={{ color: "#22c55e" }}>🏠</span>
-                <span>Shelter</span>
+                <span>Safe Shelter</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "12px", height: "2px", backgroundColor: "#38bdf8" }} />
+                <span style={{ width: "12px", height: "2px", backgroundColor: "#38bdf8", display: "inline-block" }} />
                 <span>Evacuation Route</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <span style={{ color: "#ef4444" }}>⛔</span>
                 <span>Blocked Road</span>
               </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ color: "#8b5cf6" }}>📡</span>
+                <span>IoT Sensor</span>
+              </div>
             </div>
 
-            {/* Zoom Controls (Top Right) */}
+            {/* ── ZOOM CONTROLS (TOP RIGHT) ── */}
             <div
               style={{
                 position: "absolute",
@@ -917,6 +1384,7 @@ export default function Dashboard() {
               }}
             >
               <button
+                onClick={handleZoomIn}
                 style={{
                   width: "28px",
                   height: "28px",
@@ -927,10 +1395,12 @@ export default function Dashboard() {
                   fontSize: "0.9rem",
                   cursor: "pointer",
                 }}
+                title="Zoom In"
               >
                 +
               </button>
               <button
+                onClick={handleZoomOut}
                 style={{
                   width: "28px",
                   height: "28px",
@@ -941,8 +1411,28 @@ export default function Dashboard() {
                   fontSize: "0.9rem",
                   cursor: "pointer",
                 }}
+                title="Zoom Out"
               >
                 -
+              </button>
+              <button
+                onClick={handleResetView}
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "6px",
+                  backgroundColor: "rgba(15, 23, 42, 0.9)",
+                  border: "1px solid rgba(56, 189, 248, 0.3)",
+                  color: "#38bdf8",
+                  fontSize: "0.7rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title="Reset Map to Pan-India"
+              >
+                <RefreshCw size={12} />
               </button>
             </div>
           </div>
