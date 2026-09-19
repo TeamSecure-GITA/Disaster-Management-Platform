@@ -175,6 +175,19 @@ export default function App() {
             <Route path="/ml-kem-chaff" element={<Navigate to="/world-first-innovations?tab=quantum-chaff" replace />} />
             <Route path="/quantum-gossip-routing" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
             <Route path="/quantum-gossip" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
+            <Route path="/cmos-thermal" element={<Navigate to="/world-first-innovations?tab=cmos-thermal" replace />} />
+            <Route path="/dark-current-thermometer" element={<Navigate to="/world-first-innovations?tab=cmos-thermal" replace />} />
+            <Route path="/debris-temperature" element={<Navigate to="/world-first-innovations?tab=cmos-thermal" replace />} />
+            <Route path="/micro-infrasonic" element={<Navigate to="/world-first-innovations?tab=micro-infrasonic" replace />} />
+            <Route path="/structural-interferometry" element={<Navigate to="/world-first-innovations?tab=micro-infrasonic" replace />} />
+            <Route path="/bridge-health-monitor" element={<Navigate to="/world-first-innovations?tab=micro-infrasonic" replace />} />
+            <Route path="/water-profiler" element={<Navigate to="/world-first-innovations?tab=water-profiler" replace />} />
+            <Route path="/photonic-refraction" element={<Navigate to="/world-first-innovations?tab=water-profiler" replace />} />
+            <Route path="/water-purity" element={<Navigate to="/world-first-innovations?tab=water-profiler" replace />} />
+            <Route path="/sludge-analyzer" element={<Navigate to="/world-first-innovations?tab=water-profiler" replace />} />
+            <Route path="/parasitic-rf" element={<Navigate to="/world-first-innovations?tab=parasitic-rf" replace />} />
+            <Route path="/screen-rf-beacon" element={<Navigate to="/world-first-innovations?tab=parasitic-rf" replace />} />
+            <Route path="/emergency-radio-beacon" element={<Navigate to="/world-first-innovations?tab=parasitic-rf" replace />} />
             <Route path="/sound-wave-chirp" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/reverse-gps-radio" element={<Navigate to="/world-first-innovations" replace />} />
             <Route path="/citizen-vitals-triage" element={<Navigate to="/world-first-innovations" replace />} />

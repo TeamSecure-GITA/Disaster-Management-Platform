@@ -7,7 +7,7 @@ import {
   Layers, ChevronRight, Cpu, ArrowUpRight, Clock, Info, 
   Sparkles, Sliders, ExternalLink, Award, FileText,
   Wifi, ShieldCheck, Bluetooth, QrCode, BatteryCharging,
-  Waves, Lock, Network, Atom, Magnet
+  Waves, Lock, Network, Atom, Magnet, Thermometer, Droplet
 } from 'lucide-react';
 import CosmicRayMuonTrackerTab from '../components/worldfirst/CosmicRayMuonTrackerTab';
 import GeomagneticRuptureNavigationTab from '../components/worldfirst/GeomagneticRuptureNavigationTab';
@@ -22,6 +22,10 @@ import MagnetometerLocatorTab from '../components/worldfirst/MagnetometerLocator
 import ThermoelectricTapTab from '../components/worldfirst/ThermoelectricTapTab';
 import BarometricFlashFloodTab from '../components/worldfirst/BarometricFlashFloodTab';
 import QuantumGossipRoutingTab from '../components/worldfirst/QuantumGossipRoutingTab';
+import CmosDarkCurrentThermometerTab from '../components/worldfirst/CmosDarkCurrentThermometerTab';
+import MicroInfrasonicInterferometryTab from '../components/worldfirst/MicroInfrasonicInterferometryTab';
+import PhotonicWaterProfilerTab from '../components/worldfirst/PhotonicWaterProfilerTab';
+import ScreenCoilParasiticRfBeaconTab from '../components/worldfirst/ScreenCoilParasiticRfBeaconTab';
 
 export default function WorldFirstInnovationsSuite() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -804,6 +808,82 @@ export default function WorldFirstInnovationsSuite() {
             </div>
           </button>
 
+          {/* 14. CMOS DARK-CURRENT THERMAL THERMOMETER */}
+          <button
+            onClick={() => handleTabChange('cmos-thermal')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'cmos-thermal'
+                ? 'bg-indigo-950/80 border-indigo-400 text-white shadow-lg shadow-indigo-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 text-[9px] font-black rounded-full border border-indigo-500/30 animate-pulse">
+              #14 WORLD-1ST
+            </div>
+            <Thermometer className={`w-5 h-5 flex-shrink-0 ${activeTab === 'cmos-thermal' ? 'text-indigo-400 animate-pulse' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">CMOS Dark-Current</div>
+              <div className="text-[10px] text-slate-400">Ambient Debris Void Map</div>
+            </div>
+          </button>
+
+          {/* 15. MICRO-INFRASONIC STRUCTURAL INTERFEROMETRY */}
+          <button
+            onClick={() => handleTabChange('micro-infrasonic')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'micro-infrasonic'
+                ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-sky-500/20 text-sky-300 text-[9px] font-black rounded-full border border-sky-500/30 animate-pulse">
+              #15 WORLD-1ST
+            </div>
+            <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'micro-infrasonic' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Micro-Infrasonic</div>
+              <div className="text-[10px] text-slate-400">Bridge & Slope Health</div>
+            </div>
+          </button>
+
+          {/* 16. DISPLAY-PLANE PHOTONIC WATER PROFILER */}
+          <button
+            onClick={() => handleTabChange('water-profiler')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'water-profiler'
+                ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg shadow-cyan-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-500/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-500/30 animate-pulse">
+              #16 WORLD-1ST
+            </div>
+            <Droplet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'water-profiler' ? 'text-cyan-400 animate-bounce' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Photonic Water Refraction</div>
+              <div className="text-[10px] text-slate-400">Turbidity & Sludge Analyzer</div>
+            </div>
+          </button>
+
+          {/* 17. SCREEN-COIL PARASITIC RF BEACON */}
+          <button
+            onClick={() => handleTabChange('parasitic-rf')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'parasitic-rf'
+                ? 'bg-amber-950/80 border-amber-400 text-white shadow-lg shadow-amber-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-amber-500/20 text-amber-300 text-[9px] font-black rounded-full border border-amber-500/30 animate-pulse">
+              #17 WORLD-1ST
+            </div>
+            <Radio className={`w-5 h-5 flex-shrink-0 ${activeTab === 'parasitic-rf' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Parasitic RF Beacon</div>
+              <div className="text-[10px] text-slate-400">AM Inductive SOS Pulse</div>
+            </div>
+          </button>
+
           {/* SOUND-WAVE CHIRP */}
           <button
             onClick={() => setActiveTab('chirp')}
@@ -951,6 +1031,26 @@ export default function WorldFirstInnovationsSuite() {
         {/* FINAL SUITE TAB 3: BLE SPITTING PROTOCOL (MICRO-BURSTING) */}
         {/* ========================================================= */}
         {activeTab === 'ble-spitting' && <BleSpittingProtocolTab />}
+
+        {/* ========================================================= */}
+        {/* 14. CMOS DARK-CURRENT THERMAL THERMOMETER                 */}
+        {/* ========================================================= */}
+        {activeTab === 'cmos-thermal' && <CmosDarkCurrentThermometerTab />}
+
+        {/* ========================================================= */}
+        {/* 15. MICRO-INFRASONIC STRUCTURAL INTERFEROMETRY           */}
+        {/* ========================================================= */}
+        {activeTab === 'micro-infrasonic' && <MicroInfrasonicInterferometryTab />}
+
+        {/* ========================================================= */}
+        {/* 16. DISPLAY-PLANE PHOTONIC WATER PROFILER                 */}
+        {/* ========================================================= */}
+        {activeTab === 'water-profiler' && <PhotonicWaterProfilerTab />}
+
+        {/* ========================================================= */}
+        {/* 17. SCREEN-COIL PARASITIC RF RESONANCE BEACON             */}
+        {/* ========================================================= */}
+        {activeTab === 'parasitic-rf' && <ScreenCoilParasiticRfBeaconTab />}
         {/* ========================================================= */}
         {/* TAB 1: SOUND-WAVE DATA TRANSFER (CHIRP PROTOCOL)           */}
         {/* ========================================================= */}
