@@ -62,9 +62,8 @@ const overviewItems = [
 // ── 🚨 RESPONSE ──────────────────────────────────────────────────────────────
 const responseItems = [
   { key: "nav_sos",        fallback: "Emergency SOS",      icon: IconSos,        path: "/emergency-sos", badge: "SOS" },
-  { key: "nav_rescue",     fallback: "Rescue Operations",  icon: IconRescue,     path: "/rescue-centers" },
+  { key: "nav_rescue",     fallback: "Rescue Center",      icon: IconRescue,     path: "/rescue-centers" },
   { key: "nav_evacuation", fallback: "Evacuation Planner", icon: IconEvacuation, path: "/evacuation-planner" },
-  { key: "nav_shelter",    fallback: "Shelters",           icon: IconShelter,    path: "/shelter-finder" },
   { key: "nav_damage",     fallback: "Resources",          icon: IconDamage,     path: "/damage-assessment" },
   { key: "nav_relief",     fallback: "Responder Tracker",  icon: IconDelivery,   path: "/relief-tracker" },
 ];
