@@ -1,15 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   Cpu, BatteryCharging, Radio, Lightbulb, Zap, ShieldAlert, 
   RefreshCw, Play, Square, CheckCircle, AlertTriangle, 
   MapPin, Heart, Lock, Unlock, Sliders, ArrowUpRight, 
   Clock, Sparkles, Database, Network, Layers, HardDrive, 
   Share2, Compass, Waves, Fingerprint, Eye, EyeOff, 
-  Sun, Battery, Key, QrCode
+  Sun, Battery, Key, QrCode, ArrowLeft
 } from 'lucide-react';
+import ExtremeResilienceDeckOverview from '../components/resilience/ExtremeResilienceDeckOverview';
 
 export default function ExtremeResilienceSuite() {
+  const location = useLocation();
+  const [viewMode, setViewMode] = useState('deck'); // 'deck' | 'lab'
   const [activeTab, setActiveTab] = useState('wasm');
+
+  // Auto-switch to lab if a tab parameter is supplied in the URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    const viewParam = params.get('view');
+    if (tabParam) {
+      setActiveTab(tabParam);
+      setViewMode('lab');
+    } else if (viewParam === 'lab') {
+      setViewMode('lab');
+    }
+  }, [location.search]);
 
   // -------------------------------------------------------------
   // TAB 1: WEB-WASM DISTRIBUTED SUPERCOMPUTER
@@ -240,8 +257,31 @@ export default function ExtremeResilienceSuite() {
     rfStatus: 'Wi-Fi/LTE Bands Congested (0% Interference via Light)'
   });
 
+  if (viewMode === 'deck') {
+    return (
+      <ExtremeResilienceDeckOverview
+        onSwitchToLab={() => setViewMode('lab')}
+        onSelectLabTab={(tab) => {
+          setActiveTab(tab);
+          setViewMode('lab');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-8">
+      {/* Back to Overview Deck Button */}
+      <div className="max-w-7xl mx-auto mb-4">
+        <button
+          onClick={() => setViewMode('deck')}
+          className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 font-bold text-xs rounded-xl border border-slate-700 flex items-center gap-2 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Command Overview Deck
+        </button>
+      </div>
+
       {/* Header Banner */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-6">

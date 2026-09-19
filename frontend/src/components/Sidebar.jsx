@@ -105,7 +105,7 @@ const innovationItems = [
   { key: "nav_ner_topography", fallback: "Multi-Disaster Simulation",       icon: IconNERSuite,       path: "/ner-topography-suite",    badge: "NER" },
   { key: "nav_world_first",    fallback: "World-First Innovations",         icon: IconWorldFirst,     path: "/world-first-innovations", badge: "NOVEL" },
   { key: "nav_decentralized",  fallback: "Decentralized Resilience & SAR Radar", icon: IconDecentralized,  path: "/decentralized-resilience", badge: "SAR" },
-  { key: "nav_extreme_res",    fallback: "Experimental Technologies",       icon: IconExtremeResilience, path: "/extreme-resilience" },
+  { key: "nav_extreme_res",    fallback: "Extreme Resilience & Grid-Free",  icon: IconExtremeResilience, path: "/extreme-resilience", badge: "GRID-FREE" },
 ];
 
 // ── ⚙ SYSTEM ─────────────────────────────────────────────────────────────────
