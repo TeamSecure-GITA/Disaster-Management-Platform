@@ -56,7 +56,7 @@ import {
 const overviewItems = [
   { key: "nav_dashboard", fallback: "Dashboard",          icon: IconDashboard, path: "/", badge: "LIVE" },
   { key: "nav_map",       fallback: "Live Situation Map", icon: IconMap,       path: "/map" },
-  { key: "nav_alerts",    fallback: "Active Incidents",   icon: IconAlerts,    path: "/alerts" },
+  { key: "nav_alerts",    fallback: "Disaster Alert",     icon: IconAlerts,    path: "/alerts", badge: "LIVE" },
 ];
 
 // ── 🚨 RESPONSE ──────────────────────────────────────────────────────────────
@@ -94,7 +94,6 @@ const fieldItems = [
 // ── 👥 COMMUNITY ──────────────────────────────────────────────────────────────
 const communityItems = [
   { key: "nav_family",    fallback: "Family Safety",   icon: IconFamily,  path: "/family-safety" },
-  { key: "nav_qr_id",     fallback: "QR Rescue ID",    icon: IconQrId,    path: "/qr-rescue-id" },
   { key: "nav_report_dis", fallback: "Report Disaster", icon: IconAlerts,  path: "/incident-report" },
   { key: "nav_safety",    fallback: "Safety Guides",   icon: IconSafety,  path: "/safety-guides" },
 ];
@@ -110,7 +109,6 @@ const innovationItems = [
 
 // ── ⚙ SYSTEM ─────────────────────────────────────────────────────────────────
 const systemItems = [
-  { key: "nav_notifications", fallback: "Notifications", icon: IconNotifications, path: "/notifications" },
   { key: "nav_faq",           fallback: "Help & FAQ",    icon: IconFaq,           path: "/faq" },
   { key: "nav_settings",      fallback: "Settings",      icon: IconAdmin,         path: "/settings" },
 ];

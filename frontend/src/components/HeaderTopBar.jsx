@@ -680,7 +680,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
 
                 <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid rgba(56, 189, 248, 0.15)" }}>
                   <Link
-                    to="/notifications"
+                    to="/alerts?tab=notifications"
                     onClick={() => setNotifOpen(false)}
                     style={{
                       display: "block",

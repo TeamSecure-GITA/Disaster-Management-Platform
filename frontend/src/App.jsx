@@ -256,11 +256,12 @@ export default function App() {
             <Route path="/family-safety" element={<FamilySafety />} />
             <Route path="/evacuation-planner" element={<EvacuationPlanner />} />
 
-            {/* QR Rescue ID — both route names */}
-            <Route path="/qr-rescue-id" element={<QRRescueID />} />
-            <Route path="/rescue-id" element={<QRRescueID />} />
+            {/* QR Rescue ID is now integrated into Family Safety */}
+            <Route path="/qr-rescue-id" element={<Navigate to="/family-safety" replace />} />
+            <Route path="/rescue-id" element={<Navigate to="/family-safety" replace />} />
 
-            <Route path="/notifications" element={<Notifications />} />
+            {/* Notifications are now merged into Disaster Alert */}
+            <Route path="/notifications" element={<Navigate to="/alerts?tab=notifications" replace />} />
 
             {/* Chatbot — both route names */}
             <Route path="/ai-assistant" element={<AIAssistant />} />

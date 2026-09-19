@@ -22,7 +22,7 @@ export const translations = {
     nav_dashboard: "Dashboard",
     nav_ner_landslide: "NER Landslide Monitor",
     nav_ar_risk: "AR See the Risk",
-    nav_alerts: "Disaster Alerts",
+    nav_alerts: "Disaster Alert",
     nav_climate_chronicle: "Climate Chronicle",
     nav_map: "Disaster Response Map",
     nav_sos: "Emergency SOS",

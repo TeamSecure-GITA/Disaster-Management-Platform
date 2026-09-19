@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { subscribeToDisasterAlerts } from "../services/socketService";
+import { onForegroundMessage } from "../services/fcmService";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -150,8 +152,169 @@ const FALLBACK_CROWD_SIGNALS = [
   },
 ];
 
+// Fallback seed notifications for disaster alerts & civil broadcasts
+const SEED_NOTIFICATIONS = [
+  {
+    id: "seed-1",
+    title: "[IMD / NDMA SACHET] Cyclone & High Squall Advisory",
+    message: "Severe weather system active. Heavy rainfall & squally wind conditions forecasted along the coastal belt.",
+    location: "Odisha & Bengal Coast",
+    time: "10m ago",
+    severity: "High",
+    read: false,
+    sourceAgency: "IMD Govt of India / NDMA SACHET",
+    sourceUrl: "https://sachet.ndma.gov.in/",
+    isGovtOfficial: true,
+    createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "seed-2",
+    title: "[CWC Flood Forecast] River Basin Inundation Warning",
+    message: "River catchment precipitation triggering advisory levels in delta zones.",
+    location: "Bhubaneswar & Cuttack",
+    time: "30m ago",
+    severity: "Medium",
+    read: false,
+    sourceAgency: "Central Water Commission",
+    sourceUrl: "https://ffs.india-water.gov.in/",
+    isGovtOfficial: true,
+    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "seed-3",
+    title: "Safety Centers & Shelters Operational",
+    message: "Multi-purpose emergency shelters and relief distribution points are prepared.",
+    location: "Nearby Safe Zones",
+    time: "1h ago",
+    severity: "Low",
+    read: true,
+    sourceAgency: "Platform Emergency Administration",
+    sourceUrl: "https://sachet.ndma.gov.in/",
+    isGovtOfficial: false,
+    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+  },
+];
+
+const notifSeverityIcon = (s) => {
+  const sev = (s || "").toLowerCase();
+  if (sev === "critical" || sev === "high") return "🚨";
+  if (sev === "medium") return "⚠️";
+  return "ℹ️";
+};
+
+const notifSeverityColor = (s) => {
+  const sev = (s || "").toLowerCase();
+  if (sev === "critical") return "#dc2626";
+  if (sev === "high") return "#ef4444";
+  if (sev === "medium") return "#f59e0b";
+  return "#94a3b8";
+};
+
+function formatNotifTimeAgo(dateStr) {
+  if (!dateStr) return "just now";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function NotifToast({ notification, onDismiss }) {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 8000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  const officialUrl = notification.sourceUrl || "https://sachet.ndma.gov.in/";
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "80px",
+        right: "20px",
+        zIndex: 9999,
+        backgroundColor: "#0f172a",
+        border: `2px solid ${notifSeverityColor(notification.severity || "High")}`,
+        borderRadius: "12px",
+        padding: "16px 20px",
+        maxWidth: "380px",
+        color: "#fff",
+        boxShadow: "0 10px 35px rgba(0,0,0,0.6)",
+        animation: "slideIn 0.3s ease",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+        <div>
+          {notification.sourceAgency && (
+            <div
+              style={{
+                fontSize: "0.68rem",
+                fontWeight: "800",
+                color: "#38bdf8",
+                textTransform: "uppercase",
+                marginBottom: "4px",
+              }}
+            >
+              🏛️ {notification.sourceAgency}
+            </div>
+          )}
+          <div style={{ fontWeight: "700", fontSize: "0.95rem", marginBottom: "4px" }}>
+            {notifSeverityIcon(notification.severity)} {notification.title}
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "#cbd5e1", marginBottom: "10px" }}>
+            {notification.body || notification.message}
+          </div>
+
+          {officialUrl && (
+            <a
+              href={officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                fontSize: "0.75rem",
+                fontWeight: "700",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                textDecoration: "none",
+              }}
+            >
+              <span>View Official Advisory</span>
+              <span>↗</span>
+            </a>
+          )}
+        </div>
+        <button
+          onClick={onDismiss}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#64748b",
+            cursor: "pointer",
+            fontSize: "1.2rem",
+            padding: "0",
+            lineHeight: 1,
+          }}
+          aria-label="Dismiss notification"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Alerts() {
-  const [activeTab, setActiveTab] = useState("official"); // 'official' | 'crowd'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "notifications" ? "notifications" : "official";
+  const [activeTab, setActiveTab] = useState(initialTab); // 'official' | 'notifications' | 'crowd'
   const [alerts, setAlerts] = useState([]);
   const [crowdSignals, setCrowdSignals] = useState([]);
   const [feedHealth, setFeedHealth] = useState(null);
@@ -263,10 +426,97 @@ export default function Alerts() {
     }
   };
 
+  // Notifications State & Logic merged into Disaster Alert
+  const [notifications, setNotifications] = useState(SEED_NOTIFICATIONS);
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
+  const [notifToast, setNotifToast] = useState(null);
+  const [notifFilterTab, setNotifFilterTab] = useState("all");
+  const [pushEnabled, setPushEnabled] = useState(() => {
+    return typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted";
+  });
+  const fcmUnsubRef = useRef(null);
+
+  // Sync tab from URL query params
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "notifications" && activeTab !== "notifications") {
+      setActiveTab("notifications");
+    }
+  }, [searchParams]);
+
+  // Fetch notifications from backend
+  const fetchNotifications = useCallback(async () => {
+    setLoadingNotifs(true);
+    const token = localStorage.getItem("token");
+
+    try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_URL}/api/notifications`, { headers });
+
+      if (res.ok) {
+        const json = await res.json();
+        const items = (json.data || []).map((n) => ({
+          id: n._id || n.id,
+          title: n.title,
+          message: n.message || n.body || "",
+          location: n.location || n.metadata?.location || "Regional",
+          time: formatNotifTimeAgo(n.createdAt),
+          severity: n.priority || n.severity || "Normal",
+          read: n.isRead ?? n.read ?? false,
+          sourceAgency: n.sourceAgency || n.metadata?.sourceAgency || (n.sourceUrl ? "Official Govt Feed" : null),
+          sourceUrl: n.sourceUrl || n.metadata?.sourceUrl || (n.isBroadcast ? "https://sachet.ndma.gov.in/" : null),
+          isGovtOfficial: Boolean(n.sourceUrl || n.isBroadcast || n.sourceAgency),
+          createdAt: n.createdAt,
+        }));
+
+        if (items.length > 0) {
+          setNotifications(items);
+        }
+      }
+    } catch (err) {
+      console.warn("[Alerts] Backend notifications fetch notice:", err.message);
+    } finally {
+      setLoadingNotifs(false);
+    }
+  }, []);
+
+  const triggerBrowserNotification = useCallback((n) => {
+    if (!("Notification" in window)) return;
+    const trigger = () => {
+      try {
+        const notif = new Notification(`🚨 ${n.title}`, {
+          body: `${n.message}\n📍 ${n.location || "Official Alert"}`,
+          icon: "/pwa-192x192.png",
+          badge: "/pwa-192x192.png",
+          tag: `alert-${n.id}`,
+          requireInteraction: true,
+        });
+        notif.onclick = () => {
+          window.focus();
+          if (n.sourceUrl) {
+            window.open(n.sourceUrl, "_blank", "noopener,noreferrer");
+          }
+        };
+      } catch (e) {}
+    };
+
+    if (Notification.permission === "granted") {
+      trigger();
+    } else if (Notification.permission === "default") {
+      Notification.requestPermission().then((perm) => {
+        if (perm === "granted") {
+          setPushEnabled(true);
+          trigger();
+        }
+      });
+    }
+  }, []);
+
   useEffect(() => {
     fetchAlerts();
     fetchFeedHealth();
     fetchCrowdSignals();
+    fetchNotifications();
 
     // Subscribe to real-time incoming alerts via Socket.IO
     const unsubscribe = subscribeToDisasterAlerts((newAlert) => {
@@ -279,11 +529,102 @@ export default function Alerts() {
         return [newAlert, ...prev];
       });
 
+      // Also create a live notification broadcast
+      const newNotif = {
+        id: newAlert._id || `socket-${Date.now()}`,
+        title: newAlert.title,
+        message: newAlert.message,
+        location: newAlert.affectedAreas?.[0] || newAlert.country || "Active Region",
+        time: "just now",
+        severity: newAlert.severity || "High",
+        read: false,
+        sourceAgency: newAlert.sourceAgency || "Official Govt Disaster Bureau",
+        sourceUrl: newAlert.sourceUrl || "https://sachet.ndma.gov.in/",
+        isGovtOfficial: true,
+        createdAt: new Date().toISOString(),
+      };
+      setNotifications((prev) => [newNotif, ...prev]);
+      setNotifToast(newNotif);
+      triggerBrowserNotification(newNotif);
+
       setTimeout(() => setNewAlertBadge(null), 10000);
     });
 
-    return () => unsubscribe();
-  }, [fetchAlerts, fetchFeedHealth, fetchCrowdSignals]);
+    // Subscribe to FCM foreground push messages
+    let cancelled = false;
+    onForegroundMessage(({ title, body, data }) => {
+      if (cancelled) return;
+      const newNotif = {
+        id: `fcm-${Date.now()}`,
+        title,
+        message: body,
+        location: data?.location || "Live Alert",
+        time: "just now",
+        severity: data?.severity || "High",
+        read: false,
+        sourceAgency: data?.sourceAgency || "Emergency Alert System",
+        sourceUrl: data?.sourceUrl || "https://sachet.ndma.gov.in/",
+        isGovtOfficial: true,
+        createdAt: new Date().toISOString(),
+      };
+      setNotifications((prev) => [newNotif, ...prev]);
+      setNotifToast(newNotif);
+      triggerBrowserNotification(newNotif);
+    }).then((unsub) => {
+      if (!cancelled) fcmUnsubRef.current = unsub;
+    });
+
+    return () => {
+      cancelled = true;
+      if (fcmUnsubRef.current) fcmUnsubRef.current();
+      unsubscribe();
+    };
+  }, [fetchAlerts, fetchFeedHealth, fetchCrowdSignals, fetchNotifications, triggerBrowserNotification]);
+
+  const markNotifAsRead = async (id) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    const token = localStorage.getItem("token");
+    if (token && !token.startsWith("demo-") && !token.startsWith("local-")) {
+      try {
+        await fetch(`${API_URL}/api/notifications/${id}/read`, {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch {}
+    }
+  };
+
+  const markAllNotifsAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const deleteNotification = (id) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const requestPushPermission = async () => {
+    if (!("Notification" in window)) {
+      alert("Push notifications are not supported in this browser.");
+      return;
+    }
+    const perm = await Notification.requestPermission();
+    setPushEnabled(perm === "granted");
+    if (perm === "granted") {
+      new Notification("Disaster Alert System", {
+        body: "Live emergency alerts and notifications are now enabled!",
+        icon: "/pwa-192x192.png",
+      });
+    }
+  };
+
+  const displayedNotifications = notifications.filter((n) => {
+    if (notifFilterTab === "govt") return n.isGovtOfficial;
+    if (notifFilterTab === "platform") return !n.isGovtOfficial;
+    if (notifFilterTab === "unread") return !n.read;
+    return true;
+  });
+
+  const notifUnreadCount = notifications.filter((n) => !n.read).length;
 
   // Filter official alerts
   const filteredAlerts = alerts.filter((alert) => {
@@ -372,6 +713,9 @@ export default function Alerts() {
 
   return (
     <div style={{ maxWidth: "1400px", margin: "0 auto", paddingBottom: "40px" }}>
+      {/* Live Toast for Incoming Notifications */}
+      {notifToast && <NotifToast notification={notifToast} onDismiss={() => setNotifToast(null)} />}
+
       {/* Real-time incoming notification pill */}
       {newAlertBadge && (
         <div
@@ -518,7 +862,10 @@ export default function Alerts() {
         }}
       >
         <button
-          onClick={() => setActiveTab("official")}
+          onClick={() => {
+            setActiveTab("official");
+            setSearchParams({});
+          }}
           style={{
             backgroundColor: activeTab === "official" ? "rgba(37, 99, 235, 0.2)" : "rgba(15, 23, 42, 0.6)",
             color: activeTab === "official" ? "#60a5fa" : "#94a3b8",
@@ -536,7 +883,7 @@ export default function Alerts() {
             transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          <span>🏛️ Official Programmatic Feeds</span>
+          <span>🏛️ Official Disaster Alerts</span>
           <span
             style={{
               backgroundColor: activeTab === "official" ? "rgba(59, 130, 246, 0.3)" : "rgba(255, 255, 255, 0.08)",
@@ -552,7 +899,63 @@ export default function Alerts() {
         </button>
 
         <button
-          onClick={() => setActiveTab("crowd")}
+          onClick={() => {
+            setActiveTab("notifications");
+            setSearchParams({ tab: "notifications" });
+          }}
+          style={{
+            backgroundColor: activeTab === "notifications" ? "rgba(147, 51, 234, 0.2)" : "rgba(15, 23, 42, 0.6)",
+            color: activeTab === "notifications" ? "#c084fc" : "#94a3b8",
+            border: activeTab === "notifications" ? "1.5px solid #a855f7" : "1px solid rgba(255, 255, 255, 0.08)",
+            padding: "10px 22px",
+            borderRadius: "14px",
+            fontSize: "0.88rem",
+            fontWeight: "800",
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            boxShadow: activeTab === "notifications" ? "0 4px 20px -4px rgba(168, 85, 247, 0.4)" : "none",
+            backdropFilter: "blur(12px)",
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          <span>📢 Disaster Notifications & Broadcasts</span>
+          {notifUnreadCount > 0 ? (
+            <span
+              style={{
+                backgroundColor: "#ef4444",
+                color: "#ffffff",
+                padding: "2px 8px",
+                borderRadius: "999px",
+                fontSize: "0.72rem",
+                fontWeight: "900",
+                boxShadow: "0 0 10px rgba(239, 68, 68, 0.6)",
+              }}
+            >
+              {notifUnreadCount} UNREAD
+            </span>
+          ) : (
+            <span
+              style={{
+                backgroundColor: activeTab === "notifications" ? "rgba(168, 85, 247, 0.3)" : "rgba(255, 255, 255, 0.08)",
+                color: activeTab === "notifications" ? "#e9d5ff" : "#cbd5e1",
+                padding: "2px 8px",
+                borderRadius: "999px",
+                fontSize: "0.72rem",
+                fontWeight: "900",
+              }}
+            >
+              {notifications.length}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab("crowd");
+            setSearchParams({ tab: "crowd" });
+          }}
           style={{
             backgroundColor: activeTab === "crowd" ? "rgba(217, 119, 6, 0.2)" : "rgba(15, 23, 42, 0.6)",
             color: activeTab === "crowd" ? "#fbbf24" : "#94a3b8",
@@ -1073,6 +1476,311 @@ export default function Alerts() {
             </div>
           )}
         </>
+      )}
+
+      {/* TAB 2: MERGED DISASTER NOTIFICATIONS & BROADCASTS */}
+      {activeTab === "notifications" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          {/* Notifications Hub Top Control Bar */}
+          <div
+            style={{
+              backgroundColor: "#0f172a",
+              border: "1px solid #1e293b",
+              borderRadius: "14px",
+              padding: "20px 24px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "16px",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontSize: "1.3rem" }}>🔔</span>
+                <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: "800", color: "#f8fafc" }}>
+                  Disaster Notifications & Civil Broadcasts
+                </h3>
+              </div>
+              <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.85rem" }}>
+                Real-time official advisory push notifications synchronized with national emergency agencies and live field updates.
+                {loadingNotifs && <span style={{ color: "#38bdf8", marginLeft: "8px" }}>⟳ Syncing feeds...</span>}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                onClick={requestPushPermission}
+                title={pushEnabled ? "Browser Push Alerts Enabled" : "Enable Browser Push Alerts"}
+                style={{
+                  backgroundColor: pushEnabled ? "rgba(16, 185, 129, 0.15)" : "rgba(37, 99, 235, 0.15)",
+                  color: pushEnabled ? "#34d399" : "#60a5fa",
+                  border: `1px solid ${pushEnabled ? "#059669" : "#2563eb"}`,
+                  padding: "8px 14px",
+                  borderRadius: "8px",
+                  fontSize: "0.82rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <span>{pushEnabled ? "🔔 Push Enabled" : "🔕 Enable Browser Push"}</span>
+              </button>
+
+              <button
+                onClick={fetchNotifications}
+                style={{
+                  backgroundColor: "#1e293b",
+                  border: "1px solid #334155",
+                  color: "#94a3b8",
+                  padding: "8px 14px",
+                  borderRadius: "8px",
+                  fontSize: "0.82rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <span>↻ Refresh</span>
+              </button>
+
+              {notifUnreadCount > 0 && (
+                <button
+                  onClick={markAllNotifsAsRead}
+                  style={{
+                    backgroundColor: "rgba(56, 189, 248, 0.1)",
+                    border: "1px solid rgba(56, 189, 248, 0.3)",
+                    color: "#38bdf8",
+                    padding: "8px 14px",
+                    borderRadius: "8px",
+                    fontSize: "0.82rem",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  ✓ Mark All as Read
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Filter Pills */}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            {[
+              { id: "all", label: `All Broadcasts (${notifications.length})` },
+              { id: "govt", label: "🏛️ Official Govt Advisory" },
+              { id: "platform", label: "👥 Platform Updates" },
+              { id: "unread", label: `🚨 Unread Alerts (${notifUnreadCount})` },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setNotifFilterTab(tab.id)}
+                style={{
+                  backgroundColor: notifFilterTab === tab.id ? "#2563eb" : "#0f172a",
+                  color: notifFilterTab === tab.id ? "#ffffff" : "#94a3b8",
+                  border: "1px solid",
+                  borderColor: notifFilterTab === tab.id ? "#3b82f6" : "#334155",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "0.84rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Notifications List */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {displayedNotifications.map((n) => {
+              const officialUrl = n.sourceUrl || (n.isGovtOfficial ? "https://sachet.ndma.gov.in/" : null);
+              const isUnread = !n.read;
+
+              return (
+                <div
+                  key={n.id}
+                  style={{
+                    backgroundColor: isUnread ? "#1e293b" : "#0f172a",
+                    border: `1px solid ${isUnread ? "#334155" : "#1e293b"}`,
+                    borderLeft: `5px solid ${notifSeverityColor(n.severity)}`,
+                    borderRadius: "12px",
+                    padding: "18px 20px",
+                    display: "flex",
+                    gap: "16px",
+                    alignItems: "flex-start",
+                    boxShadow: isUnread ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div style={{ fontSize: "1.6rem", flexShrink: 0, marginTop: "2px" }}>
+                    {notifSeverityIcon(n.severity)}
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
+                      {n.sourceAgency && (
+                        <span
+                          style={{
+                            backgroundColor: "rgba(56, 189, 248, 0.15)",
+                            color: "#38bdf8",
+                            border: "1px solid rgba(56, 189, 248, 0.3)",
+                            fontSize: "0.68rem",
+                            fontWeight: "800",
+                            padding: "2px 8px",
+                            borderRadius: "4px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          🏛️ {n.sourceAgency}
+                        </span>
+                      )}
+
+                      {isUnread && (
+                        <span
+                          style={{
+                            backgroundColor: "#ef4444",
+                            color: "#fff",
+                            fontSize: "0.65rem",
+                            fontWeight: "800",
+                            padding: "2px 7px",
+                            borderRadius: "4px",
+                            letterSpacing: "0.5px",
+                          }}
+                        >
+                          NEW
+                        </span>
+                      )}
+
+                      <span
+                        style={{
+                          backgroundColor: "rgba(100, 116, 139, 0.2)",
+                          color: "#cbd5e1",
+                          fontSize: "0.72rem",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        📍 {n.location}
+                      </span>
+
+                      <span style={{ fontSize: "0.75rem", color: "#64748b", marginLeft: "auto" }}>
+                        🕒 {n.time}
+                      </span>
+                    </div>
+
+                    <h4 style={{ fontSize: "1.05rem", fontWeight: "700", color: "#f8fafc", margin: "0 0 6px 0" }}>
+                      {n.title}
+                    </h4>
+
+                    <p style={{ fontSize: "0.9rem", color: "#cbd5e1", margin: "0 0 12px 0", lineHeight: 1.5 }}>
+                      {n.message}
+                    </p>
+
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: "700",
+                            color: notifSeverityColor(n.severity),
+                            backgroundColor: "rgba(0,0,0,0.3)",
+                            padding: "3px 8px",
+                            borderRadius: "4px",
+                            border: `1px solid ${notifSeverityColor(n.severity)}40`,
+                          }}
+                        >
+                          Severity: {n.severity}
+                        </span>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        {officialUrl && (
+                          <a
+                            href={officialUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              backgroundColor: "#2563eb",
+                              color: "#ffffff",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              fontSize: "0.78rem",
+                              fontWeight: "700",
+                              textDecoration: "none",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <span>Official Bulletin</span>
+                            <span>↗</span>
+                          </a>
+                        )}
+
+                        {isUnread && (
+                          <button
+                            onClick={() => markNotifAsRead(n.id)}
+                            style={{
+                              backgroundColor: "transparent",
+                              border: "1px solid #475569",
+                              color: "#94a3b8",
+                              padding: "5px 10px",
+                              borderRadius: "6px",
+                              fontSize: "0.78rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            ✓ Mark Read
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => deleteNotification(n.id)}
+                          title="Dismiss notification"
+                          style={{
+                            backgroundColor: "transparent",
+                            border: "none",
+                            color: "#64748b",
+                            cursor: "pointer",
+                            fontSize: "1rem",
+                            padding: "4px 8px",
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {displayedNotifications.length === 0 && !loadingNotifs && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "50px 20px",
+                  backgroundColor: "#0f172a",
+                  borderRadius: "12px",
+                  border: "1px solid #1e293b",
+                  color: "#94a3b8",
+                }}
+              >
+                <div style={{ fontSize: "2rem", marginBottom: "8px" }}>🔔</div>
+                <h4 style={{ margin: "0 0 6px 0", color: "#f8fafc" }}>No notifications in this view</h4>
+                <p style={{ margin: 0, fontSize: "0.85rem" }}>All current emergency broadcasts and alerts are up to date.</p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* TAB 2: LIVE CROWD SIGNALS & MEDIA ANOMALY RADAR */}

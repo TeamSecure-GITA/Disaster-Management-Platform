@@ -76,8 +76,8 @@ const FAQ_DATA = [
     items: [
       {
         q: "What is QR Rescue ID and how does it help in an emergency?",
-        a: "QR Rescue ID generates a digital, scan-ready emergency medical card with your blood group, allergies, pre-existing conditions, emergency contacts, and safe-status check. First responders can scan this instantly even if you are unconscious.",
-        action: { label: "Get Your QR Rescue ID", path: "/qr-rescue-id" },
+        a: "QR Rescue ID generates a digital, scan-ready emergency medical card with your blood group, allergies, pre-existing conditions, emergency contacts, and safe-status check. First responders can scan this instantly even if you are unconscious. It is automatically generated for every member in your Family Safety circle.",
+        action: { label: "Get Family Rescue QR", path: "/family-safety" },
       },
       {
         q: "How does the Family Safety Network notify my loved ones?",

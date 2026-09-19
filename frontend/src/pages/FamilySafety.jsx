@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { QRCodeCanvas } from "qrcode.react";
 import {
   getLocalFamilyMembers,
   getFamilyMembers,
@@ -59,6 +60,48 @@ export default function FamilySafety() {
   const [editLocation, setEditLocation] = useState("");
   const [editCoordinates, setEditCoordinates] = useState("");
   const [editSaving, setEditSaving] = useState(false);
+
+  // Auto-Generated Emergency Rescue QR States
+  const [selectedQrMember, setSelectedQrMember] = useState(null);
+  const [newlyAddedQrMember, setNewlyAddedQrMember] = useState(null);
+
+  // Generate standardized emergency rescue payload for on-the-fly QR code
+  const generateMemberRescueQrData = (member) => {
+    return JSON.stringify({
+      system: "DISASTER_RESCUE_ID",
+      id: member.id || member._id || `member-${Date.now()}`,
+      name: member.name,
+      relation: member.relation || "Family",
+      bloodGroup: member.bloodGroup || "Unknown",
+      emergencyContact: member.phone || "Emergency Line: 112",
+      location: member.location || "Registered Member",
+      coordinates: member.coordinates || "",
+      status: member.isUnsafe ? "UNSAFE / RESCUE NEEDED" : "CONFIRMED SAFE",
+      portal: "India Disaster Management & Rescue Platform",
+      timestamp: new Date().toISOString(),
+    });
+  };
+
+  const downloadQrCanvas = (member) => {
+    try {
+      const containerId = `qr-canvas-${member.id || member._id || "member"}`;
+      const container = document.getElementById(containerId);
+      const canvas = container?.querySelector("canvas");
+      if (!canvas) {
+        alert("Unable to export QR image canvas.");
+        return;
+      }
+      const url = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Rescue-QR-${(member.name || "member").replace(/\s+/g, "_")}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      console.warn("QR download notice:", e);
+    }
+  };
 
   // Disaster Alert & Siren Buzzer States
   // By default, disaster tracking alert is standby (FALSE) so the siren does NOT buzz by default!
@@ -418,23 +461,32 @@ export default function FamilySafety() {
 
     setSubmitting(true);
     try {
-      const updated = await addFamilyMember({
-        name,
+      const newMemberPayload = {
+        name: name.trim(),
         relation,
-        phone,
+        phone: phone.trim(),
         bloodGroup,
-        location: location || "Location not specified",
-        coordinates,
+        location: location.trim() || "Location not specified",
+        coordinates: coordinates.trim(),
         status: "Safe",
-      });
+      };
+      const updated = await addFamilyMember(newMemberPayload);
       setMembers(updated);
+
+      // Auto-generated Rescue QR code data for the new member
+      const savedMember = updated.find((m) => m.name === newMemberPayload.name) || {
+        ...newMemberPayload,
+        id: `local-${Date.now()}`,
+      };
+      setNewlyAddedQrMember(savedMember);
+
       setName("");
       setPhone("");
       setLocation("");
       setCoordinates("");
       setBloodGroup("Unknown");
-      setBroadcastMsg("✅ Family member registered into safety network.");
-      setTimeout(() => setBroadcastMsg(""), 3500);
+      setBroadcastMsg(`✅ ${savedMember.name} registered! Emergency Rescue QR code auto-generated.`);
+      setTimeout(() => setBroadcastMsg(""), 6000);
     } catch (err) {
       console.error("Error adding family member:", err);
       alert("Failed to save member. Please try again.");
@@ -1129,6 +1181,73 @@ export default function FamilySafety() {
             {submitting ? "Saving..." : "➕ Add to Family Network"}
           </button>
         </form>
+
+        {/* Instant Auto-Generated Rescue QR Confirmation Banner */}
+        {newlyAddedQrMember && (
+          <div
+            style={{
+              marginTop: "16px",
+              backgroundColor: "rgba(56, 189, 248, 0.12)",
+              border: "1.5px solid #38bdf8",
+              borderRadius: "10px",
+              padding: "14px 18px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "12px",
+              animation: "slideIn 0.3s ease",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "1.5rem" }}>🪪</span>
+              <div>
+                <strong style={{ color: "#f8fafc", fontSize: "0.95rem" }}>
+                  Emergency Rescue QR Code Auto-Generated!
+                </strong>
+                <div style={{ color: "#94a3b8", fontSize: "0.82rem", marginTop: "2px" }}>
+                  Digital health & emergency rescue card is ready for <strong>{newlyAddedQrMember.name}</strong>.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={() => setSelectedQrMember(newlyAddedQrMember)}
+                style={{
+                  backgroundColor: "#0284c7",
+                  border: "none",
+                  color: "#ffffff",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  fontSize: "0.85rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  boxShadow: "0 2px 10px rgba(2, 132, 199, 0.4)",
+                }}
+              >
+                <span>🪪 Show Rescue QR</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewlyAddedQrMember(null)}
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  color: "#94a3b8",
+                  fontSize: "1.2rem",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── FAMILY MEMBERS LIST ─────────────────────────────────────────── */}
@@ -1295,6 +1414,30 @@ export default function FamilySafety() {
                               🩸 {member.bloodGroup}
                             </span>
                           )}
+
+                          {/* Quick Rescue QR Indicator in Name Bar */}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedQrMember(member)}
+                            title="Click to view and scan Auto-Generated Rescue QR Code"
+                            style={{
+                              backgroundColor: "rgba(56, 189, 248, 0.15)",
+                              border: "1px solid rgba(56, 189, 248, 0.4)",
+                              color: "#38bdf8",
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "0.75rem",
+                              fontWeight: "700",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              transition: "all 0.15s ease",
+                            }}
+                          >
+                            <span>🪪</span>
+                            <span>QR Code</span>
+                          </button>
                         </div>
 
                         <div style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "12px" }}>
@@ -1335,6 +1478,31 @@ export default function FamilySafety() {
                       >
                         <span>{isSafe ? "✅" : "🆘"}</span>
                         <span>{isSafe ? "Safe (Click to Mark Unsafe)" : "Unsafe (Click to Mark Safe)"}</span>
+                      </button>
+
+                      {/* Show Auto-Generated Rescue QR Code Button */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedQrMember(member)}
+                        title="Show Emergency Rescue QR Code (Scannable by medical & search teams)"
+                        style={{
+                          padding: "8px 14px",
+                          borderRadius: "8px",
+                          border: "1px solid #38bdf8",
+                          backgroundColor: "rgba(56, 189, 248, 0.15)",
+                          color: "#38bdf8",
+                          fontWeight: "700",
+                          fontSize: "0.85rem",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          boxShadow: "0 2px 10px rgba(56, 189, 248, 0.2)",
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <span>🪪</span>
+                        <span>Rescue QR</span>
                       </button>
 
                       {/* Send Mobile Danger Alert & Siren */}
@@ -1799,6 +1967,231 @@ export default function FamilySafety() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── EMERGENCY RESCUE QR MODAL (AUTO-GENERATED FOR EVERY MEMBER) ── */}
+      {selectedQrMember && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.82)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            padding: "20px",
+          }}
+          onClick={() => setSelectedQrMember(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#0f172a",
+              border: `2px solid ${selectedQrMember.isUnsafe ? "#ef4444" : "#38bdf8"}`,
+              borderRadius: "18px",
+              padding: "28px",
+              maxWidth: "540px",
+              width: "100%",
+              boxShadow: selectedQrMember.isUnsafe
+                ? "0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(239, 68, 68, 0.4)"
+                : "0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(56, 189, 248, 0.35)",
+              color: "#f8fafc",
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px", borderBottom: "1px solid #1e293b", paddingBottom: "14px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ fontSize: "2rem" }}>🪪</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "800", color: "#f8fafc", letterSpacing: "0.5px" }}>
+                    EMERGENCY RESCUE QR ID
+                  </h3>
+                  <div style={{ fontSize: "0.75rem", color: "#38bdf8", fontWeight: "700", textTransform: "uppercase", marginTop: "2px" }}>
+                    National Disaster Medical &amp; Rescue Identifier
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedQrMember(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#94a3b8",
+                  fontSize: "1.6rem",
+                  cursor: "pointer",
+                  lineHeight: "1",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* QR and Member Profile Layout */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+              {/* Top Profile Summary Badge */}
+              <div
+                style={{
+                  backgroundColor: "#1e293b",
+                  border: "1px solid #334155",
+                  borderRadius: "12px",
+                  padding: "16px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "12px",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: "1.3rem", fontWeight: "800", color: "#f8fafc" }}>
+                    {selectedQrMember.name}
+                  </div>
+                  <div style={{ fontSize: "0.85rem", color: "#94a3b8", display: "flex", gap: "8px", alignItems: "center", marginTop: "4px" }}>
+                    <span>Relation: <strong style={{ color: "#e2e8f0" }}>{selectedQrMember.relation || "Family"}</strong></span>
+                    {selectedQrMember.bloodGroup && selectedQrMember.bloodGroup !== "Unknown" && (
+                      <span style={{ backgroundColor: "#881337", color: "#fecdd3", padding: "1px 7px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "800" }}>
+                        🩸 {selectedQrMember.bloodGroup}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: selectedQrMember.isUnsafe ? "#7f1d1d" : "#14532d",
+                    border: `1px solid ${selectedQrMember.isUnsafe ? "#ef4444" : "#22c55e"}`,
+                    color: selectedQrMember.isUnsafe ? "#fecaca" : "#86efac",
+                    padding: "6px 12px",
+                    borderRadius: "20px",
+                    fontSize: "0.8rem",
+                    fontWeight: "800",
+                  }}
+                >
+                  {selectedQrMember.isUnsafe ? "🚨 RESCUE REQUESTED" : "✅ CONFIRMED SAFE"}
+                </div>
+              </div>
+
+              {/* QR Code Container in High Contrast Canvas */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "14px",
+                  padding: "20px",
+                  boxShadow: "inset 0 0 15px rgba(0,0,0,0.1)",
+                }}
+              >
+                <div id={`qr-canvas-${selectedQrMember.id || selectedQrMember._id || 'member'}`}>
+                  <QRCodeCanvas
+                    value={generateMemberRescueQrData(selectedQrMember)}
+                    size={200}
+                    level="H"
+                    marginSize={2}
+                    bgColor="#ffffff"
+                    fgColor="#090d16"
+                  />
+                </div>
+                <div style={{ color: "#334155", fontSize: "0.78rem", fontWeight: "700", marginTop: "8px", textAlign: "center" }}>
+                  Official Scannable Emergency Health &amp; Rescue ID
+                </div>
+              </div>
+
+              {/* Key Medical & Contact Fields */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gap: "10px",
+                  fontSize: "0.85rem",
+                }}
+              >
+                <div style={{ backgroundColor: "#1e293b", padding: "10px 14px", borderRadius: "8px", border: "1px solid #334155" }}>
+                  <div style={{ color: "#94a3b8", fontSize: "0.72rem", textTransform: "uppercase" }}>Emergency Contact</div>
+                  <div style={{ fontWeight: "700", color: "#38bdf8", marginTop: "2px" }}>
+                    {selectedQrMember.phone ? `📞 ${selectedQrMember.phone}` : "112 / Emergency Team"}
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: "#1e293b", padding: "10px 14px", borderRadius: "8px", border: "1px solid #334155" }}>
+                  <div style={{ color: "#94a3b8", fontSize: "0.72rem", textTransform: "uppercase" }}>Registered Area</div>
+                  <div style={{ fontWeight: "700", color: "#e2e8f0", marginTop: "2px" }}>
+                    📍 {selectedQrMember.location || "Coordinates Recorded"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons: Download QR PNG, Print Emergency Card, Close */}
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap", marginTop: "8px" }}>
+                <button
+                  type="button"
+                  onClick={() => downloadQrCanvas(selectedQrMember)}
+                  style={{
+                    backgroundColor: "#0284c7",
+                    border: "none",
+                    color: "#ffffff",
+                    padding: "10px 16px",
+                    borderRadius: "8px",
+                    fontWeight: "700",
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>⬇️</span>
+                  <span>Download QR</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #475569",
+                    color: "#f8fafc",
+                    padding: "10px 16px",
+                    borderRadius: "8px",
+                    fontWeight: "700",
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>🖨️</span>
+                  <span>Print Card</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedQrMember(null)}
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "1px solid #334155",
+                    color: "#94a3b8",
+                    padding: "10px 16px",
+                    borderRadius: "8px",
+                    fontWeight: "600",
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
