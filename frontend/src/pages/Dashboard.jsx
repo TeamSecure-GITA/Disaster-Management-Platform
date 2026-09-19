@@ -1479,9 +1479,17 @@ export default function Dashboard() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {/* Incident 1: Landslide NH-10 */}
+              {/* Incident 1: Landslide NH-10 (Sikkim / Teesta) */}
               <div
-                onClick={() => setSelectedIncident(1)}
+                onClick={() => {
+                  setSelectedIncident(1);
+                  const z = INDIA_RISK_ZONES.find((x) => x.id === "nh10_sikkim");
+                  if (z) {
+                    setSelectedRegion("ner");
+                    setActiveZone(z);
+                    setInspectedZone(z);
+                  }
+                }}
                 style={{
                   backgroundColor: "rgba(225, 29, 72, 0.08)",
                   border: `1.5px solid ${selectedIncident === 1 ? "#ef4444" : "rgba(239, 68, 68, 0.4)"}`,
@@ -1530,7 +1538,7 @@ export default function Dashboard() {
                 </div>
 
                 <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
-                  📍 Bargarh, Odisha
+                  📍 Teesta Basin, Sikkim / North Bengal
                 </div>
 
                 <div
@@ -1544,9 +1552,9 @@ export default function Dashboard() {
                   }}
                 >
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <span>👥 387 exposed</span>
+                    <span>👥 781 exposed</span>
                     <span>🏘️ 4 villages</span>
-                    <span>🛣️ 2 roads</span>
+                    <span>🛣️ NH-10 Blocked</span>
                   </div>
                   <div style={{ color: "#f87171", fontWeight: "800" }}>
                     ⏱️ ETA 08 min
@@ -1554,16 +1562,107 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Incident 2: Flood Sector 4 */}
+              {/* Incident 2: Flood Brahmaputra Kaziranga (Assam) */}
               <div
-                onClick={() => setSelectedIncident(2)}
+                onClick={() => {
+                  setSelectedIncident(2);
+                  const z = INDIA_RISK_ZONES.find((x) => x.id === "brahmaputra_assam");
+                  if (z) {
+                    setSelectedRegion("ner");
+                    setActiveZone(z);
+                    setInspectedZone(z);
+                  }
+                }}
                 style={{
-                  backgroundColor: "rgba(245, 158, 11, 0.08)",
-                  border: `1.5px solid ${selectedIncident === 2 ? "#f59e0b" : "rgba(245, 158, 11, 0.35)"}`,
+                  backgroundColor: "rgba(225, 29, 72, 0.08)",
+                  border: `1.5px solid ${selectedIncident === 2 ? "#ef4444" : "rgba(239, 68, 68, 0.35)"}`,
                   borderRadius: "12px",
                   padding: "12px",
                   cursor: "pointer",
-                  boxShadow: selectedIncident === 2 ? "0 0 16px rgba(245, 158, 11, 0.25)" : "none",
+                  boxShadow: selectedIncident === 2 ? "0 0 16px rgba(225, 29, 72, 0.25)" : "none",
+                  transition: "all 0.18s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: "50%",
+                        backgroundColor: "#ef4444",
+                        color: "#ffffff",
+                        fontSize: "0.68rem",
+                        fontWeight: "900",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      2
+                    </span>
+                    <span style={{ fontSize: "0.86rem", fontWeight: "800", color: "#ffffff" }}>
+                      Flood — Brahmaputra Basin
+                    </span>
+                    <span
+                      style={{
+                        backgroundColor: "#e11d48",
+                        color: "#ffffff",
+                        fontSize: "0.58rem",
+                        fontWeight: "900",
+                        padding: "1px 6px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      CRITICAL
+                    </span>
+                  </div>
+                  <ChevronRight size={16} color="#94a3b8" />
+                </div>
+
+                <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
+                  📍 Kaziranga & Majuli, Assam
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: "8px",
+                    fontSize: "0.68rem",
+                    color: "#94a3b8",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <span>👥 1,395 exposed</span>
+                    <span>🏠 2 shelters</span>
+                    <span>🛣️ NH-715 Submerged</span>
+                  </div>
+                  <div style={{ color: "#f87171", fontWeight: "800" }}>
+                    ⏱️ ETA 15 min
+                  </div>
+                </div>
+              </div>
+
+              {/* Incident 3: Tawang-Sela Pass Landslide (Arunachal) */}
+              <div
+                onClick={() => {
+                  setSelectedIncident(3);
+                  const z = INDIA_RISK_ZONES.find((x) => x.id === "nh13_tawang");
+                  if (z) {
+                    setSelectedRegion("ner");
+                    setActiveZone(z);
+                    setInspectedZone(z);
+                  }
+                }}
+                style={{
+                  backgroundColor: "rgba(245, 158, 11, 0.08)",
+                  border: `1.5px solid ${selectedIncident === 3 ? "#f59e0b" : "rgba(245, 158, 11, 0.35)"}`,
+                  borderRadius: "12px",
+                  padding: "12px",
+                  cursor: "pointer",
+                  boxShadow: selectedIncident === 3 ? "0 0 16px rgba(245, 158, 11, 0.25)" : "none",
                   transition: "all 0.18s ease",
                 }}
               >
@@ -1583,10 +1682,10 @@ export default function Dashboard() {
                         justifyContent: "center",
                       }}
                     >
-                      2
+                      3
                     </span>
                     <span style={{ fontSize: "0.86rem", fontWeight: "800", color: "#ffffff" }}>
-                      Flood — Sector 4
+                      Debris Avalanche — NH-13
                     </span>
                     <span
                       style={{
@@ -1605,7 +1704,7 @@ export default function Dashboard() {
                 </div>
 
                 <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
-                  📍 Jagatsinghpur, Odisha
+                  📍 Tawang-Sela Pass, Arunachal Pradesh
                 </div>
 
                 <div
@@ -1619,26 +1718,34 @@ export default function Dashboard() {
                   }}
                 >
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <span>👥 240 affected</span>
-                    <span>🏠 2 shelters</span>
-                    <span>🛣️ 1 road</span>
+                    <span>👥 480 exposed</span>
+                    <span>🏠 1 base shelter</span>
+                    <span>🛣️ NH-13 Blocked</span>
                   </div>
                   <div style={{ color: "#f59e0b", fontWeight: "800" }}>
-                    ⏱️ ETA 20 min
+                    ⏱️ ETA 22 min
                   </div>
                 </div>
               </div>
 
-              {/* Incident 3: Road Blockage Zone B */}
+              {/* Incident 4: Wayanad Debris Flow (Kerala) */}
               <div
-                onClick={() => setSelectedIncident(3)}
+                onClick={() => {
+                  setSelectedIncident(4);
+                  const z = INDIA_RISK_ZONES.find((x) => x.id === "nh766_wayanad");
+                  if (z) {
+                    setSelectedRegion("south");
+                    setActiveZone(z);
+                    setInspectedZone(z);
+                  }
+                }}
                 style={{
-                  backgroundColor: "rgba(234, 179, 8, 0.08)",
-                  border: `1.5px solid ${selectedIncident === 3 ? "#eab308" : "rgba(234, 179, 8, 0.3)"}`,
+                  backgroundColor: "rgba(225, 29, 72, 0.08)",
+                  border: `1.5px solid ${selectedIncident === 4 ? "#ef4444" : "rgba(239, 68, 68, 0.35)"}`,
                   borderRadius: "12px",
                   padding: "12px",
                   cursor: "pointer",
-                  boxShadow: selectedIncident === 3 ? "0 0 16px rgba(234, 179, 8, 0.25)" : "none",
+                  boxShadow: selectedIncident === 4 ? "0 0 16px rgba(225, 29, 72, 0.25)" : "none",
                   transition: "all 0.18s ease",
                 }}
               >
@@ -1649,8 +1756,8 @@ export default function Dashboard() {
                         width: "20px",
                         height: "20px",
                         borderRadius: "50%",
-                        backgroundColor: "#eab308",
-                        color: "#0f172a",
+                        backgroundColor: "#ef4444",
+                        color: "#ffffff",
                         fontSize: "0.68rem",
                         fontWeight: "900",
                         display: "flex",
@@ -1658,29 +1765,29 @@ export default function Dashboard() {
                         justifyContent: "center",
                       }}
                     >
-                      3
+                      4
                     </span>
                     <span style={{ fontSize: "0.86rem", fontWeight: "800", color: "#ffffff" }}>
-                      Road Blockage — Zone B
+                      Debris Flow — NH-766
                     </span>
                     <span
                       style={{
-                        backgroundColor: "#eab308",
-                        color: "#0f172a",
+                        backgroundColor: "#e11d48",
+                        color: "#ffffff",
                         fontSize: "0.58rem",
                         fontWeight: "900",
                         padding: "1px 6px",
                         borderRadius: "4px",
                       }}
                     >
-                      MEDIUM
+                      CRITICAL
                     </span>
                   </div>
                   <ChevronRight size={16} color="#94a3b8" />
                 </div>
 
                 <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
-                  📍 Rayagada, Odisha
+                  📍 Chooralmala-Meppadi, Kerala
                 </div>
 
                 <div
@@ -1694,12 +1801,12 @@ export default function Dashboard() {
                   }}
                 >
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <span>👥 56 affected</span>
-                    <span>🏠 0 shelters</span>
-                    <span>🛣️ 1 road</span>
+                    <span>👥 1,350 exposed</span>
+                    <span>🏠 1 hub</span>
+                    <span>🛣️ Bailey Bridge Ops</span>
                   </div>
-                  <div style={{ color: "#eab308", fontWeight: "800" }}>
-                    ⏱️ ETA 45 min
+                  <div style={{ color: "#f87171", fontWeight: "800" }}>
+                    ⏱️ ETA 06 min
                   </div>
                 </div>
               </div>
