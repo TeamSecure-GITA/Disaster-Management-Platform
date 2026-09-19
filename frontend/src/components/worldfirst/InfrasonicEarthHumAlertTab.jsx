@@ -36,56 +36,23 @@ export default function InfrasonicEarthHumAlertTab() {
     detectedSource: 'Siang River Upper GLOF Breach (km 14.8 Upstream)'
   });
 
-  // Simulated 5km Distributed River Basin Peer Nodes
+  // Simulated 15-Device Decentralized P2P Mesh Across 5km Radius
   const [peerNodes, setPeerNodes] = useState([
-    {
-      id: 'NODE-101',
-      name: 'Panging Foothills (Upstream)',
-      distanceKm: 4.8,
-      lat: 28.1214,
-      lng: 95.2918,
-      detectedFreq: 4.22,
-      amplitudeDb: -26.4,
-      status: 'VERIFIED_TRIPPED',
-      deviceModel: 'Pixel 7 (Raw MEMS Mic)',
-      propagationLagMs: 0
-    },
-    {
-      id: 'NODE-104',
-      name: 'Siang Gorge Central Sensor',
-      distanceKm: 3.2,
-      lat: 28.0980,
-      lng: 95.3102,
-      detectedFreq: 4.19,
-      amplitudeDb: -29.8,
-      status: 'VERIFIED_TRIPPED',
-      deviceModel: 'Redmi Note 11',
-      propagationLagMs: 4700
-    },
-    {
-      id: 'NODE-108',
-      name: 'East Siang Highway Bridge',
-      distanceKm: 1.6,
-      lat: 28.0792,
-      lng: 95.3215,
-      detectedFreq: 4.25,
-      amplitudeDb: -32.1,
-      status: 'VERIFIED_TRIPPED',
-      deviceModel: 'Samsung Galaxy M33',
-      propagationLagMs: 9400
-    },
-    {
-      id: 'NODE-LOCAL',
-      name: 'Your Device (Pasighat Triage Camp)',
-      distanceKm: 0.0,
-      lat: 28.0674,
-      lng: 95.3289,
-      detectedFreq: 4.20,
-      amplitudeDb: -34.2,
-      status: 'RECEIVING_SURGE',
-      deviceModel: 'Active Web Audio Session',
-      propagationLagMs: 14100
-    }
+    { id: 'NODE-01', name: 'Upper Valley Ridge (Panging North)', distanceKm: 4.9, lat: 28.1250, lng: 95.2890, detectedFreq: 4.21, amplitudeDb: -25.2, status: 'VERIFIED_TRIPPED', deviceModel: 'Pixel 7 (Raw MEMS Mic)', propagationLagMs: 0 },
+    { id: 'NODE-02', name: 'Panging Foothills (Upstream)', distanceKm: 4.6, lat: 28.1214, lng: 95.2918, detectedFreq: 4.22, amplitudeDb: -26.4, status: 'VERIFIED_TRIPPED', deviceModel: 'OnePlus 11', propagationLagMs: 880 },
+    { id: 'NODE-03', name: 'Siang River Cliff Outpost', distanceKm: 4.2, lat: 28.1140, lng: 95.2970, detectedFreq: 4.20, amplitudeDb: -27.1, status: 'VERIFIED_TRIPPED', deviceModel: 'Samsung Galaxy S22', propagationLagMs: 2050 },
+    { id: 'NODE-04', name: 'Rottung Gorge Bridge East', distanceKm: 3.8, lat: 28.1060, lng: 95.3030, detectedFreq: 4.23, amplitudeDb: -28.0, status: 'VERIFIED_TRIPPED', deviceModel: 'Xiaomi 13 Pro', propagationLagMs: 3200 },
+    { id: 'NODE-05', name: 'Siang Gorge Central Sensor', distanceKm: 3.2, lat: 28.0980, lng: 95.3102, detectedFreq: 4.19, amplitudeDb: -29.8, status: 'VERIFIED_TRIPPED', deviceModel: 'Redmi Note 11', propagationLagMs: 5000 },
+    { id: 'NODE-06', name: 'Adi Village Watchpoint #1', distanceKm: 2.9, lat: 28.0920, lng: 95.3140, detectedFreq: 4.21, amplitudeDb: -30.4, status: 'VERIFIED_TRIPPED', deviceModel: 'Vivo V27', propagationLagMs: 5880 },
+    { id: 'NODE-07', name: 'Terrace Farming Valley Hub', distanceKm: 2.5, lat: 28.0870, lng: 95.3180, detectedFreq: 4.18, amplitudeDb: -31.0, status: 'VERIFIED_TRIPPED', deviceModel: 'Realme GT Neo', propagationLagMs: 7050 },
+    { id: 'NODE-08', name: 'East Siang Highway Bridge', distanceKm: 2.1, lat: 28.0792, lng: 95.3215, detectedFreq: 4.25, amplitudeDb: -32.1, status: 'VERIFIED_TRIPPED', deviceModel: 'Samsung Galaxy M33', propagationLagMs: 8200 },
+    { id: 'NODE-09', name: 'Siku Confluence Relay', distanceKm: 1.7, lat: 28.0750, lng: 95.3235, detectedFreq: 4.22, amplitudeDb: -32.8, status: 'VERIFIED_TRIPPED', deviceModel: 'POCO X5 Pro', propagationLagMs: 9400 },
+    { id: 'NODE-10', name: 'Adi Village Watchpoint #2', distanceKm: 1.4, lat: 28.0720, lng: 95.3250, detectedFreq: 4.20, amplitudeDb: -33.2, status: 'VERIFIED_TRIPPED', deviceModel: 'Motorola Edge 40', propagationLagMs: 10300 },
+    { id: 'NODE-11', name: 'Pasighat Hydro Gauge Base', distanceKm: 1.0, lat: 28.0695, lng: 95.3268, detectedFreq: 4.24, amplitudeDb: -33.7, status: 'VERIFIED_TRIPPED', deviceModel: 'Infinix Zero 30', propagationLagMs: 11450 },
+    { id: 'NODE-12', name: 'Mebo Ridge Lookout', distanceKm: 0.7, lat: 28.0685, lng: 95.3278, detectedFreq: 4.21, amplitudeDb: -34.0, status: 'VERIFIED_TRIPPED', deviceModel: 'iQOO Z7', propagationLagMs: 12350 },
+    { id: 'NODE-13', name: 'Pasighat Medical Camp', distanceKm: 0.4, lat: 28.0678, lng: 95.3283, detectedFreq: 4.19, amplitudeDb: -34.1, status: 'VERIFIED_TRIPPED', deviceModel: 'OPPO Reno 8', propagationLagMs: 13200 },
+    { id: 'NODE-14', name: 'Riverbank Evacuation Pier', distanceKm: 0.2, lat: 28.0676, lng: 95.3286, detectedFreq: 4.23, amplitudeDb: -34.1, status: 'VERIFIED_TRIPPED', deviceModel: 'Nothing Phone (2)', propagationLagMs: 13800 },
+    { id: 'NODE-15', name: 'Your Device (Pasighat Triage Camp)', distanceKm: 0.0, lat: 28.0674, lng: 95.3289, detectedFreq: 4.20, amplitudeDb: -34.2, status: 'RECEIVING_SURGE', deviceModel: 'Active Web Audio Session', propagationLagMs: 14400 }
   ]);
 
   // Canvas & Audio Refs
@@ -576,24 +543,22 @@ export default function InfrasonicEarthHumAlertTab() {
           <div>
             <div className="flex items-center gap-3">
               <span className="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] font-black tracking-wider uppercase rounded-full shadow-lg">
-                WORLD-FIRST INNOVATION #3
+                WORLD-FIRST INNOVATION #2
               </span>
               <span className="flex items-center gap-1.5 text-xs text-orange-300 font-semibold bg-orange-950/80 px-2.5 py-0.5 rounded-full border border-orange-700/50">
-                <ShieldAlert className="w-3.5 h-3.5 text-orange-400" /> Pre-Impact Hydrodynamic Infrasound
+                <ShieldAlert className="w-3.5 h-3.5 text-orange-400" /> Atmospheric Micro-Barometric Ripples (&lt; 20 Hz)
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2 flex items-center gap-3">
-              Inverted Infrasonic "Earth-Hum" Alerting
+              Sub-20Hz Infrasonic "Earth-Hum" Flood &amp; Landslide Predictor
               <span className="text-base font-normal text-orange-300 bg-orange-900/40 px-3 py-1 rounded-xl border border-orange-500/20">
-                Sub-20 Hz Web Audio DSP
+                Web Audio API • Raw DSP
               </span>
             </h1>
             <p className="text-sm text-slate-300 max-w-3xl mt-2 leading-relaxed">
-              Before a massive glacial lake outburst or mountain dam failure floods downstream villages, the turbulent displacement of 
-              millions of tons of rushing water emits <strong>infrasound</strong> (sub-audible low-frequency pressure waves under 20 Hz). 
-              Our platform uses the <strong>Web Audio API</strong> with disabled noise-suppression and custom DSP filters to monitor the sub-20 Hz spectrum. 
-              When peer phones across a 5km river basin correlate the identical infrasound signature, the network triggers an immediate 
-              acoustic siren—providing a <strong>3-to-5-minute life-saving warning</strong> before floodwaters arrive.
+              Before a massive flash flood rushes down a North-Eastern mountain valley, or a hillside begins its final catastrophic collapse, 
+              the physical grinding of rock and compression of water emits <strong>infrasound</strong>—extremely low-frequency audio waves (below 20 Hz) 
+              that travel for tens of kilometers but are entirely inaudible to human ears.
             </p>
           </div>
 
@@ -630,9 +595,42 @@ export default function InfrasonicEarthHumAlertTab() {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Zap className="w-3.5 h-3.5" /> 5km Quorum Sim
+                <Zap className="w-3.5 h-3.5" /> 15-Phone Mesh Sim
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* 3 Core Pillars: The Physics Concept, How It Works, The World-First Edge */}
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3.5 border-t border-orange-500/20 pt-4 text-xs">
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-orange-500/20">
+            <div className="text-orange-400 font-bold flex items-center gap-1.5 mb-1">
+              <Activity className="w-3.5 h-3.5" /> 1. The Physics Concept
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              Catastrophic slope shear and hydrodynamic flood displacement emit continuous <strong>sub-20 Hz infrasound waves</strong>. 
+              These low-frequency micro-barometric compression ripples travel tens of kilometers through mountain valley waveguides at 340 m/s in air and 1,800 m/s in bedrock.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-orange-500/20">
+            <div className="text-orange-400 font-bold flex items-center gap-1.5 mb-1">
+              <Sliders className="w-3.5 h-3.5" /> 2. How It Works
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              Our website utilizes the <strong>Web Audio API</strong> with custom DSP lowpass filtering. It explicitly bypasses browser noise-cancellation and speech suppression filters 
+              (<code className="text-cyan-300 font-mono">noiseSuppression: false</code>) to read raw, unfiltered atmospheric micro-barometric ripples from the device microphone.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-orange-500/20">
+            <div className="text-orange-400 font-bold flex items-center gap-1.5 mb-1">
+              <Sparkles className="w-3.5 h-3.5" /> 3. The World-First Edge
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              A single phone mic is noisy, but our platform connects a <strong>decentralized 15-smartphone mesh</strong> across a 5 km radius. 
+              When all 15 devices correlate the exact same rhythmic acoustic signature, a high-decibel alarm gives villagers a <strong>2-to-5-minute window to run to higher ground</strong>, bypassing broken government sensors.
+            </p>
           </div>
         </div>
       </div>
@@ -650,7 +648,7 @@ export default function InfrasonicEarthHumAlertTab() {
                   ⚠️ INFRASONIC 5KM QUORUM CONSENSUS REACHED
                 </span>
                 <span className="text-[10px] font-mono bg-rose-900/50 text-rose-200 px-2.5 py-0.5 rounded-full border border-rose-500/30">
-                  4/4 PEER PHONES LOCKED ({consensusConfidence}%)
+                  15/15 PEER PHONES LOCKED ({consensusConfidence}%)
                 </span>
               </div>
               <div className="text-xl md:text-2xl font-black text-white mt-1">
@@ -806,28 +804,29 @@ export default function InfrasonicEarthHumAlertTab() {
           {/* 5km Distributed Peer Mesh Quorum List */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
-              <span className="flex items-center gap-2"><Share2 className="w-4 h-4 text-cyan-400" /> 5km Peer Node Quorum (4 Nodes)</span>
-              <span className="text-[10px] font-mono text-emerald-400">100% QUORUM</span>
+              <span className="flex items-center gap-2"><Share2 className="w-4 h-4 text-cyan-400" /> 5km Decentralized Peer Mesh (15 Nodes)</span>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">15/15 QUORUM (100%)</span>
             </h3>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
               {peerNodes.map((node) => (
                 <div
                   key={node.id}
-                  className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs"
+                  className="bg-slate-950/60 border border-slate-800 rounded-xl p-2.5 text-xs hover:border-slate-700 transition-colors"
                 >
                   <div className="flex items-center justify-between font-bold">
                     <span className="text-white flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${node.id === 'NODE-LOCAL' ? 'bg-emerald-400 animate-ping' : 'bg-cyan-400'}`}></span>
-                      {node.name}
+                      <span className={`w-2 h-2 rounded-full ${node.id === 'NODE-15' ? 'bg-emerald-400 animate-ping' : 'bg-cyan-400'}`}></span>
+                      <span className="text-[11px] font-mono text-cyan-300">{node.id}</span>
+                      <span className="truncate max-w-[160px]">{node.name}</span>
                     </span>
                     <span className="font-mono text-[10px] text-orange-400">{node.detectedFreq} Hz</span>
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+                  <div className="text-[10px] text-slate-400 mt-1 flex items-center justify-between">
                     <span>{node.deviceModel}</span>
-                    <span className="font-mono text-slate-500">{node.amplitudeDb} dB</span>
+                    <span className="font-mono text-slate-400">{node.amplitudeDb} dB</span>
                   </div>
-                  <div className="text-[10px] font-mono text-emerald-400 mt-1 flex items-center justify-between">
+                  <div className="text-[10px] font-mono text-emerald-400 mt-0.5 flex items-center justify-between">
                     <span>Lag: +{node.propagationLagMs}ms</span>
                     <span className="text-slate-400">{node.distanceKm} km from local triage</span>
                   </div>

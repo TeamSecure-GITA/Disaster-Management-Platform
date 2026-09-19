@@ -659,7 +659,7 @@ export default function GeomagneticRuptureNavigationTab() {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner: World-First Deep-Tech Pillar #2 */}
+      {/* Header Banner: World-First Deep-Tech Pillar #3 */}
       <div className="bg-gradient-to-r from-slate-900 via-sky-950/80 to-slate-900 border border-sky-500/30 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
         <div className="absolute -right-16 -top-16 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute right-8 bottom-4 opacity-10 flex items-center gap-2 pointer-events-none">
@@ -670,24 +670,21 @@ export default function GeomagneticRuptureNavigationTab() {
           <div>
             <div className="flex items-center gap-3">
               <span className="px-2.5 py-1 bg-gradient-to-r from-sky-500 to-indigo-500 text-white text-[11px] font-black tracking-wider uppercase rounded-full shadow-lg">
-                WORLD-FIRST INNOVATION #2
+                WORLD-FIRST INNOVATION #3
               </span>
               <span className="flex items-center gap-1.5 text-xs text-sky-300 font-semibold bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-700/50">
-                <ShieldCheck className="w-3.5 h-3.5 text-sky-400" /> 0 GPS • 0 Cellular • Compass-Independent
+                <ShieldCheck className="w-3.5 h-3.5 text-sky-400" /> 0 GPS • 0 Cellular • Uncalibrated Sensor Fingerprinting
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2 flex items-center gap-3">
-              Geomagnetic Field Rupture Navigation
+              Uncalibrated Geomagnetic Field Rupture Navigation
               <span className="text-base font-normal text-sky-300 bg-sky-900/40 px-3 py-1 rounded-xl border border-sky-500/20">
                 Web Sensor API
               </span>
             </h1>
             <p className="text-sm text-slate-300 max-w-3xl mt-2 leading-relaxed">
-              In collapsed concrete structures, unlit tunnel cave-ins, or deep Himalayan gorges, satellite GPS signals 
-              vanish and conventional compasses spin uncontrollably due to iron rebar and structural steel distortion. 
-              This system hooks directly into raw uncalibrated magnetometer sensors via the <strong>Web Sensor API</strong>, 
-              turning magnetic anomalies into an immutable <strong>spatial fingerprint</strong>. By matching magnetic vector gradients against 
-              pre-cached building blueprints, rescuers navigate step-by-step through pitch-black voids without radio signals.
+              In thick jungle canopies, deep valleys, or inside completely collapsed concrete structures, GPS signals vanish, 
+              and traditional digital compasses spin erratically due to local iron distortions, leaving rescuers physically lost.
             </p>
           </div>
 
@@ -727,6 +724,36 @@ export default function GeomagneticRuptureNavigationTab() {
                 <Zap className="w-3.5 h-3.5" /> High-Fidelity Sim
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* 3 Core Pillars: The Physics Concept, How It Works, The World-First Edge */}
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3.5 border-t border-sky-500/20 pt-4 text-xs">
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-sky-500/20">
+            <div className="text-sky-400 font-bold flex items-center gap-1.5 mb-1">
+              <Activity className="w-3.5 h-3.5" /> 1. The Physics Concept
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              In thick jungle canopies, deep valleys, or inside completely collapsed concrete structures, GPS signals vanish, and traditional digital compasses spin erratically due to local iron distortions, leaving rescuers physically lost.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-sky-500/20">
+            <div className="text-sky-400 font-bold flex items-center gap-1.5 mb-1">
+              <Magnet className="w-3.5 h-3.5" /> 2. How It Works
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              Every square meter of the Earth features a highly unique magnetic background signature, which becomes starkly warped ("ruptured") by iron deposits, collapsed rebar, or structural voids. Your website hooks into the raw, uncalibrated magnetometer data stream via the <strong>Web Sensor API</strong>.
+            </p>
+          </div>
+
+          <div className="bg-slate-950/60 p-3.5 rounded-xl border border-sky-500/20">
+            <div className="text-sky-400 font-bold flex items-center gap-1.5 mb-1">
+              <Sparkles className="w-3.5 h-3.5" /> 3. The World-First Edge
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              As a responder walks, the website maps these microscopic magnetic variations chronologically, creating an offline <strong>Geomagnetic Signature Fingerprint</strong>. Even with zero GPS, zero cellular signal, and an uncalibrated compass, the website guides rescuers step-by-step through blind rubble by matching against pre-cached anomaly blueprints.
+            </p>
           </div>
         </div>
       </div>

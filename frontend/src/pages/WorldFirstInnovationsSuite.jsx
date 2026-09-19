@@ -586,35 +586,16 @@ export default function WorldFirstInnovationsSuite() {
             }`}
           >
             <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-cyan-400/20 text-cyan-300 text-[9px] font-black rounded-full border border-cyan-400/40 animate-pulse">
-              WORLD-1ST
+              #1 WORLD-1ST
             </div>
             <Atom className={`w-5 h-5 flex-shrink-0 ${activeTab === 'muon-tracking' ? 'text-cyan-400 animate-spin' : 'text-slate-400'}`} style={{ animationDuration: '6s' }} />
             <div>
-              <div className="text-xs font-bold leading-tight">Cosmic Muon 3D</div>
-              <div className="text-[10px] text-slate-400">Debris Void CMOS</div>
+              <div className="text-xs font-bold leading-tight">Subatomic Muon</div>
+              <div className="text-[10px] text-slate-400">Debris Density WASM</div>
             </div>
           </button>
 
-          {/* 2. GEOMAGNETIC RUPTURE NAVIGATION */}
-          <button
-            onClick={() => handleTabChange('geomagnetic-nav')}
-            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
-              activeTab === 'geomagnetic-nav'
-                ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-sky-400/20 text-sky-300 text-[9px] font-black rounded-full border border-sky-400/40 animate-pulse">
-              WORLD-1ST
-            </div>
-            <Magnet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'geomagnetic-nav' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
-            <div>
-              <div className="text-xs font-bold leading-tight">Geomagnetic Nav</div>
-              <div className="text-[10px] text-slate-400">Rupture Blueprint 3D</div>
-            </div>
-          </button>
-
-          {/* 3. INFRASONIC EARTH-HUM ALERT */}
+          {/* 2. SUB-20HZ INFRASONIC EARTH-HUM ALERT */}
           <button
             onClick={() => handleTabChange('infrasonic-hum')}
             className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
@@ -624,12 +605,31 @@ export default function WorldFirstInnovationsSuite() {
             }`}
           >
             <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-orange-400/20 text-orange-300 text-[9px] font-black rounded-full border border-orange-400/40 animate-pulse">
-              WORLD-1ST
+              #2 WORLD-1ST
             </div>
             <Waves className={`w-5 h-5 flex-shrink-0 ${activeTab === 'infrasonic-hum' ? 'text-orange-400 animate-pulse' : 'text-slate-400'}`} />
             <div>
               <div className="text-xs font-bold leading-tight">Infrasonic Hum</div>
-              <div className="text-[10px] text-slate-400">Sub-20Hz Surge Alarm</div>
+              <div className="text-[10px] text-slate-400">15-Phone 5km Quorum</div>
+            </div>
+          </button>
+
+          {/* 3. UNCALIBRATED GEOMAGNETIC RUPTURE NAVIGATION */}
+          <button
+            onClick={() => handleTabChange('geomagnetic-nav')}
+            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+              activeTab === 'geomagnetic-nav'
+                ? 'bg-sky-950/80 border-sky-400 text-white shadow-lg shadow-sky-950/50'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            <div className="absolute top-1 right-1.5 px-1.5 py-0.2 bg-sky-400/20 text-sky-300 text-[9px] font-black rounded-full border border-sky-400/40 animate-pulse">
+              #3 WORLD-1ST
+            </div>
+            <Magnet className={`w-5 h-5 flex-shrink-0 ${activeTab === 'geomagnetic-nav' ? 'text-sky-400 animate-bounce' : 'text-slate-400'}`} />
+            <div>
+              <div className="text-xs font-bold leading-tight">Geomagnetic Nav</div>
+              <div className="text-[10px] text-slate-400">Zero-GPS Rupture 3D</div>
             </div>
           </button>
 

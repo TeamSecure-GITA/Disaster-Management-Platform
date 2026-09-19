@@ -537,20 +537,20 @@ export default function CosmicRayMuonTrackerTab() {
                 WORLD-FIRST INNOVATION #1
               </span>
               <span className="flex items-center gap-1.5 text-xs text-indigo-300 font-semibold bg-indigo-950/80 px-2.5 py-0.5 rounded-full border border-indigo-700/50">
-                <ShieldAlert className="w-3.5 h-3.5 text-indigo-400" /> Zero RF Emissions (100% Passive)
+                <ShieldAlert className="w-3.5 h-3.5 text-indigo-400" /> Subatomic Cosmic Leptons (Zero RF)
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2 flex items-center gap-3">
-              Cosmic-Ray Muon Tracking
+              Subatomic Muon Particle Tracking
               <span className="text-base font-normal text-indigo-300 bg-indigo-900/40 px-3 py-1 rounded-xl border border-indigo-500/20">
-                Debris Thickness & Void Mapping
+                Debris Density &amp; Rubble Thickness Mapping
               </span>
             </h1>
             <p className="text-sm text-slate-300 max-w-3xl mt-2 leading-relaxed">
-              When landslides or building collapses bury victims, traditional rescue radar fails to penetrate wet mud or iron-reinforced concrete. 
-              Atmospheric cosmic rays constantly shower the Earth in subatomic <strong>muons</strong> that pass effortlessly through 
-              hundreds of meters of solid rock. By counting microscopic ionization artifacts on covered smartphone CMOS camera sensors via 
-              <strong> WebRTC &amp; WebAssembly</strong>, rescuers map exact rubble thickness and pinpoint hollow survivor pockets without 1 watt of RF transmission.
+              <strong>The Physics Concept:</strong> When thousands of tons of mud or concrete bury a community, thermal cameras go blind and search radar cannot penetrate deep enough. Deep-space cosmic rays constantly shower Earth in subatomic particles called <strong>muons</strong>, which easily pass through solid mountains, losing velocity and flux depending on the density of the matter they strike.
+            </p>
+            <p className="text-xs text-slate-400 max-w-3xl mt-1.5 leading-relaxed">
+              <strong>How It Works &amp; The World-First Edge:</strong> Captured via client-side <strong>WebGL &amp; WebRTC MediaStreams API</strong> with the CMOS sensor lens blacked out (phone facedown in mud or taped). High-energy muons slice through the silicon lattice, freeing electrons to leave distinct microscopic bright tracks. The in-browser <strong>WebAssembly (WASM)</strong> engine counts collisions per minute (CPM) and decelerations against open-air baselines to compute the exact thickness, density (g/cm³), and hollow survivor cavities.
             </p>
           </div>
 

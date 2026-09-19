@@ -161,6 +161,14 @@ export default function App() {
             <Route path="/thermal-tap" element={<Navigate to="/world-first-innovations?tab=thermal-tap" replace />} />
             <Route path="/barometric-flash-flood" element={<Navigate to="/world-first-innovations?tab=barometric" replace />} />
             <Route path="/barometric-flood" element={<Navigate to="/world-first-innovations?tab=barometric" replace />} />
+            <Route path="/muon-tracking" element={<Navigate to="/world-first-innovations?tab=muon-tracking" replace />} />
+            <Route path="/subatomic-muon-tracking" element={<Navigate to="/world-first-innovations?tab=muon-tracking" replace />} />
+            <Route path="/infrasonic-earth-hum" element={<Navigate to="/world-first-innovations?tab=infrasonic-hum" replace />} />
+            <Route path="/infrasonic-hum" element={<Navigate to="/world-first-innovations?tab=infrasonic-hum" replace />} />
+            <Route path="/earth-hum" element={<Navigate to="/world-first-innovations?tab=infrasonic-hum" replace />} />
+            <Route path="/geomagnetic-rupture" element={<Navigate to="/world-first-innovations?tab=geomagnetic-nav" replace />} />
+            <Route path="/geomagnetic-navigation" element={<Navigate to="/world-first-innovations?tab=geomagnetic-nav" replace />} />
+            <Route path="/uncalibrated-geomagnetic" element={<Navigate to="/world-first-innovations?tab=geomagnetic-nav" replace />} />
             <Route path="/quantum-gossip-routing" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
             <Route path="/quantum-gossip" element={<Navigate to="/world-first-innovations?tab=quantum-gossip" replace />} />
             <Route path="/sound-wave-chirp" element={<Navigate to="/world-first-innovations" replace />} />
