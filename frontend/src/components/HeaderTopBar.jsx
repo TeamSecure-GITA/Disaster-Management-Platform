@@ -313,66 +313,79 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
           </Link>
         </div>
 
-        {/* ─────────────── CENTER: Permanent Active Emergency Status Card ─────────────── */}
+        {/* ─────────────── CENTER: High-Contrast Operational Active Emergency Focal Card ─────────────── */}
         <div
           className="header-emergency-card"
           onClick={() => navigate("/alerts")}
           style={{
-            backgroundColor: "rgba(136, 19, 55, 0.28)",
-            border: "1px solid rgba(244, 63, 94, 0.45)",
-            borderRadius: "12px",
-            padding: "5px 14px",
+            background: "linear-gradient(90deg, rgba(153, 27, 27, 0.92) 0%, rgba(185, 28, 28, 0.85) 100%)",
+            border: "2px solid #ef4444",
+            borderRadius: "14px",
+            padding: "6px 16px",
             display: "flex",
             alignItems: "center",
-            gap: "10px",
-            boxShadow: "0 0 20px rgba(225, 29, 72, 0.2)",
+            gap: "12px",
+            boxShadow: "0 0 25px rgba(239, 68, 68, 0.4), inset 0 0 15px rgba(239, 68, 68, 0.2)",
             cursor: "pointer",
             flexShrink: 1,
             minWidth: 0,
+            transition: "transform 0.15s ease, box-shadow 0.15s ease",
           }}
-          title="Click to inspect Active Emergency details"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.015)";
+            e.currentTarget.style.boxShadow = "0 0 30px rgba(239, 68, 68, 0.6)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "0 0 25px rgba(239, 68, 68, 0.4)";
+          }}
+          title="Click to view Active Emergency details, response protocols & live map"
         >
           <div
             style={{
-              width: "28px",
-              height: "28px",
+              width: "34px",
+              height: "34px",
               borderRadius: "50%",
-              backgroundColor: "rgba(225, 29, 72, 0.3)",
-              border: "1px solid rgba(244, 63, 94, 0.6)",
+              backgroundColor: "#dc2626",
+              border: "2px solid #fecaca",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#f43f5e",
-              fontSize: "0.9rem",
+              color: "#ffffff",
+              fontSize: "1.1rem",
               flexShrink: 0,
+              boxShadow: "0 0 12px rgba(220, 38, 38, 0.8)",
             }}
           >
             ⚠️
           </div>
-          <div style={{ display: "flex", flexDirection: "column", lineHeight: "1.2", minWidth: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: "1.25", minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <span
                 style={{
-                  fontSize: "0.72rem",
+                  fontSize: "0.76rem",
                   fontWeight: "900",
-                  color: "#fca5a5",
-                  letterSpacing: "0.04em",
+                  color: "#fef08a",
+                  letterSpacing: "0.05em",
                   fontFamily: "var(--font-mono, monospace)",
                 }}
               >
                 ACTIVE EMERGENCY
               </span>
-              <span style={{ fontSize: "0.82rem", fontWeight: "800", color: "#ffffff" }}>
+              <span style={{ fontSize: "0.94rem", fontWeight: "900", color: "#ffffff" }}>
                 NER Landslide Alert — NH-10
               </span>
               <span
                 style={{
-                  fontSize: "0.58rem",
+                  fontSize: "0.72rem",
                   fontWeight: "900",
-                  backgroundColor: "#e11d48",
+                  backgroundColor: "#dc2626",
                   color: "#ffffff",
-                  padding: "1px 6px",
-                  borderRadius: "4px",
+                  padding: "2px 8px",
+                  borderRadius: "5px",
+                  border: "1px solid #fecaca",
+                  letterSpacing: "0.04em",
+                  boxShadow: "0 0 8px rgba(220, 38, 38, 0.6)",
                 }}
               >
                 CRITICAL
@@ -383,36 +396,70 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                fontSize: "0.66rem",
-                color: "#cbd5e1",
-                marginTop: "2px",
+                gap: "8px",
+                fontSize: "0.72rem",
+                marginTop: "3px",
                 flexWrap: "nowrap",
                 overflow: "hidden",
-                textOverflow: "ellipsis",
               }}
             >
-              <span>🏠 4 Villages Affected</span>
-              <span>👥 387 People Exposed</span>
-              <span>🛣️ 2 Roads Blocked</span>
-              <span style={{ color: "#94a3b8" }}>⏱️ Updated 21:42</span>
+              <span style={{ backgroundColor: "rgba(0, 0, 0, 0.4)", color: "#ffffff", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                🏠 4 Villages Affected
+              </span>
+              <span style={{ backgroundColor: "rgba(0, 0, 0, 0.4)", color: "#ffffff", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                👥 1,800 People Exposed
+              </span>
+              <span style={{ backgroundColor: "rgba(0, 0, 0, 0.4)", color: "#fca5a5", padding: "1px 6px", borderRadius: "4px", fontWeight: "700" }}>
+                🛣️ 2 Roads Blocked
+              </span>
+              <span style={{ color: "#fecaca", fontWeight: "600", fontSize: "0.68rem" }}>
+                ⏱️ Updated 21:42
+              </span>
+              <span style={{ marginLeft: "auto", fontSize: "0.72rem", fontWeight: "800", color: "#fef08a", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                VIEW PROTOCOL →
+              </span>
             </div>
           </div>
         </div>
 
         {/* ─────────────── RIGHT: Status, Clock, Language, Bell, User ─────────────── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+          {/* Quick SOS Center Direct Action Button */}
+          <Link
+            to="/emergency-sos"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              backgroundColor: "#dc2626",
+              color: "#ffffff",
+              padding: "6px 12px",
+              borderRadius: "8px",
+              fontWeight: "900",
+              fontSize: "0.76rem",
+              textDecoration: "none",
+              border: "1px solid #f87171",
+              boxShadow: "0 0 14px rgba(220, 38, 38, 0.5)",
+              letterSpacing: "0.04em",
+              transition: "transform 0.15s, background-color 0.15s",
+            }}
+            title="Open Emergency SOS Dispatch Center"
+          >
+            <span style={{ fontSize: "0.9rem" }}>🚨</span>
+            <span>SOS CENTER</span>
+          </Link>
+
           {/* System Online Badge */}
           <div
             className="header-online-badge"
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "7px",
-              backgroundColor: "rgba(16, 185, 129, 0.12)",
-              border: "1px solid rgba(16, 185, 129, 0.35)",
+              gap: "6px",
+              backgroundColor: "rgba(16, 185, 129, 0.14)",
+              border: "1px solid rgba(16, 185, 129, 0.4)",
               borderRadius: "999px",
-              padding: "4px 10px",
+              padding: "4px 9px",
             }}
           >
             <span
@@ -424,10 +471,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                 boxShadow: "0 0 8px #10b981",
               }}
             />
-            <div style={{ display: "flex", flexDirection: "column", lineHeight: "1.1", textAlign: "left" }}>
-              <span style={{ fontSize: "0.68rem", fontWeight: "800", color: "#34d399" }}>System Online</span>
-              <span style={{ fontSize: "0.56rem", color: "#94a3b8" }}>All Services Operational</span>
-            </div>
+            <span style={{ fontSize: "0.7rem", fontWeight: "800", color: "#34d399" }}>Online</span>
           </div>
 
           {/* Live Clock & Date */}
@@ -643,13 +687,26 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                   {notifications.slice(0, 5).map((n) => (
                     <div
                       key={n.id}
+                      onClick={() => {
+                        setNotifOpen(false);
+                        navigate("/alerts");
+                      }}
                       style={{
                         padding: "10px 12px",
                         borderRadius: "10px",
                         backgroundColor: "rgba(30, 41, 59, 0.6)",
-                        borderLeft: `3px solid ${n.severity === "critical" ? "#f43f5e" : n.severity === "high" ? "#f97316" : "#38bdf8"}`,
-                        border: "1px solid rgba(255, 255, 255, 0.05)",
+                        borderLeft: `4px solid ${n.severity === "critical" ? "#dc2626" : n.severity === "high" ? "#f97316" : "#38bdf8"}`,
+                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        cursor: "pointer",
+                        transition: "background-color 0.15s ease",
                       }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "rgba(45, 62, 88, 0.85)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "rgba(30, 41, 59, 0.6)";
+                      }}
+                      title="Click to inspect this incident bulletin"
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
                         <span style={{ fontSize: "0.66rem", fontWeight: "800", color: "#38bdf8", textTransform: "uppercase", fontFamily: "var(--font-mono, monospace)" }}>
@@ -663,25 +720,21 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                       <div style={{ fontSize: "0.74rem", color: "#cbd5e1", lineHeight: "1.35", marginBottom: "6px" }}>
                         {n.message}
                       </div>
-                      {n.sourceUrl && (
-                        <a
-                          href={n.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "0.7rem",
-                            color: "#60a5fa",
-                            textDecoration: "none",
-                            fontWeight: "700",
-                          }}
-                        >
-                          <span>Official Portal Advisory</span>
-                          <span>↗</span>
-                        </a>
-                      )}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
+                        <span style={{ fontSize: "0.7rem", color: "#38bdf8", fontWeight: "700" }}>
+                          Open Incident Details →
+                        </span>
+                        {n.sourceUrl && (
+                          <span
+                            style={{
+                              fontSize: "0.68rem",
+                              color: "#94a3b8",
+                            }}
+                          >
+                            Official Bulletin ↗
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

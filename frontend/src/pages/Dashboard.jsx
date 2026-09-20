@@ -2067,17 +2067,19 @@ export default function Dashboard() {
                     >
                       1
                     </span>
-                    <span style={{ fontSize: "0.86rem", fontWeight: "800", color: "#ffffff" }}>
+                    <span style={{ fontSize: "0.88rem", fontWeight: "800", color: "#ffffff" }}>
                       Landslide — NH-10
                     </span>
                     <span
                       style={{
-                        backgroundColor: "#e11d48",
+                        backgroundColor: "#dc2626",
                         color: "#ffffff",
-                        fontSize: "0.58rem",
+                        fontSize: "0.72rem",
                         fontWeight: "900",
-                        padding: "1px 6px",
-                        borderRadius: "4px",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        letterSpacing: "0.06em",
+                        boxShadow: "0 0 10px rgba(220, 38, 38, 0.45)",
                       }}
                     >
                       CRITICAL
@@ -2086,7 +2088,7 @@ export default function Dashboard() {
                   <ChevronRight size={16} color="#94a3b8" />
                 </div>
 
-                <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
+                <div style={{ fontSize: "0.74rem", color: "#e2e8f0", marginTop: "4px", fontWeight: "500" }}>
                   📍 Teesta Basin, Sikkim / North Bengal
                 </div>
 
@@ -2096,16 +2098,16 @@ export default function Dashboard() {
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginTop: "8px",
-                    fontSize: "0.68rem",
-                    color: "#94a3b8",
+                    fontSize: "0.74rem",
+                    color: "#f1f5f9",
                   }}
                 >
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <span>👥 781 exposed</span>
-                    <span>🏘️ 4 villages</span>
-                    <span>🛣️ NH-10 Blocked</span>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>👥 <strong>781</strong> exposed</span>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>🏘️ <strong>4</strong> villages</span>
+                    <span style={{ backgroundColor: "rgba(220, 38, 38, 0.25)", color: "#fca5a5", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(239, 68, 68, 0.4)", fontWeight: "700" }}>🛣️ NH-10 Blocked</span>
                   </div>
-                  <div style={{ color: "#f87171", fontWeight: "800" }}>
+                  <div style={{ color: "#ef4444", fontWeight: "900", fontSize: "0.76rem" }}>
                     ⏱️ ETA 08 min
                   </div>
                 </div>
@@ -2150,17 +2152,19 @@ export default function Dashboard() {
                     >
                       2
                     </span>
-                    <span style={{ fontSize: "0.86rem", fontWeight: "800", color: "#ffffff" }}>
+                    <span style={{ fontSize: "0.88rem", fontWeight: "800", color: "#ffffff" }}>
                       Flood — Brahmaputra Basin
                     </span>
                     <span
                       style={{
-                        backgroundColor: "#e11d48",
+                        backgroundColor: "#dc2626",
                         color: "#ffffff",
-                        fontSize: "0.58rem",
+                        fontSize: "0.72rem",
                         fontWeight: "900",
-                        padding: "1px 6px",
-                        borderRadius: "4px",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        letterSpacing: "0.06em",
+                        boxShadow: "0 0 10px rgba(220, 38, 38, 0.45)",
                       }}
                     >
                       CRITICAL
@@ -2169,7 +2173,7 @@ export default function Dashboard() {
                   <ChevronRight size={16} color="#94a3b8" />
                 </div>
 
-                <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
+                <div style={{ fontSize: "0.74rem", color: "#e2e8f0", marginTop: "4px", fontWeight: "500" }}>
                   📍 Kaziranga & Majuli, Assam
                 </div>
 
@@ -2179,16 +2183,16 @@ export default function Dashboard() {
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginTop: "8px",
-                    fontSize: "0.68rem",
-                    color: "#94a3b8",
+                    fontSize: "0.74rem",
+                    color: "#f1f5f9",
                   }}
                 >
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <span>👥 1,395 exposed</span>
-                    <span>🏠 2 shelters</span>
-                    <span>🛣️ NH-715 Submerged</span>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>👥 <strong>1,395</strong> exposed</span>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>🏠 <strong>2</strong> shelters</span>
+                    <span style={{ backgroundColor: "rgba(220, 38, 38, 0.25)", color: "#fca5a5", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(239, 68, 68, 0.4)", fontWeight: "700" }}>🛣️ NH-715 Submerged</span>
                   </div>
-                  <div style={{ color: "#f87171", fontWeight: "800" }}>
+                  <div style={{ color: "#ef4444", fontWeight: "900", fontSize: "0.76rem" }}>
                     ⏱️ ETA 15 min
                   </div>
                 </div>
@@ -2233,17 +2237,19 @@ export default function Dashboard() {
                     >
                       3
                     </span>
-                    <span style={{ fontSize: "0.86rem", fontWeight: "800", color: "#ffffff" }}>
+                    <span style={{ fontSize: "0.88rem", fontWeight: "800", color: "#ffffff" }}>
                       Debris Avalanche — NH-13
                     </span>
                     <span
                       style={{
-                        backgroundColor: "#f59e0b",
-                        color: "#0f172a",
-                        fontSize: "0.58rem",
+                        backgroundColor: "#d97706",
+                        color: "#ffffff",
+                        fontSize: "0.72rem",
                         fontWeight: "900",
-                        padding: "1px 6px",
-                        borderRadius: "4px",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        letterSpacing: "0.06em",
+                        boxShadow: "0 0 10px rgba(217, 119, 6, 0.45)",
                       }}
                     >
                       HIGH
@@ -2252,7 +2258,7 @@ export default function Dashboard() {
                   <ChevronRight size={16} color="#94a3b8" />
                 </div>
 
-                <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
+                <div style={{ fontSize: "0.74rem", color: "#e2e8f0", marginTop: "4px", fontWeight: "500" }}>
                   📍 Tawang-Sela Pass, Arunachal Pradesh
                 </div>
 
@@ -2262,16 +2268,16 @@ export default function Dashboard() {
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginTop: "8px",
-                    fontSize: "0.68rem",
-                    color: "#94a3b8",
+                    fontSize: "0.74rem",
+                    color: "#f1f5f9",
                   }}
                 >
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <span>👥 480 exposed</span>
-                    <span>🏠 1 base shelter</span>
-                    <span>🛣️ NH-13 Blocked</span>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>👥 <strong>480</strong> exposed</span>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>🏠 <strong>1</strong> base shelter</span>
+                    <span style={{ backgroundColor: "rgba(217, 119, 6, 0.25)", color: "#fde68a", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(245, 158, 11, 0.4)", fontWeight: "700" }}>🛣️ NH-13 Blocked</span>
                   </div>
-                  <div style={{ color: "#f59e0b", fontWeight: "800" }}>
+                  <div style={{ color: "#f59e0b", fontWeight: "900", fontSize: "0.76rem" }}>
                     ⏱️ ETA 22 min
                   </div>
                 </div>
@@ -2316,17 +2322,19 @@ export default function Dashboard() {
                     >
                       4
                     </span>
-                    <span style={{ fontSize: "0.86rem", fontWeight: "800", color: "#ffffff" }}>
+                    <span style={{ fontSize: "0.88rem", fontWeight: "800", color: "#ffffff" }}>
                       Debris Flow — NH-766
                     </span>
                     <span
                       style={{
-                        backgroundColor: "#e11d48",
+                        backgroundColor: "#dc2626",
                         color: "#ffffff",
-                        fontSize: "0.58rem",
+                        fontSize: "0.72rem",
                         fontWeight: "900",
-                        padding: "1px 6px",
-                        borderRadius: "4px",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        letterSpacing: "0.06em",
+                        boxShadow: "0 0 10px rgba(220, 38, 38, 0.45)",
                       }}
                     >
                       CRITICAL
@@ -2335,7 +2343,7 @@ export default function Dashboard() {
                   <ChevronRight size={16} color="#94a3b8" />
                 </div>
 
-                <div style={{ fontSize: "0.7rem", color: "#cbd5e1", marginTop: "4px" }}>
+                <div style={{ fontSize: "0.74rem", color: "#e2e8f0", marginTop: "4px", fontWeight: "500" }}>
                   📍 Chooralmala-Meppadi, Kerala
                 </div>
 
@@ -2345,16 +2353,16 @@ export default function Dashboard() {
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginTop: "8px",
-                    fontSize: "0.68rem",
-                    color: "#94a3b8",
+                    fontSize: "0.74rem",
+                    color: "#f1f5f9",
                   }}
                 >
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <span>👥 1,350 exposed</span>
-                    <span>🏠 1 hub</span>
-                    <span>🛣️ Bailey Bridge Ops</span>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>👥 <strong>1,350</strong> exposed</span>
+                    <span style={{ backgroundColor: "rgba(15, 23, 42, 0.8)", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>🏠 <strong>1</strong> hub</span>
+                    <span style={{ backgroundColor: "rgba(14, 165, 233, 0.25)", color: "#7dd3fc", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(56, 189, 248, 0.4)", fontWeight: "700" }}>🛣️ Bailey Bridge Ops</span>
                   </div>
-                  <div style={{ color: "#f87171", fontWeight: "800" }}>
+                  <div style={{ color: "#ef4444", fontWeight: "900", fontSize: "0.76rem" }}>
                     ⏱️ ETA 06 min
                   </div>
                 </div>
@@ -2519,21 +2527,24 @@ export default function Dashboard() {
                   <span style={{ fontSize: "1.3rem", fontWeight: "900", color: "#ffffff", lineHeight: "1" }}>87%</span>
                 </div>
               </div>
-              <div style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "4px" }}>Landslide Risk</div>
+              <div style={{ fontSize: "0.72rem", color: "#cbd5e1", marginTop: "4px", fontWeight: "600" }}>Landslide Risk</div>
               <div
                 style={{
-                  backgroundColor: "#e11d48",
+                  backgroundColor: "#dc2626",
                   color: "#ffffff",
-                  fontSize: "0.58rem",
+                  fontSize: "0.74rem",
                   fontWeight: "900",
-                  padding: "1px 6px",
-                  borderRadius: "4px",
-                  marginTop: "3px",
+                  padding: "3px 8px",
+                  borderRadius: "6px",
+                  marginTop: "4px",
+                  letterSpacing: "0.06em",
+                  boxShadow: "0 0 10px rgba(220, 38, 38, 0.5)",
+                  display: "inline-block",
                 }}
               >
                 CRITICAL
               </div>
-              <div style={{ fontSize: "0.6rem", color: "#64748b", marginTop: "2px" }}>Confidence level</div>
+              <div style={{ fontSize: "0.62rem", color: "#94a3b8", marginTop: "3px", fontWeight: "600" }}>High Confidence</div>
             </div>
 
             {/* Key Factors Progress Bars */}

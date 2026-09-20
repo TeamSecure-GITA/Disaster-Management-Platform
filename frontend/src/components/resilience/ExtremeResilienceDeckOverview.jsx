@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Zap, Cpu, ShieldCheck, Network, Layers, Radio, Activity,
   Play, CheckCircle, AlertTriangle, Clock, RefreshCw,
@@ -9,6 +10,8 @@ import {
 } from 'lucide-react';
 
 export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectLabTab }) {
+  const navigate = useNavigate();
+
   // Navigation & Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilterPill, setActiveFilterPill] = useState('all');
@@ -106,74 +109,92 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
   };
 
   // -------------------------------------------------------------
-  // FEATURE SHOWCASE DATA
+  // FEATURE SHOWCASE DATA (Segregated Operational vs Innovation Lab)
   // -------------------------------------------------------------
   const featureCards = [
     {
       id: 'digital-twin',
-      title: 'Digital Twin',
-      badge: 'LIVE',
-      badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      title: 'Digital Twin 3D Topography',
+      tier: 'operational',
+      badge: 'DEPLOYED · 3D/4D',
+      badgeColor: 'bg-emerald-600 text-white border-emerald-400',
       image: '/images/digital_twin_terrain.jpg',
-      desc: 'Real-time disaster simulation and predictive modeling using geographic, climate and infrastructure data.',
-      buttonText: 'Open Module',
+      desc: 'Real-time disaster simulation and predictive modeling using geographic, climate, and infrastructure data.',
+      buttonText: 'Open Digital Twin →',
       pillCategory: 'digital-twin',
-      action: () => setActiveModal('digital-twin')
-    },
-    {
-      id: 'multi-disaster',
-      title: 'Multi-Disaster Simulation',
-      badge: 'PROTOTYPE',
-      badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-      image: '/images/multi_disaster_sim.jpg',
-      desc: 'Simulate cascading events (e.g., cyclone → flood → landslide) to plan multi-hazard response strategies.',
-      buttonText: 'Open Module',
-      pillCategory: 'edge-computing',
-      action: () => setActiveModal('multi-disaster')
-    },
-    {
-      id: 'quantum',
-      title: 'Quantum Optimization',
-      badge: 'RESEARCH',
-      badgeColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      image: '/images/quantum_opt_network.jpg',
-      desc: 'Optimize resource allocation, evacuation routes and responder units using quantum-inspired algorithms.',
-      buttonText: 'Open Module',
-      pillCategory: 'quantum',
-      action: () => setActiveModal('quantum')
-    },
-    {
-      id: 'rf-csi',
-      title: 'RF/CSI Survivor Detection',
-      badge: 'PROTOTYPE',
-      badgeColor: 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30',
-      image: '/images/rf_csi_waveform.jpg',
-      desc: 'Camera-free human presence detection using Wi-Fi / RF signals and CSI analysis.',
-      buttonText: 'View Details',
-      pillCategory: 'offline-first',
-      action: () => setActiveModal('rf-csi')
+      action: () => navigate('/digital-twin')
     },
     {
       id: 'zero-internet',
-      title: 'Zero-Internet Communication',
-      badge: 'PROTOTYPE',
-      badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+      title: 'Zero-Internet P2P Mesh',
+      tier: 'operational',
+      badge: 'DEPLOYED · OFF-GRID',
+      badgeColor: 'bg-emerald-600 text-white border-emerald-400',
       image: '/images/zero_internet_mesh.jpg',
-      desc: 'Mesh network and LoRa for communication when cellular and internet are unavailable.',
-      buttonText: 'View Details',
+      desc: 'Ad-hoc mesh protocol and LoRa communications when cellular backbones and internet services collapse.',
+      buttonText: 'Open Mesh Console →',
       pillCategory: 'offline-first',
-      action: () => setActiveModal('mesh')
+      action: () => navigate('/zero-internet-mesh')
     },
     {
       id: 'sensors',
-      title: 'Advanced Sensor Network',
-      badge: 'LIVE',
-      badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      title: 'Advanced IoT Sensor Network',
+      tier: 'operational',
+      badge: 'LIVE TELEMETRY',
+      badgeColor: 'bg-emerald-600 text-white border-emerald-400',
       image: '/images/sensor_station.jpg',
-      desc: 'IoT sensors for landslide, flood, weather and structural monitoring.',
-      buttonText: 'View Details',
+      desc: 'Distributed sensor telemetry for soil moisture saturation, slope pore pressure, tilt, and flash floods.',
+      buttonText: 'Inspect Live Sensors →',
       pillCategory: 'edge-computing',
-      action: () => setActiveModal('sensors')
+      action: () => navigate('/smart-alerts')
+    },
+    {
+      id: 'emergency-sos',
+      title: 'Emergency SOS Center',
+      tier: 'operational',
+      badge: 'CRISIS DISPATCH',
+      badgeColor: 'bg-red-600 text-white border-red-400',
+      image: '/images/rf_csi_waveform.jpg',
+      desc: 'Direct citizen SOS beacons, WhatsApp crisis dispatch, and unified coordinates for field rescue units.',
+      buttonText: 'Open SOS Center →',
+      pillCategory: 'offline-first',
+      action: () => navigate('/emergency-sos')
+    },
+    {
+      id: 'multi-disaster',
+      title: 'Multi-Disaster Cascading Simulation',
+      tier: 'innovation',
+      badge: 'SIMULATION LAB',
+      badgeColor: 'bg-purple-600 text-white border-purple-400',
+      image: '/images/multi_disaster_sim.jpg',
+      desc: 'Simulate cascading events (cyclone → flash flood → hill slope collapse) to plan multi-hazard response.',
+      buttonText: 'Launch Simulator →',
+      pillCategory: 'edge-computing',
+      action: () => navigate('/ner-topography-suite')
+    },
+    {
+      id: 'quantum',
+      title: 'Quantum-Inspired Route Optimization',
+      tier: 'innovation',
+      badge: 'RESEARCH ENGINE',
+      badgeColor: 'bg-indigo-600 text-white border-indigo-400',
+      image: '/images/quantum_opt_network.jpg',
+      desc: 'Simulated annealing and post-quantum route clearing algorithms for blocked evacuation corridors.',
+      buttonText: 'Open Quantum Suite →',
+      pillCategory: 'quantum',
+      action: () => navigate('/world-first-innovations?tab=quantum-chaff')
+    },
+    {
+      id: 'rf-csi',
+      title: 'RF/CSI Rubble Survivor Detection',
+      tier: 'innovation',
+      badge: 'RESEARCH ENGINE',
+      badgeColor: 'bg-sky-600 text-white border-sky-400',
+      image: '/images/rf_csi_waveform.jpg',
+      desc: 'Through-barrier human respiration and micro-movement detection using parasitic Wi-Fi CSI waveforms.',
+      buttonText: 'Open Deep-Tech Suite →',
+      pillCategory: 'offline-first',
+      action: () => navigate('/world-first-innovations?tab=parasitic-rf')
     }
   ];
 
@@ -222,17 +243,18 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
           <div className="flex items-center gap-3 self-end md:self-auto">
             {/* Active Emergency Alert Pill */}
             <button
-              onClick={() => setActiveModal('emergency-alert')}
-              className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 rounded-xl flex items-center gap-2 transition-all cursor-pointer group"
+              onClick={() => navigate('/alerts')}
+              className="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/35 border border-rose-500/60 rounded-xl flex items-center gap-2 transition-all cursor-pointer group shadow-sm"
+              title="View Live Alert Protocol"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
               </span>
-              <span className="text-xs font-semibold text-rose-300 group-hover:text-rose-200">
+              <span className="text-xs font-bold text-rose-200 group-hover:text-white">
                 NER Landslide Risk - NH-10
               </span>
-              <span className="text-[10px] font-black uppercase px-1.5 py-0.2 bg-rose-600 text-white rounded font-mono">
+              <span className="text-[11px] font-black uppercase px-2 py-0.5 bg-rose-600 text-white rounded font-mono shadow-sm">
                 CRITICAL
               </span>
             </button>
@@ -245,7 +267,7 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
 
             {/* Notification Bell */}
             <button
-              onClick={() => setActiveModal('activity')}
+              onClick={() => navigate('/alerts?tab=notifications')}
               className="relative p-2 bg-[#0b1728] hover:bg-slate-800/80 border border-slate-800 text-slate-300 rounded-xl transition-colors cursor-pointer"
               title="Recent Activity Notifications"
             >
@@ -254,12 +276,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
             </button>
 
             {/* User Profile Pill */}
-            <div className="flex items-center gap-2 pl-2 pr-3 py-1 bg-[#0b1728] border border-slate-800 rounded-xl">
+            <button
+              onClick={() => navigate('/administrator')}
+              className="flex items-center gap-2 pl-2 pr-3 py-1 bg-[#0b1728] hover:bg-slate-800/80 border border-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+              title="Go to Administrator Hub"
+            >
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-[11px] font-black text-white">
                 CC
               </div>
               <span className="text-xs font-semibold text-slate-200">Command Center</span>
-            </div>
+            </button>
           </div>
         </div>
       </header>
@@ -297,131 +323,198 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
       <section className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Hero Left & Center Topography Card */}
-          <div className="lg:col-span-8 bg-gradient-to-br from-[#0b172a] via-[#091424] to-[#070e18] border border-slate-800/80 rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between">
-            {/* Ambient background glow */}
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0"></div>
-            <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-0"></div>
-
-            <div className="relative z-10">
-              {/* Innovation Suite Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-bold rounded-full border border-purple-500/40 mb-4">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span>INNOVATION SUITE</span>
+          {/* Operational Tactical Telemetry & Sector Matrix Card */}
+          <div className="lg:col-span-8 bg-[#0a1526] border border-slate-800 rounded-2xl p-5 sm:p-6 flex flex-col justify-between relative shadow-lg">
+            <div>
+              {/* Tactical Status Badges */}
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white text-xs font-black rounded-md tracking-wider">
+                  <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
+                  CRISIS OPERATIONS ACTIVE
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-cyan-950 text-cyan-300 text-xs font-bold rounded-md border border-cyan-500/40 font-mono">
+                  <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
+                  ZERO-GRID RESILIENCE ENGINE
+                </span>
               </div>
 
-              {/* Main Headline */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15] mb-3">
-                Extreme Resilience & <br className="hidden sm:inline" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">
-                  Grid-Free Computing Suite
-                </span>
+              {/* Main Operational Headline */}
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-snug mb-2">
+                Tactical Grid-Free Operations &amp; Telemetry Deck
               </h1>
 
               {/* Subtitle */}
-              <p className="text-slate-300 text-sm sm:text-base max-w-xl mb-6 leading-relaxed">
-                Next-generation technologies for a self-sufficient, resilient and intelligent disaster response ecosystem.
+              <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mb-4 leading-relaxed font-medium">
+                Autonomous disaster compute operating independently of cellular networks, central servers, or power grids. Live telemetry, sensor mesh ingestion, and responder unit dispatch.
               </p>
 
-              {/* Feature Pills */}
-              <div className="flex flex-wrap items-center gap-2 mb-6">
-                {[
-                  { id: 'digital-twin', label: 'Digital Twin', icon: Layers },
-                  { id: 'edge-computing', label: 'Edge Computing', icon: Cpu },
-                  { id: 'offline-first', label: 'Offline First', icon: HardDrive },
-                  { id: 'quantum', label: 'Quantum-Inspired', icon: Sparkles },
-                ].map((pill) => {
-                  const IconComponent = pill.icon;
-                  const isActive = activeFilterPill === pill.id;
-                  return (
+              {/* Interactive Operational Incident Matrix (High-Density Real Estate) */}
+              <div className="space-y-2.5 my-3">
+                {/* Sector 1: Landslide Fracture */}
+                <div className="p-3.5 bg-[#081220] border-l-4 border-l-red-500 border border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="px-2 py-0.5 bg-red-600 text-white text-[11px] font-black rounded uppercase">
+                        CRITICAL SECTOR
+                      </span>
+                      <span className="text-xs font-bold text-white">
+                        NH-10 Km 42 Fracture Zone (Kalimpong / Teesta Corridor)
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-300 flex flex-wrap items-center gap-3 font-mono">
+                      <span>Saturation: <strong className="text-red-400">88.4%</strong></span>
+                      <span>Slope Tilt: <strong className="text-amber-400">14.2°</strong></span>
+                      <span>Deployed: <strong className="text-cyan-400">4 NDRF Teams</strong></span>
+                      <span>Access: <strong className="text-red-300">2 Roads Severed</strong></span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
-                      key={pill.id}
-                      onClick={() => setActiveFilterPill(isActive ? 'all' : pill.id)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        isActive
-                          ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                          : 'bg-[#0e1d33] hover:bg-[#132744] text-slate-300 border border-slate-700/60'
-                      }`}
+                      onClick={() => navigate('/alerts')}
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-lg shadow transition-colors flex items-center gap-1 cursor-pointer"
                     >
-                      <IconComponent className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : 'text-cyan-400'}`} />
-                      <span>{pill.label}</span>
+                      <span>Alert Details</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </button>
-                  );
-                })}
+                    <button
+                      onClick={() => navigate('/rescue-centers')}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg border border-slate-700 transition-colors cursor-pointer"
+                    >
+                      Deploy
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sector 2: Teesta River Basin Surge */}
+                <div className="p-3.5 bg-[#081220] border-l-4 border-l-amber-500 border border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="px-2 py-0.5 bg-amber-600 text-white text-[11px] font-black rounded uppercase">
+                        HIGH WARNING
+                      </span>
+                      <span className="text-xs font-bold text-white">
+                        Teesta River Catchment Surge (Hydro Sensor Array #04)
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-300 flex flex-wrap items-center gap-3 font-mono">
+                      <span>Water Inundation: <strong className="text-amber-400">+1.85m</strong></span>
+                      <span>Discharge: <strong className="text-slate-200">3,420 m³/s</strong></span>
+                      <span>Shelter Alert: <strong className="text-emerald-400">3 Ready</strong></span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => navigate('/smart-alerts')}
+                      className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg shadow transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Sensors</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => navigate('/evacuation-planner')}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg border border-slate-700 transition-colors cursor-pointer"
+                    >
+                      Evac Plan
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sector 3: Off-Grid LoRa Mesh Backbone */}
+                <div className="p-3.5 bg-[#081220] border-l-4 border-l-emerald-500 border border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="px-2 py-0.5 bg-emerald-600 text-white text-[11px] font-black rounded uppercase">
+                        OPERATIONAL
+                      </span>
+                      <span className="text-xs font-bold text-white">
+                        Zero-Internet LoRa Mesh Backbone (Pasighat &amp; Hill Relays)
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-300 flex flex-wrap items-center gap-3 font-mono">
+                      <span>Active Relays: <strong className="text-emerald-400">7 Hardware Nodes</strong></span>
+                      <span>Packet Loss: <strong className="text-emerald-400">0.0%</strong></span>
+                      <span>Devices Synced: <strong className="text-cyan-400">142 Citizen Terminals</strong></span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => navigate('/zero-internet-mesh')}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Mesh Console</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* 3D Terrain Graphic with Satellite Radar Beam */}
-            <div className="relative mt-2 rounded-2xl overflow-hidden border border-cyan-500/30 group shadow-2xl shadow-cyan-950/40">
-              <img
-                src="/images/digital_twin_terrain.jpg"
-                alt="Digital Twin Topography Satellite Scan"
-                className="w-full h-64 sm:h-80 object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#070e18] via-transparent to-transparent"></div>
-
-              {/* Topography telemetry overlay markers */}
-              <div className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md border border-cyan-500/40 px-3 py-1.5 rounded-lg text-[11px] font-mono text-cyan-300 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                <span>ALT: 7240m • SCAN %: 94.7%</span>
-              </div>
-
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono">
-                <div className="bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
-                  <span className="text-cyan-400 font-bold">LAT:</span> 28.0642°N &nbsp;
-                  <span className="text-cyan-400 font-bold">LON:</span> 95.3318°E
-                </div>
-
-                <button
-                  onClick={() => setActiveModal('digital-twin')}
-                  className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-950/50 transition-all cursor-pointer"
-                >
-                  <Play className="w-3.5 h-3.5" />
-                  <span>Inspect Digital Twin</span>
-                </button>
-              </div>
+            {/* Quick Tactical Navigation Bar */}
+            <div className="mt-4 pt-3 border-t border-slate-800/90 flex flex-wrap items-center gap-2.5">
+              <button
+                onClick={() => navigate('/digital-twin')}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <Layers className="w-4 h-4" />
+                <span>Launch Full 3D Digital Twin</span>
+              </button>
+              <button
+                onClick={() => navigate('/map')}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-cyan-300 hover:text-white font-bold text-xs rounded-xl border border-cyan-500/40 flex items-center gap-2 transition-colors cursor-pointer"
+              >
+                <MapPin className="w-4 h-4 text-cyan-400" />
+                <span>Live Tactical Map</span>
+              </button>
+              <button
+                onClick={() => navigate('/emergency-sos')}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <Radio className="w-4 h-4" />
+                <span>Emergency SOS Center</span>
+              </button>
             </div>
           </div>
 
-          {/* Hero Right: Feature Status Card */}
-          <div className="lg:col-span-4 bg-[#0a1526] border border-slate-800/80 rounded-3xl p-6 flex flex-col justify-between">
+          {/* Hero Right: High-Contrast Operational Readiness Card */}
+          <div className="lg:col-span-4 bg-[#0a1526] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
             <div>
-              <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-800/80">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
                 <div className="flex items-center gap-2">
                   <Activity className="w-5 h-5 text-cyan-400" />
-                  <h2 className="text-base font-bold text-white tracking-wide">Feature Status</h2>
+                  <h2 className="text-sm font-bold text-white tracking-wide">Operational Readiness</h2>
                 </div>
-                <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-full">
-                  6 Active
+                <span className="px-2.5 py-0.5 bg-emerald-600 text-white text-[11px] font-black rounded-md uppercase">
+                  All Systems Deployed
                 </span>
               </div>
 
-              {/* Status list */}
-              <div className="space-y-3">
+              {/* Clickable Status List with Direct Route Navigation */}
+              <div className="space-y-2">
                 {[
-                  { title: 'Digital Twin', status: 'Active', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', icon: Layers, modal: 'digital-twin' },
-                  { title: 'Quantum Optimization', status: 'Prototype', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', icon: Sparkles, modal: 'quantum' },
-                  { title: 'Offline-First Computing', status: 'Active', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', icon: HardDrive, modal: 'mesh' },
-                  { title: 'Edge AI Processing', status: 'Active', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', icon: Cpu, modal: 'multi-disaster' },
-                  { title: 'Grid-Free Communication', status: 'Prototype', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', icon: Radio, modal: 'mesh' },
-                  { title: 'Experimental Features', status: 'Research', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30', icon: Zap, modal: 'rf-csi' },
+                  { title: 'Digital Twin Topography', status: 'DEPLOYED', color: 'bg-emerald-600 text-white', icon: Layers, path: '/digital-twin' },
+                  { title: 'Offline-First LoRa Mesh', status: 'DEPLOYED', color: 'bg-emerald-600 text-white', icon: HardDrive, path: '/zero-internet-mesh' },
+                  { title: 'IoT Slope Sensors', status: 'LIVE TELEMETRY', color: 'bg-emerald-600 text-white', icon: Activity, path: '/smart-alerts' },
+                  { title: 'Emergency SOS Dispatch', status: 'STANDBY READY', color: 'bg-red-600 text-white', icon: Radio, path: '/emergency-sos' },
+                  { title: 'Multi-Disaster Sim Lab', status: 'SIM ENGINE', color: 'bg-purple-600 text-white', icon: Cpu, path: '/ner-topography-suite' },
+                  { title: 'Quantum Route Clearing', status: 'RESEARCH LAB', color: 'bg-indigo-600 text-white', icon: Sparkles, path: '/world-first-innovations?tab=quantum-chaff' },
                 ].map((item, idx) => {
                   const IconComponent = item.icon;
                   return (
                     <div
                       key={idx}
-                      onClick={() => setActiveModal(item.modal)}
-                      className="p-3 bg-[#0d1c32] hover:bg-[#112440] border border-slate-800 hover:border-slate-700 rounded-xl flex items-center justify-between transition-all cursor-pointer group"
+                      onClick={() => navigate(item.path)}
+                      className="p-2.5 bg-[#0d1c32] hover:bg-[#132744] border border-slate-800 hover:border-cyan-500/50 rounded-xl flex items-center justify-between transition-all cursor-pointer group"
+                      title={`Click to open ${item.title}`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform">
-                          <IconComponent className="w-4 h-4" />
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform">
+                          <IconComponent className="w-3.5 h-3.5" />
                         </div>
-                        <span className="text-xs font-semibold text-slate-200 group-hover:text-white">
+                        <span className="text-xs font-bold text-slate-100 group-hover:text-white">
                           {item.title}
                         </span>
                       </div>
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${item.color}`}>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded shadow-sm ${item.color}`}>
                         {item.status}
                       </span>
                     </div>
@@ -430,19 +523,20 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
               </div>
             </div>
 
-            {/* Quick Lab Shortcut Callout */}
-            <div className="mt-6 pt-4 border-t border-slate-800/80">
+            {/* Hardware Lab Shortcut Callout */}
+            <div className="mt-4 pt-3 border-t border-slate-800">
               <div className="p-3 bg-[#081220] rounded-xl border border-slate-800 flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold text-slate-200">Hardware & Supercomputer Lab</div>
-                  <div className="text-[10px] text-slate-400">E-Ink Canvas, Web-NFC, Li-Fi & WASM</div>
+                  <div className="text-xs font-bold text-white">Hardware &amp; Supercomputer Lab</div>
+                  <div className="text-[10px] text-slate-400">E-Ink Canvas, Web-NFC, Li-Fi &amp; WASM</div>
                 </div>
                 <button
                   onClick={onSwitchToLab}
-                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded-lg transition-colors cursor-pointer"
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
                   title="Open Deep-Tech Lab"
                 >
-                  <ArrowUpRight className="w-4 h-4" />
+                  <span>Open Lab</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -507,78 +601,160 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
       </section>
 
       {/* ========================================================= */}
-      {/* 4. FEATURE SHOWCASE (2x3 GRID)                            */}
+      {/* 4. FEATURE SHOWCASE (STRICT SEPARATION: OPS VS INNOVATION) */}
       {/* ========================================================= */}
-      <section className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Feature Showcase</h2>
-            <span className="text-xs font-mono px-2.5 py-0.5 bg-slate-800 text-cyan-400 rounded-full border border-slate-700">
-              {filteredCards.length} Modules
-            </span>
+      <section className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-10">
+        {/* ── ZONE A: FIELD-DEPLOYED OPERATIONAL MODULES ── */}
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-800">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded uppercase tracking-wider">
+                  Field-Verified &amp; Actionable
+                </span>
+                <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                  Field-Deployed Operational Modules
+                </h2>
+              </div>
+              <p className="text-xs text-slate-400">
+                Mission-critical systems active and verified for immediate operational crisis response.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/map')}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-lg border border-slate-700 flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <span>Live Map</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => navigate('/emergency-sos')}
+                className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <span>SOS Center</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          <button
-            onClick={() => setActiveFilterPill('all')}
-            className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors cursor-pointer"
-          >
-            <span>View All Features</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* 6 Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCards.map((card) => (
-            <div
-              key={card.id}
-              className="bg-[#0a1526] border border-slate-800/80 hover:border-cyan-500/40 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-cyan-950/20 group"
-            >
-              <div>
-                {/* Card Header & Badge */}
-                <div className="p-4 pb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                    <h3 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
+          {/* Operational Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {filteredCards.filter(c => c.tier === 'operational').map((card) => (
+              <div
+                key={card.id}
+                className="bg-[#0a1526] border border-slate-800 hover:border-emerald-500/50 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:shadow-emerald-950/20 group"
+              >
+                <div>
+                  <div className="p-3.5 pb-2.5 flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
                       {card.title}
                     </h3>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded shadow-sm ${card.badgeColor}`}>
+                      {card.badge}
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${card.badgeColor}`}>
-                    {card.badge}
-                  </span>
+
+                  <div className="relative h-36 overflow-hidden bg-slate-950">
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a1526] via-transparent to-transparent"></div>
+                  </div>
+
+                  <div className="p-3.5 pt-2.5">
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {card.desc}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Card Graphic */}
-                <div className="relative h-44 overflow-hidden bg-slate-950">
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a1526] via-transparent to-transparent"></div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-4 pt-3">
-                  <h4 className="text-xs font-bold text-slate-200 mb-1.5">{card.title}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {card.desc}
-                  </p>
+                <div className="p-3.5 pt-0">
+                  <button
+                    onClick={card.action}
+                    className="w-full py-2 px-3 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{card.buttonText}</span>
+                  </button>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              {/* Card Footer Button */}
-              <div className="p-4 pt-0">
-                <button
-                  onClick={card.action}
-                  className="w-full py-2 px-3 bg-[#0e1d33] hover:bg-cyan-600 text-slate-200 hover:text-slate-950 font-bold text-xs rounded-xl border border-slate-700/60 hover:border-cyan-500 transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                >
-                  <span>{card.buttonText}</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
+        {/* ── ZONE B: INNOVATION LAB & PREDICTIVE SIMULATIONS ── */}
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-800">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 bg-purple-600 text-white text-[10px] font-black rounded uppercase tracking-wider">
+                  Deep-Tech &amp; Research Lab
+                </span>
+                <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                  Predictive Simulation &amp; Deep-Tech Lab
+                </h2>
               </div>
+              <p className="text-xs text-slate-400">
+                Advanced cascading hazard simulators, post-quantum optimization, and experimental sensor telemetry.
+              </p>
             </div>
-          ))}
+
+            <button
+              onClick={() => navigate('/world-first-innovations')}
+              className="text-xs font-bold text-purple-300 hover:text-white bg-purple-950/60 hover:bg-purple-900/80 px-3.5 py-1.5 rounded-lg border border-purple-500/40 flex items-center gap-1.5 transition-colors cursor-pointer self-start sm:self-auto"
+            >
+              <span>Explore 22 Deep-Tech Breakthroughs</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Innovation Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {filteredCards.filter(c => c.tier === 'innovation').map((card) => (
+              <div
+                key={card.id}
+                className="bg-[#0a1526] border border-slate-800 hover:border-purple-500/50 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:shadow-purple-950/20 group"
+              >
+                <div>
+                  <div className="p-3.5 pb-2.5 flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+                      {card.title}
+                    </h3>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded shadow-sm ${card.badgeColor}`}>
+                      {card.badge}
+                    </span>
+                  </div>
+
+                  <div className="relative h-36 overflow-hidden bg-slate-950">
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a1526] via-transparent to-transparent"></div>
+                  </div>
+
+                  <div className="p-3.5 pt-2.5">
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {card.desc}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 pt-0">
+                  <button
+                    onClick={card.action}
+                    className="w-full py-2 px-3 bg-[#111e38] hover:bg-purple-600 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-slate-700 hover:border-purple-500 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{card.buttonText}</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -978,16 +1154,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <button
                   onClick={() => {
-                    playChime(700, 'sine', 0.2);
-                    alert('Terrain simulation recalculated. Updated shear model saved to offline ledger.');
+                    setActiveModal(null);
+                    navigate('/digital-twin');
                   }}
-                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Recalculate Terrain Shards
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Launch Full 3D / 4D Digital Twin →
                 </button>
               </div>
             </div>
@@ -1052,16 +1228,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <button
                   onClick={() => {
-                    playChime(640, 'triangle', 0.25);
-                    alert('Simulating cascading impact: 3 secondary shelters unlocked in inland highland sector.');
+                    setActiveModal(null);
+                    navigate('/ner-topography-suite');
                   }}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md"
                 >
-                  <Play className="w-3.5 h-3.5" />
-                  Run Compound Risk Cascade
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Open Multi-Disaster Simulation Suite →
                 </button>
               </div>
             </div>
@@ -1120,16 +1296,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <button
                   onClick={() => {
-                    playChime(880, 'sine', 0.25);
-                    alert('Quantum annealer executed. 14 ambulance routes dynamically rerouted around NH-10.');
+                    setActiveModal(null);
+                    navigate('/world-first-innovations?tab=quantum-chaff');
                   }}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Solve QPU Route Graph
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Open Quantum Optimization Engine →
                 </button>
               </div>
             </div>
@@ -1192,16 +1368,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <button
                   onClick={() => {
-                    playChime(1020, 'sine', 0.2);
-                    alert('CSI beacon pinned at Sector 4 Rubble Pile B. Dispatch ticket sent to SAR team.');
+                    setActiveModal(null);
+                    navigate('/world-first-innovations?tab=parasitic-rf');
                   }}
-                  className="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md"
                 >
-                  <MapPin className="w-3.5 h-3.5" />
-                  Pin Survivor Telemetry
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Open RF/CSI Radar Module →
                 </button>
               </div>
             </div>
@@ -1260,16 +1436,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <button
                   onClick={() => {
-                    playChime(600, 'triangle', 0.2);
-                    alert('Broadcast ping disseminated across all 7 mesh relay nodes. Acknowledgments received: 7/7.');
+                    setActiveModal(null);
+                    navigate('/zero-internet-mesh');
                   }}
-                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md"
                 >
-                  <Wifi className="w-3.5 h-3.5" />
-                  Broadcast Mesh Ping
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Open P2P Mesh Console →
                 </button>
               </div>
             </div>
@@ -1332,16 +1508,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <button
                   onClick={() => {
-                    playChime(750, 'sine', 0.2);
-                    alert('Calibrating station sensor zero-offset. All 114 telemetry channels responding normal.');
+                    setActiveModal(null);
+                    navigate('/smart-alerts');
                   }}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Calibrate Sensor Telemetry
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Open IoT Sensor Telemetry Hub →
                 </button>
               </div>
             </div>
@@ -1493,17 +1669,16 @@ export default function ExtremeResilienceDeckOverview({ onSwitchToLab, onSelectL
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3">
+              <div className="flex flex-wrap justify-end gap-2 pt-3">
                 <button
                   onClick={() => {
-                    playChime(920, 'sine', 0.2);
-                    alert('Emergency advisory transmitted over all grid-free mesh channels.');
                     setActiveModal(null);
+                    navigate('/alerts');
                   }}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md"
                 >
                   <Radio className="w-3.5 h-3.5" />
-                  Broadcast Evacuation Advisory
+                  Inspect Full Alert Protocol →
                 </button>
               </div>
             </div>

@@ -76,6 +76,9 @@ export default function DashboardLayout() {
         onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
       />
 
+      {/* ── Active Crisis Early Warning Broadcast (Unambiguous Dominant Top Focal Banner) ── */}
+      <EmergencyAlertBanner />
+
       <CitizenUnsafeEmergencyModal />
       <LiveNotificationToast />
 
