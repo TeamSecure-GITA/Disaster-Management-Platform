@@ -23,6 +23,7 @@ import {
   logoutSession,
   subscribeToAuthChange,
 } from "../services/authService";
+import { isAuthorizedAdmin } from "../utils/adminAuth";
 import { subscribeToDisasterAlerts } from "../services/socketService";
 import { useLowBandwidth } from "../utils/LowBandwidthContext";
 
@@ -539,7 +540,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                   {displayName.length > 14 ? `${displayName.substring(0, 14)}...` : displayName}
                 </span>
                 <span style={{ fontSize: "0.64rem", color: "#94a3b8", fontFamily: "var(--font-mono, monospace)" }}>
-                  {user?.role === "admin" ? "OFFICER · ADMIN" : "FIELD RESPONDER"}
+                  {Boolean(user?.email && isAuthorizedAdmin(user.email)) ? "OFFICER · ADMIN" : "FIELD RESPONDER"}
                 </span>
               </div>
             </Link>
@@ -782,7 +783,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                       {user?.email || "Authenticated Responder"}
                     </div>
                     <div style={{ display: "inline-block", marginTop: "4px", backgroundColor: "rgba(14, 165, 233, 0.18)", color: "#38bdf8", fontSize: "0.64rem", fontWeight: "800", padding: "2px 8px", borderRadius: "999px", fontFamily: "var(--font-mono, monospace)" }}>
-                      {user?.role === "admin" ? "🛡️ OFFICER ADMIN" : "🚨 VERIFIED RESPONDER"}
+                      {Boolean(user?.email && isAuthorizedAdmin(user.email)) ? "🛡️ OFFICER ADMIN" : "🚨 VERIFIED RESPONDER"}
                     </div>
                   </div>
                 </div>

@@ -45,13 +45,7 @@ export function isUserExemptFromInspectGuard() {
         const email = (parsed?.email || "").toLowerCase().trim();
         const role = (parsed?.role || "").toLowerCase().trim();
 
-        if (
-          HEAD_ADMIN_EMAILS.includes(email) ||
-          isHeadAdmin(email) ||
-          isAuthorizedAdmin(email) ||
-          role === "admin" ||
-          role === "head_admin"
-        ) {
+        if (email && (HEAD_ADMIN_EMAILS.includes(email) || isHeadAdmin(email) || isAuthorizedAdmin(email))) {
           return true;
         }
       }

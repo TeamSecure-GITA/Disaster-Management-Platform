@@ -89,7 +89,7 @@ const connectivityItems = [
 const fieldItems = [
   { key: "nav_drone",      fallback: "Drone Operations",   icon: IconDrone,     path: "/drone-analytics",  badge: "UAV" },
   { key: "nav_tasks",      fallback: "Volunteer Network",  icon: IconMicroTask, path: "/volunteer-tasks" },
-  { key: "nav_incident",   fallback: "Field Reports",      icon: IconReport,    path: "/incident-report" },
+  { key: "nav_aid_ledger", fallback: "Aid Distribution",   icon: IconAidLedger, path: "/aid-ledger",       badge: "LEDGER" },
 ];
 
 // ── 👥 COMMUNITY ──────────────────────────────────────────────────────────────
@@ -140,8 +140,9 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
         if (!email && rawSession) { try { const p = JSON.parse(rawSession); email = p?.email || ""; role = p?.role || ""; } catch {} }
         if (!email && rawProfile) { try { const p = JSON.parse(rawProfile); email = p?.email || ""; role = p?.role || ""; } catch {} }
 
-        const authorized = (email && isAuthorizedAdmin(email)) || role === "admin";
-        const approved = authorized || (email && isApprovedMember(email));
+        // Access to administrator is strictly restricted to Head Admin or emails granted permission by Administrator
+        const authorized = Boolean(email && isAuthorizedAdmin(email));
+        const approved = authorized || Boolean(email && isApprovedMember(email));
 
         setIsAdmin(authorized);
         setIsHead(email ? isHeadAdmin(email) : false);
@@ -181,9 +182,24 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
     );
   };
 
+  // Deduplication tracker: ensures each destination/menu path is rendered at most once across the entire sidebar
+  const renderedPaths = new Set();
+  if (isAdmin) {
+    renderedPaths.add("/administrator");
+  }
+
   const renderNavGroup = (title, items, iconPrefix = "⚡", sectorId = "") => {
-    const filtered = filterItems(items);
+    // Filter out items whose path was already rendered in a previous group or header
+    const uniqueItems = items.filter((item) => {
+      if (!item?.path) return false;
+      if (renderedPaths.has(item.path)) return false;
+      renderedPaths.add(item.path);
+      return true;
+    });
+
+    const filtered = filterItems(uniqueItems);
     if (searchQuery.trim() && filtered.length === 0) return null;
+    if (filtered.length === 0) return null;
     const isCollapsed = !searchQuery.trim() && sectorId && collapsedSectors[sectorId];
 
     return (
@@ -537,11 +553,8 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
         {/* 🧪 INNOVATION LAB */}
         {renderNavGroup("INNOVATION LAB", innovationItems, "🧪", "grp_lab")}
 
-        {/* ⚙ SYSTEM — Administration only shown to admins */}
-        {renderNavGroup("SYSTEM", [
-          ...systemItems,
-          ...(isAdmin ? [{ key: "nav_admin_hub", fallback: "Administration", icon: IconAdmin, path: "/administrator" }] : []),
-        ], "⚙", "grp_system")}
+        {/* ⚙ SYSTEM */}
+        {renderNavGroup("SYSTEM", systemItems, "⚙", "grp_system")}
       </div>
 
       {/* ── Footer Branding: Together for a Safer Tomorrow ───────────── */}

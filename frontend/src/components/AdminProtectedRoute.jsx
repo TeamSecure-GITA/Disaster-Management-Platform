@@ -34,8 +34,8 @@ export default function AdminProtectedRoute({ children }) {
         } catch {}
       }
 
-      const allowed =
-        (email && isAuthorizedAdmin(email)) || role === "admin";
+      // Only allow access if the email is a root Head Admin or explicitly granted admin permissions
+      const allowed = Boolean(email && isAuthorizedAdmin(email));
 
       setStatus(allowed ? "allowed" : "denied");
     } catch {

@@ -319,9 +319,9 @@ export default function AdministratorHub() {
     );
   }
 
-  // Security Check: Only debasishn185@gmail.com, authorized admins, or admin role
+  // Security Check: Only debasishn185@gmail.com or authorized admins granted email permissions by Administrator
   const userEmail = currentUser?.email || "";
-  const hasAccess = isAuthorizedAdmin(userEmail) || currentUser?.role === "admin";
+  const hasAccess = Boolean(userEmail && isAuthorizedAdmin(userEmail));
 
   if (!hasAccess) {
     return (

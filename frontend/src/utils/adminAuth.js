@@ -294,7 +294,6 @@ export function isApprovedMember(email) {
 }
 
 export function hasPrivilegedFeatureAccess(email, role) {
-  if (role === "admin") return true;
   if (!email) return false;
   return isAuthorizedAdmin(email) || isApprovedMember(email);
 }

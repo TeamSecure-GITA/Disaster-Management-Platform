@@ -51,7 +51,7 @@ export default function Login() {
   // ─── After successful login: persist session + navigate ─────────────────────
   const persistAndNavigate = async ({ uid, name, email: userEmail, role: userRole, token, photoUrl }) => {
     const isHead = isHeadAdmin(userEmail);
-    const isAdmin = isHead || isAuthorizedAdmin(userEmail) || userRole === "admin";
+    const isAdmin = Boolean(userEmail && (isHead || isAuthorizedAdmin(userEmail)));
     const effectiveRole = isAdmin ? "admin" : "user";
     const effectiveName = isHead ? (name || "Debasish N.") : (name || (userEmail ? userEmail.split("@")[0] : "Responder"));
     const effectivePhoto = photoUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(effectiveName || userEmail)}`;
@@ -360,12 +360,12 @@ export default function Login() {
               </div>
               <div style={{ fontSize: "0.82rem", color: "#cbd5e1", marginTop: "4px", marginBottom: "12px" }}>
                 Active: <strong>{currentUser?.name || currentUser?.email || "Responder"}</strong>
-                {currentUser?.role === "admin" && (
+                {Boolean(currentUser?.email && isAuthorizedAdmin(currentUser.email)) && (
                   <span style={{ marginLeft: "8px", backgroundColor: "#f59e0b", color: "#0f172a", padding: "1px 7px", borderRadius: "4px", fontSize: "0.72rem", fontWeight: "800" }}>ADMIN</span>
                 )}
               </div>
               <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
-                {currentUser?.role === "admin" ? (
+                {Boolean(currentUser?.email && isAuthorizedAdmin(currentUser.email)) ? (
                   <button
                     type="button"
                     onClick={() => navigate("/administrator")}
