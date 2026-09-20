@@ -77,6 +77,22 @@ function computeBlockHash(dataStr, prevHash) {
   return "0x" + hashHex.padStart(16, "0") + "f89a2b";
 }
 
+// ── SHARED UNIT PALETTE & COLOR-CODING (Map & List Shared Identity) ─────────
+export const UNIT_THEMES = [
+  { id: "TRUCK-07", color: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)", border: "rgba(245, 158, 11, 0.4)", num: 1, label: "Food & Water" },
+  { id: "AMB-03",   color: "#ef4444", bg: "rgba(239, 68, 68, 0.15)",   border: "rgba(239, 68, 68, 0.4)", num: 2, label: "Cold-Chain" },
+  { id: "TRUCK-12", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.15)",   border: "rgba(6, 182, 212, 0.4)", num: 3, label: "Shelter" },
+  { id: "DRONE-01", color: "#a855f7", bg: "rgba(168, 85, 247, 0.15)",  border: "rgba(168, 85, 247, 0.4)", num: 4, label: "Plasma/Blood" },
+];
+
+export function getUnitTheme(vehicle, index = 0) {
+  const predefined = UNIT_THEMES.find((u) => u.id === vehicle?.id);
+  if (predefined) return predefined;
+  const fallbackColors = ["#10b981", "#3b82f6", "#ec4899", "#eab308"];
+  const c = fallbackColors[index % fallbackColors.length];
+  return { id: vehicle?.id, color: c, bg: `${c}22`, border: `${c}66`, num: index + 1, label: vehicle?.category || "Logistics" };
+}
+
 // Initial Live Relief Convoys with precise tactical waypoint paths
 const INITIAL_CONVOYS = [
   {
@@ -305,6 +321,12 @@ export default function LiveReliefTracker() {
   const [blocks, setBlocks] = useState(INITIAL_BLOCKS);
   const [chainIntegrityVerified, setChainIntegrityVerified] = useState(false);
   const [ledgerSearch, setLedgerSearch] = useState("");
+  const [expandedManifests, setExpandedManifests] = useState({});
+
+  const toggleManifest = (id, e) => {
+    if (e) e.stopPropagation();
+    setExpandedManifests((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   // New Dispatch Form State
   const [newDispatch, setNewDispatch] = useState({
@@ -590,20 +612,25 @@ export default function LiveReliefTracker() {
               <Truck className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-sky-200">
-                  Live Relief Fleet Tracking & Blockchain Aid Ledger
-                </h1>
-                <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono">
-                  POLYGON VERIFIED #481920
+              <h1 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-sky-200">
+                Live Relief Fleet Tracking & Blockchain Aid Ledger
+              </h1>
+              {/* Step 3: De-emphasized trust indicators strip beneath title */}
+              <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[11px] text-slate-400 font-mono">
+                <span className="flex items-center gap-1 text-slate-400">
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Polygon Verified #481920</span>
                 </span>
-                <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
-                  ZERO RELIEF DIVERSION
+                <span className="text-slate-600 hidden sm:inline">&bull;</span>
+                <span className="flex items-center gap-1 text-slate-400">
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Zero Relief Diversion</span>
+                </span>
+                <span className="text-slate-600 hidden sm:inline">&bull;</span>
+                <span className="text-slate-400 font-sans">
+                  Real-time satellite GPS tracking with cryptographic receipts
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Real-time satellite GPS tracking of humanitarian food, water, medicine, and shelter convoys with immutable cryptographic delivery receipts.
-              </p>
             </div>
           </div>
 
@@ -698,8 +725,11 @@ export default function LiveReliefTracker() {
 
             {/* Vehicles List */}
             <div className="space-y-2.5 max-h-[620px] overflow-y-auto pr-1">
-              {filteredVehicles.map((v) => {
+              {filteredVehicles.map((v, idx) => {
                 const isSelected = selectedId === v.id;
+                const theme = getUnitTheme(v, idx);
+                const isManifestExpanded = Boolean(expandedManifests[v.id]);
+
                 return (
                   <div
                     key={v.id}
@@ -709,71 +739,122 @@ export default function LiveReliefTracker() {
                     }}
                     className={`p-3.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
                       isSelected
-                        ? "bg-slate-900/95 border-cyan-400 shadow-xl shadow-cyan-950/60 ring-1 ring-cyan-400/50"
+                        ? "bg-slate-900/95 shadow-xl ring-1"
                         : "bg-slate-950/70 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/60"
                     }`}
+                    style={{
+                      borderColor: isSelected ? theme.color : undefined,
+                      boxShadow: isSelected ? `0 0 16px ${theme.color}33` : undefined,
+                    }}
                   >
-                    {/* Top Row: ID, Category & ETA */}
-                    <div className="flex items-start justify-between gap-2">
+                    {/* Top Row: [Dot + Icon + Unit ID] (Left) | Priority/Status Tag (Right) */}
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold border ${
-                          v.category === "medicine"
-                            ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
-                            : v.category === "food"
-                            ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                            : "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                        }`}>
+                        {/* Numbered dot badge matching map marker exactly */}
+                        <span
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white font-mono shadow-sm flex-shrink-0"
+                          style={{ backgroundColor: theme.color }}
+                        >
+                          {theme.num}
+                        </span>
+                        {/* Vehicle Icon */}
+                        <span className="text-sm">
                           {v.icon === "drone" ? "🚁" : v.icon === "ambulance" ? "🚑" : "🚚"}
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-white flex items-center gap-1.5">
-                            <span>{v.id}</span>
-                            {v.verified && (
-                              <span className="text-emerald-400 font-normal">
-                                <CheckCircle2 className="w-3.5 h-3.5 inline" />
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[10px] text-slate-400 truncate max-w-[140px]">{v.name}</div>
-                        </div>
+                        </span>
+                        {/* Unit ID */}
+                        <span className="text-xs font-black text-white tracking-wide">
+                          {v.id}
+                        </span>
+                        <span className="text-[11px] text-slate-400 truncate max-w-[100px]">
+                          {v.name.split(" #")[0]}
+                        </span>
                       </div>
 
-                      <div className="text-right font-mono">
-                        {v.verified ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            DELIVERED
-                          </span>
-                        ) : (
-                          <>
-                            <div className="text-base font-black text-cyan-300 leading-none">{v.etaMinutes}m</div>
-                            <div className="text-[9px] text-slate-400 mt-0.5">ETA ARRIVAL</div>
-                          </>
-                        )}
-                      </div>
+                      {/* Status / Priority Tag (colored only when non-default) */}
+                      {v.verified ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+                          DELIVERED
+                        </span>
+                      ) : v.category === "medicine" ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono">
+                          CRITICAL COLD-CHAIN
+                        </span>
+                      ) : v.routeType === "detour" ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">
+                          DETOUR ACTIVE
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 bg-slate-900 border border-slate-800 font-mono">
+                          ON ROUTE
+                        </span>
+                      )}
                     </div>
 
-                    {/* Sector Destination */}
-                    <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-300">
-                      <MapPin className="w-3 h-3 text-cyan-400 flex-shrink-0" />
-                      <span className="truncate">{v.sector}</span>
+                    {/* Route line: origin → destination, single line */}
+                    <div className="mt-2 text-[11px] text-slate-300 flex items-center gap-1.5 truncate">
+                      <span className="text-slate-400">Depot</span>
+                      <span className="text-slate-500">→</span>
+                      <span className="font-semibold text-white truncate">{v.sector}</span>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="mt-2 w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          v.verified
-                            ? "bg-emerald-400"
-                            : "bg-gradient-to-r from-cyan-500 via-sky-400 to-emerald-400"
-                        }`}
-                        style={{ width: `${v.progress}%` }}
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${v.progress}%`,
+                          backgroundColor: v.verified ? "#10b981" : theme.color,
+                        }}
                       />
                     </div>
 
-                    {/* Bottom Status & Speed */}
-                    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                      <span className="truncate max-w-[170px]">{v.status}</span>
-                      <span className="text-cyan-400 font-bold">{v.speedKmh} km/h</span>
+                    {/* Bottom Row: Micro-formats for Time, Speed, Distance */}
+                    <div className="mt-2.5 flex items-center justify-between text-xs font-mono border-t border-slate-800/60 pt-2">
+                      {/* Time: Bold, largest, colored */}
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-sm font-black text-white" style={{ color: theme.color }}>
+                          {v.verified ? "0m" : `${v.etaMinutes}m`}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-400">ETA</span>
+                      </div>
+
+                      {/* Speed: Muted, secondary */}
+                      <div className="flex items-baseline gap-1 text-slate-400 text-[11px]">
+                        <span className="font-bold text-slate-300">{v.verified ? 0 : v.speedKmh}</span>
+                        <span className="text-[10px] text-slate-500">km/h</span>
+                      </div>
+
+                      {/* Distance: Muted, secondary */}
+                      <div className="flex items-baseline gap-1 text-slate-400 text-[11px]">
+                        <span className="font-bold text-slate-300">{v.verified ? 0 : v.distanceKm}</span>
+                        <span className="text-[10px] text-slate-500">km rem.</span>
+                      </div>
+                    </div>
+
+                    {/* Expandable Manifest Section inside truck card (Step 4) */}
+                    <div className="mt-2 pt-1.5 border-t border-slate-800/40">
+                      <button
+                        type="button"
+                        onClick={(e) => toggleManifest(v.id, e)}
+                        className="text-[10px] text-slate-400 hover:text-cyan-300 font-mono flex items-center justify-between w-full transition-colors cursor-pointer"
+                      >
+                        <span className="flex items-center gap-1">
+                          <Package className="w-3 h-3 text-cyan-400" />
+                          <span>Manifest ({v.cargo.length} items)</span>
+                        </span>
+                        <span>{isManifestExpanded ? "▲ Hide" : "▼ View"}</span>
+                      </button>
+
+                      {isManifestExpanded && (
+                        <div className="mt-2 space-y-1 text-[10px] bg-slate-950 p-2 rounded-lg border border-slate-800 animate-fadeIn">
+                          {v.cargo.map((c, cIdx) => (
+                            <div key={cIdx} className="flex items-center justify-between text-slate-300">
+                              <span className="truncate pr-2">{c.item}</span>
+                              <span className="font-mono text-cyan-300 font-bold flex-shrink-0">{c.qty}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -882,9 +963,10 @@ export default function LiveReliefTracker() {
                     SIANG RIVER FLOODWAY (DISASTER ZONE)
                   </text>
 
-                  {/* ── ROAD CORRIDOR ROUTES ── */}
-                  {vehicles.map((v) => {
+                  {/* ── ROAD CORRIDOR ROUTES (Color-Coded to Convoy Units) ── */}
+                  {vehicles.map((v, idx) => {
                     const isTarget = v.id === selectedVehicle.id;
+                    const theme = getUnitTheme(v, idx);
                     const pathD = v.routePoints
                       .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x},${p.y}`)
                       .join(" ");
@@ -896,7 +978,7 @@ export default function LiveReliefTracker() {
                           <path
                             d={pathD}
                             fill="none"
-                            stroke="#06b6d4"
+                            stroke={theme.color}
                             strokeWidth="8"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -907,9 +989,10 @@ export default function LiveReliefTracker() {
                         <path
                           d={pathD}
                           fill="none"
-                          stroke={isTarget ? "#22d3ee" : "rgba(148, 163, 184, 0.3)"}
-                          strokeWidth={isTarget ? "3.5" : "1.8"}
-                          strokeDasharray={v.routeType === "detour" ? "6,6" : undefined}
+                          stroke={theme.color}
+                          strokeOpacity={isTarget ? 1 : 0.45}
+                          strokeWidth={isTarget ? "3.5" : "2"}
+                          strokeDasharray={v.routeType === "detour" || v.routeType === "air" ? "6,6" : undefined}
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
@@ -959,10 +1042,11 @@ export default function LiveReliefTracker() {
                     </g>
                   ))}
 
-                  {/* ── MOVING VEHICLES ON MAP ── */}
-                  {vehicles.map((v) => {
+                  {/* ── MOVING VEHICLES ON MAP (Linked with Numbered Theme Badges) ── */}
+                  {vehicles.map((v, idx) => {
                     const pos = getVehiclePosition(v);
                     const isSelected = v.id === selectedVehicle.id;
+                    const theme = getUnitTheme(v, idx);
 
                     return (
                       <g
@@ -974,11 +1058,11 @@ export default function LiveReliefTracker() {
                         {/* Radar Ping around selected vehicle */}
                         {isSelected && (
                           <circle
-                            r="22"
+                            r="24"
                             fill="none"
-                            stroke="#22d3ee"
-                            strokeWidth="1.8"
-                            opacity="0.8"
+                            stroke={theme.color}
+                            strokeWidth="2"
+                            opacity="0.85"
                             className="animate-ping"
                             style={{ transformOrigin: "0 0" }}
                           />
@@ -986,28 +1070,28 @@ export default function LiveReliefTracker() {
 
                         {/* Vehicle Icon Disc */}
                         <circle
-                          r={isSelected ? "15" : "12"}
-                          fill={v.verified ? "#059669" : isSelected ? "#0891b2" : "#1e293b"}
-                          stroke={v.verified ? "#34d399" : isSelected ? "#67e8f9" : "#64748b"}
+                          r={isSelected ? "16" : "13"}
+                          fill={v.verified ? "#059669" : theme.color}
+                          stroke={v.verified ? "#34d399" : "#ffffff"}
                           strokeWidth={isSelected ? "2.5" : "1.5"}
-                          filter={isSelected ? "drop-shadow(0 0 8px rgba(6,182,212,0.8))" : undefined}
+                          filter={isSelected ? `drop-shadow(0 0 10px ${theme.color})` : undefined}
                         />
 
                         <text y="4" textAnchor="middle" fill="#ffffff" fontSize={isSelected ? "11" : "9"}>
                           {v.icon === "drone" ? "🚁" : v.icon === "ambulance" ? "🚑" : "🚚"}
                         </text>
 
-                        {/* Callout Tag */}
-                        <g transform="translate(0, -22)">
+                        {/* Callout Tag: Numbered & Color-Coded */}
+                        <g transform="translate(0, -24)">
                           <rect
-                            x="-32"
-                            y="-9"
-                            width="64"
-                            height="16"
+                            x="-40"
+                            y="-10"
+                            width="80"
+                            height="18"
                             rx="4"
-                            fill={isSelected ? "rgba(8, 145, 178, 0.95)" : "rgba(15, 23, 42, 0.9)"}
-                            stroke={isSelected ? "#38bdf8" : "rgba(255,255,255,0.15)"}
-                            strokeWidth="1"
+                            fill="rgba(8, 14, 28, 0.95)"
+                            stroke={isSelected ? theme.color : `${theme.color}aa`}
+                            strokeWidth={isSelected ? "2" : "1"}
                           />
                           <text
                             y="2.5"
@@ -1017,7 +1101,7 @@ export default function LiveReliefTracker() {
                             fontWeight="bold"
                             fontFamily="monospace"
                           >
-                            {v.id} {v.verified ? "✓" : `(${v.etaMinutes}m)`}
+                            [{theme.num}] {v.id} {v.verified ? "✓" : `• ${v.etaMinutes}m`}
                           </text>
                         </g>
                       </g>
@@ -1025,192 +1109,239 @@ export default function LiveReliefTracker() {
                   })}
                 </svg>
 
-                {/* Floating Map Legend Watermark */}
-                <div className="absolute bottom-2.5 left-2.5 bg-slate-950/90 border border-slate-800/90 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-400 font-mono flex items-center gap-3 backdrop-blur-md">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400" /> Active En Route
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" /> Delivered On-Chain
-                  </span>
+                {/* Floating Map Legend with Numbered Unit Badges */}
+                <div className="absolute bottom-2.5 left-2.5 bg-slate-950/90 border border-slate-800/90 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 font-mono flex flex-wrap items-center gap-2 backdrop-blur-md">
+                  {vehicles.map((v, idx) => {
+                    const t = getUnitTheme(v, idx);
+                    const isSelected = v.id === selectedVehicle.id;
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => setSelectedId(v.id)}
+                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-colors cursor-pointer ${
+                          isSelected ? "bg-slate-800 text-white font-bold" : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: t.color }} />
+                        <span>[{t.num}] {v.id}</span>
+                      </button>
+                    );
+                  })}
+                  <span className="h-3 w-px bg-slate-700 mx-0.5 hidden sm:inline" />
                   <span className="flex items-center gap-1 text-rose-400">
-                    ⛔ Landslide Cut
+                    ⛔ Slip Cut
                   </span>
                 </div>
               </div>
             </div>
 
             {/* 2. SELECTED CONVOY INTELLIGENCE & TELEMETRY HUD */}
-            <div className="deeptech-hud-card p-5 space-y-4">
-              {/* Header Info */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center text-lg font-bold">
-                    {selectedVehicle.icon === "drone" ? "🚁" : selectedVehicle.icon === "ambulance" ? "🚑" : "🚚"}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-base font-black text-white">{selectedVehicle.id}</h2>
-                      <span className="text-xs text-cyan-300 font-bold">({selectedVehicle.name})</span>
-                      <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold border ${
-                        selectedVehicle.verified
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                          : "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
-                      }`}>
-                        {selectedVehicle.verified ? "VERIFIED ON-CHAIN" : "LIVE SATELLITE GPS"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400">
-                      En route to: <b className="text-white">{selectedVehicle.sector}</b> &bull; Donor: <span className="text-slate-300">{selectedVehicle.donor}</span>
-                    </p>
-                  </div>
-                </div>
+            {(() => {
+              const selectedIdx = vehicles.findIndex((v) => v.id === selectedVehicle.id);
+              const selectedTheme = getUnitTheme(selectedVehicle, selectedIdx >= 0 ? selectedIdx : 0);
 
-                {/* Driver Satellite Call / Radio Button */}
-                <button
-                  onClick={() => {
-                    setRadioModalOpen(true);
-                    playTone(820, 0.2);
-                  }}
-                  className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
-                >
-                  <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                  <span>Radio Driver: {selectedVehicle.driver.split(" ")[0]}</span>
-                </button>
-              </div>
-
-              {/* Telemetry Metrics Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <div className="text-slate-500 text-[10px] flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-cyan-400" />
-                    <span>Countdown ETA</span>
-                  </div>
-                  <div className="text-base font-black text-cyan-300 mt-1">
-                    {selectedVehicle.verified ? "0 min" : `${selectedVehicle.etaMinutes} mins`}
-                  </div>
-                  <div className="text-[10px] text-slate-400">{selectedVehicle.distanceKm} km to camp</div>
-                </div>
-
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <div className="text-slate-500 text-[10px] flex items-center gap-1">
-                    <Activity className="w-3 h-3 text-emerald-400" />
-                    <span>Speed / Transit</span>
-                  </div>
-                  <div className="text-base font-black text-emerald-400 mt-1">
-                    {selectedVehicle.verified ? "0 km/h" : `${selectedVehicle.speedKmh} km/h`}
-                  </div>
-                  <div className="text-[10px] text-slate-400">SatLink Latency: 14ms</div>
-                </div>
-
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <div className="text-slate-500 text-[10px] flex items-center gap-1">
-                    <Thermometer className="w-3 h-3 text-rose-400" />
-                    <span>Cold-Chain IoT</span>
-                  </div>
-                  <div className="text-base font-black text-rose-300 mt-1">
-                    {selectedVehicle.coldChain ? `${selectedVehicle.coldChain.temp}${selectedVehicle.coldChain.unit}` : "N/A (Dry Cargo)"}
-                  </div>
-                  <div className="text-[10px] text-slate-400">
-                    {selectedVehicle.coldChain ? `Safe: ${selectedVehicle.coldChain.minTemp}-${selectedVehicle.coldChain.maxTemp}°C` : "Ambient Ambient"}
-                  </div>
-                </div>
-
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <div className="text-slate-500 text-[10px] flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-amber-400" />
-                    <span>Cargo Container Seal</span>
-                  </div>
-                  <div className="text-xs font-bold text-amber-300 mt-1 truncate">
-                    {selectedVehicle.sealId}
-                  </div>
-                  <div className="text-[10px] text-emerald-400">Tamper-Proof Intact</div>
-                </div>
-              </div>
-
-              {/* Cargo Manifest Breakdown */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                  <span className="flex items-center gap-1.5 text-cyan-300">
-                    <Package className="w-4 h-4" />
-                    <span>Cargo Manifest ({selectedVehicle.cargo.length} Supply Batches on Board)</span>
-                  </span>
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    Genesis Block #{selectedVehicle.blockNumber}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {selectedVehicle.cargo.map((c, i) => (
-                    <div
-                      key={i}
-                      className="p-2.5 bg-slate-950/80 rounded-lg border border-slate-800/90 flex items-center justify-between text-xs"
-                    >
-                      <div>
-                        <div className="font-bold text-white">{c.item}</div>
-                        <div className="text-[10px] text-slate-400">Weight: {c.weight}</div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-mono font-bold text-[11px] border border-cyan-500/20">
-                        {c.qty}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── 3. DELIVERY HANDOVER & BLOCKCHAIN RECEIPT VERIFICATION ── */}
-              <div className="pt-3 border-t border-slate-800/80">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                  
-                  {/* Left: OTP Code & Offline QR Badge */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 flex-shrink-0 font-mono text-base font-black">
-                      <QrCode className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                        Official Handover OTP (Show to driver)
-                      </div>
-                      <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 font-mono tracking-widest">
-                        {selectedVehicle.otp}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: Verification Action */}
-                  {selectedVehicle.verified ? (
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 bg-emerald-950/60 border border-emerald-500/50 px-4 py-2.5 rounded-xl shadow-lg">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      <div>
-                        <div>Handover Verified on Polygon Blockchain</div>
-                        <div className="text-[10px] font-mono text-emerald-400/80 font-normal">
-                          Block #{selectedVehicle.blockNumber} &bull; TX: {selectedVehicle.blockchainTx.substring(0, 14)}...
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <input
-                        type="text"
-                        maxLength="4"
-                        value={enteredOtp}
-                        onChange={(e) => setEnteredOtp(e.target.value)}
-                        placeholder={`Enter ${selectedVehicle.otp} to verify...`}
-                        className="w-40 px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-                      />
-                      <button
-                        onClick={handleVerifyOtp}
-                        disabled={isVerifying}
-                        className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white text-xs font-bold rounded-lg shadow-lg shadow-emerald-950/50 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              return (
+                <div className="deeptech-hud-card p-5 space-y-4">
+                  {/* Header Info with Linked Unit Badge */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold border"
+                        style={{
+                          backgroundColor: selectedTheme.bg,
+                          borderColor: selectedTheme.border,
+                          color: selectedTheme.color
+                        }}
                       >
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>{isVerifying ? "Mining Block..." : "Verify & Log Block"}</span>
-                      </button>
+                        {selectedVehicle.icon === "drone" ? "🚁" : selectedVehicle.icon === "ambulance" ? "🚑" : "🚚"}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className="w-5 h-5 rounded-full flex items-center justify-center font-mono font-black text-[11px] text-slate-950"
+                            style={{ backgroundColor: selectedTheme.color }}
+                          >
+                            {selectedTheme.num}
+                          </span>
+                          <h2 className="text-base font-black text-white">{selectedVehicle.id}</h2>
+                          <span className="text-xs text-slate-400 font-medium">({selectedVehicle.name})</span>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                            selectedVehicle.verified
+                              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                              : "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+                          }`}>
+                            {selectedVehicle.verified ? "VERIFIED ON-CHAIN" : "LIVE SATELLITE GPS"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          En route: <b className="text-slate-200">{selectedVehicle.sector}</b> &bull; Donor: <span className="text-slate-300">{selectedVehicle.donor}</span>
+                        </p>
+                      </div>
                     </div>
-                  )}
+
+                    {/* Driver Satellite Call / Radio Button */}
+                    <button
+                      onClick={() => {
+                        setRadioModalOpen(true);
+                        playTone(820, 0.2);
+                      }}
+                      className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
+                    >
+                      <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                      <span>Radio Driver: {selectedVehicle.driver.split(" ")[0]}</span>
+                    </button>
+                  </div>
+
+                  {/* Telemetry Metrics Bar (Normalized Micro-Formats: Step 6) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="text-slate-500 text-[10px] flex items-center gap-1 uppercase tracking-wider">
+                        <Clock className="w-3 h-3 text-cyan-400" />
+                        <span>Time Remaining</span>
+                      </div>
+                      <div className="text-base font-black mt-1" style={{ color: selectedTheme.color }}>
+                        {selectedVehicle.verified ? "0m ETA" : `${selectedVehicle.etaMinutes}m ETA`}
+                      </div>
+                      <div className="text-[10px] text-slate-400">Scheduled arrival</div>
+                    </div>
+
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="text-slate-500 text-[10px] flex items-center gap-1 uppercase tracking-wider">
+                        <Activity className="w-3 h-3 text-emerald-400" />
+                        <span>Transit Speed</span>
+                      </div>
+                      <div className="text-base font-black text-slate-200 mt-1">
+                        {selectedVehicle.verified ? "0 km/h" : `${selectedVehicle.speedKmh} km/h`}
+                      </div>
+                      <div className="text-[10px] text-slate-400">Satellite telemetry</div>
+                    </div>
+
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="text-slate-500 text-[10px] flex items-center gap-1 uppercase tracking-wider">
+                        <Compass className="w-3 h-3 text-sky-400" />
+                        <span>Corridor Distance</span>
+                      </div>
+                      <div className="text-base font-black text-slate-200 mt-1">
+                        {selectedVehicle.verified ? "0.0 km rem." : `${selectedVehicle.distanceKm} km rem.`}
+                      </div>
+                      <div className="text-[10px] text-slate-400">Remaining to depot</div>
+                    </div>
+
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="text-slate-500 text-[10px] flex items-center gap-1 uppercase tracking-wider">
+                        {selectedVehicle.coldChain ? (
+                          <Thermometer className="w-3 h-3 text-rose-400" />
+                        ) : (
+                          <Lock className="w-3 h-3 text-amber-400" />
+                        )}
+                        <span>{selectedVehicle.coldChain ? "Cold-Chain IoT" : "Tamper Seal"}</span>
+                      </div>
+                      <div className="text-base font-black mt-1 truncate" style={{ color: selectedVehicle.coldChain ? "#f87171" : "#f59e0b" }}>
+                        {selectedVehicle.coldChain ? `${selectedVehicle.coldChain.temp}${selectedVehicle.coldChain.unit}` : selectedVehicle.sealId}
+                      </div>
+                      <div className="text-[10px] text-emerald-400">
+                        {selectedVehicle.coldChain ? `Safe (${selectedVehicle.coldChain.minTemp}–${selectedVehicle.coldChain.maxTemp}°C)` : "Tamper-Proof Intact"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cargo Manifest Breakdown — Attached to Owning Truck (Step 4) */}
+                  <div className="space-y-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs font-bold text-slate-300">
+                      <span className="flex items-center gap-2">
+                        <Package className="w-4 h-4 text-cyan-400" />
+                        <span>Cargo Manifest &bull; Assigned to Unit [{selectedTheme.num}] {selectedVehicle.id}</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono border" style={{ backgroundColor: selectedTheme.bg, borderColor: selectedTheme.border, color: selectedTheme.color }}>
+                          {selectedVehicle.cargo.length} Batches
+                        </span>
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        Genesis Block #{selectedVehicle.blockNumber}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {selectedVehicle.cargo.map((c, i) => (
+                        <div
+                          key={i}
+                          className="p-2.5 bg-slate-950/80 rounded-lg border border-slate-800/90 flex items-center justify-between text-xs"
+                        >
+                          <div>
+                            <div className="font-bold text-white">{c.item}</div>
+                            <div className="text-[10px] text-slate-400">Unit Weight: {c.weight}</div>
+                          </div>
+                          <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-mono font-bold text-[11px] border border-cyan-500/20">
+                            {c.qty}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── 3. ELEVATED DELIVERY CONFIRMATION & BLOCKCHAIN RECEIPT (Step 5) ── */}
+                  <div className="pt-2">
+                    <div className="rounded-xl border-2 border-emerald-500/60 bg-gradient-to-r from-emerald-950/40 via-slate-950 to-teal-950/40 p-4 sm:p-5 shadow-xl shadow-emerald-950/30">
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        
+                        {/* Left: OTP Code & Offline QR Badge */}
+                        <div className="flex items-start sm:items-center gap-3.5">
+                          <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                            <QrCode className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-black text-white uppercase tracking-wider">Confirm Delivery</h3>
+                              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                AID RECIPIENT HANDOVER
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-slate-400 font-mono">Recipient OTP:</span>
+                              <span className="text-xl font-black text-emerald-400 font-mono tracking-widest bg-slate-900 px-2.5 py-0.5 rounded-lg border border-emerald-500/40 shadow-inner">
+                                {selectedVehicle.otp}
+                              </span>
+                              <span className="text-[10px] text-slate-500 hidden sm:inline">(Citizen shows code at vehicle tailgate)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right: Elevated Action — Input and Button on the Same Row */}
+                        {selectedVehicle.verified ? (
+                          <div className="flex items-center gap-3 text-xs font-bold text-emerald-300 bg-emerald-900/40 border border-emerald-500/60 px-4 py-2.5 rounded-xl shadow-lg">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                            <div>
+                              <div className="font-black text-white">Delivery Confirmed &amp; Logged On-Chain</div>
+                              <div className="text-[10px] font-mono text-emerald-400/90 font-normal">
+                                Block #{selectedVehicle.blockNumber} &bull; TX: {selectedVehicle.blockchainTx.substring(0, 16)}...
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 w-full lg:w-auto">
+                            <input
+                              type="text"
+                              maxLength="4"
+                              value={enteredOtp}
+                              onChange={(e) => setEnteredOtp(e.target.value)}
+                              placeholder={`Enter ${selectedVehicle.otp}`}
+                              className="w-32 sm:w-36 px-3 py-2.5 bg-slate-900 border-2 border-emerald-500/50 rounded-xl text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 text-center font-bold tracking-widest shadow-inner"
+                            />
+                            <button
+                              onClick={handleVerifyOtp}
+                              disabled={isVerifying}
+                              className="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                            >
+                              <ShieldCheck className="w-4 h-4 text-slate-950" />
+                              <span>{isVerifying ? "Mining Block..." : "Confirm Delivery"}</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
           </div>
         </div>
       )}
