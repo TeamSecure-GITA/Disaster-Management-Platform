@@ -56,7 +56,7 @@
 9. [Module 6: Core Groundbreaking Tactical Innovations](#9-module-6-core-groundbreaking-tactical-innovations)
    - 6.1 Network-Agnostic P2P Mesh Network (WebRTC + BLE + Satellite Gateway)
    - 6.2 Live UAV/Drone Video Analytics Feed (YOLOv8 + FLIR Thermal Infrared)
-   - 6.3 "Swiggy-Style" Live Resource Tracking & Immutable Blockchain Aid Ledger
+   - 6.3 Autonomous Live Resource Tracking & Immutable Blockchain Aid Ledger
    - 6.4 Crowdsourced AI Damage Assessment (WhatsApp/Telegram Bot + EXIF GPS)
    - 6.5 Extreme Low-Bandwidth "2G / Emergency Mode" (<50KB Text Portal)
    - 6.6 Dynamic Anti-Herd AI Evacuation Router (Multi-Corridor Load Balancing)
@@ -423,8 +423,8 @@ When 5,000+ displaced citizens crowd into a concrete stadium or underground emer
 ### 6.2 Live UAV/Drone Video Analytics Feed (`/drone-analytics`)
 * Processes live drone video feeds with client-side YOLOv8 computer vision models to highlight trapped survivors on rooftops, detect structural collapses, and identify impassable road obstructions with FLIR thermal vision toggling.
 
-### 6.3 "Swiggy-Style" Live Resource Tracking & Immutable Blockchain Aid Ledger (`/relief-tracker`)
-* **For Citizens:** Real-time animated GPS tracking of relief trucks, food delivery vans, and ambulances with live countdown ETAs and 4-digit OTP handover verification.
+### 6.3 Autonomous Live Resource Tracking & Immutable Blockchain Aid Ledger (`/relief-tracker`)
+* **For Citizens:** Real-time animated GPS tracking of relief trucks, food delivery vans, ambulances, and cargo drones with live countdown ETAs and 4-digit OTP handover verification.
 * **For Auditors:** Public immutable Polygon/Hyperledger aid ledger logging donations, warehouse dispatches, and recipient QR scans with transparent transaction hashes (`0x4f9a...`) to eliminate corruption.
 
 ### 6.4 Crowdsourced AI Damage Assessment (`/damage-assessment`)
@@ -597,7 +597,7 @@ npm run dev
 * **NER Live Landslide Risk Monitoring:** `http://localhost:5173/ner-landslide-monitor`
 * **Zero-Internet P2P Mesh Console:** `http://localhost:5173/zero-internet-mesh`
 * **Live UAV Drone Analytics:** `http://localhost:5173/drone-analytics`
-* **Swiggy-Style Relief Tracker & Blockchain Ledger:** `http://localhost:5173/relief-tracker`
+* **Live Relief Fleet Tracker & Blockchain Ledger:** `http://localhost:5173/relief-tracker`
 * **Low-Bandwidth 2G Emergency Mode:** `http://localhost:5173/low-bandwidth`
 * **Anti-Herd Dynamic Evacuation Router:** `http://localhost:5173/dynamic-evacuation`
 * **Platform User Reviews & Feedback:** `http://localhost:5173/reviews`

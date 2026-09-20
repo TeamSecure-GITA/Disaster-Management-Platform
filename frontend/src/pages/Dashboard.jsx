@@ -131,13 +131,16 @@ export default function Dashboard() {
       const zoomDelta = e.deltaY < 0 ? 0.18 : -0.18;
       setZoomLevel((prev) => {
         const next = Math.max(0.8, Math.min(6.0, Number((prev + zoomDelta).toFixed(2))));
+        if (next <= 1.05 && selectedRegion !== "all") {
+          setSelectedRegion("all");
+        }
         return next;
       });
     };
 
     container.addEventListener("wheel", onWheel, { passive: false });
     return () => container.removeEventListener("wheel", onWheel);
-  }, []);
+  }, [selectedRegion]);
 
   // ─── DYNAMIC MAP VIEWPORT & CAMERA COMPUTATION ────────────────────────────
   const currentViewport = REGION_VIEWPORTS[selectedRegion] || REGION_VIEWPORTS.all;
@@ -158,7 +161,13 @@ export default function Dashboard() {
   };
 
   const handleZoomOut = () => {
-    setZoomLevel((prev) => Math.max(Number((prev - 0.35).toFixed(2)), 0.8));
+    setZoomLevel((prev) => {
+      const next = Math.max(Number((prev - 0.35).toFixed(2)), 0.8);
+      if (next <= 1.05 && selectedRegion !== "all") {
+        setSelectedRegion("all");
+      }
+      return next;
+    });
   };
 
   const handlePan = (dx, dy) => {
@@ -174,6 +183,29 @@ export default function Dashboard() {
     setPanOffset({ x: 0, y: 0 });
     setActiveZone(INDIA_RISK_ZONES[0]);
     setInspectedZone(null);
+  };
+
+  // Region blur determination: When a region is selected, blur and dim all other regions
+  const isZoneBlurred = (zoneRegion) => {
+    if (selectedRegion === "all") return false;
+    return zoneRegion !== selectedRegion;
+  };
+
+  const isPathBlurred = (pathId) => {
+    if (selectedRegion === "all") return false;
+    if (selectedRegion === "ner") {
+      return !["siliguri_corridor", "brahmaputra_river", "teesta_river", "ner_backbone"].includes(pathId);
+    }
+    if (selectedRegion === "himalayas") {
+      return !["himalayan_arc", "ganga_river"].includes(pathId);
+    }
+    if (selectedRegion === "south") {
+      return !["western_ghats"].includes(pathId);
+    }
+    if (selectedRegion === "east") {
+      return !["ganga_river", "brahmaputra_river"].includes(pathId);
+    }
+    return false;
   };
 
   const handleMouseDown = (e) => {
@@ -263,7 +295,13 @@ export default function Dashboard() {
       const newDist = Math.hypot(dx, dy);
       const factor = newDist / touchStartRef.current.pinchDist;
       if (Math.abs(factor - 1) > 0.04) {
-        setZoomLevel((prev) => Math.max(0.8, Math.min(6.0, Number((prev * (factor > 1 ? 1.05 : 0.95)).toFixed(2)))));
+        setZoomLevel((prev) => {
+          const next = Math.max(0.8, Math.min(6.0, Number((prev * (factor > 1 ? 1.05 : 0.95)).toFixed(2))));
+          if (next <= 1.05 && selectedRegion !== "all") {
+            setSelectedRegion("all");
+          }
+          return next;
+        });
         touchStartRef.current.pinchDist = newDist;
       }
     }
@@ -273,7 +311,7 @@ export default function Dashboard() {
     if (dragStartRef.current?.didDrag) return;
     setActiveZone(zone);
     setInspectedZone(zone);
-    if (zone.region && zone.region !== selectedRegion && selectedRegion !== "all") {
+    if (zone.region) {
       setSelectedRegion(zone.region);
       setPanOffset({ x: 0, y: 0 });
     }
@@ -511,13 +549,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── 2. MAIN MIDDLE SECTION (MAP 2/3 + ACTIVE INCIDENTS & TIMELINE 1/3) ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 2fr) minmax(320px, 1fr)",
-          gap: "16px",
-        }}
-      >
+      <div className="dashboard-main-grid">
         {/* ────────────── LEFT: LIVE DISASTER MAP ────────────── */}
         <div
           style={{
@@ -724,6 +756,60 @@ export default function Dashboard() {
               touchAction: "none",
             }}
           >
+            {/* Floating Region Focus Banner with Reset/Back to Full India Button */}
+            {selectedRegion !== "all" && (
+              <div
+                className="dashboard-region-focus-banner"
+                style={{
+                  position: "absolute",
+                  top: "14px",
+                  left: "14px",
+                  zIndex: 30,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  background: "rgba(10, 18, 36, 0.94)",
+                  border: "1px solid rgba(56, 189, 248, 0.6)",
+                  padding: "6px 14px",
+                  borderRadius: "10px",
+                  boxShadow: "0 8px 30px rgba(0, 0, 0, 0.75), 0 0 15px rgba(56, 189, 248, 0.25)",
+                  backdropFilter: "blur(14px)",
+                  pointerEvents: "auto",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <span style={{ fontSize: "0.74rem", fontWeight: "900", color: "#38bdf8", letterSpacing: "0.02em" }}>
+                    REGION FOCUS: {REGION_VIEWPORTS[selectedRegion]?.label || selectedRegion}
+                  </span>
+                  <span style={{ fontSize: "0.62rem", color: "#94a3b8" }}>
+                    Other regions blurred · Click back or zoom out to reset
+                  </span>
+                </div>
+                <button
+                  onClick={handleResetView}
+                  style={{
+                    background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
+                    color: "#ffffff",
+                    border: "1px solid rgba(255, 255, 255, 0.35)",
+                    borderRadius: "7px",
+                    padding: "4px 10px",
+                    fontSize: "0.7rem",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    boxShadow: "0 2px 8px rgba(2, 132, 199, 0.5)",
+                    transition: "all 0.15s ease",
+                  }}
+                  title="Unblur & return to Full India view"
+                >
+                  <RefreshCw size={11} />
+                  <span>← Back to Full India</span>
+                </button>
+              </div>
+            )}
+
             {/* Topographic Elevation Contours Simulation & Geographic India Base */}
             <svg
               style={{
@@ -750,22 +836,27 @@ export default function Dashboard() {
                   <feGaussianBlur stdDeviation="4.5" result="blur" />
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
+                {/* Region Blur Filter for Unselected Regional Elements */}
+                <filter id="regionBlurFilter" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3.8" result="blur" />
+                  <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.18 0" />
+                </filter>
               </defs>
 
               {/* Background Grid */}
               <rect x="0" y="0" width="1000" height="680" fill="url(#contourGrid)" />
 
               {/* ── GEOGRAPHIC LABELS & OCEANIC WATERMARKS (ENHANCED CLARITY) ── */}
-              <text x="120" y="520" fill="rgba(56, 189, 248, 0.28)" fontSize="13" fontWeight="900" letterSpacing="5" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+              <text x="120" y="520" fill="rgba(56, 189, 248, 0.28)" fontSize="13" fontWeight="900" letterSpacing="5" fontFamily="monospace" opacity={selectedRegion === "all" ? 1 : 0.15} style={{ pointerEvents: "none", transition: "opacity 0.4s ease" }}>
                 ARABIAN SEA
               </text>
-              <text x="590" y="520" fill="rgba(56, 189, 248, 0.28)" fontSize="13" fontWeight="900" letterSpacing="5" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+              <text x="590" y="520" fill="rgba(56, 189, 248, 0.28)" fontSize="13" fontWeight="900" letterSpacing="5" fontFamily="monospace" opacity={selectedRegion === "all" ? 1 : 0.15} style={{ pointerEvents: "none", transition: "opacity 0.4s ease" }}>
                 BAY OF BENGAL
               </text>
-              <text x="320" y="668" fill="rgba(56, 189, 248, 0.24)" fontSize="11" fontWeight="900" letterSpacing="6" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+              <text x="320" y="668" fill="rgba(56, 189, 248, 0.24)" fontSize="11" fontWeight="900" letterSpacing="6" fontFamily="monospace" opacity={selectedRegion === "all" ? 1 : 0.15} style={{ pointerEvents: "none", transition: "opacity 0.4s ease" }}>
                 INDIAN OCEAN
               </text>
-              <text x="270" y="45" fill="rgba(34, 197, 94, 0.45)" fontSize="9.5" fontWeight="900" letterSpacing="4" fontFamily="monospace" style={{ pointerEvents: "none" }}>
+              <text x="270" y="45" fill="rgba(34, 197, 94, 0.45)" fontSize="9.5" fontWeight="900" letterSpacing="4" fontFamily="monospace" opacity={selectedRegion === "all" || selectedRegion === "himalayas" ? 1 : 0.15} style={{ pointerEvents: "none", transition: "opacity 0.4s ease" }}>
                 ▲ HIMALAYAN TECTONIC ARC (SEISMIC ZONE IV & V)
               </text>
 
@@ -776,7 +867,9 @@ export default function Dashboard() {
                 fill="none"
                 stroke="rgba(56, 189, 248, 0.45)"
                 strokeWidth="4.5"
-                filter="url(#cyanGlow)"
+                filter={selectedRegion === "all" ? "url(#cyanGlow)" : "url(#regionBlurFilter)"}
+                opacity={selectedRegion === "all" ? 1 : 0.25}
+                style={{ transition: "opacity 0.4s ease, filter 0.4s ease" }}
               />
               {/* Sharp Navy Landmass with Crisp Sky-Blue Border */}
               <path
@@ -786,37 +879,127 @@ export default function Dashboard() {
                 strokeWidth={selectedRegion === "all" ? 1.8 : 1.4}
                 strokeLinejoin="round"
                 strokeLinecap="round"
+                opacity={selectedRegion === "all" ? 1 : 0.35}
+                filter={selectedRegion === "all" ? undefined : "url(#regionBlurFilter)"}
+                style={{ transition: "opacity 0.4s ease, filter 0.4s ease" }}
               />
 
               {/* ── GEOGRAPHIC CORRIDORS & RIVERS (BRAHMAPUTRA, TEESTA, GANGA) ── */}
-              {INDIA_REGION_PATHS.map((item) => (
-                <path
-                  key={item.id}
-                  d={item.d}
-                  fill="none"
-                  stroke={item.stroke}
-                  strokeWidth={item.width || "1.5"}
-                  strokeDasharray={item.dash !== "none" ? item.dash : undefined}
-                  strokeLinecap="round"
-                />
-              ))}
+              {INDIA_REGION_PATHS.map((item) => {
+                const isBlurred = isPathBlurred(item.id);
+                return (
+                  <path
+                    key={item.id}
+                    d={item.d}
+                    fill="none"
+                    stroke={item.stroke}
+                    strokeWidth={item.width || "1.5"}
+                    strokeDasharray={item.dash !== "none" ? item.dash : undefined}
+                    strokeLinecap="round"
+                    filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                    opacity={isBlurred ? 0.12 : 1}
+                    style={{ transition: "opacity 0.4s ease, filter 0.4s ease" }}
+                  />
+                );
+              })}
 
-              {/* Prominent NER Region Boundary Highlight */}
+              {/* ── INTERACTIVE REGION BOUNDARIES (CLICK ANY TO FOCUS THAT REGION) ── */}
+              {/* 1. North Eastern Region (NER) */}
               <polygon
                 points="575,200 660,140 880,140 880,330 790,450 690,400 575,280"
-                fill={selectedRegion === "ner" ? "rgba(225, 29, 72, 0.06)" : "rgba(56, 189, 248, 0.03)"}
-                stroke={selectedRegion === "ner" ? "rgba(239, 68, 68, 0.5)" : "rgba(56, 189, 248, 0.25)"}
-                strokeWidth="1.2"
-                strokeDasharray="4,4"
-              />
+                fill={selectedRegion === "ner" ? "rgba(225, 29, 72, 0.1)" : selectedRegion === "all" ? "rgba(56, 189, 248, 0.04)" : "transparent"}
+                stroke={selectedRegion === "ner" ? "#ef4444" : selectedRegion === "all" ? "rgba(56, 189, 248, 0.35)" : "rgba(56, 189, 248, 0.1)"}
+                strokeWidth={selectedRegion === "ner" ? "2.5" : "1.2"}
+                strokeDasharray={selectedRegion === "ner" ? "none" : "4,4"}
+                filter={selectedRegion !== "all" && selectedRegion !== "ner" ? "url(#regionBlurFilter)" : undefined}
+                opacity={selectedRegion !== "all" && selectedRegion !== "ner" ? 0.12 : 1}
+                style={{ cursor: "pointer", transition: "all 0.3s ease" }}
+                onClick={() => {
+                  setSelectedRegion("ner");
+                  setZoomLevel(1);
+                  setPanOffset({ x: 0, y: 0 });
+                  setActiveZone(INDIA_RISK_ZONES[0]);
+                }}
+              >
+                <title>Click to focus North Eastern Region (NER)</title>
+              </polygon>
+
+              {/* 2. North Himalayas */}
+              <polygon
+                points="260,30 460,30 520,180 380,190 260,140"
+                fill={selectedRegion === "himalayas" ? "rgba(56, 189, 248, 0.12)" : selectedRegion === "all" ? "rgba(56, 189, 248, 0.03)" : "transparent"}
+                stroke={selectedRegion === "himalayas" ? "#38bdf8" : selectedRegion === "all" ? "rgba(56, 189, 248, 0.25)" : "rgba(56, 189, 248, 0.1)"}
+                strokeWidth={selectedRegion === "himalayas" ? "2.5" : "1"}
+                strokeDasharray={selectedRegion === "himalayas" ? "none" : "4,4"}
+                filter={selectedRegion !== "all" && selectedRegion !== "himalayas" ? "url(#regionBlurFilter)" : undefined}
+                opacity={selectedRegion !== "all" && selectedRegion !== "himalayas" ? 0.12 : 1}
+                style={{ cursor: "pointer", transition: "all 0.3s ease" }}
+                onClick={() => {
+                  setSelectedRegion("himalayas");
+                  setZoomLevel(1);
+                  setPanOffset({ x: 0, y: 0 });
+                  const z = INDIA_RISK_ZONES.find((item) => item.region === "himalayas");
+                  if (z) setActiveZone(z);
+                }}
+              >
+                <title>Click to focus North Himalayas</title>
+              </polygon>
+
+              {/* 3. Western Ghats / South */}
+              <polygon
+                points="250,470 340,470 380,660 300,660 250,540"
+                fill={selectedRegion === "south" ? "rgba(16, 185, 129, 0.12)" : selectedRegion === "all" ? "rgba(16, 185, 129, 0.03)" : "transparent"}
+                stroke={selectedRegion === "south" ? "#10b981" : selectedRegion === "all" ? "rgba(16, 185, 129, 0.25)" : "rgba(16, 185, 129, 0.1)"}
+                strokeWidth={selectedRegion === "south" ? "2.5" : "1"}
+                strokeDasharray={selectedRegion === "south" ? "none" : "4,4"}
+                filter={selectedRegion !== "all" && selectedRegion !== "south" ? "url(#regionBlurFilter)" : undefined}
+                opacity={selectedRegion !== "all" && selectedRegion !== "south" ? 0.12 : 1}
+                style={{ cursor: "pointer", transition: "all 0.3s ease" }}
+                onClick={() => {
+                  setSelectedRegion("south");
+                  setZoomLevel(1);
+                  setPanOffset({ x: 0, y: 0 });
+                  const z = INDIA_RISK_ZONES.find((item) => item.region === "south");
+                  if (z) setActiveZone(z);
+                }}
+              >
+                <title>Click to focus Western Ghats (South)</title>
+              </polygon>
+
+              {/* 4. East Coast & Delta */}
+              <polygon
+                points="430,320 570,320 620,490 480,490"
+                fill={selectedRegion === "east" ? "rgba(245, 158, 11, 0.12)" : selectedRegion === "all" ? "rgba(245, 158, 11, 0.03)" : "transparent"}
+                stroke={selectedRegion === "east" ? "#f59e0b" : selectedRegion === "all" ? "rgba(245, 158, 11, 0.25)" : "rgba(245, 158, 11, 0.1)"}
+                strokeWidth={selectedRegion === "east" ? "2.5" : "1"}
+                strokeDasharray={selectedRegion === "east" ? "none" : "4,4"}
+                filter={selectedRegion !== "all" && selectedRegion !== "east" ? "url(#regionBlurFilter)" : undefined}
+                opacity={selectedRegion !== "all" && selectedRegion !== "east" ? 0.12 : 1}
+                style={{ cursor: "pointer", transition: "all 0.3s ease" }}
+                onClick={() => {
+                  setSelectedRegion("east");
+                  setZoomLevel(1);
+                  setPanOffset({ x: 0, y: 0 });
+                  const z = INDIA_RISK_ZONES.find((item) => item.region === "east");
+                  if (z) setActiveZone(z);
+                }}
+              >
+                <title>Click to focus East Coast & Delta</title>
+              </polygon>
 
               {/* ── 1. LAYER: DISASTER RISK ZONES (POLYGONS LIKE NH-10) ── */}
               {mapLayers.disasterRisk && (
                 <>
                   {INDIA_RISK_ZONES.map((zone) => {
                     const isCurrent = activeZone?.id === zone.id;
+                    const isBlurred = isZoneBlurred(zone.region);
                     return (
-                      <g key={`zone-poly-${zone.id}`}>
+                      <g 
+                        key={`zone-poly-${zone.id}`}
+                        filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                        opacity={isBlurred ? 0.12 : 1}
+                        style={{ pointerEvents: isBlurred ? "none" : "auto", transition: "opacity 0.4s ease, filter 0.4s ease" }}
+                      >
                         {/* Warning Amber Perimeter */}
                         {zone.polygons?.warning && (
                           <polygon
@@ -848,42 +1031,50 @@ export default function Dashboard() {
               {/* ── 2. LAYER: ROADS & EVACUATION HIGHWAYS (LIKE NH-10) ── */}
               {mapLayers.roads && (
                 <>
-                  {INDIA_RISK_ZONES.map((zone) => (
-                    <g key={`roads-${zone.id}`}>
-                      {/* Underlying Road Bed */}
-                      {zone.evacuationRoad && (
-                        <path
-                          d={zone.evacuationRoad}
-                          fill="none"
-                          stroke="#1e293b"
-                          strokeWidth="5"
-                          strokeLinecap="round"
-                        />
-                      )}
-                      {/* Evacuation Route (Cyan Glowing Dashed Line) */}
-                      {zone.evacuationRoad && (
-                        <path
-                          d={zone.evacuationRoad}
-                          fill="none"
-                          stroke="#38bdf8"
-                          strokeWidth="2.8"
-                          strokeDasharray="7,5"
-                          strokeLinecap="round"
-                          filter="url(#cyanGlow)"
-                        />
-                      )}
-                      {/* Secondary Alternate Route (Green Dashed Line) */}
-                      {zone.secondaryRoad && (
-                        <path
-                          d={zone.secondaryRoad}
-                          fill="none"
-                          stroke="#22c55e"
-                          strokeWidth="2"
-                          strokeDasharray="5,4"
-                        />
-                      )}
-                    </g>
-                  ))}
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isBlurred = isZoneBlurred(zone.region);
+                    return (
+                      <g 
+                        key={`roads-${zone.id}`}
+                        filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                        opacity={isBlurred ? 0.12 : 1}
+                        style={{ pointerEvents: isBlurred ? "none" : "auto", transition: "opacity 0.4s ease, filter 0.4s ease" }}
+                      >
+                        {/* Underlying Road Bed */}
+                        {zone.evacuationRoad && (
+                          <path
+                            d={zone.evacuationRoad}
+                            fill="none"
+                            stroke="#1e293b"
+                            strokeWidth="5"
+                            strokeLinecap="round"
+                          />
+                        )}
+                        {/* Evacuation Route (Cyan Glowing Dashed Line) */}
+                        {zone.evacuationRoad && (
+                          <path
+                            d={zone.evacuationRoad}
+                            fill="none"
+                            stroke="#38bdf8"
+                            strokeWidth="2.8"
+                            strokeDasharray="7,5"
+                            strokeLinecap="round"
+                            filter="url(#cyanGlow)"
+                          />
+                        )}
+                        {/* Secondary Alternate Route (Green Dashed Line) */}
+                        {zone.secondaryRoad && (
+                          <path
+                            d={zone.secondaryRoad}
+                            fill="none"
+                            stroke="#22c55e"
+                            strokeWidth="2"
+                            strokeDasharray="5,4"
+                          />
+                        )}
+                      </g>
+                    );
+                  })}
                 </>
               )}
 
@@ -892,7 +1083,7 @@ export default function Dashboard() {
                 <>
                   {INDIA_RISK_ZONES.map((zone) => {
                     const isCurrent = activeZone?.id === zone.id;
-                    const isNer = zone.region === "ner";
+                    const isBlurred = isZoneBlurred(zone.region);
                     // Scale badges in zoomed modes vs Pan-India
                     const boxW = selectedRegion === "all" ? 170 : 130;
                     const boxH = selectedRegion === "all" ? 44 : 36;
@@ -906,7 +1097,9 @@ export default function Dashboard() {
                         y={zone.center.y - boxH}
                         width={boxW}
                         height={boxH + 10}
-                        style={{ overflow: "visible", pointerEvents: "auto" }}
+                        filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                        opacity={isBlurred ? 0.12 : 1}
+                        style={{ overflow: "visible", pointerEvents: isBlurred ? "none" : "auto", transition: "opacity 0.4s ease, filter 0.4s ease" }}
                       >
                         <div
                           onClick={() => handleSelectZone(zone)}
@@ -958,8 +1151,9 @@ export default function Dashboard() {
               {/* ── 4. LAYER: AFFECTED POPULATION & VILLAGE BADGES (LIKE NH-10) ── */}
               {mapLayers.affectedPopulation && (
                 <>
-                  {INDIA_RISK_ZONES.map((zone) =>
-                    zone.villages?.map((village, vIdx) => {
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isBlurred = isZoneBlurred(zone.region);
+                    return zone.villages?.map((village, vIdx) => {
                       const vW = selectedRegion === "all" ? 140 : 110;
                       const vH = selectedRegion === "all" ? 28 : 22;
                       const vFontSize = selectedRegion === "all" ? "9.5px" : "7px";
@@ -971,7 +1165,9 @@ export default function Dashboard() {
                           y={village.y - vH / 2}
                           width={vW}
                           height={vH}
-                          style={{ overflow: "visible", pointerEvents: "none" }}
+                          filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                          opacity={isBlurred ? 0.12 : 1}
+                          style={{ overflow: "visible", pointerEvents: "none", transition: "opacity 0.4s ease, filter 0.4s ease" }}
                         >
                           <div
                             style={{
@@ -997,16 +1193,17 @@ export default function Dashboard() {
                           </div>
                         </foreignObject>
                       );
-                    })
-                  )}
+                    });
+                  })}
                 </>
               )}
 
               {/* ── 5. LAYER: RESCUE UNITS (BLUE VEHICLES LIKE NH-10) ── */}
               {mapLayers.rescueUnits && (
                 <>
-                  {INDIA_RISK_ZONES.map((zone) =>
-                    zone.rescueUnits?.map((unit) => {
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isBlurred = isZoneBlurred(zone.region);
+                    return zone.rescueUnits?.map((unit) => {
                       const uSize = selectedRegion === "all" ? 24 : 18;
                       const iconSize = selectedRegion === "all" ? 12 : 9;
                       return (
@@ -1016,7 +1213,9 @@ export default function Dashboard() {
                           y={unit.y - uSize / 2}
                           width={uSize}
                           height={uSize}
-                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                          filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                          opacity={isBlurred ? 0.12 : 1}
+                          style={{ overflow: "visible", pointerEvents: isBlurred ? "none" : "auto", transition: "opacity 0.4s ease, filter 0.4s ease" }}
                         >
                           <div
                             onClick={() => handleSelectZone(zone)}
@@ -1039,16 +1238,17 @@ export default function Dashboard() {
                           </div>
                         </foreignObject>
                       );
-                    })
-                  )}
+                    });
+                  })}
                 </>
               )}
 
               {/* ── 6. LAYER: SAFE SHELTERS (GREEN HOUSES LIKE NH-10) ── */}
               {mapLayers.shelters && (
                 <>
-                  {INDIA_RISK_ZONES.map((zone) =>
-                    zone.shelters?.map((shelter) => {
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isBlurred = isZoneBlurred(zone.region);
+                    return zone.shelters?.map((shelter) => {
                       const sSize = selectedRegion === "all" ? 22 : 16;
                       const iconSize = selectedRegion === "all" ? 11 : 8;
                       return (
@@ -1058,7 +1258,9 @@ export default function Dashboard() {
                           y={shelter.y - sSize / 2}
                           width={sSize}
                           height={sSize}
-                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                          filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                          opacity={isBlurred ? 0.12 : 1}
+                          style={{ overflow: "visible", pointerEvents: isBlurred ? "none" : "auto", transition: "opacity 0.4s ease, filter 0.4s ease" }}
                         >
                           <div
                             onClick={() => handleSelectZone(zone)}
@@ -1081,16 +1283,17 @@ export default function Dashboard() {
                           </div>
                         </foreignObject>
                       );
-                    })
-                  )}
+                    });
+                  })}
                 </>
               )}
 
               {/* ── 7. LAYER: ROAD BLOCKS (RED BADGES LIKE NH-10) ── */}
               {mapLayers.roads && (
                 <>
-                  {INDIA_RISK_ZONES.map((zone) =>
-                    zone.blockedPoints?.map((bp) => {
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isBlurred = isZoneBlurred(zone.region);
+                    return zone.blockedPoints?.map((bp) => {
                       const bSize = selectedRegion === "all" ? 20 : 15;
                       const bFontSize = selectedRegion === "all" ? "10px" : "7.5px";
                       return (
@@ -1100,7 +1303,9 @@ export default function Dashboard() {
                           y={bp.y - bSize / 2}
                           width={bSize}
                           height={bSize}
-                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                          filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                          opacity={isBlurred ? 0.12 : 1}
+                          style={{ overflow: "visible", pointerEvents: isBlurred ? "none" : "auto", transition: "opacity 0.4s ease, filter 0.4s ease" }}
                         >
                           <div
                             style={{
@@ -1123,16 +1328,17 @@ export default function Dashboard() {
                           </div>
                         </foreignObject>
                       );
-                    })
-                  )}
+                    });
+                  })}
                 </>
               )}
 
               {/* ── 8. LAYER: IOT SENSORS (PURPLE NODES) ── */}
               {mapLayers.iotSensors && (
                 <>
-                  {INDIA_RISK_ZONES.map((zone) =>
-                    zone.iotSensors?.map((sensor) => {
+                  {INDIA_RISK_ZONES.map((zone) => {
+                    const isBlurred = isZoneBlurred(zone.region);
+                    return zone.iotSensors?.map((sensor) => {
                       const sensSize = selectedRegion === "all" ? 22 : 16;
                       const iconSize = selectedRegion === "all" ? 11 : 8;
                       return (
@@ -1142,7 +1348,9 @@ export default function Dashboard() {
                           y={sensor.y - sensSize / 2}
                           width={sensSize}
                           height={sensSize}
-                          style={{ overflow: "visible", pointerEvents: "auto" }}
+                          filter={isBlurred ? "url(#regionBlurFilter)" : undefined}
+                          opacity={isBlurred ? 0.12 : 1}
+                          style={{ overflow: "visible", pointerEvents: isBlurred ? "none" : "auto", transition: "opacity 0.4s ease, filter 0.4s ease" }}
                         >
                           <div
                             style={{
@@ -1164,8 +1372,8 @@ export default function Dashboard() {
                           </div>
                         </foreignObject>
                       );
-                    })
-                  )}
+                    });
+                  })}
                 </>
               )}
             </svg>
@@ -1173,6 +1381,7 @@ export default function Dashboard() {
             {/* ── FLOATING TACTICAL HUD DRAWER (SELECTED RISK ZONE INTELLIGENCE) ── */}
             {inspectedZone && (
               <div
+                className="dashboard-tactical-hud"
                 style={{
                   position: "absolute",
                   bottom: "12px",
@@ -1435,6 +1644,7 @@ export default function Dashboard() {
 
             {/* ── FLOATING OVERLAY: INSET MINIMAP (BOTTOM LEFT) ── */}
             <div
+              className="dashboard-map-minimap"
               style={{
                 position: "absolute",
                 bottom: "14px",
@@ -1490,6 +1700,7 @@ export default function Dashboard() {
 
             {/* ── FLOATING OVERLAY: LEGEND (BOTTOM RIGHT) ── */}
             <div
+              className="dashboard-map-legend"
               style={{
                 position: "absolute",
                 bottom: "14px",

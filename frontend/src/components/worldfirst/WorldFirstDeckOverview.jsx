@@ -246,40 +246,40 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
       {/* ═══════════════════════════════════════════════════════════════ */}
       {/* ── 1. TACTICAL COMMAND BAR & TELEMETRY STATUS ── */}
       {/* ═══════════════════════════════════════════════════════════════ */}
-      <div className="w-full bg-slate-950/80 border border-cyan-500/25 rounded-2xl p-2.5 sm:p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+      <div className="w-full bg-slate-950/80 border border-cyan-500/25 rounded-2xl p-2.5 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xl backdrop-blur-xl relative overflow-hidden">
         {/* Glow ambient accent */}
         <div className="absolute -top-10 -left-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs relative z-10">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs relative z-10 w-full sm:w-auto">
           {/* Active Emergency Status Pill */}
-          <div className="flex items-center gap-2 bg-gradient-to-r from-rose-950/90 via-rose-900/60 to-rose-950/90 border border-rose-500/60 px-3.5 py-1.5 rounded-full text-rose-200 font-bold shadow-lg shadow-rose-950/50">
-            <span className="relative flex h-2.5 w-2.5">
+          <div className="flex items-center gap-2 bg-gradient-to-r from-rose-950/90 via-rose-900/60 to-rose-950/90 border border-rose-500/60 px-3 py-1.5 rounded-full text-rose-200 font-bold shadow-lg shadow-rose-950/50 text-[11px]">
+            <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
             </span>
             <span className="tracking-wide">CRISIS ACTIVE</span>
-            <span className="text-rose-400 font-mono text-[11px] font-black border-l border-rose-500/40 pl-2">
+            <span className="text-rose-400 font-mono text-[10px] font-black border-l border-rose-500/40 pl-2">
               NH-10 LANDSLIDE
             </span>
           </div>
 
           {/* Satellite Telemetry Sync */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-full text-slate-300 font-mono text-[11px]">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-full text-slate-300 font-mono text-[11px]">
             <Satellite className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-            <span>InSAR Sentinel-1:</span>
-            <span className="text-cyan-400 font-bold font-mono">0.92 Coherence</span>
+            <span>InSAR:</span>
+            <span className="text-cyan-400 font-bold font-mono">0.92</span>
           </div>
 
           {/* Mesh Network Health */}
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-full text-slate-300 font-mono text-[11px]">
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-full text-slate-300 font-mono text-[11px]">
             <Radio className="w-3.5 h-3.5 text-emerald-400" />
-            <span>P2P LoRa Mesh:</span>
-            <span className="text-emerald-400 font-bold">114/116 Active</span>
+            <span>LoRa Mesh:</span>
+            <span className="text-emerald-400 font-bold">114/116</span>
           </div>
         </div>
 
         {/* Right Tools & Clock */}
-        <div className="flex items-center gap-2.5 text-xs relative z-10">
+        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs relative z-10 w-full sm:w-auto border-t sm:border-t-0 border-slate-900 pt-2 sm:pt-0">
           {/* Audio Synthesizer Tone Toggle */}
           <button
             onClick={() => setAudioEnabled(!audioEnabled)}
@@ -295,16 +295,16 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
           </button>
 
           {/* Digital Chronometer */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/90 border border-slate-800 rounded-lg text-slate-300 font-mono">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900/90 border border-slate-800 rounded-lg text-slate-300 font-mono text-[11px]">
             <Clock className="w-3.5 h-3.5 text-cyan-400" />
             <span className="font-bold text-white tracking-wider">{currentClock}</span>
-            <span className="text-[10px] text-slate-500">IST</span>
+            <span className="text-[9px] text-slate-500">IST</span>
           </div>
 
           {/* Active Alerts Bell */}
           <button 
             onClick={() => setIsIncidentModalOpen(true)}
-            className="p-2 bg-rose-950/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-rose-300 relative transition-all cursor-pointer shadow-md"
+            className="p-1.5 bg-rose-950/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-rose-300 relative transition-all cursor-pointer shadow-md"
             title="Active Incidents"
           >
             <Bell className="w-4 h-4 animate-bounce" />
@@ -318,19 +318,19 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
       {/* ═══════════════════════════════════════════════════════════════ */}
       {/* ── 2. MODE SWITCHER: OVERVIEW DECK vs 22 LAB PROTOCOLS ── */}
       {/* ═══════════════════════════════════════════════════════════════ */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950/70 border border-slate-800/80 p-2 rounded-2xl backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 text-white shadow-lg shadow-cyan-950/60 border border-cyan-400/40">
-            <SlidersHorizontal className="w-4 h-4" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/70 border border-slate-800/80 p-2.5 rounded-2xl backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 text-white shadow-lg shadow-cyan-950/60 border border-cyan-400/40 text-center">
+            <SlidersHorizontal className="w-4 h-4 shrink-0" />
             <span>Autonomous Command Overview Deck</span>
           </div>
 
           <button
             onClick={onSwitchToLab}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-all cursor-pointer group"
+            className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-all cursor-pointer group text-center"
           >
-            <Sparkles className="w-4 h-4 text-amber-400 group-hover:animate-spin" />
-            <span>Deep-Tech Innovations Lab (22 Protocols)</span>
+            <Sparkles className="w-4 h-4 text-amber-400 group-hover:animate-spin shrink-0" />
+            <span>Deep-Tech Innovations Lab</span>
             <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-mono font-black rounded-full border border-amber-500/30">
               22 NOVEL
             </span>
@@ -339,7 +339,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
         <button
           onClick={onSwitchToLab}
-          className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer px-3 py-1.5"
+          className="flex items-center justify-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer px-3 py-1.5 w-full sm:w-auto border sm:border-0 border-cyan-500/20 rounded-xl"
         >
           <span>Open Full Hardware Simulators</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -388,12 +388,12 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                 </p>
 
                 {/* 3 Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 pt-2">
                   <button
                     onClick={() => setIsMapModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg shadow-cyan-900/40 transition-all cursor-pointer border border-cyan-400/30"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg shadow-cyan-900/40 transition-all cursor-pointer border border-cyan-400/30 w-full sm:w-auto"
                   >
-                    <MapPin className="w-4 h-4" />
+                    <MapPin className="w-4 h-4 shrink-0" />
                     <span>View Live SAR Radar Map</span>
                   </button>
 
@@ -402,17 +402,17 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                       setSelectedCapability('ner-monitor');
                       setIsCapabilityModalOpen(true);
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/90 hover:bg-slate-800 active:scale-95 text-slate-200 border border-slate-700/80 hover:border-cyan-500/40 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900/90 hover:bg-slate-800 active:scale-95 text-slate-200 border border-slate-700/80 hover:border-cyan-500/40 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md w-full sm:w-auto"
                   >
-                    <Layers className="w-4 h-4 text-cyan-400" />
+                    <Layers className="w-4 h-4 text-cyan-400 shrink-0" />
                     <span>Inspect 9 Deep-Tech Tools</span>
                   </button>
 
                   <button
                     onClick={handleStartSimulation}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg shadow-emerald-950/50 transition-all cursor-pointer border border-emerald-400/40"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg shadow-emerald-950/50 transition-all cursor-pointer border border-emerald-400/40 w-full sm:w-auto"
                   >
-                    <Play className="w-4 h-4 fill-current" />
+                    <Play className="w-4 h-4 fill-current shrink-0" />
                     <span>{isSimulationActive ? `Simulating Stage ${simulationStep + 1}/6...` : 'Run 6-Stage Autonomous Demo'}</span>
                   </button>
                 </div>
@@ -435,7 +435,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
               </div>
 
               {/* Right: High-Tech Animated SAR Radar Display */}
-              <div className="md:col-span-5 relative h-60 sm:h-72 rounded-2xl overflow-hidden border border-cyan-500/30 bg-slate-950 shadow-2xl group">
+              <div className="md:col-span-5 relative h-60 sm:h-72 rounded-2xl overflow-hidden border border-cyan-500/30 bg-slate-950 shadow-2xl group w-full">
                 <img
                   src="/images/mountain_corridor.jpg"
                   alt="Mountain Valley Highway Corridor"
@@ -452,9 +452,9 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                 </div>
 
                 {/* Concentric Radar Rings */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full border border-cyan-400/20 pointer-events-none flex items-center justify-center">
-                  <div className="w-40 h-40 rounded-full border border-cyan-400/30 flex items-center justify-center">
-                    <div className="w-24 h-24 rounded-full border border-dashed border-cyan-400/40 flex items-center justify-center">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 rounded-full border border-cyan-400/20 pointer-events-none flex items-center justify-center">
+                  <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border border-cyan-400/30 flex items-center justify-center">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-dashed border-cyan-400/40 flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-md shadow-cyan-400/80" />
                     </div>
                   </div>
@@ -1032,8 +1032,8 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 1. LIVE SAR RADAR & SATELLITE MAP MODAL */}
       {isMapModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-slate-900/95 border border-cyan-500/50 rounded-2xl w-full max-w-4xl p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-slate-900/95 border border-cyan-500/50 rounded-2xl w-full max-w-4xl p-4 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/40">
@@ -1107,8 +1107,8 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 2. CAPABILITY INSPECTOR MODAL */}
       {isCapabilityModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-slate-900/95 border border-slate-700 rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-slate-900/95 border border-slate-700 rounded-2xl w-full max-w-3xl p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <Layers className="w-5 h-5 text-cyan-400" />
@@ -1133,7 +1133,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                     Calculates real-time Landslide Susceptibility Index based on rainfall intensity, slope degree, and pore-water pressure.
                   </p>
                 </div>
-                <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-center">
                   <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <div className="text-xs text-slate-400">Rainfall (24h)</div>
                     <div className="text-lg font-bold text-white mt-1">112 mm</div>
@@ -1302,8 +1302,8 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 3. ACTIVE INCIDENT MODAL (LANDSLIDE NH-10) */}
       {isIncidentModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-rose-500/50 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-slate-900 border border-rose-500/50 rounded-2xl w-full max-w-2xl p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2 text-rose-400">
                 <AlertTriangle className="w-5 h-5" />
@@ -1322,7 +1322,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                 Severe mud liquefaction detected at NH-10 km 34.2 (Siang Valley Corridor). 4 villages isolated, 387 citizens identified in immediate perimeter. Road clearance unit en route (ETA 06 min).
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
                   <span className="text-slate-400 block text-[11px]">Primary Evacuation Destination:</span>
                   <span className="text-white font-bold block mt-1">Pangin East High Ground Camp</span>
@@ -1340,7 +1340,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                     alert("Emergency Broadcast dispatched to local mesh radios and SMS gateway.");
                     setIsIncidentModalOpen(false);
                   }}
-                  className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl cursor-pointer"
+                  className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl cursor-pointer w-full sm:w-auto"
                 >
                   Broadcast Evacuation Sirens & Alerts
                 </button>
@@ -1352,8 +1352,8 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 4. TECHNOLOGY STACK MODAL */}
       {isTechStackModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <Cpu className="w-5 h-5 text-cyan-400" />
@@ -1387,8 +1387,8 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 5. SYSTEM HEALTH DIAGNOSTICS MODAL */}
       {isHealthModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-emerald-400" />

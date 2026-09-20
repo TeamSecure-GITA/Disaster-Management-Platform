@@ -61,9 +61,7 @@ frontend/src/
 │   ├── ShelterFinder.jsx             # Real-time shelter directory with live occupancy
 │   ├── FamilySafety.jsx              # Family safety circle check-ins & locator
 │   ├── DroneAnalytics.jsx            # Live UAV flight feeds with YOLOv8 & FLIR thermal
-│   ├── DynamicEvacuation.jsx         # Anti-herd multi-corridor evacuation router
-│   ├── ReliefTracker.jsx             # "Swiggy-style" resource tracker & blockchain ledger
-│   ├── LowBandwidthMode.jsx          # Ultra-lightweight <50KB pure-text emergency mode
+│   ├── LiveReliefTracker.jsx         # Live GPS supply convoy tracking & blockchain aid ledger
 │   ├── Reviews.jsx                   # Citizen & responder review submission hub
 │   ├── AdministratorHub.jsx          # Admin command center & review management
 │   └── ...

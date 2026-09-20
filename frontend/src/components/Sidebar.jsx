@@ -65,7 +65,7 @@ const responseItems = [
   { key: "nav_rescue",     fallback: "Rescue Center",      icon: IconRescue,     path: "/rescue-centers" },
   { key: "nav_evacuation", fallback: "Evacuation Planner", icon: IconEvacuation, path: "/evacuation-planner" },
   { key: "nav_damage",     fallback: "Resources",          icon: IconDamage,     path: "/damage-assessment" },
-  { key: "nav_relief",     fallback: "Responder Tracker",  icon: IconDelivery,   path: "/relief-tracker" },
+  { key: "nav_relief",     fallback: "Live Relief Supply Fleet", icon: IconDelivery,   path: "/relief-tracker", badge: "GPS/LEDGER" },
 ];
 
 // ── 🧠 INTELLIGENCE ───────────────────────────────────────────────────────────

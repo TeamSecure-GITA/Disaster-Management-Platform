@@ -315,6 +315,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
 
         {/* ─────────────── CENTER: Permanent Active Emergency Status Card ─────────────── */}
         <div
+          className="header-emergency-card"
           onClick={() => navigate("/alerts")}
           style={{
             backgroundColor: "rgba(136, 19, 55, 0.28)",
@@ -378,6 +379,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
               </span>
             </div>
             <div
+              className="header-emergency-details"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -402,6 +404,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
           {/* System Online Badge */}
           <div
+            className="header-online-badge"
             style={{
               display: "flex",
               alignItems: "center",
@@ -428,7 +431,10 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
           </div>
 
           {/* Live Clock & Date */}
-          <div style={{ display: "flex", flexDirection: "column", textAlign: "center", lineHeight: "1.1", minWidth: "65px" }}>
+          <div
+            className="header-live-clock"
+            style={{ display: "flex", flexDirection: "column", textAlign: "center", lineHeight: "1.1", minWidth: "65px" }}
+          >
             <span style={{ fontSize: "0.98rem", fontWeight: "900", color: "#ffffff", fontFamily: "var(--font-mono, monospace)" }}>
               {clock.time}
             </span>
@@ -439,6 +445,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
 
           {/* Language Switcher Dropdown */}
           <div
+            className="header-language-box"
             style={{
               backgroundColor: "rgba(30, 41, 59, 0.75)",
               border: "1px solid rgba(56, 189, 248, 0.25)",
