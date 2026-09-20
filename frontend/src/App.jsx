@@ -29,7 +29,6 @@ const Notifications = lazy(() => import("./pages/Notifications"));
 const AIAssistant = lazy(() => import("./pages/Chatbot"));
 const VoiceAssistant = lazy(() => import("./pages/VoiceAssistant"));
 const DamageAssessment = lazy(() => import("./pages/DamageAssessment"));
-const Analytics = lazy(() => import("./pages/Analytics"));
 const SafetyGuides = lazy(() => import("./pages/SafetyGuides"));
 const Statistics = lazy(() => import("./pages/Statistics"));
 const IncidentReport = lazy(() => import("./pages/IncidentReport"));
@@ -269,9 +268,9 @@ export default function App() {
             <Route path="/voice-assistant" element={<AIAssistant initialTab="voice" />} />
             <Route path="/damage-assessment" element={<DamageAssessment />} />
 
-            {/* Analytics — both route names */}
-            <Route path="/analytics-reports" element={<Analytics />} />
-            <Route path="/analytics" element={<Analytics />} />
+            {/* Analytics & Reports merged into Statistics & Reports */}
+            <Route path="/analytics-reports" element={<Navigate to="/statistics?tab=analytics" replace />} />
+            <Route path="/analytics" element={<Navigate to="/statistics?tab=analytics" replace />} />
 
             <Route path="/safety-guides" element={<SafetyGuides />} />
             <Route path="/climate-chronicle" element={<ClimateChronicle />} />

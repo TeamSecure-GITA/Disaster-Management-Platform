@@ -72,9 +72,8 @@ const responseItems = [
 const intelligenceItems = [
   { key: "nav_ai_voice",          fallback: "AI & Voice Assistant",   icon: IconAi,         path: "/ai-assistant", badge: "AI/VOICE" },
   { key: "nav_ner_landslide",     fallback: "NER Monitor",            icon: IconLandslide,  path: "/ner-landslide-monitor", badge: "AI" },
-  { key: "nav_statistics",        fallback: "Risk Prediction",        icon: IconStatistics, path: "/statistics" },
+  { key: "nav_statistics",        fallback: "Statistics & Reports",   icon: IconStatistics, path: "/statistics", badge: "STATS/REP" },
   { key: "nav_climate_chronicle", fallback: "Disaster Intelligence",  icon: IconClimate,    path: "/climate-chronicle" },
-  { key: "nav_analytics",         fallback: "Analytics",              icon: IconAnalytics,  path: "/analytics-reports" },
 ];
 
 // ── 📡 CONNECTIVITY ──────────────────────────────────────────────────────────
