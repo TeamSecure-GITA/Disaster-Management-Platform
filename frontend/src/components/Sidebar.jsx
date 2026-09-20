@@ -56,7 +56,7 @@ const overviewItems = [
 
 // ── 2. TIER: CRISIS RESPONSE (Urgent / Emergency Dispatch) ────────────────────
 const responseItems = [
-  { key: "nav_sos",        fallback: "Emergency SOS Center",    icon: IconSos,        path: "/emergency-sos",     badge: "SOS", tier: "urgent", accent: "#dc2626" },
+  { key: "nav_sos",        fallback: "Emergency SOS",           icon: IconSos,        path: "/emergency-sos",     badge: "SOS", tier: "crisis", accent: "#ef4444" },
   { key: "nav_rescue",     fallback: "Rescue Centers",          icon: IconRescue,     path: "/rescue-centers",    badge: "FIELD", tier: "crisis", accent: "#10b981" },
   { key: "nav_evacuation", fallback: "Evacuation Planner",      icon: IconEvacuation, path: "/evacuation-planner", badge: "ROUTES", tier: "crisis", accent: "#38bdf8" },
   { key: "nav_damage",     fallback: "Damage & Resources",      icon: IconDamage,     path: "/damage-assessment", badge: null, tier: "crisis", accent: "#f59e0b" },

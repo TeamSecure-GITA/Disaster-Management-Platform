@@ -424,29 +424,39 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
 
         {/* ─────────────── RIGHT: Status, Clock, Language, Bell, User ─────────────── */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-          {/* Quick SOS Center Direct Action Button */}
+          {/* Quick 1-Tap Emergency SOS Beacon Shortcut */}
           <Link
             to="/emergency-sos"
             style={{
               display: "flex",
               alignItems: "center",
               gap: "6px",
-              backgroundColor: "#dc2626",
+              background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
               color: "#ffffff",
-              padding: "6px 12px",
-              borderRadius: "8px",
-              fontWeight: "900",
-              fontSize: "0.76rem",
+              padding: "5px 14px",
+              borderRadius: "999px",
+              fontSize: "0.74rem",
+              fontWeight: "800",
               textDecoration: "none",
-              border: "1px solid #f87171",
-              boxShadow: "0 0 14px rgba(220, 38, 38, 0.5)",
+              border: "1px solid rgba(251, 113, 133, 0.6)",
+              boxShadow: "0 0 14px rgba(225, 29, 72, 0.55)",
+              flexShrink: 0,
+              fontFamily: "var(--font-mono, monospace)",
               letterSpacing: "0.04em",
-              transition: "transform 0.15s, background-color 0.15s",
+              transition: "transform 0.15s ease, box-shadow 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.04)";
+              e.currentTarget.style.boxShadow = "0 0 20px rgba(225, 29, 72, 0.85)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 0 14px rgba(225, 29, 72, 0.55)";
             }}
             title="Open Emergency SOS Dispatch Center"
           >
-            <span style={{ fontSize: "0.9rem" }}>🚨</span>
-            <span>SOS CENTER</span>
+            <span>🚨</span>
+            <span>SOS BEACON</span>
           </Link>
 
           {/* System Online Badge */}
