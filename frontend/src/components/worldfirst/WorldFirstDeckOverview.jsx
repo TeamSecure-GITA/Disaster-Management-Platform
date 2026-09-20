@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Volume2, Radio, Activity, Mountain, ShieldAlert, 
+  Volume2, VolumeX, Radio, Activity, Mountain, ShieldAlert, 
   Send, RefreshCw, Play, Square, CheckCircle, AlertTriangle, 
   MapPin, Heart, Zap, Download, Eye, Compass, 
   Layers, ChevronRight, Cpu, ArrowUpRight, Clock, Info, 
@@ -26,16 +26,19 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
   const [sarCoherence, setSarCoherence] = useState(0.92);
   const [currentClock, setCurrentClock] = useState('21:42');
   const [selectedAlert, setSelectedAlert] = useState(null);
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState('EN');
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState('all');
+  const [audioEnabled, setAudioEnabled] = useState(true);
 
   // Capability sub-states
   const [chirpFreqMode, setChirpFreqMode] = useState('ultrasonic');
   const [isChirping, setIsChirping] = useState(false);
-  const [chirpSentLogs, setChirpSentLogs] = useState([]);
+  const [chirpSentLogs, setChirpSentLogs] = useState([
+    { id: 'PKT-9421', time: '1 min ago', mode: '19.2 kHz (Near-Ultrasonic)', hops: '3 Nodes', status: 'RELAYED_TO_BASE_CAMP' }
+  ]);
   const [quantumTarget, setQuantumTarget] = useState('Sector 4 Siang Valley');
   const [quantumEfficiency, setQuantumEfficiency] = useState(94.6);
   const [csiVitalRate, setCsiVitalRate] = useState(0.24); // 0.24 Hz = ~14.4 breaths/min
+  const [isOptimizingQuantum, setIsOptimizingQuantum] = useState(false);
 
   const audioContextRef = useRef(null);
 
@@ -54,12 +57,13 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
       setCurrentClock(d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
     };
     updateClock();
-    const timer = setInterval(updateClock, 10000);
+    const timer = setInterval(updateClock, 5000);
     return () => clearInterval(timer);
   }, []);
 
   // Web Audio chime helper
   const playSynthesizedTone = (freq = 880, duration = 0.25) => {
+    if (!audioEnabled) return;
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
@@ -104,7 +108,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
         clearInterval(interval);
         setTimeout(() => setIsSimulationActive(false), 2500);
       }
-    }, 200);
+    }, 180);
   };
 
   // Transmit acoustic chirp over sound waves
@@ -124,169 +128,273 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
           hops: '4 Repeater Nodes',
           status: 'RELAYED_TO_BASE_CAMP'
         },
-        ...prev
+        ...prev.slice(0, 4)
       ]);
-    }, 1200);
+    }, 1100);
   };
 
+  // Quantum optimization trigger
+  const handleQuantumOptimize = () => {
+    setIsOptimizingQuantum(true);
+    playSynthesizedTone(1080, 0.3);
+    setTimeout(() => {
+      setQuantumEfficiency(Number((92 + Math.random() * 6.5).toFixed(1)));
+      setIsOptimizingQuantum(false);
+    }, 800);
+  };
+
+  // Key Capabilities dataset with tags & categories
+  const capabilities = [
+    {
+      id: 'ner-monitor',
+      title: 'NER Landslide Monitor',
+      category: 'early-warning',
+      desc: 'Real-time slope acoustic micro-fracturing (20-300 kHz) & IoT incline telemetry.',
+      icon: Mountain,
+      status: 'LIVE',
+      statusColor: 'emerald',
+      metrics: '4 Pass Corridors Active'
+    },
+    {
+      id: 'ai-risk',
+      title: 'AI Geotechnical Risk',
+      category: 'early-warning',
+      desc: 'Edge-AI automated Landslide Susceptibility Index (LSI) & pore-pressure forecast.',
+      icon: Cpu,
+      status: 'AUTONOMOUS',
+      statusColor: 'cyan',
+      metrics: 'LSI 0.94 Critical Zone'
+    },
+    {
+      id: 'emergency-sos',
+      title: 'Decentralized SOS',
+      category: 'search-rescue',
+      desc: 'Single-tap distress beacon with GPS coordinate burst & nearest responder routing.',
+      icon: ShieldAlert,
+      status: 'EMERGENCY',
+      statusColor: 'rose',
+      metrics: 'Instant Mesh Broadcast'
+    },
+    {
+      id: 'smart-sensors',
+      title: 'Multi-Sensory IoT Sensors',
+      category: 'early-warning',
+      desc: 'Barometric flash-flood barometers, acoustic ground taps, and soil moisture probes.',
+      icon: Wifi,
+      status: 'LIVE',
+      statusColor: 'emerald',
+      metrics: '116 Active Field Probes'
+    },
+    {
+      id: 'digital-twin',
+      title: 'AI 3D Digital Twin',
+      category: 'quantum-ai',
+      desc: 'High-fidelity physics simulator for debris flow kinematics and structural failure.',
+      icon: Layers,
+      status: 'SIMULATOR',
+      statusColor: 'amber',
+      metrics: '60 FPS WebGL Engine'
+    },
+    {
+      id: 'zero-internet',
+      title: 'Zero-Internet Acoustic Mesh',
+      category: 'resilient-mesh',
+      desc: 'Offline sound-wave data transmission + parasitic RF backscatter across phones.',
+      icon: Radio,
+      status: 'ZERO-GRID',
+      statusColor: 'purple',
+      metrics: 'Air-Gapped P2P Mesh'
+    },
+    {
+      id: 'drone-analytics',
+      title: 'Drone Swarm Analytics',
+      category: 'search-rescue',
+      desc: 'Autonomous thermal camera feeds, survivor triage bounding, and 3D rubble mapping.',
+      icon: Compass,
+      status: 'LIVE',
+      statusColor: 'emerald',
+      metrics: '4 Swarm Drones Airborne'
+    },
+    {
+      id: 'quantum-optimization',
+      title: 'Quantum-Inspired Routing',
+      category: 'quantum-ai',
+      desc: 'Polynomial annealing evacuation routing and ML-KEM post-quantum encrypted logs.',
+      icon: Atom,
+      status: 'QUANTUM',
+      statusColor: 'purple',
+      metrics: '94.6% Flow Efficiency'
+    },
+    {
+      id: 'rf-csi',
+      title: 'Wi-Fi CSI Survivor Radar',
+      category: 'search-rescue',
+      desc: 'Through-rubble human breath & heartbeat detection via multipath RF Doppler shifts.',
+      icon: Radar,
+      status: 'PROTOTYPE',
+      statusColor: 'cyan',
+      metrics: '0.24 Hz Respiration Lock'
+    }
+  ];
+
+  const filteredCapabilities = activeCategoryFilter === 'all'
+    ? capabilities
+    : capabilities.filter(c => c.category === activeCategoryFilter);
+
   return (
-    <div className="w-full space-y-5">
-      {/* ── TOP ACTIVE EMERGENCY MARQUEE BAR ── */}
-      <div className="w-full bg-slate-950/90 border border-slate-800/80 rounded-2xl p-2.5 sm:p-3 flex flex-wrap items-center justify-between gap-3 shadow-xl backdrop-blur-md">
-        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs">
-          {/* Active Emergency Pill */}
-          <div className="flex items-center gap-2 bg-gradient-to-r from-rose-950/90 via-rose-900/60 to-rose-950/90 border border-rose-500/50 px-3 py-1.5 rounded-full text-rose-200 font-bold shadow-sm shadow-rose-950/50">
+    <div className="w-full space-y-5 deeptech-grid-pattern pb-8">
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      {/* ── 1. TACTICAL COMMAND BAR & TELEMETRY STATUS ── */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      <div className="w-full bg-slate-950/80 border border-cyan-500/25 rounded-2xl p-2.5 sm:p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+        {/* Glow ambient accent */}
+        <div className="absolute -top-10 -left-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs relative z-10">
+          {/* Active Emergency Status Pill */}
+          <div className="flex items-center gap-2 bg-gradient-to-r from-rose-950/90 via-rose-900/60 to-rose-950/90 border border-rose-500/60 px-3.5 py-1.5 rounded-full text-rose-200 font-bold shadow-lg shadow-rose-950/50">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
             </span>
-            <span className="tracking-wide uppercase text-[11px]">Active Emergency</span>
+            <span className="tracking-wide">CRISIS ACTIVE</span>
+            <span className="text-rose-400 font-mono text-[11px] font-black border-l border-rose-500/40 pl-2">
+              NH-10 LANDSLIDE
+            </span>
           </div>
 
-          {/* Quick Metrics Chips */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/90 border border-slate-800 rounded-lg text-slate-300 font-medium">
-            <Mountain className="w-3.5 h-3.5 text-rose-400" />
-            <span>{liveMetrics.villagesAffected} Villages Affected</span>
+          {/* Satellite Telemetry Sync */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-full text-slate-300 font-mono text-[11px]">
+            <Satellite className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+            <span>InSAR Sentinel-1:</span>
+            <span className="text-cyan-400 font-bold font-mono">0.92 Coherence</span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/90 border border-slate-800 rounded-lg text-slate-300 font-medium">
-            <Activity className="w-3.5 h-3.5 text-amber-400" />
-            <span>{liveMetrics.peopleExposed} People Exposed</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/90 border border-slate-800 rounded-lg text-slate-300 font-medium">
-            <Car className="w-3.5 h-3.5 text-orange-400" />
-            <span>{liveMetrics.roadsBlocked} Roads Blocked</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/90 border border-slate-800 rounded-lg text-slate-400 font-mono text-[11px]">
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
-            <span>Updated ({currentClock})</span>
+          {/* Mesh Network Health */}
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-full text-slate-300 font-mono text-[11px]">
+            <Radio className="w-3.5 h-3.5 text-emerald-400" />
+            <span>P2P LoRa Mesh:</span>
+            <span className="text-emerald-400 font-bold">114/116 Active</span>
           </div>
         </div>
 
-        {/* Right Status & Controls */}
-        <div className="flex items-center gap-2.5 text-xs ml-auto">
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-950/40 border border-emerald-500/30 rounded-full text-emerald-400 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>All Services Operational</span>
+        {/* Right Tools & Clock */}
+        <div className="flex items-center gap-2.5 text-xs relative z-10">
+          {/* Audio Synthesizer Tone Toggle */}
+          <button
+            onClick={() => setAudioEnabled(!audioEnabled)}
+            className={`p-1.5 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 px-2.5 ${
+              audioEnabled 
+                ? 'bg-cyan-950/60 border-cyan-500/40 text-cyan-300 shadow-sm' 
+                : 'bg-slate-900 border-slate-800 text-slate-500'
+            }`}
+            title={audioEnabled ? "Tactical Audio On" : "Audio Muted"}
+          >
+            {audioEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+            <span className="text-[10px] font-bold font-mono">{audioEnabled ? 'AUDIO ON' : 'MUTED'}</span>
+          </button>
+
+          {/* Digital Chronometer */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/90 border border-slate-800 rounded-lg text-slate-300 font-mono">
+            <Clock className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="font-bold text-white tracking-wider">{currentClock}</span>
+            <span className="text-[10px] text-slate-500">IST</span>
           </div>
 
-          {/* Language Selector */}
-          <div className="relative">
-            <button 
-              onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg font-bold transition-all cursor-pointer"
-            >
-              <span>{currentLang}</span>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
-            {langDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-32 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-1.5 z-50">
-                {['EN', 'HI', 'BN', 'AS', 'OD', 'MR'].map(l => (
-                  <button
-                    key={l}
-                    onClick={() => { setCurrentLang(l); setLangDropdownOpen(false); }}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold ${currentLang === l ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
-                  >
-                    {l} - {l === 'EN' ? 'English' : l === 'HI' ? 'हिन्दी' : l === 'BN' ? 'বাংলা' : l === 'AS' ? 'অসমীয়া' : l === 'OD' ? 'ଓଡ଼ିଆ' : 'मराठी'}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notifications Bell */}
+          {/* Active Alerts Bell */}
           <button 
             onClick={() => setIsIncidentModalOpen(true)}
-            className="p-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg text-slate-300 relative transition-all cursor-pointer"
-            title="Active Alerts"
+            className="p-2 bg-rose-950/40 border border-rose-500/40 hover:border-rose-400 rounded-lg text-rose-300 relative transition-all cursor-pointer shadow-md"
+            title="Active Incidents"
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-4 h-4 animate-bounce" />
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
               3
             </span>
           </button>
-
-          {/* Command Center Profile */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-white font-bold text-xs shadow-md">
-              <User className="w-4 h-4" />
-            </div>
-            <span className="hidden lg:inline text-xs font-bold text-slate-300">Command Center</span>
-          </div>
         </div>
       </div>
 
-      {/* ── MODE SWITCHER (OVERVIEW DECK vs 22 PROTOCOLS LAB) ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-        <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800/80">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-cyan-950/40">
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      {/* ── 2. MODE SWITCHER: OVERVIEW DECK vs 22 LAB PROTOCOLS ── */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950/70 border border-slate-800/80 p-2 rounded-2xl backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 text-white shadow-lg shadow-cyan-950/60 border border-cyan-400/40">
             <SlidersHorizontal className="w-4 h-4" />
-            <span>Command Overview Deck</span>
+            <span>Autonomous Command Overview Deck</span>
           </div>
 
           <button
             onClick={onSwitchToLab}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-all cursor-pointer group"
           >
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Deep-Tech Innovations Lab (22 Breakthroughs)</span>
-            <span className="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 text-[10px] font-mono rounded">NOVEL</span>
+            <Sparkles className="w-4 h-4 text-amber-400 group-hover:animate-spin" />
+            <span>Deep-Tech Innovations Lab (22 Protocols)</span>
+            <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-mono font-black rounded-full border border-amber-500/30">
+              22 NOVEL
+            </span>
           </button>
         </div>
 
         <button
           onClick={onSwitchToLab}
-          className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer px-3 py-1.5"
         >
-          <span>Explore All 22 Innovations</span>
+          <span>Open Full Hardware Simulators</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* ── MAIN GRID LAYOUT (8 COLS LEFT, 4 COLS RIGHT) ── */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      {/* ── 3. MAIN GRID (8 COLS LEFT, 4 COLS RIGHT) ── */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
         {/* ── LEFT MAIN SECTION (8 COLS) ── */}
         <div className="lg:col-span-8 space-y-5">
           
-          {/* 1. HERO BANNER CARD */}
-          <div className="bg-gradient-to-br from-slate-900/95 via-[#0c1626]/90 to-slate-950/95 border border-slate-800/90 rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-2xl">
-            {/* Ambient backdrop glow */}
-            <div className="absolute top-0 right-1/3 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-
+          {/* 3.1 HERO COMMAND DECK & 360° SAR RADAR SCANNER */}
+          <div className="deeptech-hero-card p-5 sm:p-7 relative">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              {/* Left Text & CTAs */}
+              
+              {/* Left Details & Interactive Triggers */}
               <div className="md:col-span-7 space-y-3.5">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-950/60 border border-cyan-500/40 rounded-full text-cyan-300 text-[11px] font-bold tracking-wider uppercase">
-                  <Sparkles className="w-3 h-3 text-cyan-400" />
-                  {heroSlide === 0 ? 'Next-Gen Disaster Response' : heroSlide === 1 ? 'Quantum & Subatomic Sensing' : 'Zero-Grid Resilience Mesh'}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-cyan-950/80 border border-cyan-400/50 rounded-full text-cyan-300 text-[11px] font-black tracking-wider uppercase shadow-inner">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                  <span>
+                    {heroSlide === 0 ? 'Autonomous Disaster Defense Architecture' : heroSlide === 1 ? 'Subatomic Cosmic Muon Tomography' : 'Zero-Grid Decentralized Survivability'}
+                  </span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-black text-white leading-tight tracking-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-black text-white leading-tight tracking-tight drop-shadow-md">
                   {heroSlide === 0 ? 'Deep-Tech Autonomous Disaster Suite' : heroSlide === 1 ? 'Subatomic Cosmic Muon Tomography' : 'Zero-Grid Decentralized Survivability'}
                 </h1>
 
-                <p className="text-cyan-400/90 font-medium text-xs sm:text-sm">
-                  {heroSlide === 0 ? 'AI-driven. Sensor-powered. Community-focused.' : heroSlide === 1 ? 'Sub-surface void tomography. Zero-satellite localization.' : 'Screen-to-screen data over sound. Ambient radio echoes.'}
+                <p className="text-cyan-400 font-bold text-xs sm:text-sm">
+                  {heroSlide === 0 
+                    ? 'AI-Driven · Sensor-Powered · Edge-First · Zero-Cloud Dependent' 
+                    : heroSlide === 1 
+                    ? 'Through-Rubble Human Void Tomography · Zero Optical Camera' 
+                    : 'Acoustic Sound FSK Packets · Ambient Parasitic RF Backscatter'}
                 </p>
 
-                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xl">
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
                   {heroSlide === 0 
-                    ? 'From early warning to rescue — one integrated platform.' 
+                    ? 'Unified military-grade disaster lifecycle platform — predicting slope fractures, deploying dynamic anti-herd evacuation, and orchestrating survivor rescue across blacked-out corridors.' 
                     : heroSlide === 1 
-                    ? 'Detect trapped human survivors under 30 meters of landslide debris without cameras, wires, or cell towers.' 
-                    : 'Self-healing acoustic & RF mesh ensuring continuous telemetry across blacked-out Himalayan corridors.'}
+                    ? 'Measures naturally occurring cosmic ray muon flux absorption to detect breathing survivors trapped beneath 30 meters of collapsed earth and debris.' 
+                    : 'Continuous self-healing mesh protocol operating without cellular signals, Internet gateways, or satellites using phone speakers, microphones, and screens.'}
                 </p>
 
                 {/* 3 Action Buttons */}
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <button
                     onClick={() => setIsMapModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-900/40 transition-all cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg shadow-cyan-900/40 transition-all cursor-pointer border border-cyan-400/30"
                   >
                     <MapPin className="w-4 h-4" />
-                    <span>View Live Map</span>
+                    <span>View Live SAR Radar Map</span>
                   </button>
 
                   <button
@@ -294,30 +402,30 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                       setSelectedCapability('ner-monitor');
                       setIsCapabilityModalOpen(true);
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/90 hover:bg-slate-800 active:scale-95 text-slate-200 border border-slate-700/80 hover:border-slate-600 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/90 hover:bg-slate-800 active:scale-95 text-slate-200 border border-slate-700/80 hover:border-cyan-500/40 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md"
                   >
                     <Layers className="w-4 h-4 text-cyan-400" />
-                    <span>Explore Features</span>
+                    <span>Inspect 9 Deep-Tech Tools</span>
                   </button>
 
                   <button
                     onClick={handleStartSimulation}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-950/40 transition-all cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-black rounded-xl shadow-lg shadow-emerald-950/50 transition-all cursor-pointer border border-emerald-400/40"
                   >
                     <Play className="w-4 h-4 fill-current" />
-                    <span>{isSimulationActive ? `Simulating Stage ${simulationStep + 1}...` : 'Start Demo'}</span>
+                    <span>{isSimulationActive ? `Simulating Stage ${simulationStep + 1}/6...` : 'Run 6-Stage Autonomous Demo'}</span>
                   </button>
                 </div>
 
-                {/* Carousel Dots */}
-                <div className="flex items-center gap-2 pt-3">
+                {/* Slide Switcher Dots */}
+                <div className="flex items-center gap-2 pt-2">
                   {[0, 1, 2].map((idx) => (
                     <button
                       key={idx}
                       onClick={() => setHeroSlide(idx)}
                       className={`transition-all rounded-full cursor-pointer ${
                         heroSlide === idx
-                          ? 'w-6 h-2 bg-cyan-400'
+                          ? 'w-7 h-2 bg-cyan-400 shadow-md shadow-cyan-400/50'
                           : 'w-2 h-2 bg-slate-700 hover:bg-slate-500'
                       }`}
                       title={`Slide ${idx + 1}`}
@@ -326,286 +434,132 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                 </div>
               </div>
 
-              {/* Right Aerial Mountain Terrain Graphic */}
-              <div className="md:col-span-5 relative h-56 sm:h-64 rounded-xl overflow-hidden border border-slate-700/60 group shadow-inner">
+              {/* Right: High-Tech Animated SAR Radar Display */}
+              <div className="md:col-span-5 relative h-60 sm:h-72 rounded-2xl overflow-hidden border border-cyan-500/30 bg-slate-950 shadow-2xl group">
                 <img
                   src="/images/mountain_corridor.jpg"
                   alt="Mountain Valley Highway Corridor"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover opacity-45 group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent pointer-events-none" />
 
-                {/* 360 Degree Radar Sweep Beam */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full border border-cyan-500/30 pointer-events-none">
-                  <div className="w-full h-full rounded-full border border-dashed border-cyan-400/20 animate-spin" style={{ animationDuration: '8s' }} />
-                  <div 
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: 'conic-gradient(from 0deg, rgba(6, 182, 212, 0.35) 0deg, rgba(6, 182, 212, 0) 60deg)',
-                      animation: 'spin 4s linear infinite'
-                    }}
-                  />
+                {/* Cybernetic HUD Frame & Bearing Degrees */}
+                <div className="absolute top-2 left-3 text-[10px] font-mono text-cyan-400/80 font-bold">
+                  GRID: 28.0642° N · 95.3318° E
+                </div>
+                <div className="absolute top-2 right-3 text-[10px] font-mono text-emerald-400/80 font-bold">
+                  RADAR: 360° IN-AIR
                 </div>
 
-                {/* Landslide Risk Critical Target Marker */}
-                <div className="absolute top-8 right-6 z-10">
-                  <div className="flex items-center gap-2 px-2.5 py-1 bg-rose-950/90 border border-rose-500/80 rounded-lg text-rose-200 text-[11px] font-bold shadow-lg shadow-rose-950/60 backdrop-blur-md">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 animate-bounce" />
-                    <div>
-                      <div>Landslide Risk</div>
-                      <div className="text-[9px] text-rose-400 font-mono">CRITICAL</div>
+                {/* Concentric Radar Rings */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full border border-cyan-400/20 pointer-events-none flex items-center justify-center">
+                  <div className="w-40 h-40 rounded-full border border-cyan-400/30 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-full border border-dashed border-cyan-400/40 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-md shadow-cyan-400/80" />
                     </div>
                   </div>
                 </div>
 
-                {/* Evacuation Route Tag */}
+                {/* Rotating Conic Radar Sweep Beam */}
+                <div 
+                  className="absolute inset-0 rounded-full pointer-events-none animate-radar-sweep"
+                  style={{
+                    background: 'conic-gradient(from 0deg, rgba(6, 182, 212, 0.45) 0deg, rgba(6, 182, 212, 0) 65deg)'
+                  }}
+                />
+
+                {/* Critical Hazard Blip with Sonar Ping */}
+                <div className="absolute top-1/3 right-8 z-10">
+                  <div className="relative">
+                    <div className="absolute -inset-2 rounded-full bg-rose-500/30 animate-ping" />
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-rose-950/90 border border-rose-500 rounded-lg text-rose-200 text-[10px] font-bold shadow-xl shadow-rose-950/80 backdrop-blur-md">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                      <div>
+                        <div>Landslide Danger</div>
+                        <div className="text-[8px] text-rose-400 font-mono">SECTOR A · CRITICAL</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Evacuation Safe Corridor Tag */}
                 <div className="absolute bottom-16 left-6 z-10">
-                  <div className="flex items-center gap-1.5 px-2 py-0.8 bg-emerald-950/80 border border-emerald-500/60 rounded-md text-emerald-300 text-[10px] font-bold shadow-md backdrop-blur-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span>Evacuation Route</span>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-950/90 border border-emerald-500/70 rounded-lg text-emerald-200 text-[10px] font-bold shadow-md backdrop-blur-md">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Safe Corridor B</span>
                   </div>
                 </div>
 
-                {/* Rescue Unit Tag */}
-                <div className="absolute bottom-4 right-6 z-10">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-950/90 border border-blue-500/80 rounded-lg text-blue-200 text-[10px] font-bold shadow-md backdrop-blur-sm">
-                    <Car className="w-3 h-3 text-blue-400" />
+                {/* Rescue Vehicle Tracker */}
+                <div className="absolute bottom-3 right-6 z-10">
+                  <div className="flex items-center gap-2 px-2.5 py-1 bg-blue-950/90 border border-blue-500/70 rounded-lg text-blue-200 text-[10px] font-bold shadow-md backdrop-blur-md">
+                    <Car className="w-3.5 h-3.5 text-blue-400" />
                     <div>
-                      <div>Rescue Unit</div>
-                      <div className="text-[9px] text-blue-300/80 font-mono">2.4 km away</div>
+                      <div>SDRF Fleet Unit #4</div>
+                      <div className="text-[8px] text-blue-300/80 font-mono">2.4 km · ETA 06m</div>
                     </div>
                   </div>
                 </div>
 
-                {/* Interactive Trigger Overlay */}
+                {/* Expand Overlay Button */}
                 <button
                   onClick={() => setIsMapModalOpen(true)}
-                  className="absolute inset-0 z-20 flex items-center justify-center opacity-0 hover:opacity-100 bg-slate-950/60 backdrop-blur-xs transition-opacity text-white text-xs font-bold gap-2 cursor-pointer"
+                  className="absolute inset-0 z-20 flex items-center justify-center opacity-0 hover:opacity-100 bg-slate-950/75 backdrop-blur-xs transition-opacity text-white text-xs font-black gap-2 cursor-pointer"
                 >
                   <Eye className="w-4 h-4 text-cyan-400" />
-                  <span>Expand Real-Time SAR Radar</span>
+                  <span>Launch Full Tactical Radar</span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* 2. KEY CAPABILITIES (3x3 GRID) */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Layers className="w-5 h-5 text-cyan-400" />
-                <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">Key Capabilities</h2>
-              </div>
-              <button
-                onClick={onSwitchToLab}
-                className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 font-bold transition-all cursor-pointer"
-              >
-                <span>View All Features</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* 3x3 Grid of 9 Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {/* 1. NER Monitor */}
-              <div 
-                onClick={() => { setSelectedCapability('ner-monitor'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-cyan-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Mountain className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30">
-                    LIVE
-                  </span>
+          {/* 3.2 6-STAGE AUTONOMOUS WORKFLOW SIMULATOR */}
+          <div className="deeptech-hud-card p-5 shadow-xl">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+                  <RefreshCw className={`w-4 h-4 ${isSimulationActive ? 'animate-spin' : ''}`} />
                 </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">NER Monitor</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Real-time landslide & hazard monitoring for NER region.
-                </p>
-              </div>
-
-              {/* 2. AI Risk Prediction */}
-              <div 
-                onClick={() => { setSelectedCapability('ai-risk'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-cyan-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Cpu className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30">
-                    LIVE
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">AI Risk Prediction</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  ML-powered early warning and risk assessment.
-                </p>
-              </div>
-
-              {/* 3. Emergency SOS */}
-              <div 
-                onClick={() => { setSelectedCapability('emergency-sos'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-rose-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-rose-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <ShieldAlert className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30">
-                    LIVE
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-rose-300 transition-colors">Emergency SOS</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  One-tap distress signal with GPS & nearest responder.
-                </p>
-              </div>
-
-              {/* 4. Smart Sensors */}
-              <div 
-                onClick={() => { setSelectedCapability('smart-sensors'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-cyan-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Wifi className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30">
-                    LIVE
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">Smart Sensors</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  IoT based environmental & structural monitoring.
-                </p>
-              </div>
-
-              {/* 5. Digital Twin */}
-              <div 
-                onClick={() => { setSelectedCapability('digital-twin'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-amber-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-amber-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Layers className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded-full border border-amber-500/30">
-                    PROTOTYPE
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Digital Twin</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Simulate disasters & test response strategies.
-                </p>
-              </div>
-
-              {/* 6. Zero-Internet Mode */}
-              <div 
-                onClick={() => { setSelectedCapability('zero-internet'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-purple-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-purple-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Radio className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-[10px] font-bold rounded-full border border-purple-500/30">
-                    RESEARCH
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Zero-Internet Mode</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Mesh + offline communication for no-network zones.
-                </p>
-              </div>
-
-              {/* 7. Drone Analytics */}
-              <div 
-                onClick={() => { setSelectedCapability('drone-analytics'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-cyan-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Compass className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30">
-                    LIVE
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">Drone Analytics</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Aerial surveillance & real-time assessment.
-                </p>
-              </div>
-
-              {/* 8. Quantum Optimization */}
-              <div 
-                onClick={() => { setSelectedCapability('quantum-optimization'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-purple-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-purple-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Atom className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-[10px] font-bold rounded-full border border-purple-500/30">
-                    RESEARCH
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Quantum Optimization</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Optimized resource & evacuation planning using quantum algorithms.
-                </p>
-              </div>
-
-              {/* 9. RF/SOS & Survivor Detection */}
-              <div 
-                onClick={() => { setSelectedCapability('rf-csi'); setIsCapabilityModalOpen(true); }}
-                className="bg-slate-950/80 border border-slate-800/90 hover:border-amber-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-lg hover:shadow-amber-950/30"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Radar className="w-4 h-4" />
-                  </div>
-                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded-full border border-amber-500/30">
-                    PROTOTYPE
-                  </span>
-                </div>
-                <h3 className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">RF/SOS & Survivor Detection</h3>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Camera-free detection using RF/CSI signals.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. OPERATIONAL FLOW (FROM ALERT TO RECOVERY) */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <RefreshCw className={`w-4 h-4 text-cyan-400 ${isSimulationActive ? 'animate-spin' : ''}`} />
                 <div>
-                  <h2 className="text-base font-bold text-white tracking-tight">Operational Flow</h2>
-                  <span className="text-[11px] text-slate-400">From Alert to Recovery</span>
+                  <h2 className="text-base font-black text-white tracking-tight">Autonomous Crisis Execution Flow</h2>
+                  <span className="text-[11px] text-slate-400">Integrated zero-human-bottleneck lifecycle</span>
                 </div>
               </div>
-              {isSimulationActive && (
-                <span className="px-2.5 py-1 bg-cyan-500/20 text-cyan-300 text-xs font-mono font-bold rounded-full animate-pulse border border-cyan-500/40">
-                  Stage {simulationStep + 1}/6 Active ({simulationProgress}%)
-                </span>
-              )}
+
+              <div className="flex items-center gap-3">
+                {isSimulationActive && (
+                  <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 text-xs font-mono font-bold rounded-full animate-pulse border border-cyan-500/40">
+                    Stage {simulationStep + 1}/6 Active ({simulationProgress}%)
+                  </span>
+                )}
+                <button
+                  onClick={handleStartSimulation}
+                  disabled={isSimulationActive}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  <span>{isSimulationActive ? 'Running...' : 'Run Simulation'}</span>
+                </button>
+              </div>
             </div>
 
-            {/* 6 Sequential Steps */}
+            {/* Glowing Pipeline Progress Track */}
+            <div className="w-full bg-slate-900/90 h-2.5 rounded-full overflow-hidden mb-4 border border-slate-800 relative">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-emerald-400 rounded-full transition-all duration-300 shadow-md shadow-cyan-400/50"
+                style={{ width: `${simulationProgress}%` }}
+              />
+            </div>
+
+            {/* 6 Interactive Step Nodes */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
               {[
-                { step: 1, title: '1. Detect', desc: 'Sensors & Satellite Data', icon: Wifi },
-                { step: 2, title: '2. Predict', desc: 'AI Risk Analysis & LSI', icon: Cpu },
-                { step: 3, title: '3. Alert', desc: 'Multi-Channel Notifications', icon: Bell },
-                { step: 4, title: '4. Evacuate', desc: 'Safe Routes & Shelters', icon: MapPin },
-                { step: 5, title: '5. Rescue', desc: 'Dispatch & On-ground Teams', icon: Car },
-                { step: 6, title: '6. Recover', desc: 'Assessment & Rebuild', icon: ShieldCheck }
+                { step: 1, title: '1. Detect', desc: 'IoT Sensors & InSAR', icon: Wifi },
+                { step: 2, title: '2. Predict', desc: 'Edge AI LSI Index', icon: Cpu },
+                { step: 3, title: '3. Alert', desc: 'Multi-Sensory P2P', icon: Bell },
+                { step: 4, title: '4. Evacuate', desc: 'Dynamic Anti-Herd', icon: MapPin },
+                { step: 5, title: '5. Rescue', desc: 'Drones & SDRF Fleet', icon: Car },
+                { step: 6, title: '6. Recover', desc: 'Blockchain Ledger', icon: ShieldCheck }
               ].map((st, idx) => {
                 const IconC = st.icon;
                 const isActive = simulationStep === idx;
@@ -616,219 +570,366 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                     key={st.step}
                     onClick={() => {
                       setSimulationStep(idx);
-                      playSynthesizedTone(700 + idx * 80, 0.15);
+                      playSynthesizedTone(700 + idx * 85, 0.15);
                     }}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer relative ${
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer relative overflow-hidden ${
                       isActive
-                        ? 'bg-cyan-950/80 border-cyan-400 shadow-lg shadow-cyan-950/50 ring-1 ring-cyan-400'
+                        ? 'bg-cyan-950/80 border-cyan-400 shadow-xl shadow-cyan-950/60 ring-2 ring-cyan-400/60'
                         : isPassed
                         ? 'bg-slate-950/90 border-emerald-500/50 text-emerald-300'
-                        : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center bg-slate-900 border border-slate-700 text-cyan-400">
+                    <div className={`w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center border ${
+                      isActive
+                        ? 'bg-cyan-500 text-slate-950 border-cyan-300 font-bold'
+                        : isPassed
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                        : 'bg-slate-900 border-slate-800 text-slate-400'
+                    }`}>
                       <IconC className="w-4 h-4" />
                     </div>
-                    <div className="text-xs font-bold text-white">{st.title}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5 leading-tight">{st.desc}</div>
+                    <div className="text-xs font-bold text-white leading-tight">{st.title}</div>
+                    <div className="text-[10px] text-slate-400 mt-1 leading-tight">{st.desc}</div>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* 4. BOTTOM 3 CARDS: TECH STACK, DEMO SCENARIO, SYSTEM HEALTH */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Card 1: Technology Stack */}
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Cpu className="w-4 h-4 text-cyan-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">Technology Stack</h3>
-                  </div>
-                  <button 
-                    onClick={() => setIsTechStackModalOpen(true)}
-                    className="text-[11px] text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer"
-                  >
-                    View All →
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {['React', 'Node.js', 'MongoDB', 'Socket.io', 'Python', 'TensorFlow', 'PostgreSQL', 'Leaflet (Maps)', 'Open-Meteo', 'Sentinel', 'ESP32 (IoT)', 'PWA'].map((tech) => (
-                    <span
-                      key={tech}
-                      onClick={() => setIsTechStackModalOpen(true)}
-                      className="px-2 py-0.8 bg-slate-950/80 border border-slate-800 hover:border-cyan-500/40 text-slate-300 text-[10px] font-mono rounded cursor-pointer transition-colors"
-                    >
-                      {tech}
+          {/* 3.3 LIVE HARDWARE TELEMETRY & SENSOR SIMULATION DECK */}
+          <div className="deeptech-hud-card p-5 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div className="flex items-center gap-2">
+                <Radio className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-base font-black text-white tracking-tight">Live Hardware Telemetry & Sensor Labs</h2>
+              </div>
+              <span className="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/30 font-bold">
+                ON-DEVICE WASM ENGINES
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Hardware 1: Ultrasonic & Audio Chirp Transmitter */}
+              <div className="bg-slate-950/80 border border-slate-800/90 rounded-xl p-4 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Volume2 className="w-4 h-4 text-purple-400" />
+                      <span>Acoustic Chirp Modem</span>
                     </span>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-500 font-mono">
-                Autonomous Edge & Microservices
-              </div>
-            </div>
+                    <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-[10px] font-mono rounded font-bold">
+                      ZERO-GRID
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Transmits emergency data packets through audio pulses between phones.
+                  </p>
 
-            {/* Card 2: Demo Scenario */}
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Play className="w-4 h-4 text-emerald-400 fill-current" />
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Demo Scenario</h3>
-                </div>
-                <p className="text-[11px] text-slate-400 mb-3">
-                  Simulate a real-world disaster scenario and see the platform in action.
-                </p>
+                  {/* Frequency Switcher */}
+                  <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-lg border border-slate-800 my-2.5">
+                    <button
+                      onClick={() => setChirpFreqMode('audible')}
+                      className={`flex-1 py-1 text-[10px] font-bold rounded cursor-pointer ${
+                        chirpFreqMode === 'audible' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      2.4 kHz Audible
+                    </button>
+                    <button
+                      onClick={() => setChirpFreqMode('ultrasonic')}
+                      className={`flex-1 py-1 text-[10px] font-bold rounded cursor-pointer ${
+                        chirpFreqMode === 'ultrasonic' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      19.2 kHz Ultrasonic
+                    </button>
+                  </div>
 
-                <div className="relative h-20 rounded-lg overflow-hidden border border-slate-800 mb-3 group">
-                  <img src="/images/mountain_corridor.jpg" alt="Simulation Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-slate-950/60 flex items-center justify-center">
-                    <div className="w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                  {/* Equalizer Waveform Animation */}
+                  <div className="flex items-end justify-center gap-1 h-8 bg-slate-900/90 rounded-lg p-1.5 border border-slate-800">
+                    {[12, 24, 8, 16, 28, 10, 22, 14, 26, 6, 18, 20].map((h, i) => (
+                      <div
+                        key={i}
+                        className="w-1 bg-cyan-400 rounded-full transition-all"
+                        style={{
+                          height: isChirping ? `${h}px` : '6px',
+                          transitionDuration: '0.2s',
+                          animation: isChirping ? `equalizer-dance ${0.4 + (i % 4) * 0.1}s infinite ease-in-out` : 'none'
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleTriggerChirp}
+                  disabled={isChirping}
+                  className="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-lg shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Radio className="w-3.5 h-3.5" />
+                  <span>{isChirping ? 'Transmitting Audio Wave...' : 'Transmit Acoustic Burst'}</span>
+                </button>
+              </div>
+
+              {/* Hardware 2: Wi-Fi CSI Survivor Vital Respiration Monitor */}
+              <div className="bg-slate-950/80 border border-slate-800/90 rounded-xl p-4 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Heart className="w-4 h-4 text-rose-400 animate-pulse" />
+                      <span>CSI Survivor Doppler</span>
+                    </span>
+                    <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-mono rounded font-bold">
+                      1 LOCATED
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Detects chest micro-movements of buried survivors via RF multipath distortion.
+                  </p>
+
+                  {/* Real-time Respiration Waveform Visualizer */}
+                  <div className="my-2.5 bg-slate-900/90 border border-slate-800 rounded-lg p-2 flex flex-col justify-between h-20 relative overflow-hidden">
+                    <div className="flex items-center justify-between text-[10px] font-mono">
+                      <span className="text-slate-400">Respiration Frequency:</span>
+                      <span className="text-rose-400 font-bold">14.4 breaths/min</span>
+                    </div>
+
+                    {/* Animated SVG Sine Wave */}
+                    <svg className="w-full h-8 overflow-visible" viewBox="0 0 100 20" preserveAspectRatio="none">
+                      <path
+                        d="M 0 10 Q 12.5 0, 25 10 T 50 10 T 75 10 T 100 10"
+                        fill="none"
+                        stroke="#f43f5e"
+                        strokeWidth="2"
+                        className="animate-pulse"
+                      />
+                    </svg>
+
+                    <div className="flex items-center justify-between text-[9px] font-mono text-slate-500">
+                      <span>Signal: -62 dBm</span>
+                      <span className="text-emerald-400 font-bold">Vitals Stable</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-xs font-bold text-white">NER Landslide Simulation</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">
-                  Rainfall → Risk → Alert → Evacuation → Rescue
+                <button
+                  onClick={() => {
+                    setSelectedCapability('rf-csi');
+                    setIsCapabilityModalOpen(true);
+                  }}
+                  className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Radar className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Inspect Doppler CSI Console</span>
+                </button>
+              </div>
+
+              {/* Hardware 3: Quantum-Gossip Mesh Optimizer */}
+              <div className="bg-slate-950/80 border border-slate-800/90 rounded-xl p-4 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Atom className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
+                      <span>Quantum Mesh Router</span>
+                    </span>
+                    <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-300 text-[10px] font-mono rounded font-bold">
+                      ANNEALING
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Calculates congestion-free evacuation flow and post-quantum encrypted packets.
+                  </p>
+
+                  <div className="my-2.5 bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400">Flow Efficiency:</span>
+                      <span className="text-emerald-400 font-bold font-mono text-xs">{quantumEfficiency}%</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-cyan-400 to-emerald-400 h-full rounded-full transition-all duration-500" 
+                        style={{ width: `${quantumEfficiency}%` }} 
+                      />
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-500 flex justify-between">
+                      <span>Latency: 8.4ms</span>
+                      <span>Hops: 3 Nodes</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleQuantumOptimize}
+                  disabled={isOptimizingQuantum}
+                  className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs rounded-lg shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isOptimizingQuantum ? 'animate-spin' : ''}`} />
+                  <span>{isOptimizingQuantum ? 'Optimizing...' : 'Recalculate Mesh Routes'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 3.4 KEY CAPABILITIES MATRIX (WITH CATEGORY FILTERS) */}
+          <div className="deeptech-hud-card p-5 shadow-xl space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <h2 className="text-base font-black text-white tracking-tight">Key Autonomous Capabilities</h2>
+                  <span className="text-[11px] text-slate-400">Pioneering zero-infrastructure disaster modules</span>
                 </div>
               </div>
 
-              <button
-                onClick={handleStartSimulation}
-                className="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>{isSimulationActive ? 'Simulation Running...' : 'Start Simulation'}</span>
-              </button>
-            </div>
-
-            {/* Card 3: System Health */}
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-emerald-400" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">System Health</h3>
-                  </div>
-                  <button 
-                    onClick={() => setIsHealthModalOpen(true)}
-                    className="text-[11px] text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer"
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                {[
+                  { id: 'all', label: 'All (9)' },
+                  { id: 'early-warning', label: 'Early Warning' },
+                  { id: 'resilient-mesh', label: 'Zero-Grid Comms' },
+                  { id: 'search-rescue', label: 'SAR & Vitals' },
+                  { id: 'quantum-ai', label: 'Quantum & AI' }
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setActiveCategoryFilter(f.id)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeCategoryFilter === f.id
+                        ? 'bg-cyan-500 text-slate-950 font-black shadow-sm'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    }`}
                   >
-                    View Details →
+                    {f.label}
                   </button>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                <div className="space-y-2">
-                  {[
-                    { name: 'API Services', status: 'Online', color: 'text-emerald-400' },
-                    { name: 'Database', status: 'Online', color: 'text-emerald-400' },
-                    { name: 'Socket.IO', status: 'Online', color: 'text-emerald-400' },
-                    { name: 'Satellite Feed', status: 'Online', color: 'text-emerald-400' },
-                    { name: 'Sensor Network', status: '114/116 Online', color: 'text-emerald-400' }
-                  ].map((srv) => (
-                    <div key={srv.name} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 text-slate-300">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                        <span>{srv.name}</span>
+            {/* 3x3 Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filteredCapabilities.map((cap) => {
+                const IconComp = cap.icon;
+                return (
+                  <div
+                    key={cap.id}
+                    onClick={() => {
+                      setSelectedCapability(cap.id);
+                      setIsCapabilityModalOpen(true);
+                      playSynthesizedTone(800, 0.15);
+                    }}
+                    className="bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/50 p-4 rounded-xl transition-all cursor-pointer group hover:shadow-xl hover:shadow-cyan-950/40 hover:-translate-y-1 relative"
+                  >
+                    <div className="flex items-start justify-between mb-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                        <IconComp className="w-4 h-4" />
                       </div>
-                      <span className={`text-[11px] font-mono font-bold ${srv.color}`}>{srv.status}</span>
+                      <span className={`px-2 py-0.5 text-[10px] font-black rounded-full border ${
+                        cap.statusColor === 'rose'
+                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+                          : cap.statusColor === 'emerald'
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                          : cap.statusColor === 'cyan'
+                          ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                          : cap.statusColor === 'purple'
+                          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                          : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                      }`}>
+                        {cap.status}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              <div className="mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-500 font-mono flex items-center justify-between">
-                <span>99.98% Uptime</span>
-                <span>Latency: 14ms</span>
-              </div>
+                    <h3 className="text-xs font-black text-white group-hover:text-cyan-300 transition-colors">
+                      {cap.title}
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                      {cap.desc}
+                    </p>
+
+                    <div className="mt-3 pt-2.5 border-t border-slate-900 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                      <span className="text-cyan-400/80 font-bold">{cap.metrics}</span>
+                      <span className="text-slate-400 group-hover:text-white flex items-center gap-0.5 font-sans font-bold">
+                        Inspect →
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
         {/* ── RIGHT RAIL COLUMN (4 COLS) ── */}
         <div className="lg:col-span-4 space-y-5">
+          
           {/* 1. ACTIVE EMERGENCY CARD */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
+          <div className="deeptech-hud-card p-5 shadow-2xl relative overflow-hidden border-rose-500/40">
+            <div className="flex items-center justify-between mb-3.5">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-rose-500 animate-pulse" />
-                <h2 className="text-base font-bold text-white tracking-tight">Active Emergency</h2>
+                <ShieldAlert className="w-5 h-5 text-rose-400 animate-pulse" />
+                <h2 className="text-base font-black text-white tracking-tight">Active Emergency Incident</h2>
               </div>
-              <button
-                onClick={() => setIsIncidentModalOpen(true)}
-                className="text-xs text-rose-400 hover:text-rose-300 font-bold cursor-pointer"
-              >
-                View All →
-              </button>
+              <span className="px-2 py-0.5 bg-rose-500 text-slate-950 font-black text-[10px] rounded uppercase">
+                DEFCON 1
+              </span>
             </div>
 
-            {/* Large Crimson Incident Card */}
-            <div className="bg-gradient-to-br from-rose-950/70 via-slate-950 to-slate-900 border border-rose-500/50 rounded-xl p-4 shadow-xl relative overflow-hidden">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center shadow-inner">
-                    <AlertTriangle className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-white">Landslide - NH-10</h3>
-                      <span className="px-2 py-0.2 bg-rose-500 text-slate-950 font-black text-[9px] rounded uppercase">
-                        CRITICAL
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-rose-400" />
-                      <span>Bargarh, Odisha / Sikkim Highway</span>
-                    </p>
-                  </div>
+            {/* Crimson Incident Card */}
+            <div className="bg-gradient-to-br from-rose-950/80 via-slate-950 to-slate-900 border border-rose-500/60 rounded-xl p-4 shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white">Landslide Rupture - NH-10</h3>
+                  <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3 text-rose-400" />
+                    <span>km 34.2 Siang Valley Highway</span>
+                  </p>
                 </div>
               </div>
 
               {/* 3 Metrics Box */}
-              <div className="grid grid-cols-3 gap-2 my-4 pt-3 border-t border-rose-500/20 text-center">
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+              <div className="grid grid-cols-3 gap-2 my-3.5 pt-3 border-t border-rose-500/20 text-center">
+                <div className="bg-slate-900/90 p-2 rounded-lg border border-slate-800">
                   <div className="text-base font-black text-rose-400">{liveMetrics.peopleExposed}</div>
-                  <div className="text-[10px] text-slate-400">Exposed</div>
+                  <div className="text-[10px] text-slate-400 font-medium">Exposed</div>
                 </div>
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+                <div className="bg-slate-900/90 p-2 rounded-lg border border-slate-800">
                   <div className="text-base font-black text-amber-400">{liveMetrics.villagesAffected}</div>
-                  <div className="text-[10px] text-slate-400">Villages</div>
+                  <div className="text-[10px] text-slate-400 font-medium">Villages</div>
                 </div>
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+                <div className="bg-slate-900/90 p-2 rounded-lg border border-slate-800">
                   <div className="text-base font-black text-orange-400">{liveMetrics.roadsBlocked}</div>
-                  <div className="text-[10px] text-slate-400">Roads</div>
+                  <div className="text-[10px] text-slate-400 font-medium">Blocked</div>
                 </div>
               </div>
 
-              {/* ETA */}
-              <div className="flex items-center justify-between text-xs px-3 py-2 bg-rose-950/40 rounded-lg border border-rose-500/30 mb-3">
-                <span className="text-slate-300 font-medium">ETA (Rescue Units)</span>
-                <span className="font-mono font-bold text-rose-400 flex items-center gap-1">
+              {/* ETA Bar */}
+              <div className="flex items-center justify-between text-xs px-3 py-2 bg-rose-950/50 rounded-lg border border-rose-500/40 mb-3 font-mono">
+                <span className="text-slate-300">Rescue Unit ETA:</span>
+                <span className="font-bold text-rose-400 flex items-center gap-1 font-mono">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>06 min</span>
+                  <span>06 min (SDRF)</span>
                 </span>
               </div>
 
               <button
                 onClick={() => setIsIncidentModalOpen(true)}
-                className="w-full py-2.5 bg-rose-600 hover:bg-rose-500 active:scale-98 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-950/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 bg-rose-600 hover:bg-rose-500 active:scale-98 text-white font-black text-xs rounded-xl shadow-lg shadow-rose-950/60 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <span>View Incident Details</span>
+                <span>View Incident Telemetry</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* 2. RECENT ALERTS CARD */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
+          {/* 2. RECENT DISASTER ALERTS */}
+          <div className="deeptech-hud-card p-5 shadow-xl space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-cyan-400" />
-                <h2 className="text-base font-bold text-white tracking-tight">Recent Alerts</h2>
+                <h2 className="text-base font-black text-white tracking-tight">Recent Threat Feed</h2>
               </div>
               <button
                 onClick={() => setIsIncidentModalOpen(true)}
@@ -838,32 +939,90 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
               </button>
             </div>
 
-            {/* Alert Feed List */}
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {[
                 { id: 'ALT-01', title: 'Landslide Risk - NH-10', severity: 'Critical', time: '21:42', dot: 'bg-rose-500', text: 'text-rose-400' },
-                { id: 'ALT-02', title: 'Heavy Rainfall Warning', severity: 'High', time: '20:17', dot: 'bg-orange-500', text: 'text-orange-400' },
-                { id: 'ALT-03', title: 'Road Blockage - Zone B', severity: 'Medium', time: '19:32', dot: 'bg-amber-500', text: 'text-amber-400' },
-                { id: 'ALT-04', title: 'Flood Alert - Sector 4', severity: 'Medium', time: '18:45', dot: 'bg-amber-500', text: 'text-amber-400' },
-                { id: 'ALT-05', title: 'Weather Update', severity: 'Low', time: '16:20', dot: 'bg-blue-500', text: 'text-blue-400' }
+                { id: 'ALT-02', title: 'Heavy Infiltration Monsoon', severity: 'High', time: '20:17', dot: 'bg-orange-500', text: 'text-orange-400' },
+                { id: 'ALT-03', title: 'Slope Creep Slip - Zone B', severity: 'Medium', time: '19:32', dot: 'bg-amber-500', text: 'text-amber-400' },
+                { id: 'ALT-04', title: 'River Surge - Sector 4', severity: 'Medium', time: '18:45', dot: 'bg-amber-500', text: 'text-amber-400' },
+                { id: 'ALT-05', title: 'Atmospheric Bending Update', severity: 'Info', time: '16:20', dot: 'bg-blue-500', text: 'text-blue-400' }
               ].map((alt) => (
                 <div
                   key={alt.id}
                   onClick={() => setSelectedAlert(alt)}
-                  className="p-3 bg-slate-950/80 border border-slate-800/90 hover:border-slate-700 rounded-xl transition-all cursor-pointer flex items-center justify-between"
+                  className="p-2.5 bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/40 rounded-xl transition-all cursor-pointer flex items-center justify-between group"
                 >
                   <div className="flex items-start gap-2.5">
-                    <span className={`w-2 h-2 rounded-full ${alt.dot} mt-1.5 flex-shrink-0`} />
+                    <span className={`w-2 h-2 rounded-full ${alt.dot} mt-1.5 flex-shrink-0 animate-pulse`} />
                     <div>
-                      <div className="text-xs font-bold text-white">{alt.title}</div>
-                      <div className={`text-[10px] font-semibold ${alt.text}`}>{alt.severity}</div>
+                      <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{alt.title}</div>
+                      <div className={`text-[10px] font-mono font-bold ${alt.text}`}>{alt.severity}</div>
                     </div>
                   </div>
-                  <span className="text-[11px] font-mono text-slate-500">{alt.time}</span>
+                  <span className="text-[10px] font-mono text-slate-500">{alt.time}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* 3. SYSTEM HEALTH & EDGE NETWORK DIAGNOSTICS */}
+          <div className="deeptech-hud-card p-5 shadow-xl space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-xs font-black text-white uppercase tracking-wider">Edge System Health</h3>
+              </div>
+              <button 
+                onClick={() => setIsHealthModalOpen(true)}
+                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer"
+              >
+                Diagnostics →
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {[
+                { name: 'Gateway WebSocket API', status: 'Online', val: '14ms', color: 'text-emerald-400' },
+                { name: 'P2P LoRa Mesh Stack', status: '114/116 Active', val: '99.8%', color: 'text-emerald-400' },
+                { name: 'Sentinel-1 SAR Feed', status: 'Orbit Sync', val: '0.92 InSAR', color: 'text-cyan-400' },
+                { name: 'Subatomic Muon Sensor', status: 'Calibrated', val: '28 CPM', color: 'text-emerald-400' }
+              ].map((srv) => (
+                <div key={srv.name} className="flex items-center justify-between text-xs p-1.5 rounded-lg bg-slate-950/60 border border-slate-900">
+                  <div className="flex items-center gap-2 text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span>{srv.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 font-mono">
+                    <span className="text-[10px] text-slate-500">{srv.val}</span>
+                    <span className={`text-[11px] font-bold ${srv.color}`}>{srv.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 border-t border-slate-800/80 text-[10px] text-slate-500 font-mono flex items-center justify-between">
+              <span>99.98% Autonomous Uptime</span>
+              <span className="text-cyan-400 font-bold">Zero Cloud Lock-in</span>
+            </div>
+          </div>
+
+          {/* 4. TECH ARCHITECTURE CHIP */}
+          <div className="deeptech-hud-card p-4 shadow-xl flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Cpu className="w-5 h-5 text-cyan-400" />
+              <div>
+                <div className="text-xs font-bold text-white">Full Deep-Tech Architecture</div>
+                <div className="text-[10px] text-slate-400 font-mono">React 18 · WASM · ML-KEM · P2P</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsTechStackModalOpen(true)}
+              className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-bold rounded-lg border border-slate-700 cursor-pointer"
+            >
+              View →
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -873,15 +1032,15 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 1. LIVE SAR RADAR & SATELLITE MAP MODAL */}
       {isMapModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-cyan-500/40 rounded-2xl w-full max-w-4xl p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-slate-900/95 border border-cyan-500/50 rounded-2xl w-full max-w-4xl p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/40">
                   <Radar className="w-6 h-6 animate-spin" style={{ animationDuration: '6s' }} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Live Synthetic Aperture Radar (SAR) Telemetry</h3>
+                  <h3 className="text-lg font-black text-white">Live Synthetic Aperture Radar (SAR) Telemetry</h3>
                   <p className="text-xs text-slate-400">Sentinel-1 InSAR Interferometry & Coherence Ground Slip Scanner</p>
                 </div>
               </div>
@@ -893,19 +1052,18 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
               </button>
             </div>
 
-            <div className="relative flex-1 min-h-[300px] rounded-xl overflow-hidden border border-slate-800 bg-slate-950 flex items-center justify-center">
+            <div className="relative flex-1 min-h-[320px] rounded-xl overflow-hidden border border-slate-800 bg-slate-950 flex items-center justify-center">
               <img src="/images/mountain_corridor.jpg" alt="Aerial SAR Overlay" className="w-full h-full object-cover opacity-60" />
               <div className="absolute inset-0 bg-cyan-950/30" />
 
               {/* Concentric radar rings */}
-              <div className="absolute w-72 h-72 rounded-full border border-cyan-400/30 pointer-events-none" />
-              <div className="absolute w-48 h-48 rounded-full border border-cyan-400/40 pointer-events-none" />
-              <div className="absolute w-24 h-24 rounded-full border border-cyan-400/60 pointer-events-none" />
+              <div className="absolute w-80 h-80 rounded-full border border-cyan-400/30 pointer-events-none" />
+              <div className="absolute w-52 h-52 rounded-full border border-cyan-400/40 pointer-events-none" />
+              <div className="absolute w-28 h-28 rounded-full border border-cyan-400/60 pointer-events-none" />
               <div 
-                className="absolute inset-0 rounded-full"
+                className="absolute inset-0 rounded-full animate-radar-sweep pointer-events-none"
                 style={{
-                  background: 'conic-gradient(from 0deg, rgba(6, 182, 212, 0.4) 0deg, rgba(6, 182, 212, 0) 90deg)',
-                  animation: 'spin 3s linear infinite'
+                  background: 'conic-gradient(from 0deg, rgba(6, 182, 212, 0.45) 0deg, rgba(6, 182, 212, 0) 90deg)'
                 }}
               />
 
@@ -949,8 +1107,8 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 2. CAPABILITY INSPECTOR MODAL */}
       {isCapabilityModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-slate-900/95 border border-slate-700 rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <Layers className="w-5 h-5 text-cyan-400" />
@@ -1071,10 +1229,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    playSynthesizedTone(1050, 0.3);
-                    setQuantumEfficiency(Number((92 + Math.random() * 6).toFixed(1)));
-                  }}
+                  onClick={handleQuantumOptimize}
                   className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl cursor-pointer"
                 >
                   Recalculate Optimal Quantum Flow Bypass
@@ -1114,7 +1269,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
               </div>
             )}
 
-            {/* Capability Tab 5: Drone Analytics / Emergency SOS / General fallback */}
+            {/* Capability Tab 5: Fallback */}
             {selectedCapability !== 'ner-monitor' && selectedCapability !== 'ai-risk' && selectedCapability !== 'zero-internet' && selectedCapability !== 'quantum-optimization' && selectedCapability !== 'rf-csi' && (
               <div className="space-y-4">
                 <p className="text-xs text-slate-300">
@@ -1147,7 +1302,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 3. ACTIVE INCIDENT MODAL (LANDSLIDE NH-10) */}
       {isIncidentModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-rose-500/50 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2 text-rose-400">
@@ -1197,7 +1352,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 4. TECHNOLOGY STACK MODAL */}
       {isTechStackModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
@@ -1215,7 +1370,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
             <div className="space-y-3 text-xs">
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
                 <div className="font-bold text-cyan-400 mb-1">Frontend & Client Runtime:</div>
-                <p className="text-slate-300">React 18, Vite, Progressive Web App (PWA) with Service Workers, Web Audio API, WebHID, Web Bluetooth, and WebAssembly (WASM).</p>
+                <p className="text-slate-300">React 19, Vite, Progressive Web App (PWA) with Service Workers, Web Audio API, WebHID, Web Bluetooth, and WebAssembly (WASM).</p>
               </div>
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
                 <div className="font-bold text-emerald-400 mb-1">Real-Time Telemetry & Mesh:</div>
@@ -1232,7 +1387,7 @@ export default function WorldFirstDeckOverview({ onSwitchToLab, onSelectTab }) {
 
       {/* 5. SYSTEM HEALTH DIAGNOSTICS MODAL */}
       {isHealthModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">

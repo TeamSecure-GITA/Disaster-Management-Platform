@@ -3151,4 +3151,40 @@ html[data-desktop-mode="true"] .app-main-content-scroll,
     linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
 }
+
+/* Responsive Dashboard Layout (Single Column on Mobile, 2/3 + 1/3 on Desktop) */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-main-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  }
+}
+
+/* Map Region Dim/Blur and Focus Transitions */
+.map-region-blur {
+  filter: blur(4px) grayscale(75%);
+  opacity: 0.15 !important;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  pointer-events: none !important;
+}
+
+.map-region-focused {
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.6));
+  opacity: 1 !important;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+/* Mobile Top-to-Bottom Frame Adjustments */
+@media (max-width: 640px) {
+  .app-main-content-scroll {
+    padding: 10px 8px 84px 8px !important;
+  }
+}
+
 

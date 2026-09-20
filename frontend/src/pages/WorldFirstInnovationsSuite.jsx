@@ -609,30 +609,31 @@ export default function WorldFirstInnovationsSuite() {
       ) : (
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Lab Header & Back to Deck button */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> WORLD-FIRST RESCUE PROTOCOLS
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-950/90 border border-cyan-500/20 backdrop-blur-xl p-6 shadow-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="absolute top-0 right-0 w-80 h-32 bg-cyan-500/10 blur-3xl pointer-events-none rounded-full" />
+            <div className="relative z-10">
+              <div className="flex flex-wrap items-center gap-2.5 mb-2.5">
+                <span className="px-3 py-1 bg-cyan-500/15 text-cyan-300 text-[11px] font-black uppercase tracking-widest rounded-full border border-cyan-400/30 flex items-center gap-1.5 shadow-sm shadow-cyan-500/20">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> 22 WORLD-FIRST INNOVATIONS LAB
                 </span>
-                <span className="px-3 py-1 bg-sky-500/20 text-sky-400 text-xs font-bold rounded-full border border-sky-500/30">
-                  ZERO-INFRASTRUCTURE RESILIENT
+                <span className="px-3 py-1 bg-emerald-500/15 text-emerald-300 text-[11px] font-bold uppercase tracking-wider rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> ZERO-GRID AUTONOMOUS
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight flex items-center gap-3">
-                Deep-Tech Innovations Lab (22 Breakthroughs)
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-slate-200 tracking-tight flex items-center gap-3">
+                Deep-Tech Research & Simulation Engines
               </h1>
-              <p className="text-slate-400 text-sm mt-1 max-w-3xl">
-                Select any breakthrough innovation below to inspect its live mathematical models, WASM simulators, and local on-device hardware engines.
+              <p className="text-slate-400 text-xs sm:text-sm mt-1.5 max-w-3xl leading-relaxed font-sans">
+                Access 22 patent-worthy crisis engineering breakthroughs with client-side WebAssembly, acoustic transducers, geomagnetic mesh vectors, and biometric sensor arrays.
               </p>
             </div>
 
             <button
               onClick={() => setViewMode('deck')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all self-start md:self-auto cursor-pointer"
+              className="relative z-10 flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-cyan-600/30 border border-cyan-400/40 transition-all transform hover:-translate-y-0.5 cursor-pointer self-start md:self-auto group"
             >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span>Back to Command Overview Deck</span>
+              <SlidersHorizontal className="w-4 h-4 transition-transform group-hover:rotate-180" />
+              <span>Command Deck Overview</span>
             </button>
           </div>
 
