@@ -32,6 +32,10 @@ class CleaningResult:
         default_factory=list
     )
 
+    @property
+    def cleaned_features(self) -> dict[str, Any]:
+        return self.data
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 

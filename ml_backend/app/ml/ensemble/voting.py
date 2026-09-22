@@ -20,17 +20,16 @@ class ModelVote:
     """Prediction supplied by one component model."""
 
     model_name: str
-    score: float
-
+    score: float = 0.0
     weight: float = 1.0
-
     risk_level: Optional[str] = None
-
     confidence: Optional[float] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    risk_score: Optional[float] = None
 
-    metadata: dict[str, Any] = field(
-        default_factory=dict
-    )
+    def __post_init__(self):
+        if self.risk_score is not None and self.score == 0.0:
+            self.score = self.risk_score
 
 
 @dataclass
@@ -38,8 +37,11 @@ class VotingPrediction:
     """Combined voting result."""
 
     status: str
-
     score: Optional[float]
+
+    @property
+    def risk_score(self) -> Optional[float]:
+        return self.score
 
     risk_level: Optional[str]
 
@@ -210,6 +212,9 @@ class VotingEnsemble:
                     "No model predictions were supplied."
                 ],
             )
+
+        if isinstance(predictions, (list, tuple)):
+            predictions = {v.model_name if hasattr(v, "model_name") else f"m_{i}": v for i, v in enumerate(predictions)}
 
         votes: list[ModelVote] = []
 

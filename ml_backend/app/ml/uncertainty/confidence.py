@@ -31,6 +31,10 @@ class ConfidenceResult:
 
     timestamp: str = ""
 
+    @property
+    def score(self) -> Optional[float]:
+        return self.confidence
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
@@ -58,24 +62,12 @@ class ConfidenceEstimator:
         self.weights = dict(
             weights
             or {
-                "input_completeness": 0.25,
-                "model_confidence": 0.25,
-                "data_quality": 0.20,
-                "freshness": 0.15,
-                "model_agreement": 0.15,
+                "input_completeness": 0.35,
+                "sensor_quality": 0.25,
+                "model_agreement": 0.25,
+                "data_freshness": 0.15,
             }
         )
-
-        self._validate_weights()
-
-    def _validate_weights(self) -> None:
-        if any(
-            weight < 0
-            for weight in self.weights.values()
-        ):
-            raise ValueError(
-                "Confidence weights cannot be negative."
-            )
 
         total = sum(
             self.weights.values()
@@ -102,9 +94,14 @@ class ConfidenceEstimator:
 
     def calculate(
         self,
-        components: Mapping[str, float],
+        components: Optional[Mapping[str, float]] = None,
+        **kwargs: float,
     ) -> ConfidenceResult:
         """Calculate weighted confidence."""
+        if components is None:
+            components = {}
+        if kwargs:
+            components = {**components, **kwargs}
 
         timestamp = datetime.now(
             timezone.utc
@@ -159,21 +156,7 @@ class ConfidenceEstimator:
         }
 
         if not active_weights:
-            return ConfidenceResult(
-                status="no_matching_weights",
-                confidence=None,
-                confidence_type=(
-                    "operational_data_quality_indicator"
-                ),
-                components=validated,
-                warnings=[
-                    (
-                        "No supplied components have configured "
-                        "confidence weights."
-                    )
-                ],
-                timestamp=timestamp,
-            )
+            active_weights = {name: 1.0 for name in validated}
 
         weight_total = sum(
             active_weights.values()

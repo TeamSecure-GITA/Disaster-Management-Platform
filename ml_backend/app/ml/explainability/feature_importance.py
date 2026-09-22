@@ -41,18 +41,24 @@ class FeatureImportanceAnalyzer:
     def __init__(
         self,
         model: Any = None,
-        feature_names: Optional[
-            Sequence[str]
-        ] = None,
+        feature_names: Optional[Sequence[str]] = None,
+        importances: Optional[Sequence[float]] = None,
     ) -> None:
         self.model = model
-
-        self.feature_names = list(
-            feature_names or []
-        )
+        self.feature_names = list(feature_names or [])
+        self.importances = list(importances) if importances is not None else None
 
     def analyze(self) -> FeatureImportanceResult:
         """Extract and rank feature importance."""
+        if self.importances is not None and self.feature_names:
+            imp_dict = dict(zip(self.feature_names, self.importances))
+            ranked = [{"feature": k, "importance": v} for k, v in sorted(imp_dict.items(), key=lambda x: x[1], reverse=True)]
+            return FeatureImportanceResult(
+                status="success",
+                importances=imp_dict,
+                ranked_features=ranked,
+                method="provided",
+            )
 
         if self.model is None:
             return FeatureImportanceResult(
