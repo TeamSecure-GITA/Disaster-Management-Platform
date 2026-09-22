@@ -11,9 +11,18 @@ Production:
 from __future__ import annotations
 
 import logging
+import sys
 import time
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+# Enable direct script execution (e.g. `python app/main.py`)
+if __package__ is None or __package__ == "":
+    backend_root = str(Path(__file__).resolve().parent.parent)
+    if backend_root not in sys.path:
+        sys.path.insert(0, backend_root)
+    __package__ = "app"
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
