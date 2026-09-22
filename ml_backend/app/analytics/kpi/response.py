@@ -69,8 +69,8 @@ class ResponseKPICalculator:
     @classmethod
     def calculate_from_records(
         cls,
-        dispatch_delays_min: Sequence[float],
-        arrival_delays_min: Sequence[float],
+        dispatch_delays_min: Sequence[Any] = (),
+        arrival_delays_min: Sequence[float] = (),
         detection_delays_min: Optional[Sequence[float]] = None,
         containment_delays_min: Optional[Sequence[float]] = None,
         resolution_delays_hr: Optional[Sequence[float]] = None,
@@ -82,6 +82,10 @@ class ResponseKPICalculator:
         """
         Calculate latency averages, SLA compliance, and grade response performance.
         """
+        if dispatch_delays_min and isinstance(dispatch_delays_min[0], dict):
+            arrival_delays_min = [float(r.get("arrival_delay", 0.0)) for r in dispatch_delays_min]
+            dispatch_delays_min = [float(r.get("dispatch_delay", 0.0)) for r in dispatch_delays_min]
+
         n_incidents = max(len(dispatch_delays_min), 1)
 
         def safe_mean(arr: Optional[Sequence[float]]) -> float:
