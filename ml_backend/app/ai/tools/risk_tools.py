@@ -17,16 +17,23 @@ class RiskTools:
 
     async def analyze_risk(
         self,
-        latitude: float,
-        longitude: float,
+        latitude: Any = None,
+        longitude: Optional[float] = None,
         hazard_type: Optional[str] = None,
         horizon_hours: Optional[int] = 24,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """
         Analyze risk at a geographic point.
 
         The returned risk score must come from the configured risk engine.
         """
+        if isinstance(latitude, dict):
+            data = latitude
+            latitude = data.get("latitude", 0.0)
+            longitude = data.get("longitude", 0.0)
+            hazard_type = data.get("hazard_type", hazard_type)
+            horizon_hours = data.get("horizon_hours", horizon_hours)
 
         if latitude is None or longitude is None:
             return {

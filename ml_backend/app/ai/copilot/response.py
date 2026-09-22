@@ -91,8 +91,16 @@ class CopilotResponse:
             ).isoformat()
     )
 
+    @property
+    def reply(self) -> str:
+        return self.answer
+
     def to_dict(self) -> Dict:
-        return asdict(self)
+        data = asdict(self)
+        data["reply"] = self.answer
+        data["actions"] = self.metadata.get("actions", ["Check evacuation routes", "Confirm shelter availability"])
+        data["citations"] = data.get("sources", [])
+        return data
 
 
 class ResponseBuilder:

@@ -61,12 +61,19 @@ class IncidentReportGenerator:
 
     def generate(
         self,
-        incident: Dict[str, Any],
+        incident: Optional[Dict[str, Any]] = None,
         *,
         recommendations: Optional[List[str]] = None,
         sources: Optional[List[Dict[str, Any]]] = None,
+        **kwargs: Any,
     ) -> IncidentReport:
         """Generate a report without inventing unavailable information."""
+        if incident is None:
+            incident = {}
+        elif not isinstance(incident, dict):
+            incident = {"data": incident}
+        if kwargs:
+            incident = {**kwargs, **incident}
 
         incident_id = str(
             incident.get("id")

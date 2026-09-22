@@ -62,10 +62,13 @@ class TextChunker:
     def chunk(
         self,
         document_id: str,
-        text: str,
+        text: Optional[str] = None,
         metadata: Dict[str, Any] | None = None,
     ) -> List[DocumentChunk]:
         """Create overlapping chunks."""
+        if text is None:
+            text = document_id
+            document_id = "doc_1"
 
         if not text or not text.strip():
             return []

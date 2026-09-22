@@ -21,6 +21,10 @@ class HallucinationCheckResult:
     unsupported_claims: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
 
+    @property
+    def is_consistent(self) -> bool:
+        return self.grounded
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "grounded": self.grounded,
@@ -56,8 +60,9 @@ class HallucinationChecker:
     def check(
         self,
         response: str,
-        *,
         evidence: Optional[List[Any]] = None,
+        *,
+        threshold: float = 0.5,
         citations: Optional[List[Dict[str, Any]]] = None,
         tool_results: Optional[List[Dict[str, Any]]] = None,
     ) -> HallucinationCheckResult:

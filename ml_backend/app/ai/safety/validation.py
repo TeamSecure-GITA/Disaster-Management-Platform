@@ -19,6 +19,10 @@ class SafetyValidationResult:
     sanitized_output: Optional[Any] = None
     requires_human_review: bool = False
 
+    @property
+    def is_safe(self) -> bool:
+        return self.valid
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "valid": self.valid,

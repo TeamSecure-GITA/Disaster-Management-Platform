@@ -116,9 +116,12 @@ class InMemoryRetriever:
         query: str,
         *,
         top_k: int = 5,
+        limit: Optional[int] = None,
         min_score: float = 0.0,
     ) -> List[RetrievalResult]:
         """Perform vector similarity search."""
+        if limit is not None:
+            top_k = limit
 
         if not query.strip():
             return []

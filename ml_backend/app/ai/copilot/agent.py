@@ -65,18 +65,18 @@ class CopilotContext:
     """Runtime context supplied to the Copilot."""
 
     user_id: Optional[str] = None
-
     location: Optional[Dict[str, Any]] = None
-
     organization: Optional[str] = None
-
     role: Optional[str] = None
-
+    user_role: Optional[str] = None
+    session_id: Optional[str] = None
     metadata: Dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+        if self.user_role and not self.role:
+            self.role = self.user_role
 
 
 class CopilotAgent:
@@ -599,3 +599,5 @@ class CopilotAgent:
             ),
             "llm_connected": False,
         }
+
+    process_message = process
