@@ -26,6 +26,7 @@ class IncidentType(str, enum.Enum):
     SLOPE_MOVEMENT = "slope_movement"
     SOIL_EROSION = "soil_erosion"
     FLOODING = "flooding"
+    FLOOD = "flooding"
     BRIDGE_DAMAGE = "bridge_damage"
     CYCLONE = "cyclone"
     EARTHQUAKE = "earthquake"
@@ -78,7 +79,8 @@ class Incident(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
         nullable=False,
         index=True,
     )
-    description: Mapped[str] = mapped_column(Text, nullable=False)
+    title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
 
     # Geolocation (WGS-84 decimal coordinates)
     latitude: Mapped[float] = mapped_column(Float, nullable=False, index=True)
