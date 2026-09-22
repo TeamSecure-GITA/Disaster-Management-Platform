@@ -30,6 +30,7 @@ class UnitType(str, Enum):
     HAZMAT_TEAM = "hazmat_team"
     MEDICAL_TEAM = "medical_team"
     VOLUNTEER_TEAM = "volunteer_team"
+    SEARCH_AND_RESCUE = "search_and_rescue"
 
 
 class UnitAvailabilityStatus(str, Enum):
