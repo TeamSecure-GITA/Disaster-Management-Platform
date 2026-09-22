@@ -1,18 +1,7 @@
 """
-Simulation package.
-
-Provides:
-- Digital twin state modeling
-- Multi-hazard scenario simulation
-- Population exposure/vulnerability modeling
-- Evacuation-flow simulation
-- What-if scenario analysis
+Disaster Management Platform ML & AI Backend Application.
 """
 
-from .digital_twin import *
-from .multi_hazard import *
-from .population import *
-from .evacuation import *
-from .what_if import *
+from __future__ import annotations
 
-__all__ = []
+__version__ = "1.0.0"
