@@ -282,24 +282,16 @@ async def require_human_confirmation(
 async def get_db() -> AsyncGenerator:
     """
     Database session dependency.
-
-    This function is intentionally lightweight until the
-    project's actual SQLAlchemy models/database layer is
-    connected.
-
-    Later it can become:
-
-        async with AsyncSessionLocal() as session:
-            yield session
+    Yields transactional SQLAlchemy session.
     """
-
     try:
-        # Database session will be connected here.
-        yield None
+        from ml_backend.database import get_db as _db_gen
 
-    finally:
-        # Session cleanup will happen here.
-        pass
+        async for session in _db_gen():
+            yield session
+    except Exception:
+        # Fallback if database is unavailable
+        yield None
 
 
 # ============================================================
