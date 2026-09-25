@@ -36,7 +36,11 @@ class BaseTrainer(ABC):
         X = df[features].fillna(0.0)
         y = df[target_col]
 
-        stratify = y if (self.config.stratify and len(y.unique()) > 1) else None
+        stratify = (
+            y
+            if (self.config.stratify and len(y.unique()) > 1 and y.value_counts().min() >= 2)
+            else None
+        )
 
         X_train, X_test, y_train, y_test = train_test_split(
             X,

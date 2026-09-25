@@ -33,20 +33,20 @@ class ReliabilityDiagram:
         for b in range(self.n_bins):
             mask = bin_assignments == b
             bin_size = int(np.sum(mask))
+            bin_acc = float(np.mean(yt[mask])) if bin_size > 0 else 0.0
+            bin_conf = float(np.mean(yp[mask])) if bin_size > 0 else float((bin_edges[b] + bin_edges[b + 1]) / 2.0)
+            diff = abs(bin_acc - bin_conf) if bin_size > 0 else 0.0
             if bin_size > 0:
-                bin_acc = float(np.mean(yt[mask]))
-                bin_conf = float(np.mean(yp[mask]))
-                diff = abs(bin_acc - bin_conf)
                 ece += (bin_size / total_samples) * diff
                 mce = max(mce, diff)
-                bin_details.append({
-                    "bin_index": b,
-                    "bin_range": [float(bin_edges[b]), float(bin_edges[b + 1])],
-                    "sample_count": bin_size,
-                    "accuracy": bin_acc,
-                    "confidence": bin_conf,
-                    "calibration_gap": diff,
-                })
+            bin_details.append({
+                "bin_index": b,
+                "bin_range": [float(bin_edges[b]), float(bin_edges[b + 1])],
+                "sample_count": bin_size,
+                "accuracy": bin_acc,
+                "confidence": bin_conf,
+                "calibration_gap": diff,
+            })
 
         return {
             "expected_calibration_error_ece": float(ece),
