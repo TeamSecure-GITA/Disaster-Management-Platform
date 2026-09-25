@@ -1,0 +1,28 @@
+model_name: "cyclone_intensity_model"
+hazard_type: "cyclone"
+version: "1.0.0"
+algorithm: "random_forest"
+target_column: "cyclone_category"
+
+feature_columns:
+  - wind_speed
+  - central_pressure
+  - storm_surge
+  - radius_max_wind
+  - movement_speed
+  - cyclone_power_dissipation_index
+  - vapor_pressure_deficit_kpa
+
+hyperparameters:
+  n_estimators: 100
+  max_depth: 10
+  min_samples_split: 4
+  random_state: 42
+
+calibration:
+  method: "isotonic_regression"
+  max_ece: 0.05
+
+evaluation:
+  metric: "f1"
+  threshold: 0.80

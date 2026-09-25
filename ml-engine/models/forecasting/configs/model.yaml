@@ -1,0 +1,26 @@
+model_name: "environmental_forecasting_model"
+hazard_type: "forecasting"
+version: "1.0.0"
+algorithm: "gradient_boosting"
+target_column: "target_value"
+
+feature_columns:
+  - water_level
+  - rainfall_mm
+  - rain_rolling_6h
+  - dew_point_c
+  - vapor_pressure_deficit_kpa
+  - hour_sin
+  - hour_cos
+  - month_sin
+  - month_cos
+
+hyperparameters:
+  n_estimators: 100
+  learning_rate: 0.05
+  max_depth: 5
+  random_state: 42
+
+evaluation:
+  metric: "rmse"
+  threshold: 5.0

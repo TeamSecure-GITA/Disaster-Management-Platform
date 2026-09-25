@@ -1,0 +1,30 @@
+model_name: "flood_hazard_model"
+hazard_type: "flood"
+version: "1.0.0"
+algorithm: "gradient_boosting"
+target_column: "flood_alert_level"
+
+feature_columns:
+  - water_level
+  - flow_rate
+  - discharge
+  - rainfall_mm
+  - rain_rolling_6h
+  - rain_rolling_24h
+  - flood_potential_index
+  - topographic_wetness_index
+
+hyperparameters:
+  n_estimators: 120
+  learning_rate: 0.08
+  max_depth: 6
+  subsample: 0.85
+  random_state: 42
+
+calibration:
+  method: "temperature_scaling"
+  max_ece: 0.05
+
+evaluation:
+  metric: "f1"
+  threshold: 0.82

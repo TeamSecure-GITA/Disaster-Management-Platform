@@ -1,0 +1,29 @@
+model_name: "sensor_anomaly_detector"
+hazard_type: "anomaly"
+version: "1.0.0"
+algorithm: "isolation_forest"
+target_column: "is_anomaly"
+
+feature_columns:
+  - temperature
+  - humidity
+  - pressure
+  - wind_speed
+  - rainfall_mm
+  - water_level
+  - soil_moisture
+  - pga
+
+hyperparameters:
+  n_estimators: 100
+  contamination: 0.05
+  max_samples: "auto"
+  random_state: 42
+
+calibration:
+  method: "reliability_diagram"
+  percentile_threshold: 95.0
+
+evaluation:
+  metric: "f1"
+  threshold: 0.85
