@@ -1,0 +1,59 @@
+intents:
+  general:
+    description: "General disaster preparedness information, platform FAQs, or greetings"
+    requires_tools: false
+    requires_confirmation: false
+
+  risk:
+    description: "Assess vulnerability and composite risk score for a location or sector"
+    requires_tools: true
+    default_tools: ["risk_prediction", "hazard_map"]
+    requires_confirmation: false
+
+  prediction:
+    description: "Predict likelihood, magnitude, and timeline of impending hazards"
+    requires_tools: true
+    default_tools: ["ml_prediction", "weather_forecast", "hazard_prediction"]
+    requires_confirmation: false
+
+  incident:
+    description: "Query, search, or create new disaster incident reports"
+    requires_tools: true
+    default_tools: ["incident_search", "incident_details", "incident_creation"]
+    requires_confirmation: false
+
+  shelter:
+    description: "Locate nearby shelters, verify occupancy, accessibility, and safety status"
+    requires_tools: true
+    default_tools: ["shelter_search", "shelter_capacity", "shelter_safety"]
+    requires_confirmation: false
+
+  responder:
+    description: "Locate, assign, and coordinate field rescue teams and first responders"
+    requires_tools: true
+    default_tools: ["responder_search", "responder_status", "responder_assignment"]
+    requires_confirmation: true
+
+  evacuation:
+    description: "Calculate optimal evacuation corridors and issue evacuation guidance"
+    requires_tools: true
+    default_tools: ["routing", "nearby", "evacuation"]
+    requires_confirmation: true
+
+  analytics:
+    description: "Retrieve platform KPIs, casualty trends, impact statistics, and dashboards"
+    requires_tools: true
+    default_tools: ["dashboard", "trends", "statistics", "kpi"]
+    requires_confirmation: false
+
+  simulation:
+    description: "Run digital twin and scenario simulations for hazard progression"
+    requires_tools: true
+    default_tools: ["digital_twin", "scenario", "what_if"]
+    requires_confirmation: false
+
+  emergency_action:
+    description: "Trigger broadcast alerts, siren activation, and critical resource dispatch"
+    requires_tools: true
+    default_tools: ["responder_dispatch", "incident_status"]
+    requires_confirmation: true
