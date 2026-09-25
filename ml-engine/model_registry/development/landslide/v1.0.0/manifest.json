@@ -1,0 +1,8 @@
+{
+  "hazard_type": "landslide",
+  "version": "1.0.0",
+  "packaged_at": "2026-09-25T04:31:36.268366+00:00",
+  "files": [
+    "model.yaml"
+  ]
+}

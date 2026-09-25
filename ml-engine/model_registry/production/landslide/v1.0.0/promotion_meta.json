@@ -1,0 +1,7 @@
+{
+  "hazard_type": "landslide",
+  "version": "1.0.0",
+  "promoted_from": "staging",
+  "promoted_to": "production",
+  "promoted_at": "2026-09-25T04:31:36.271088+00:00"
+}

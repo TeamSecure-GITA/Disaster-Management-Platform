@@ -1,0 +1,32 @@
+model_name: "landslide_risk_model"
+hazard_type: "landslide"
+version: "1.0.0"
+algorithm: "random_forest"
+target_column: "landslide_occurred"
+
+feature_columns:
+  - slope_angle
+  - rainfall_mm
+  - soil_moisture
+  - pore_pressure
+  - elevation
+  - displacement
+  - antecedent_precipitation_index
+  - gravitational_shear_index
+  - landslide_susceptibility_index
+
+hyperparameters:
+  n_estimators: 100
+  max_depth: 12
+  min_samples_split: 5
+  min_samples_leaf: 2
+  class_weight: "balanced"
+  random_state: 42
+
+calibration:
+  method: "temperature_scaling"
+  max_ece: 0.05
+
+evaluation:
+  metric: "f1"
+  threshold: 0.78
