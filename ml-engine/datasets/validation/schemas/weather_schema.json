@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WeatherObservationSchema",
+  "description": "Validation schema for atmospheric and meteorological telemetry observations",
+  "type": "object",
+  "required": ["timestamp", "latitude", "longitude", "temperature", "humidity"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 observation timestamp"
+    },
+    "latitude": {
+      "type": "number",
+      "minimum": -90.0,
+      "maximum": 90.0,
+      "description": "Geographic latitude in degrees"
+    },
+    "longitude": {
+      "type": "number",
+      "minimum": -180.0,
+      "maximum": 180.0,
+      "description": "Geographic longitude in degrees"
+    },
+    "temperature": {
+      "type": "number",
+      "minimum": -80.0,
+      "maximum": 70.0,
+      "description": "Ambient air temperature in Celsius"
+    },
+    "humidity": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 100.0,
+      "description": "Relative humidity percentage"
+    },
+    "pressure": {
+      "type": "number",
+      "minimum": 800.0,
+      "maximum": 1100.0,
+      "description": "Atmospheric pressure in hPa"
+    },
+    "wind_speed": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 400.0,
+      "description": "Wind speed in km/h or m/s"
+    },
+    "wind_direction": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 360.0,
+      "description": "Wind bearing angle in degrees"
+    },
+    "visibility": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Atmospheric horizontal visibility in km"
+    }
+  },
+  "additionalProperties": true
+}

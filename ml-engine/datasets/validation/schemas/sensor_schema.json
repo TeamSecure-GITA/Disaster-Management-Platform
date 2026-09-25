@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SensorTelemetrySchema",
+  "description": "Validation schema for ground-based IoT telemetry including river, soil, geotechnical, and seismic sensors",
+  "type": "object",
+  "required": ["timestamp", "latitude", "longitude"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 sensor telemetry timestamp"
+    },
+    "sensor_id": {
+      "type": "string",
+      "description": "Unique identifier for the telemetry station or sensor device"
+    },
+    "latitude": {
+      "type": "number",
+      "minimum": -90.0,
+      "maximum": 90.0,
+      "description": "Geographic latitude in degrees"
+    },
+    "longitude": {
+      "type": "number",
+      "minimum": -180.0,
+      "maximum": 180.0,
+      "description": "Geographic longitude in degrees"
+    },
+    "water_level": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 50.0,
+      "description": "River gauge stage or water height in meters"
+    },
+    "flow_rate": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Water velocity in m/s"
+    },
+    "discharge": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Volumetric water discharge in m3/s"
+    },
+    "soil_moisture": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 100.0,
+      "description": "Volumetric soil moisture percentage"
+    },
+    "soil_temperature": {
+      "type": "number",
+      "minimum": -40.0,
+      "maximum": 80.0,
+      "description": "Soil temperature in Celsius"
+    },
+    "slope_angle": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 90.0,
+      "description": "Slope inclination angle in degrees"
+    },
+    "displacement": {
+      "type": "number",
+      "description": "InSAR or borehole ground displacement in mm"
+    },
+    "pore_pressure": {
+      "type": "number",
+      "description": "Pore water pressure in kPa"
+    },
+    "factor_of_safety": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Geotechnical slope stability factor of safety"
+    },
+    "crack_width": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Structural or surface crack aperture width in mm"
+    },
+    "magnitude": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 10.0,
+      "description": "Seismic moment magnitude"
+    },
+    "depth_km": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 800.0,
+      "description": "Earthquake focal depth in kilometers"
+    },
+    "pga": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Peak ground acceleration in g or m/s2"
+    },
+    "pgv": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Peak ground velocity in cm/s"
+    }
+  },
+  "additionalProperties": true
+}
