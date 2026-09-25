@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-09-25T04:17:52.382795+00:00",
+  "top_features_by_hazard": {
+    "landslide": [
+      {
+        "feature": "soil_moisture",
+        "importance": 0.16751896147964357,
+        "relative_importance_pct": 16.75,
+        "cumulative_importance_pct": 16.75
+      },
+      {
+        "feature": "gravitational_shear_index",
+        "importance": 0.13085041645418666,
+        "relative_importance_pct": 13.09,
+        "cumulative_importance_pct": 29.84
+      },
+      {
+        "feature": "antecedent_precipitation_index",
+        "importance": 0.11979889702475635,
+        "relative_importance_pct": 11.98,
+        "cumulative_importance_pct": 41.82
+      },
+      {
+        "feature": "displacement",
+        "importance": 0.11918971489367167,
+        "relative_importance_pct": 11.92,
+        "cumulative_importance_pct": 53.74
+      },
+      {
+        "feature": "rainfall_mm",
+        "importance": 0.10582867335528803,
+        "relative_importance_pct": 10.58,
+        "cumulative_importance_pct": 64.32
+      }
+    ],
+    "flood": [
+      {
+        "feature": "flow_rate",
+        "importance": 0.23394063030403595,
+        "relative_importance_pct": 23.39,
+        "cumulative_importance_pct": 23.39
+      },
+      {
+        "feature": "discharge",
+        "importance": 0.16751610928940802,
+        "relative_importance_pct": 16.75,
+        "cumulative_importance_pct": 40.14
+      },
+      {
+        "feature": "rainfall_mm",
+        "importance": 0.1299114238656792,
+        "relative_importance_pct": 12.99,
+        "cumulative_importance_pct": 53.13
+      },
+      {
+        "feature": "rain_rolling_24h",
+        "importance": 0.11006147171069437,
+        "relative_importance_pct": 11.01,
+        "cumulative_importance_pct": 64.14
+      },
+      {
+        "feature": "water_level",
+        "importance": 0.10489462238671705,
+        "relative_importance_pct": 10.49,
+        "cumulative_importance_pct": 74.63
+      }
+    ]
+  }
+}

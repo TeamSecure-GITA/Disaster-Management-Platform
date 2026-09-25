@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp_landslide_001",
+  "timestamp": "2026-09-25T04:17:51.090965+00:00",
+  "model_name": "landslide_risk_model",
+  "dataset": "datasets/test/landslide/test_landslide.csv",
+  "samples": 100,
+  "parameters": {
+    "model_name": "landslide_rf",
+    "hazard_type": "landslide",
+    "algorithm": "random_forest",
+    "target_column": "landslide_occurred",
+    "feature_columns": [],
+    "hyperparameters": {
+      "n_estimators": 80,
+      "max_depth": 8,
+      "class_weight": "balanced",
+      "random_state": 42
+    },
+    "test_size": 0.25,
+    "random_state": 42,
+    "stratify": true,
+    "cv_folds": 5,
+    "eval_metric": "roc_auc",
+    "checkpoint_dir": "checkpoints",
+    "artifact_dir": "artifacts"
+  },
+  "train_status": "COMPLETED",
+  "metrics": {
+    "accuracy": 0.8,
+    "precision": 0.64,
+    "recall": 0.8,
+    "f1": 0.7111111111111111,
+    "roc_auc": 0.21000000000000002
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp_cyclone_001",
+  "timestamp": "2026-09-25T04:17:52.116363+00:00",
+  "model_name": "cyclone_intensity_model",
+  "dataset": "datasets/test/cyclone/test_cyclone.csv",
+  "samples": 100,
+  "parameters": {
+    "model_name": "cyclone_rf",
+    "hazard_type": "cyclone",
+    "algorithm": "random_forest",
+    "target_column": "cyclone_category",
+    "feature_columns": [],
+    "hyperparameters": {
+      "n_estimators": 80,
+      "max_depth": 8,
+      "random_state": 42
+    },
+    "test_size": 0.25,
+    "random_state": 42,
+    "stratify": true,
+    "cv_folds": 5,
+    "eval_metric": "roc_auc",
+    "checkpoint_dir": "checkpoints",
+    "artifact_dir": "artifacts"
+  },
+  "train_status": "COMPLETED",
+  "metrics": {
+    "accuracy": 0.16,
+    "precision": 0.13244444444444445,
+    "recall": 0.16,
+    "f1": 0.14077922077922078
+  }
+}

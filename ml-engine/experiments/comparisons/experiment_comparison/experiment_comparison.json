@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-09-25T04:17:52.383388+00:00",
+  "total_experiments": 5,
+  "hazards_covered": [
+    "landslide",
+    "flood",
+    "cyclone",
+    "anomaly",
+    "forecasting"
+  ],
+  "status": "ALL_SUCCESS"
+}

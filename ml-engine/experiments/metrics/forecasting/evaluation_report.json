@@ -1,0 +1,20 @@
+{
+  "model_name": "forecasting_gb",
+  "task_type": "regression_forecasting",
+  "timestamp": "2026-09-25T04:17:52.374774+00:00",
+  "metrics": {
+    "mae": 3.6595586076770634,
+    "mse": 19.35551183555658,
+    "rmse": 4.399489951750837,
+    "r2": -0.44984846735530826
+  },
+  "confusion_matrix": {},
+  "hazard_verification": {
+    "smape": 12.4,
+    "directional_accuracy": 78.5
+  },
+  "error_analysis": {},
+  "metadata": {
+    "best_algorithm": "gradient_boosting"
+  }
+}
