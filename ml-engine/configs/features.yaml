@@ -1,0 +1,112 @@
+version: "1.0.0"
+description: "Feature Engineering and Domain Hazard Feature Extraction Configuration"
+
+temporal:
+  enabled: true
+  timestamp_column: "timestamp"
+  extract_calendar: true
+  cyclical_encoding: true
+  cyclical_periods:
+    hour: 24.0
+    month: 12.0
+  monsoon_season_months: [6, 7, 8, 9]
+
+spatial:
+  enabled: true
+  lat_col: "latitude"
+  lon_col: "longitude"
+  spherical_projection_3d: true
+  reference_landmarks:
+    bay_of_bengal_coast: [19.8, 85.8]
+    himalayan_front: [27.5, 88.5]
+    gangetic_basin: [25.6, 85.1]
+
+rainfall:
+  enabled: true
+  decay_factor: 0.85
+  rolling_windows_hours: [3, 6, 24, 72]
+  heavy_rain_threshold_mm_h: 15.0
+  extreme_rain_threshold_mm_h: 35.0
+
+soil:
+  enabled: true
+  field_capacity_pct: 35.0
+  saturation_point_pct: 50.0
+  drought_moisture_threshold_pct: 10.0
+
+geotechnical:
+  enabled: true
+  internal_friction_angle_deg: 30.0
+  critical_factor_of_safety: 1.2
+  displacement_velocity_window: 3
+
+seismic:
+  enabled: true
+  strong_motion_pga_threshold_g: 0.15
+  major_earthquake_magnitude: 6.0
+  hypocenter_depth_decay: 10.0
+
+weather:
+  enabled: true
+  vapor_pressure_deficit: true
+  wind_vector_decomposition: true
+  low_pressure_threshold_hpa: 1005.0
+
+terrain:
+  enabled: true
+  aspect_decomposition: true
+  topographic_wetness_index: true
+  steep_slope_threshold_deg: 25.0
+
+hazard_compounds:
+  enabled: true
+  landslide_factors: ["slope_angle", "rainfall_mm", "soil_moisture"]
+  flood_factors: ["water_level", "flow_rate", "rainfall_mm"]
+  fire_factors: ["temperature", "humidity", "wind_speed"]
+  cyclone_factors: ["wind_speed", "storm_surge"]
+
+feature_sets:
+  landslide:
+    - slope_angle
+    - rainfall_mm
+    - soil_moisture
+    - pore_pressure
+    - elevation
+    - displacement
+    - antecedent_precipitation_index
+    - gravitational_shear_index
+    - landslide_susceptibility_index
+    - aspect_northness
+    - is_steep_slope
+
+  flood:
+    - water_level
+    - flow_rate
+    - discharge
+    - rainfall_mm
+    - rain_rolling_6h
+    - rain_rolling_24h
+    - flood_potential_index
+    - topographic_wetness_index
+    - rain_intensity_mm_per_h
+
+  cyclone:
+    - wind_speed
+    - central_pressure
+    - storm_surge
+    - radius_max_wind
+    - movement_speed
+    - cyclone_power_dissipation_index
+    - vapor_pressure_deficit_kpa
+    - wind_u
+    - wind_v
+
+  anomaly:
+    - temperature
+    - humidity
+    - pressure
+    - wind_speed
+    - rainfall_mm
+    - water_level
+    - soil_moisture
+    - pga

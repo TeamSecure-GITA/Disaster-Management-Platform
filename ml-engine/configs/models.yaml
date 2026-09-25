@@ -1,0 +1,157 @@
+version: "1.0.0"
+description: "Model Catalog, Lifecycle Registry, and Deployment Governance Configuration"
+
+registry:
+  root_dir: "model_registry"
+  stages:
+    development: "model_registry/development"
+    staging: "model_registry/staging"
+    production: "model_registry/production"
+
+catalog:
+  landslide:
+    name: "landslide_risk_model"
+    version: "1.0.0"
+    domain: "geological"
+    task: "binary_classification"
+    framework: "scikit-learn"
+    format: "joblib"
+    checkpoint_path: "models/landslide/checkpoints/model.joblib"
+    artifact_dir: "models/landslide/artifacts"
+    config_file: "models/landslide/configs/model.yaml"
+    sla:
+      max_latency_ms: 50
+      max_memory_mb: 256
+    inputs:
+      - name: slope_angle
+        type: float
+        unit: "degrees"
+      - name: rainfall_mm
+        type: float
+        unit: "mm"
+      - name: soil_moisture
+        type: float
+        unit: "%"
+      - name: pore_pressure
+        type: float
+        unit: "kPa"
+      - name: displacement
+        type: float
+        unit: "mm"
+    outputs:
+      - name: risk_score
+        type: float
+        range: [0.0, 1.0]
+      - name: risk_level
+        type: string
+        classes: ["LOW", "MODERATE", "HIGH", "CRITICAL"]
+
+  flood:
+    name: "flood_hazard_model"
+    version: "1.0.0"
+    domain: "hydrological"
+    task: "multiclass_classification"
+    framework: "scikit-learn"
+    format: "joblib"
+    checkpoint_path: "models/flood/checkpoints/model.joblib"
+    artifact_dir: "models/flood/artifacts"
+    config_file: "models/flood/configs/model.yaml"
+    sla:
+      max_latency_ms: 50
+      max_memory_mb: 256
+    inputs:
+      - name: water_level
+        type: float
+        unit: "meters"
+      - name: flow_rate
+        type: float
+        unit: "m3/s"
+      - name: rainfall_mm
+        type: float
+        unit: "mm"
+    outputs:
+      - name: alert_level
+        type: string
+        classes: ["NORMAL", "ADVISORY", "WARNING", "EVACUATION"]
+
+  cyclone:
+    name: "cyclone_intensity_model"
+    version: "1.0.0"
+    domain: "meteorological"
+    task: "multiclass_classification"
+    framework: "scikit-learn"
+    format: "joblib"
+    checkpoint_path: "models/cyclone/checkpoints/model.joblib"
+    artifact_dir: "models/cyclone/artifacts"
+    config_file: "models/cyclone/configs/model.yaml"
+    sla:
+      max_latency_ms: 60
+      max_memory_mb: 256
+    inputs:
+      - name: wind_speed
+        type: float
+        unit: "km/h"
+      - name: central_pressure
+        type: float
+        unit: "hPa"
+      - name: storm_surge
+        type: float
+        unit: "meters"
+    outputs:
+      - name: category
+        type: int
+        range: [1, 5]
+
+  anomaly:
+    name: "sensor_anomaly_detector"
+    version: "1.0.0"
+    domain: "iot_telemetry"
+    task: "unsupervised_anomaly_detection"
+    framework: "scikit-learn"
+    format: "joblib"
+    checkpoint_path: "models/anomaly/checkpoints/model.joblib"
+    artifact_dir: "models/anomaly/artifacts"
+    config_file: "models/anomaly/configs/model.yaml"
+    sla:
+      max_latency_ms: 20
+      max_memory_mb: 128
+    inputs:
+      - name: sensor_features
+        type: array
+        description: "Vector of standardized continuous telemetry readings"
+    outputs:
+      - name: is_anomaly
+        type: boolean
+      - name: anomaly_score
+        type: float
+
+  forecasting:
+    name: "environmental_forecasting_model"
+    version: "1.0.0"
+    domain: "time_series"
+    task: "regression"
+    framework: "scikit-learn"
+    format: "joblib"
+    checkpoint_path: "models/forecasting/checkpoints/model.joblib"
+    artifact_dir: "models/forecasting/artifacts"
+    config_file: "models/forecasting/configs/model.yaml"
+    sla:
+      max_latency_ms: 40
+      max_memory_mb: 256
+    inputs:
+      - name: lag_features
+        type: array
+      - name: temporal_features
+        type: array
+    outputs:
+      - name: forecasted_value
+        type: float
+      - name: prediction_interval_95
+        type: array
+        items: float
+
+governance:
+  auto_promotion: false
+  require_calibration_audit: true
+  require_explainability_report: true
+  allowed_frameworks: ["scikit-learn", "xgboost", "lightgbm", "pytorch"]

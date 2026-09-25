@@ -1,0 +1,39 @@
+version: "1.0.0"
+description: "Probability Calibration and Reliability Diagnostics Configuration"
+
+methods:
+  temperature_scaling:
+    initial_temperature: 1.0
+    bounds: [0.05, 10.0]
+    optimizer: "bounded"
+    loss: "negative_log_likelihood"
+
+  platt_scaling:
+    solver: "lbfgs"
+    c_parameter: 1.0
+    max_iter: 100
+
+  isotonic_regression:
+    out_of_bounds: "clip"
+    y_min: 0.0
+    y_max: 1.0
+
+reliability_diagram:
+  n_bins: 10
+  strategy: "uniform" # options: uniform, quantile
+  confidence_level: 0.95
+
+calibration_targets:
+  max_expected_calibration_error_ece: 0.05
+  max_maximum_calibration_error_mce: 0.15
+  max_brier_score: 0.12
+
+defaults_per_hazard:
+  landslide: "temperature_scaling"
+  flood: "temperature_scaling"
+  cyclone: "isotonic_regression"
+  multi_hazard: "platt_scaling"
+
+monitoring:
+  recalibration_trigger_ece_drift: 0.08
+  audit_report_dir: "experiments/metrics"

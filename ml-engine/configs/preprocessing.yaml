@@ -1,0 +1,75 @@
+version: "1.0.0"
+description: "Preprocessing and Data Cleaning Pipeline Configuration"
+
+cleaning:
+  drop_duplicates: true
+  strip_whitespace: true
+  lowercase_columns: true
+  replace_spaces_with_underscore: true
+  remove_special_characters: true
+
+missing_values:
+  global_numeric_strategy: "median"  # options: mean, median, zero, drop
+  global_categorical_strategy: "mode" # options: mode, constant, unknown
+  drop_column_threshold: 0.40         # drop columns with > 40% missing values
+  specific_imputations:
+    rainfall_mm: 0.0
+    duration_hours: 1.0
+    displacement: 0.0
+    crack_width: 0.0
+    storm_surge: 0.0
+    flow_rate: 0.0
+    magnitude: 0.0
+    pga: 0.0
+    pgv: 0.0
+    soil_type: "loam"
+
+outliers:
+  method: "clip"                      # options: clip, iqr, zscore, nan, drop
+  iqr_factor: 1.5
+  z_threshold: 3.0
+  telemetry_bounds:
+    latitude: [-90.0, 90.0]
+    longitude: [-180.0, 180.0]
+    rainfall_mm: [0.0, 1500.0]
+    wind_speed: [0.0, 450.0]
+    temperature: [-50.0, 65.0]
+    humidity: [0.0, 100.0]
+    soil_moisture: [0.0, 100.0]
+    slope_angle: [0.0, 90.0]
+    pressure: [850.0, 1090.0]
+    water_level: [0.0, 50.0]
+    factor_of_safety: [0.1, 10.0]
+    ndvi: [-1.0, 1.0]
+
+encoding:
+  default_method: "ordinal"           # options: ordinal, one_hot, frequency
+  handle_unknown: "ignore"
+  categorical_features:
+    - soil_type
+    - satellite
+    - hazard_type
+    - category
+    - wind_direction
+
+normalization:
+  default_method: "standard"          # options: standard, minmax, robust, log1p
+  feature_range: [0.0, 1.0]
+  methods_per_column:
+    rainfall_mm: "log1p"
+    seismic_energy_log10_j: "standard"
+    slope_angle: "minmax"
+    soil_moisture: "minmax"
+    temperature: "standard"
+    pressure: "standard"
+    wind_speed: "standard"
+    water_level: "standard"
+
+pipeline:
+  stages:
+    - "cleaner"
+    - "imputer"
+    - "outlier_detector"
+    - "encoder"
+    - "normalizer"
+  cache_transformed: true

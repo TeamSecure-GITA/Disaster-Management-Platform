@@ -1,0 +1,84 @@
+version: "1.0.0"
+description: "Model Evaluation, Disaster Early Warning Verification, and Acceptance Gates Configuration"
+
+classification:
+  metrics:
+    - accuracy
+    - precision_weighted
+    - recall_weighted
+    - f1_weighted
+    - roc_auc
+    - log_loss
+  average_methods: ["macro", "weighted"]
+
+regression:
+  metrics:
+    - mae
+    - mse
+    - rmse
+    - r2
+    - mape
+    - explained_variance
+
+forecasting:
+  metrics:
+    - mae
+    - rmse
+    - smape
+    - directional_accuracy_pct
+    - peak_magnitude_error
+    - peak_time_lag_steps
+
+anomaly:
+  default_threshold_percentile: 95.0
+  metrics:
+    - precision
+    - recall
+    - f1
+    - false_positive_rate
+    - pr_auc
+    - roc_auc
+
+hazard_early_warning:
+  metrics:
+    - probability_of_detection_pod
+    - false_alarm_ratio_far
+    - critical_success_index_csi
+    - frequency_bias
+    - equitable_threat_score_ets
+    - brier_score
+
+acceptance_thresholds:
+  landslide:
+    min_f1_score: 0.78
+    min_pod: 0.80
+    max_far: 0.25
+    max_brier: 0.18
+
+  flood:
+    min_f1_score: 0.82
+    min_pod: 0.85
+    max_far: 0.20
+    max_brier: 0.15
+
+  cyclone:
+    min_f1_score: 0.80
+    min_pod: 0.85
+    max_far: 0.20
+    max_brier: 0.15
+
+  anomaly:
+    min_precision: 0.85
+    min_recall: 0.80
+    max_false_positive_rate: 0.05
+
+  forecasting:
+    max_rmse: 5.0
+    min_r2: 0.75
+    min_directional_accuracy_pct: 70.0
+
+reporting:
+  export_markdown: true
+  export_json: true
+  output_dir: "experiments/metrics"
+  error_analysis_top_k: 10

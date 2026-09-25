@@ -1,0 +1,193 @@
+version: "1.0.0"
+description: "Disaster Management Platform - Datasets Configuration"
+
+storage:
+  base_dir: "datasets"
+  raw_dir: "datasets/raw"
+  processed_dir: "datasets/processed"
+  test_dir: "datasets/test"
+  validation_dir: "datasets/validation"
+
+raw_sources:
+  weather:
+    path: "datasets/raw/weather"
+    format: "csv"
+    update_frequency: "10m"
+    schema: "datasets/validation/schemas/weather_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - temperature
+      - humidity
+      - pressure
+      - wind_speed
+      - wind_direction
+      - visibility
+
+  rainfall:
+    path: "datasets/raw/rainfall"
+    format: "csv"
+    update_frequency: "5m"
+    schema: "datasets/validation/schemas/rainfall_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - rainfall_mm
+      - duration_hours
+      - intensity
+
+  river:
+    path: "datasets/raw/river"
+    format: "csv"
+    update_frequency: "15m"
+    schema: "datasets/validation/schemas/sensor_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - water_level
+      - flow_rate
+      - discharge
+
+  soil:
+    path: "datasets/raw/soil"
+    format: "csv"
+    update_frequency: "30m"
+    schema: "datasets/validation/schemas/sensor_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - soil_moisture
+      - soil_temperature
+      - soil_type
+
+  geotechnical:
+    path: "datasets/raw/geotechnical"
+    format: "csv"
+    update_frequency: "15m"
+    schema: "datasets/validation/schemas/sensor_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - slope_angle
+      - displacement
+      - pore_pressure
+      - factor_of_safety
+      - crack_width
+
+  seismic:
+    path: "datasets/raw/seismic"
+    format: "csv"
+    update_frequency: "realtime"
+    schema: "datasets/validation/schemas/sensor_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - magnitude
+      - depth_km
+      - pga
+      - pgv
+      - frequency
+
+  satellite:
+    path: "datasets/raw/satellite"
+    format: "csv"
+    update_frequency: "6h"
+    schema: "datasets/validation/schemas/satellite_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - ndvi
+      - ndwi
+      - surface_temperature
+      - elevation
+      - satellite
+
+  drone:
+    path: "datasets/raw/drone"
+    format: "json"
+    update_frequency: "ondemand"
+    schema: "datasets/validation/schemas/sensor_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - altitude
+      - crack_score
+      - damage_score
+      - image_path
+
+  wildfire:
+    path: "datasets/raw/wildfire"
+    format: "csv"
+    update_frequency: "30m"
+    schema: "datasets/validation/schemas/incident_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - temperature
+      - humidity
+      - wind_speed
+      - vegetation_index
+      - fire_radiative_power
+
+  cyclone:
+    path: "datasets/raw/cyclone"
+    format: "csv"
+    update_frequency: "1h"
+    schema: "datasets/validation/schemas/incident_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - wind_speed
+      - central_pressure
+      - storm_surge
+      - radius_max_wind
+      - movement_speed
+      - movement_direction
+      - category
+
+  citizen_reports:
+    path: "datasets/raw/citizen_reports"
+    format: "json"
+    update_frequency: "realtime"
+    schema: "datasets/validation/schemas/incident_schema.json"
+    columns:
+      - timestamp
+      - latitude
+      - longitude
+      - hazard_type
+      - severity
+      - description
+      - verified
+      - upvotes
+      - media_url
+
+processed:
+  partition_by: ["hazard_type", "year", "month"]
+  compression: "snappy"
+  format: "parquet"
+  clean_data_path: "datasets/processed"
+
+validation:
+  reports_dir: "datasets/validation/quality_reports"
+  rejected_dir: "datasets/validation/rejected"
+  logs_dir: "datasets/validation/validation_logs"
+  max_missing_rate: 0.15
+  allow_out_of_bounds: false
+
+test_benchmarks:
+  landslide: "datasets/test/landslide"
+  flood: "datasets/test/flood"
+  cyclone: "datasets/test/cyclone"
+  anomaly: "datasets/test/anomaly"
+  forecasting: "datasets/test/forecasting"
+  multi_hazard: "datasets/test/multi_hazard"
