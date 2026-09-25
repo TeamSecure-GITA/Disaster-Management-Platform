@@ -1,0 +1,902 @@
+[
+  {
+    "timestamp": "2026-09-25T03:59:25.147879+00:00",
+    "latitude": 22.9963,
+    "longitude": 80.3143,
+    "altitude": 105.3,
+    "crack_score": 0.64,
+    "damage_score": 0.7,
+    "image_path": "/data/drone/survey_000.jpg"
+  },
+  {
+    "timestamp": "2026-09-25T02:59:25.147879+00:00",
+    "latitude": 27.6057,
+    "longitude": 86.3641,
+    "altitude": 87.3,
+    "crack_score": 0.56,
+    "damage_score": 0.45,
+    "image_path": "/data/drone/survey_001.jpg"
+  },
+  {
+    "timestamp": "2026-09-25T01:59:25.147879+00:00",
+    "latitude": 25.856,
+    "longitude": 83.1436,
+    "altitude": 117.2,
+    "crack_score": 0.58,
+    "damage_score": 0.53,
+    "image_path": "/data/drone/survey_002.jpg"
+  },
+  {
+    "timestamp": "2026-09-25T00:59:25.147879+00:00",
+    "latitude": 24.7893,
+    "longitude": 85.0857,
+    "altitude": 75.0,
+    "crack_score": 0.0,
+    "damage_score": 0.17,
+    "image_path": "/data/drone/survey_003.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T23:59:25.147879+00:00",
+    "latitude": 21.2481,
+    "longitude": 89.0757,
+    "altitude": 61.7,
+    "crack_score": 0.45,
+    "damage_score": 0.61,
+    "image_path": "/data/drone/survey_004.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T22:59:25.147879+00:00",
+    "latitude": 21.248,
+    "longitude": 82.4929,
+    "altitude": 71.3,
+    "crack_score": 0.94,
+    "damage_score": 0.01,
+    "image_path": "/data/drone/survey_005.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T21:59:25.147879+00:00",
+    "latitude": 20.4647,
+    "longitude": 84.1038,
+    "altitude": 127.2,
+    "crack_score": 0.63,
+    "damage_score": 0.37,
+    "image_path": "/data/drone/survey_006.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T20:59:25.147879+00:00",
+    "latitude": 26.9294,
+    "longitude": 87.5555,
+    "altitude": 55.0,
+    "crack_score": 0.63,
+    "damage_score": 0.39,
+    "image_path": "/data/drone/survey_007.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T19:59:25.147879+00:00",
+    "latitude": 24.8089,
+    "longitude": 82.288,
+    "altitude": 143.6,
+    "crack_score": 0.54,
+    "damage_score": 0.94,
+    "image_path": "/data/drone/survey_008.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T18:59:25.147879+00:00",
+    "latitude": 25.6646,
+    "longitude": 80.7698,
+    "altitude": 72.0,
+    "crack_score": 0.73,
+    "damage_score": 0.62,
+    "image_path": "/data/drone/survey_009.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T17:59:25.147879+00:00",
+    "latitude": 20.1647,
+    "longitude": 82.8975,
+    "altitude": 123.9,
+    "crack_score": 0.21,
+    "damage_score": 0.66,
+    "image_path": "/data/drone/survey_010.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T16:59:25.147879+00:00",
+    "latitude": 27.7593,
+    "longitude": 81.6122,
+    "altitude": 99.8,
+    "crack_score": 0.74,
+    "damage_score": 0.33,
+    "image_path": "/data/drone/survey_011.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T15:59:25.147879+00:00",
+    "latitude": 26.6595,
+    "longitude": 89.297,
+    "altitude": 139.0,
+    "crack_score": 0.08,
+    "damage_score": 0.81,
+    "image_path": "/data/drone/survey_012.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T14:59:25.147879+00:00",
+    "latitude": 21.6987,
+    "longitude": 88.0812,
+    "altitude": 136.1,
+    "crack_score": 0.82,
+    "damage_score": 0.51,
+    "image_path": "/data/drone/survey_013.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T13:59:25.147879+00:00",
+    "latitude": 21.4546,
+    "longitude": 86.334,
+    "altitude": 93.8,
+    "crack_score": 1.0,
+    "damage_score": 0.23,
+    "image_path": "/data/drone/survey_014.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T12:59:25.147879+00:00",
+    "latitude": 21.4672,
+    "longitude": 88.7146,
+    "altitude": 104.7,
+    "crack_score": 0.67,
+    "damage_score": 0.7,
+    "image_path": "/data/drone/survey_015.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T11:59:25.147879+00:00",
+    "latitude": 22.4339,
+    "longitude": 88.0367,
+    "altitude": 70.4,
+    "crack_score": 0.65,
+    "damage_score": 0.82,
+    "image_path": "/data/drone/survey_016.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T10:59:25.147879+00:00",
+    "latitude": 24.1981,
+    "longitude": 81.8657,
+    "altitude": 55.0,
+    "crack_score": 0.91,
+    "damage_score": 0.03,
+    "image_path": "/data/drone/survey_017.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T09:59:25.147879+00:00",
+    "latitude": 23.4556,
+    "longitude": 88.9256,
+    "altitude": 85.6,
+    "crack_score": 0.02,
+    "damage_score": 0.08,
+    "image_path": "/data/drone/survey_018.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T08:59:25.147879+00:00",
+    "latitude": 22.3298,
+    "longitude": 85.3934,
+    "altitude": 141.1,
+    "crack_score": 0.35,
+    "damage_score": 0.42,
+    "image_path": "/data/drone/survey_019.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T07:59:25.147879+00:00",
+    "latitude": 24.8948,
+    "longitude": 88.0744,
+    "altitude": 71.5,
+    "crack_score": 0.6,
+    "damage_score": 0.59,
+    "image_path": "/data/drone/survey_020.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T06:59:25.147879+00:00",
+    "latitude": 21.116,
+    "longitude": 88.9609,
+    "altitude": 87.2,
+    "crack_score": 0.33,
+    "damage_score": 0.88,
+    "image_path": "/data/drone/survey_021.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T05:59:25.147879+00:00",
+    "latitude": 22.3372,
+    "longitude": 83.18,
+    "altitude": 88.3,
+    "crack_score": 0.49,
+    "damage_score": 0.28,
+    "image_path": "/data/drone/survey_022.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T04:59:25.147879+00:00",
+    "latitude": 22.9309,
+    "longitude": 81.1005,
+    "altitude": 128.7,
+    "crack_score": 0.4,
+    "damage_score": 0.51,
+    "image_path": "/data/drone/survey_023.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T03:59:25.147879+00:00",
+    "latitude": 23.6486,
+    "longitude": 82.2794,
+    "altitude": 75.3,
+    "crack_score": 0.99,
+    "damage_score": 0.29,
+    "image_path": "/data/drone/survey_024.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T02:59:25.147879+00:00",
+    "latitude": 26.2814,
+    "longitude": 84.2711,
+    "altitude": 127.1,
+    "crack_score": 0.43,
+    "damage_score": 0.21,
+    "image_path": "/data/drone/survey_025.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T01:59:25.147879+00:00",
+    "latitude": 21.5974,
+    "longitude": 88.1801,
+    "altitude": 130.0,
+    "crack_score": 0.33,
+    "damage_score": 0.87,
+    "image_path": "/data/drone/survey_026.jpg"
+  },
+  {
+    "timestamp": "2026-09-24T00:59:25.147879+00:00",
+    "latitude": 24.1139,
+    "longitude": 88.6073,
+    "altitude": 141.5,
+    "crack_score": 0.86,
+    "damage_score": 0.04,
+    "image_path": "/data/drone/survey_027.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T23:59:25.147879+00:00",
+    "latitude": 24.7393,
+    "longitude": 80.0695,
+    "altitude": 128.7,
+    "crack_score": 0.41,
+    "damage_score": 0.87,
+    "image_path": "/data/drone/survey_028.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T22:59:25.147879+00:00",
+    "latitude": 20.3716,
+    "longitude": 85.1075,
+    "altitude": 113.8,
+    "crack_score": 0.83,
+    "damage_score": 0.5,
+    "image_path": "/data/drone/survey_029.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T21:59:25.147879+00:00",
+    "latitude": 24.8604,
+    "longitude": 84.1741,
+    "altitude": 103.5,
+    "crack_score": 0.14,
+    "damage_score": 0.78,
+    "image_path": "/data/drone/survey_030.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T20:59:25.147879+00:00",
+    "latitude": 21.3642,
+    "longitude": 82.2211,
+    "altitude": 91.9,
+    "crack_score": 0.5,
+    "damage_score": 0.79,
+    "image_path": "/data/drone/survey_031.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T19:59:25.147879+00:00",
+    "latitude": 20.5204,
+    "longitude": 81.1987,
+    "altitude": 109.9,
+    "crack_score": 0.2,
+    "damage_score": 0.59,
+    "image_path": "/data/drone/survey_032.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T18:59:25.147879+00:00",
+    "latitude": 27.5911,
+    "longitude": 83.3762,
+    "altitude": 90.8,
+    "crack_score": 0.47,
+    "damage_score": 0.03,
+    "image_path": "/data/drone/survey_033.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T17:59:25.147879+00:00",
+    "latitude": 27.7251,
+    "longitude": 89.4291,
+    "altitude": 71.0,
+    "crack_score": 0.28,
+    "damage_score": 0.71,
+    "image_path": "/data/drone/survey_034.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T16:59:25.147879+00:00",
+    "latitude": 26.4672,
+    "longitude": 83.232,
+    "altitude": 51.1,
+    "crack_score": 0.41,
+    "damage_score": 0.92,
+    "image_path": "/data/drone/survey_035.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T15:59:25.147879+00:00",
+    "latitude": 22.4369,
+    "longitude": 85.1879,
+    "altitude": 61.2,
+    "crack_score": 0.52,
+    "damage_score": 0.79,
+    "image_path": "/data/drone/survey_036.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T14:59:25.147879+00:00",
+    "latitude": 20.7814,
+    "longitude": 87.0302,
+    "altitude": 144.3,
+    "crack_score": 0.75,
+    "damage_score": 0.72,
+    "image_path": "/data/drone/survey_037.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T13:59:25.147879+00:00",
+    "latitude": 25.4739,
+    "longitude": 83.6363,
+    "altitude": 132.6,
+    "crack_score": 0.45,
+    "damage_score": 0.81,
+    "image_path": "/data/drone/survey_038.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T12:59:25.147879+00:00",
+    "latitude": 23.5212,
+    "longitude": 89.7178,
+    "altitude": 50.8,
+    "crack_score": 0.92,
+    "damage_score": 0.44,
+    "image_path": "/data/drone/survey_039.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T11:59:25.147879+00:00",
+    "latitude": 20.9763,
+    "longitude": 89.6245,
+    "altitude": 105.3,
+    "crack_score": 0.25,
+    "damage_score": 0.74,
+    "image_path": "/data/drone/survey_040.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T10:59:25.147879+00:00",
+    "latitude": 23.9614,
+    "longitude": 82.5178,
+    "altitude": 57.7,
+    "crack_score": 0.87,
+    "damage_score": 0.83,
+    "image_path": "/data/drone/survey_041.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T09:59:25.147879+00:00",
+    "latitude": 20.2751,
+    "longitude": 84.9725,
+    "altitude": 71.6,
+    "crack_score": 0.81,
+    "damage_score": 0.79,
+    "image_path": "/data/drone/survey_042.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T08:59:25.147879+00:00",
+    "latitude": 27.2746,
+    "longitude": 83.0088,
+    "altitude": 113.2,
+    "crack_score": 0.37,
+    "damage_score": 0.27,
+    "image_path": "/data/drone/survey_043.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T07:59:25.147879+00:00",
+    "latitude": 22.0702,
+    "longitude": 82.8484,
+    "altitude": 73.2,
+    "crack_score": 0.32,
+    "damage_score": 0.9,
+    "image_path": "/data/drone/survey_044.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T06:59:25.147879+00:00",
+    "latitude": 25.3002,
+    "longitude": 80.3689,
+    "altitude": 57.8,
+    "crack_score": 0.83,
+    "damage_score": 0.35,
+    "image_path": "/data/drone/survey_045.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T05:59:25.147879+00:00",
+    "latitude": 22.4937,
+    "longitude": 86.0956,
+    "altitude": 102.2,
+    "crack_score": 0.79,
+    "damage_score": 0.88,
+    "image_path": "/data/drone/survey_046.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T04:59:25.147879+00:00",
+    "latitude": 24.1605,
+    "longitude": 85.0268,
+    "altitude": 84.5,
+    "crack_score": 0.46,
+    "damage_score": 0.41,
+    "image_path": "/data/drone/survey_047.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T03:59:25.147879+00:00",
+    "latitude": 24.3737,
+    "longitude": 80.5148,
+    "altitude": 51.3,
+    "crack_score": 0.3,
+    "damage_score": 0.46,
+    "image_path": "/data/drone/survey_048.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T02:59:25.147879+00:00",
+    "latitude": 21.4788,
+    "longitude": 82.7865,
+    "altitude": 91.1,
+    "crack_score": 0.72,
+    "damage_score": 0.38,
+    "image_path": "/data/drone/survey_049.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T01:59:25.147879+00:00",
+    "latitude": 27.7567,
+    "longitude": 89.0827,
+    "altitude": 98.9,
+    "crack_score": 0.43,
+    "damage_score": 0.74,
+    "image_path": "/data/drone/survey_050.jpg"
+  },
+  {
+    "timestamp": "2026-09-23T00:59:25.147879+00:00",
+    "latitude": 26.2011,
+    "longitude": 82.3956,
+    "altitude": 136.3,
+    "crack_score": 0.53,
+    "damage_score": 0.79,
+    "image_path": "/data/drone/survey_051.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T23:59:25.147879+00:00",
+    "latitude": 27.516,
+    "longitude": 81.4489,
+    "altitude": 79.7,
+    "crack_score": 0.54,
+    "damage_score": 0.35,
+    "image_path": "/data/drone/survey_052.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T22:59:25.147879+00:00",
+    "latitude": 27.1586,
+    "longitude": 84.8945,
+    "altitude": 91.4,
+    "crack_score": 0.73,
+    "damage_score": 0.88,
+    "image_path": "/data/drone/survey_053.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T21:59:25.147879+00:00",
+    "latitude": 24.7832,
+    "longitude": 89.8565,
+    "altitude": 62.1,
+    "crack_score": 0.63,
+    "damage_score": 0.58,
+    "image_path": "/data/drone/survey_054.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T20:59:25.147879+00:00",
+    "latitude": 27.375,
+    "longitude": 82.4206,
+    "altitude": 61.8,
+    "crack_score": 0.21,
+    "damage_score": 0.31,
+    "image_path": "/data/drone/survey_055.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T19:59:25.147879+00:00",
+    "latitude": 20.7079,
+    "longitude": 86.7214,
+    "altitude": 66.7,
+    "crack_score": 0.24,
+    "damage_score": 0.27,
+    "image_path": "/data/drone/survey_056.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T18:59:25.147879+00:00",
+    "latitude": 21.5679,
+    "longitude": 87.6162,
+    "altitude": 83.6,
+    "crack_score": 0.75,
+    "damage_score": 0.57,
+    "image_path": "/data/drone/survey_057.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T17:59:25.147879+00:00",
+    "latitude": 20.3618,
+    "longitude": 82.3764,
+    "altitude": 148.6,
+    "crack_score": 0.41,
+    "damage_score": 0.75,
+    "image_path": "/data/drone/survey_058.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T16:59:25.147879+00:00",
+    "latitude": 22.6026,
+    "longitude": 87.2822,
+    "altitude": 137.1,
+    "crack_score": 0.68,
+    "damage_score": 0.41,
+    "image_path": "/data/drone/survey_059.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T15:59:25.147879+00:00",
+    "latitude": 23.1094,
+    "longitude": 83.6778,
+    "altitude": 125.4,
+    "crack_score": 0.2,
+    "damage_score": 0.33,
+    "image_path": "/data/drone/survey_060.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T14:59:25.147879+00:00",
+    "latitude": 22.1708,
+    "longitude": 86.3231,
+    "altitude": 104.7,
+    "crack_score": 0.58,
+    "damage_score": 0.02,
+    "image_path": "/data/drone/survey_061.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T13:59:25.147879+00:00",
+    "latitude": 26.6299,
+    "longitude": 86.3353,
+    "altitude": 144.5,
+    "crack_score": 0.7,
+    "damage_score": 0.5,
+    "image_path": "/data/drone/survey_062.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T12:59:25.147879+00:00",
+    "latitude": 22.854,
+    "longitude": 85.3577,
+    "altitude": 143.3,
+    "crack_score": 0.44,
+    "damage_score": 0.98,
+    "image_path": "/data/drone/survey_063.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T11:59:25.147879+00:00",
+    "latitude": 22.2475,
+    "longitude": 80.9029,
+    "altitude": 101.2,
+    "crack_score": 0.11,
+    "damage_score": 0.76,
+    "image_path": "/data/drone/survey_064.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T10:59:25.147879+00:00",
+    "latitude": 24.3416,
+    "longitude": 88.353,
+    "altitude": 117.9,
+    "crack_score": 0.77,
+    "damage_score": 0.95,
+    "image_path": "/data/drone/survey_065.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T09:59:25.147879+00:00",
+    "latitude": 21.1274,
+    "longitude": 83.2078,
+    "altitude": 127.6,
+    "crack_score": 0.61,
+    "damage_score": 0.86,
+    "image_path": "/data/drone/survey_066.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T08:59:25.147879+00:00",
+    "latitude": 26.4176,
+    "longitude": 81.8652,
+    "altitude": 117.3,
+    "crack_score": 0.41,
+    "damage_score": 0.89,
+    "image_path": "/data/drone/survey_067.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T07:59:25.147879+00:00",
+    "latitude": 20.5964,
+    "longitude": 80.4078,
+    "altitude": 72.2,
+    "crack_score": 0.71,
+    "damage_score": 0.88,
+    "image_path": "/data/drone/survey_068.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T06:59:25.147879+00:00",
+    "latitude": 27.8951,
+    "longitude": 85.9089,
+    "altitude": 123.1,
+    "crack_score": 0.7,
+    "damage_score": 0.75,
+    "image_path": "/data/drone/survey_069.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T05:59:25.147879+00:00",
+    "latitude": 26.178,
+    "longitude": 86.7756,
+    "altitude": 96.5,
+    "crack_score": 0.87,
+    "damage_score": 0.2,
+    "image_path": "/data/drone/survey_070.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T04:59:25.147879+00:00",
+    "latitude": 21.5897,
+    "longitude": 80.1659,
+    "altitude": 62.7,
+    "crack_score": 0.29,
+    "damage_score": 0.53,
+    "image_path": "/data/drone/survey_071.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T03:59:25.147879+00:00",
+    "latitude": 20.0442,
+    "longitude": 85.1209,
+    "altitude": 101.1,
+    "crack_score": 0.82,
+    "damage_score": 0.4,
+    "image_path": "/data/drone/survey_072.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T02:59:25.147879+00:00",
+    "latitude": 26.5237,
+    "longitude": 82.265,
+    "altitude": 98.4,
+    "crack_score": 0.01,
+    "damage_score": 0.41,
+    "image_path": "/data/drone/survey_073.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T01:59:25.147879+00:00",
+    "latitude": 25.6549,
+    "longitude": 86.4517,
+    "altitude": 114.8,
+    "crack_score": 0.02,
+    "damage_score": 0.28,
+    "image_path": "/data/drone/survey_074.jpg"
+  },
+  {
+    "timestamp": "2026-09-22T00:59:25.147879+00:00",
+    "latitude": 25.8321,
+    "longitude": 81.7437,
+    "altitude": 70.8,
+    "crack_score": 0.04,
+    "damage_score": 0.48,
+    "image_path": "/data/drone/survey_075.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T23:59:25.147879+00:00",
+    "latitude": 26.1702,
+    "longitude": 86.9094,
+    "altitude": 68.2,
+    "crack_score": 0.74,
+    "damage_score": 0.85,
+    "image_path": "/data/drone/survey_076.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T22:59:25.147879+00:00",
+    "latitude": 20.5924,
+    "longitude": 83.8674,
+    "altitude": 104.6,
+    "crack_score": 0.98,
+    "damage_score": 0.45,
+    "image_path": "/data/drone/survey_077.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T21:59:25.147879+00:00",
+    "latitude": 22.8677,
+    "longitude": 89.3673,
+    "altitude": 101.3,
+    "crack_score": 0.99,
+    "damage_score": 0.23,
+    "image_path": "/data/drone/survey_078.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T20:59:25.147879+00:00",
+    "latitude": 20.927,
+    "longitude": 81.3752,
+    "altitude": 144.3,
+    "crack_score": 0.04,
+    "damage_score": 0.45,
+    "image_path": "/data/drone/survey_079.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T19:59:25.147879+00:00",
+    "latitude": 26.9048,
+    "longitude": 83.4107,
+    "altitude": 57.0,
+    "crack_score": 0.73,
+    "damage_score": 0.61,
+    "image_path": "/data/drone/survey_080.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T18:59:25.147879+00:00",
+    "latitude": 24.9864,
+    "longitude": 81.1347,
+    "altitude": 120.7,
+    "crack_score": 0.37,
+    "damage_score": 0.37,
+    "image_path": "/data/drone/survey_081.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T17:59:25.147879+00:00",
+    "latitude": 22.6472,
+    "longitude": 89.2469,
+    "altitude": 54.5,
+    "crack_score": 0.35,
+    "damage_score": 0.93,
+    "image_path": "/data/drone/survey_082.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T16:59:25.147879+00:00",
+    "latitude": 20.5085,
+    "longitude": 88.7734,
+    "altitude": 87.9,
+    "crack_score": 0.83,
+    "damage_score": 0.84,
+    "image_path": "/data/drone/survey_083.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T15:59:25.147879+00:00",
+    "latitude": 22.4879,
+    "longitude": 82.5794,
+    "altitude": 87.3,
+    "crack_score": 0.63,
+    "damage_score": 0.1,
+    "image_path": "/data/drone/survey_084.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T14:59:25.147879+00:00",
+    "latitude": 22.6015,
+    "longitude": 86.5998,
+    "altitude": 60.4,
+    "crack_score": 0.05,
+    "damage_score": 0.58,
+    "image_path": "/data/drone/survey_085.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T13:59:25.147879+00:00",
+    "latitude": 25.8368,
+    "longitude": 88.1722,
+    "altitude": 92.6,
+    "crack_score": 0.55,
+    "damage_score": 0.52,
+    "image_path": "/data/drone/survey_086.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T12:59:25.147879+00:00",
+    "latitude": 25.1005,
+    "longitude": 85.552,
+    "altitude": 85.0,
+    "crack_score": 0.68,
+    "damage_score": 0.76,
+    "image_path": "/data/drone/survey_087.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T11:59:25.147879+00:00",
+    "latitude": 27.0977,
+    "longitude": 85.2965,
+    "altitude": 51.5,
+    "crack_score": 0.21,
+    "damage_score": 0.71,
+    "image_path": "/data/drone/survey_088.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T10:59:25.147879+00:00",
+    "latitude": 23.7777,
+    "longitude": 82.4185,
+    "altitude": 88.7,
+    "crack_score": 0.66,
+    "damage_score": 0.35,
+    "image_path": "/data/drone/survey_089.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T09:59:25.147879+00:00",
+    "latitude": 20.9568,
+    "longitude": 80.931,
+    "altitude": 89.1,
+    "crack_score": 0.16,
+    "damage_score": 0.26,
+    "image_path": "/data/drone/survey_090.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T08:59:25.147879+00:00",
+    "latitude": 25.706,
+    "longitude": 88.9722,
+    "altitude": 110.5,
+    "crack_score": 0.43,
+    "damage_score": 0.77,
+    "image_path": "/data/drone/survey_091.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T07:59:25.147879+00:00",
+    "latitude": 26.0863,
+    "longitude": 89.0042,
+    "altitude": 135.3,
+    "crack_score": 0.54,
+    "damage_score": 0.76,
+    "image_path": "/data/drone/survey_092.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T06:59:25.147879+00:00",
+    "latitude": 24.4902,
+    "longitude": 86.331,
+    "altitude": 80.7,
+    "crack_score": 0.41,
+    "damage_score": 0.71,
+    "image_path": "/data/drone/survey_093.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T05:59:25.147879+00:00",
+    "latitude": 26.1677,
+    "longitude": 83.3903,
+    "altitude": 88.6,
+    "crack_score": 0.59,
+    "damage_score": 0.19,
+    "image_path": "/data/drone/survey_094.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T04:59:25.147879+00:00",
+    "latitude": 23.9504,
+    "longitude": 83.4921,
+    "altitude": 110.0,
+    "crack_score": 0.86,
+    "damage_score": 0.87,
+    "image_path": "/data/drone/survey_095.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T03:59:25.147879+00:00",
+    "latitude": 24.1819,
+    "longitude": 87.2596,
+    "altitude": 122.4,
+    "crack_score": 0.75,
+    "damage_score": 0.56,
+    "image_path": "/data/drone/survey_096.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T02:59:25.147879+00:00",
+    "latitude": 23.4203,
+    "longitude": 88.9711,
+    "altitude": 108.5,
+    "crack_score": 0.13,
+    "damage_score": 0.44,
+    "image_path": "/data/drone/survey_097.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T01:59:25.147879+00:00",
+    "latitude": 20.2034,
+    "longitude": 88.8709,
+    "altitude": 95.1,
+    "crack_score": 0.96,
+    "damage_score": 0.43,
+    "image_path": "/data/drone/survey_098.jpg"
+  },
+  {
+    "timestamp": "2026-09-21T00:59:25.147879+00:00",
+    "latitude": 20.8631,
+    "longitude": 87.7988,
+    "altitude": 104.9,
+    "crack_score": 0.53,
+    "damage_score": 0.64,
+    "image_path": "/data/drone/survey_099.jpg"
+  }
+]
