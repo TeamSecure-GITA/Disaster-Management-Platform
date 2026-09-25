@@ -1,0 +1,10 @@
+pytest>=8.0.0
+pytest-cov>=5.0.0
+pytest-mock>=3.14.0
+black>=24.2.0
+isort>=5.13.0
+flake8>=7.0.0
+mypy>=1.9.0
+jupyter>=1.0.0
+ipykernel>=6.29.0
+nbconvert>=7.16.0

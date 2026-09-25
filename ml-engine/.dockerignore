@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.venv
+venv
+env
+*.egg-info
+dist
+build
+.git
+.github
+*.ipynb_checkpoints
+datasets/raw/*.tmp
+experiments/experiment_logs/*/*.tmp
