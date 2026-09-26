@@ -21,7 +21,6 @@ web-build/
 #deleteable folder name
 
 
-components
 config
 constants
 database
