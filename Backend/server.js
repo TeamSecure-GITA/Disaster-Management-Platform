@@ -20,6 +20,10 @@ const startGovtDisasterAlertJob = require("./jobs/govtDisasterAlertJob");
 const startCrowdSignalJob = require("./jobs/crowdSignalJob");
 const { startNewsFetcherJob } = require("./jobs/newsFetcher");
 const { startMeshHealthJob } = require("./jobs/meshHealthJob");
+const {
+  startMlBackendSupervisor,
+  stopMlBackendSupervisor,
+} = require("./services/mlSupervisor");
 
 const PORT = process.env.PORT || 5000;
 
@@ -52,6 +56,11 @@ const startServerRuntime = () => {
 
   // Start LoRa mesh beacon health monitoring (every 5 min)
   startMeshHealthJob();
+
+  // Auto-supervise AI / ML FastAPI engine
+  startMlBackendSupervisor().catch((err) => {
+    console.warn("[ML-Supervisor] Auto-start warning:", err.message);
+  });
 };
 
 
@@ -67,6 +76,9 @@ const stopServer = async (signal) => {
   console.log(
     `Received ${signal}; shutting down gracefully...`
   );
+
+  // Stop supervised ML backend process
+  await stopMlBackendSupervisor().catch(() => {});
 
   // Stop background jobs
   jobTasks.forEach((task) => {

@@ -8,8 +8,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build": "node --check server.js && node --check app.js",
-    "test": "jest --runInBand",
-    "test:ci": "jest --runInBand --coverage",
+    "test": "jest --runInBand --forceExit",
+    "test:ci": "jest --runInBand --coverage --forceExit",
     "check": "node --check server.js && node --check app.js"
   },
   "keywords": [

@@ -52,6 +52,7 @@ const bleSpitRoutes = require("./routes/bleSpitRoutes");
 const nfcTriageRoutes = require("./routes/nfcTriageRoutes");
 const riskRoutes = require("./routes/riskRoutes");
 const responseRoutes = require("./routes/responseRoutes");
+const aiRoute = require("./routes/aiRoute");
 
 const app = express();
 
@@ -177,6 +178,9 @@ app.use("/api/nfc-triage", nfcTriageRoutes);
 // Working Architecture Core: Risk Engine & Unified Response System
 app.use("/api/risk", riskRoutes);
 app.use("/api/response", responseRoutes);
+
+// Unified AI & ML Bridge
+app.use("/api/ai", aiRoute);
 
 // ================================
 // 404 HANDLER
