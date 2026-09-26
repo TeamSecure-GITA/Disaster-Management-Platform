@@ -21,7 +21,6 @@ web-build/
 #deleteable folder name
 
 
-config
 constants
 database
 hooks
