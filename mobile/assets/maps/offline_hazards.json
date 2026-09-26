@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "id": "hz_demo_1", "type": "landslide", "severity": "critical", "name": "Northern Hill Ridge" },
+      "geometry": { "type": "Point", "coordinates": [85.324, 27.7172] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "id": "hz_demo_2", "type": "flood", "severity": "high", "name": "River Basin Sector 4" },
+      "geometry": { "type": "Point", "coordinates": [85.330, 27.7120] }
+    }
+  ]
+}\n
