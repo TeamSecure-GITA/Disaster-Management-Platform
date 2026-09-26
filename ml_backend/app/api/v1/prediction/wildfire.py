@@ -10,11 +10,12 @@ from pydantic import BaseModel, Field
 
 from app.ml.models.wildfire.model import WildfireModel
 from app.ml.models.wildfire.inference import WildfireInferenceEngine
+from app.ml.models.factory import create_operational_wildfire_engine
 
 router = APIRouter(prefix="/wildfire", tags=["Prediction - Wildfire"])
 
-_model = WildfireModel()
-_engine = WildfireInferenceEngine(model=_model)
+_engine = create_operational_wildfire_engine()
+_model = _engine.model
 
 
 class WildfirePredictRequest(BaseModel):
@@ -53,7 +54,7 @@ async def predict_wildfire(request: WildfirePredictRequest):
     try:
         result = _engine.predict(payload)
         return WildfirePredictResponse(
-            success=result.status in ("success", "partial_prediction", "missing_features"),
+            success=result.status in ("success", "partial_prediction", "missing_features", "ok"),
             status=result.status,
             risk_score=result.risk_score,
             risk_level=result.risk_level,

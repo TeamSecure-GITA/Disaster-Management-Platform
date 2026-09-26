@@ -10,11 +10,12 @@ from pydantic import BaseModel, Field
 
 from app.ml.models.flood.model import FloodModel
 from app.ml.models.flood.inference import FloodInferenceEngine
+from app.ml.models.factory import create_operational_flood_engine
 
 router = APIRouter(prefix="/flood", tags=["Prediction - Flood"])
 
-_model = FloodModel()
-_engine = FloodInferenceEngine(model=_model)
+_engine = create_operational_flood_engine()
+_model = _engine.model
 
 
 class FloodPredictRequest(BaseModel):
@@ -53,7 +54,7 @@ async def predict_flood(request: FloodPredictRequest):
     try:
         result = _engine.predict(payload)
         return FloodPredictResponse(
-            success=result.status in ("success", "partial_prediction", "missing_features"),
+            success=result.status in ("success", "partial_prediction", "missing_features", "ok"),
             status=result.status,
             risk_score=result.risk_score,
             risk_level=result.risk_level,

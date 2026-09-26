@@ -10,11 +10,12 @@ from pydantic import BaseModel, Field
 
 from app.ml.models.cyclone.model import CycloneModel
 from app.ml.models.cyclone.inference import CycloneInferenceEngine
+from app.ml.models.factory import create_operational_cyclone_engine
 
 router = APIRouter(prefix="/cyclone", tags=["Prediction - Cyclone"])
 
-_model = CycloneModel()
-_engine = CycloneInferenceEngine(model=_model)
+_engine = create_operational_cyclone_engine()
+_model = _engine.model
 
 
 class CyclonePredictRequest(BaseModel):
@@ -51,7 +52,7 @@ async def predict_cyclone(request: CyclonePredictRequest):
     try:
         result = _engine.predict(payload)
         return CyclonePredictResponse(
-            success=result.status in ("success", "partial_prediction", "missing_features"),
+            success=result.status in ("success", "partial_prediction", "missing_features", "ok"),
             status=result.status,
             risk_score=result.risk_score,
             risk_level=result.risk_level,

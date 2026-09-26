@@ -497,15 +497,22 @@ def register_routers(application: FastAPI) -> None:
                 websocket_router,
             )
 
-            logger.info(
-                "WebSocket router registered."
-            )
-
         except ImportError as exc:
             logger.warning(
                 "WebSocket router not available yet: %s",
                 exc,
             )
+
+    # --------------------------------------------------------
+    # Root & Frontend Compatibility Router (/chat, /predict, /predictions/*, /analytics/*, /simulation/*)
+    # --------------------------------------------------------
+    try:
+        from .api.compatibility import router as compatibility_router
+
+        application.include_router(compatibility_router)
+        logger.info("Compatibility router registered.")
+    except Exception as exc:
+        logger.warning("Compatibility router error: %s", exc)
 
 
 # Register routers after application creation.

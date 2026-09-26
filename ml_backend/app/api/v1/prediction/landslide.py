@@ -10,11 +10,12 @@ from pydantic import BaseModel, Field
 
 from app.ml.models.landslide.model import LandslideModel
 from app.ml.models.landslide.inference import LandslideInferenceEngine
+from app.ml.models.factory import create_operational_landslide_engine
 
 router = APIRouter(prefix="/landslide", tags=["Prediction - Landslide"])
 
-_model = LandslideModel()
-_engine = LandslideInferenceEngine(model=_model)
+_engine = create_operational_landslide_engine()
+_model = _engine.model
 
 
 class LandslidePredictRequest(BaseModel):
@@ -58,7 +59,7 @@ async def predict_landslide(request: LandslidePredictRequest):
         result = _engine.predict(payload)
         res_dict = result.to_dict()
         return LandslidePredictResponse(
-            success=result.status in ("success", "partial_prediction", "missing_features"),
+            success=result.status in ("success", "partial_prediction", "missing_features", "ok"),
             status=result.status,
             risk_score=result.risk_score,
             risk_level=result.risk_level,

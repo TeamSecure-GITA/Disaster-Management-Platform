@@ -10,11 +10,12 @@ from pydantic import BaseModel, Field
 
 from app.ml.models.multi_hazard.model import MultiHazardModel
 from app.ml.models.multi_hazard.inference import MultiHazardInferenceEngine
+from app.ml.models.factory import create_operational_multi_hazard_engine
 
 router = APIRouter(prefix="/multi-hazard", tags=["Prediction - Multi Hazard"])
 
-_model = MultiHazardModel()
-_engine = MultiHazardInferenceEngine(model=_model)
+_engine = create_operational_multi_hazard_engine()
+_model = _engine.model
 
 
 class MultiHazardPredictRequest(BaseModel):
@@ -55,7 +56,7 @@ async def predict_multi_hazard(request: MultiHazardPredictRequest):
         result = _engine.predict(payload)
         res_dict = result.to_dict()
         return MultiHazardPredictResponse(
-            success=result.status in ("success", "partial_prediction", "missing_features"),
+            success=result.status in ("success", "partial_prediction", "missing_features", "ok"),
             status=result.status,
             composite_risk_score=res_dict.get("composite_risk_score", result.risk_score),
             cascading_probability=res_dict.get("cascading_probability", 0.65),

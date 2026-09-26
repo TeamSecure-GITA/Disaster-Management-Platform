@@ -10,11 +10,12 @@ from pydantic import BaseModel, Field
 
 from app.ml.models.earthquake.model import EarthquakeModel
 from app.ml.models.earthquake.inference import EarthquakeInferenceEngine
+from app.ml.models.factory import create_operational_earthquake_engine
 
 router = APIRouter(prefix="/earthquake", tags=["Prediction - Earthquake"])
 
-_model = EarthquakeModel()
-_engine = EarthquakeInferenceEngine(model=_model)
+_engine = create_operational_earthquake_engine()
+_model = _engine.model
 
 
 class EarthquakePredictRequest(BaseModel):
@@ -52,7 +53,7 @@ async def predict_earthquake(request: EarthquakePredictRequest):
     try:
         result = _engine.predict(payload)
         return EarthquakePredictResponse(
-            success=result.status in ("success", "partial_prediction", "missing_features"),
+            success=result.status in ("success", "partial_prediction", "missing_features", "ok"),
             status=result.status,
             risk_score=result.risk_score,
             risk_level=result.risk_level,
