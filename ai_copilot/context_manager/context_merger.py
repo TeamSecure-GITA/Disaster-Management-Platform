@@ -11,4 +11,12 @@ class ContextMerger:
             base.incident.active_incident_id = incoming_payload["incident_id"]
         if "role" in incoming_payload:
             base.user.role = incoming_payload["role"]
+        if "disaster" in incoming_payload and incoming_payload["disaster"]:
+            disaster_data = incoming_payload["disaster"]
+            if isinstance(disaster_data, dict):
+                hazard = disaster_data.get("hazard_type") or disaster_data.get("disaster_type")
+                if hazard:
+                    base.disaster.disaster_type = hazard
+                if "severity" in disaster_data:
+                    base.disaster.warning_level = disaster_data["severity"]
         return base

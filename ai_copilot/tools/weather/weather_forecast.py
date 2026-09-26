@@ -8,6 +8,7 @@ class WeatherForecastTool(BaseTool):
 
     def run(self, days: int = 3, **kwargs) -> Dict[str, Any]:
         return {
+            "forecast": f"{days}-day weather forecast",
             "forecast_days": days,
             "accumulated_rain_mm": 185.0,
             "peak_intensity_window": "Tonight 22:00 - Tomorrow 06:00",

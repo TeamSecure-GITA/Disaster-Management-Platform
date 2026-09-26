@@ -1,0 +1,39 @@
+[
+  {
+    "text": "What is the likelihood of a slope failure on NH-10 Shillong bypass?",
+    "category": "prediction",
+    "confidence": 0.95,
+    "slots": {
+      "hazard_type": "landslide",
+      "location": "NH-10 Shillong bypass"
+    }
+  },
+  {
+    "text": "Show me the nearest relief shelters in Mawlynnong with capacity for 50 people.",
+    "category": "shelter",
+    "confidence": 0.94,
+    "slots": {
+      "location": "Mawlynnong",
+      "capacity_required": 50
+    }
+  },
+  {
+    "text": "Dispatch NDRF squad to Majuli island flood embankment immediately.",
+    "category": "emergency_action",
+    "confidence": 0.98,
+    "slots": {
+      "unit_type": "NDRF",
+      "location": "Majuli island"
+    }
+  },
+  {
+    "text": "Run a digital twin simulation for 300mm cloudburst over East Khasi Hills.",
+    "category": "simulation",
+    "confidence": 0.92,
+    "slots": {
+      "scenario": "cloudburst",
+      "rainfall_mm": 300,
+      "region": "East Khasi Hills"
+    }
+  }
+]

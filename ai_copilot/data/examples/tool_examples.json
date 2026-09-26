@@ -1,0 +1,41 @@
+[
+  {
+    "tool_name": "ml_prediction",
+    "arguments": {
+      "region": "East Khasi Hills",
+      "hazard_type": "landslide"
+    },
+    "expected_result": {
+      "probability": 0.88,
+      "risk_level": "CRITICAL",
+      "factor_of_safety": 0.94
+    }
+  },
+  {
+    "tool_name": "shelter_search",
+    "arguments": {
+      "location": "Shillong",
+      "min_capacity": 100
+    },
+    "expected_result": {
+      "shelters": [
+        {
+          "name": "Shillong Sports Complex Shelter Center",
+          "available_capacity": 315,
+          "distance_km": 2.4
+        }
+      ]
+    }
+  },
+  {
+    "tool_name": "sensor_readings",
+    "arguments": {
+      "sensor_id": "sens-khasi-01"
+    },
+    "expected_result": {
+      "value": 4.82,
+      "unit": "degrees_tilt",
+      "threshold_exceeded": true
+    }
+  }
+]

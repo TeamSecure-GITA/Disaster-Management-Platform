@@ -28,6 +28,14 @@ class LocationContext(BaseModel):
     affected_zones: List[str] = Field(default_factory=list)
     nearest_shelter_id: Optional[str] = None
 
+    @property
+    def latitude(self) -> Optional[float]:
+        return self.current_location.latitude if self.current_location else None
+
+    @property
+    def longitude(self) -> Optional[float]:
+        return self.current_location.longitude if self.current_location else None
+
 
 class IncidentContext(BaseModel):
     active_incident_id: Optional[str] = None
@@ -43,6 +51,14 @@ class DisasterContext(BaseModel):
     warning_level: str = "alert"
     weather_condition: Optional[str] = "heavy_rain"
     is_declared_state_of_emergency: bool = False
+
+    @property
+    def hazard_type(self) -> Optional[str]:
+        return self.disaster_type
+
+    @hazard_type.setter
+    def hazard_type(self, value: Optional[str]):
+        self.disaster_type = value
 
 
 class ConversationTurn(BaseModel):
