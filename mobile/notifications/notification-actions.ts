@@ -1,0 +1,5 @@
+export const NotificationActions = {
+  EVACUATE_NOW: 'ACTION_EVACUATE_NOW',
+  FIND_SHELTER: 'ACTION_FIND_SHELTER',
+  MARK_SAFE: 'ACTION_MARK_SAFE',
+};
