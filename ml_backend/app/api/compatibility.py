@@ -47,6 +47,24 @@ _damage_model = create_operational_damage_detection_model()
 _copilot_agent = CopilotAgent()
 
 
+def _extract_prob(res: Any, default_prob: float = 0.65) -> float:
+    if hasattr(res, "to_dict"):
+        d = res.to_dict()
+    elif hasattr(res, "__dict__"):
+        d = res.__dict__
+    elif isinstance(res, dict):
+        d = res
+    else:
+        return default_prob
+    score = d.get("risk_score")
+    if score is not None:
+        return float(score)
+    pred = d.get("probability") or d.get("prediction")
+    if pred is not None:
+        return float(pred)
+    return default_prob
+
+
 # ============================================================
 # 1. Chatbot endpoint for Express backend & UI (/chat)
 # ============================================================
@@ -73,10 +91,11 @@ async def chat_endpoint(payload: ChatRequest):
     Serves Express backend chatbotService.js and direct frontend clients.
     """
     try:
-        reply_text = await _copilot_agent.generate_response(
+        resp = await _copilot_agent.process(
             payload.message,
-            context=payload.context or "disaster_management",
+            conversation_id=payload.session_id,
         )
+        reply_text = resp.answer or resp.reply or "Emergency guidance received."
         return ChatResponse(
             response=reply_text,
             message=reply_text,
@@ -121,7 +140,7 @@ async def generic_predict_endpoint(payload: Dict[str, Any]):
                 "vegetation_cover_pct": float(payload.get("vegetation_cover_pct", 42.0)),
             }
             res = _landslide_engine.predict(features)
-            prob = float(res.get("probability", 0.65))
+            prob = _extract_prob(res, 0.65)
             model_name = "Mohr-Coulomb Geotechnical Ensemble"
             version = "1.2.0"
             recommendations = [
@@ -138,7 +157,7 @@ async def generic_predict_endpoint(payload: Dict[str, Any]):
                 "soil_moisture_pct": float(payload.get("soil_moisture_pct", 75.0)),
             }
             res = _flood_engine.predict(features)
-            prob = float(res.get("probability", 0.72))
+            prob = _extract_prob(res, 0.72)
             model_name = "Catchment Inundation Hydrological Predictor"
             version = "2.0.1"
             recommendations = [
@@ -154,7 +173,7 @@ async def generic_predict_endpoint(payload: Dict[str, Any]):
                 "storm_surge_m": float(payload.get("storm_surge_m", 2.4)),
             }
             res = _cyclone_engine.predict(features)
-            prob = float(res.get("probability", 0.78))
+            prob = _extract_prob(res, 0.78)
             model_name = "Super-Cyclonic Storm Surge Model"
             version = "1.1.0"
             recommendations = [
@@ -170,7 +189,7 @@ async def generic_predict_endpoint(payload: Dict[str, Any]):
                 "epicentral_distance_km": float(payload.get("epicentral_distance_km", 35.0)),
             }
             res = _earthquake_engine.predict(features)
-            prob = float(res.get("probability", 0.60))
+            prob = _extract_prob(res, 0.60)
             model_name = "Peak Ground Acceleration Attenuation Model"
             version = "1.0.4"
             recommendations = [
@@ -186,7 +205,7 @@ async def generic_predict_endpoint(payload: Dict[str, Any]):
                 "wind_speed_kmh": float(payload.get("wind_speed_kmh", 35.0)),
             }
             res = _wildfire_engine.predict(features)
-            prob = float(res.get("probability", 0.68))
+            prob = _extract_prob(res, 0.68)
             model_name = "Wildfire Rothermel Spread Rate Model"
             version = "1.3.0"
             recommendations = [
@@ -202,7 +221,7 @@ async def generic_predict_endpoint(payload: Dict[str, Any]):
                 "vulnerability_index": 0.6,
             }
             res = _multi_hazard_engine.predict(features)
-            prob = float(res.get("probability", 0.55))
+            prob = _extract_prob(res, 0.55)
             model_name = "Cascading Multi-Hazard Compound Model"
             version = "2.0.0"
             recommendations = [
@@ -313,7 +332,7 @@ async def get_landslide_predictions():
     for sec in sectors:
         feat = sec["features"]
         res = _landslide_engine.predict(feat)
-        prob = float(res.get("probability", 0.70))
+        prob = _extract_prob(res, 0.70)
 
         # Calculate Mohr-Coulomb Factor of Safety
         # FoS < 1.0 indicates critical slope shear failure

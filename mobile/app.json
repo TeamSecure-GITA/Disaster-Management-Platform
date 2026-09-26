@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "Disaster Sentinel Mobile",
+    "slug": "disaster-management-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/icon.png",
+    "scheme": "disastersentinel",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#090D16"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.disastermanagement.sentinel",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Disaster Sentinel uses your location to deliver real-time life-saving hazard alerts and safe zone evacuation routing.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Continuous background location is required to alert you when entering flood, landslide, or cyclone impact hazard zones.",
+        "NSCameraUsageDescription": "Disaster Sentinel requires camera access to allow emergency incident reporting and damage severity analysis.",
+        "NSMicrophoneUsageDescription": "Microphone access is required for hands-free voice AI emergency guidance."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#090D16"
+      },
+      "package": "com.disastermanagement.sentinel",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "POST_NOTIFICATIONS",
+        "VIBRATE",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/icons/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Disaster Sentinel to monitor regional hazard perimeters in real time."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Disaster Sentinel to photograph disaster sites for damage classification."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "disaster-sentinel-mobile-app"
+      }
+    }
+  }
+}

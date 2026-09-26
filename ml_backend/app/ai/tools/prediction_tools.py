@@ -48,6 +48,37 @@ class PredictionTools:
             }
 
         if self.prediction_service is None:
+            try:
+                from app.ml.models.factory import (
+                    create_operational_landslide_engine,
+                    create_operational_flood_engine,
+                    create_operational_cyclone_engine,
+                    create_operational_earthquake_engine,
+                    create_operational_wildfire_engine,
+                    create_operational_multi_hazard_engine,
+                )
+                feat = features or {}
+                if hazard_type == "landslide":
+                    res = create_operational_landslide_engine().predict(feat)
+                    return {"success": True, "status": "ok", "hazard_type": hazard_type, "result": res.to_dict()}
+                elif hazard_type == "flood":
+                    res = create_operational_flood_engine().predict(feat)
+                    return {"success": True, "status": "ok", "hazard_type": hazard_type, "result": res.to_dict()}
+                elif hazard_type == "cyclone":
+                    res = create_operational_cyclone_engine().predict(feat)
+                    return {"success": True, "status": "ok", "hazard_type": hazard_type, "result": res.to_dict()}
+                elif hazard_type == "earthquake":
+                    res = create_operational_earthquake_engine().predict(feat)
+                    return {"success": True, "status": "ok", "hazard_type": hazard_type, "result": res.to_dict()}
+                elif hazard_type == "wildfire":
+                    res = create_operational_wildfire_engine().predict(feat)
+                    return {"success": True, "status": "ok", "hazard_type": hazard_type, "result": res.to_dict()}
+                elif hazard_type == "multi_hazard":
+                    res = create_operational_multi_hazard_engine().predict(feat)
+                    return {"success": True, "status": "ok", "hazard_type": hazard_type, "result": res.to_dict()}
+            except Exception:
+                pass
+
             return {
                 "success": False,
                 "status": "not_connected",
@@ -88,11 +119,17 @@ class PredictionTools:
 
     async def landslide_prediction(
         self,
-        latitude: float,
-        longitude: float,
+        latitude: Any = None,
+        longitude: Optional[float] = None,
         features: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         """Landslide susceptibility/risk inference."""
+        if isinstance(latitude, dict):
+            payload = latitude
+            features = payload.get("features", features)
+            latitude = payload.get("latitude")
+            longitude = payload.get("longitude")
 
         return await self.predict(
             hazard_type="landslide",
@@ -103,12 +140,18 @@ class PredictionTools:
 
     async def flood_prediction(
         self,
-        latitude: float,
-        longitude: float,
+        latitude: Any = None,
+        longitude: Optional[float] = None,
         features: Optional[Dict[str, Any]] = None,
         horizon_hours: int = 24,
+        **kwargs,
     ) -> Dict[str, Any]:
         """Flood-risk inference."""
+        if isinstance(latitude, dict):
+            payload = latitude
+            features = payload.get("features", features)
+            latitude = payload.get("latitude")
+            longitude = payload.get("longitude")
 
         return await self.predict(
             hazard_type="flood",
@@ -120,12 +163,18 @@ class PredictionTools:
 
     async def cyclone_prediction(
         self,
-        latitude: float,
-        longitude: float,
+        latitude: Any = None,
+        longitude: Optional[float] = None,
         features: Optional[Dict[str, Any]] = None,
         horizon_hours: int = 72,
+        **kwargs,
     ) -> Dict[str, Any]:
         """Cyclone-related risk inference."""
+        if isinstance(latitude, dict):
+            payload = latitude
+            features = payload.get("features", features)
+            latitude = payload.get("latitude")
+            longitude = payload.get("longitude")
 
         return await self.predict(
             hazard_type="cyclone",
@@ -137,15 +186,21 @@ class PredictionTools:
 
     async def earthquake_analysis(
         self,
-        latitude: float,
-        longitude: float,
+        latitude: Any = None,
+        longitude: Optional[float] = None,
         features: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Earthquake hazard/detection analysis.
 
         This does not claim deterministic earthquake prediction.
         """
+        if isinstance(latitude, dict):
+            payload = latitude
+            features = payload.get("features", features)
+            latitude = payload.get("latitude")
+            longitude = payload.get("longitude")
 
         return await self.predict(
             hazard_type="earthquake",
@@ -156,12 +211,18 @@ class PredictionTools:
 
     async def wildfire_prediction(
         self,
-        latitude: float,
-        longitude: float,
+        latitude: Any = None,
+        longitude: Optional[float] = None,
         features: Optional[Dict[str, Any]] = None,
         horizon_hours: int = 24,
+        **kwargs,
     ) -> Dict[str, Any]:
         """Wildfire risk inference."""
+        if isinstance(latitude, dict):
+            payload = latitude
+            features = payload.get("features", features)
+            latitude = payload.get("latitude")
+            longitude = payload.get("longitude")
 
         return await self.predict(
             hazard_type="wildfire",
@@ -173,11 +234,17 @@ class PredictionTools:
 
     async def multi_hazard_prediction(
         self,
-        latitude: float,
-        longitude: float,
+        latitude: Any = None,
+        longitude: Optional[float] = None,
         features: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         """Multi-hazard risk inference."""
+        if isinstance(latitude, dict):
+            payload = latitude
+            features = payload.get("features", features)
+            latitude = payload.get("latitude")
+            longitude = payload.get("longitude")
 
         return await self.predict(
             hazard_type="multi_hazard",
