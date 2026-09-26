@@ -1,0 +1,12 @@
+[
+  {
+    "query": "What is the flash flood forecast for Sector 4 over the next 24 hours?",
+    "expected_intent": "prediction",
+    "expected_tools": ["ml_prediction", "weather_forecast"]
+  },
+  {
+    "query": "Find all relief shelters within 5km that still have available bed capacity.",
+    "expected_intent": "shelter",
+    "expected_tools": ["shelter_search", "shelter_capacity", "shelter_safety"]
+  }
+]

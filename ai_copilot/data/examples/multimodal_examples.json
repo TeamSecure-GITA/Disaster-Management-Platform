@@ -1,0 +1,7 @@
+[
+  {
+    "query": "Assess this aerial drone photo of highway breach and calculate bypass route.",
+    "modalities": ["text", "image"],
+    "expected_intent": "routing"
+  }
+]

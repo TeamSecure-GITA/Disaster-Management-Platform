@@ -1,0 +1,12 @@
+[
+  {
+    "query": "Immediate evacuation order for riverside communities in Zone 3.",
+    "expected_intent": "evacuation",
+    "requires_confirmation": true
+  },
+  {
+    "query": "Dispatch NDRF team to collapsed bridge at North River Crossing.",
+    "expected_intent": "responder",
+    "requires_confirmation": true
+  }
+]
