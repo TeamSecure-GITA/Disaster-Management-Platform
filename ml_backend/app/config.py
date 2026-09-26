@@ -118,13 +118,23 @@ class Settings(BaseSettings):
 
     OPENAI_API_KEY: Optional[str] = None
 
-    AI_MODEL: str = "gpt-5.6"
+    GEMINI_API_KEY: Optional[str] = None
+
+    VITE_GEMINI_API_KEY: Optional[str] = None
+
+    VITE_FIREBASE_API_KEY: Optional[str] = None
+
+    AI_MODEL: str = "gemini-2.0-flash"
 
     AI_TEMPERATURE: float = 0.2
 
     AI_MAX_TOKENS: int = 4096
 
-    AI_ENABLED: bool = False
+    AI_ENABLED: bool = True
+
+    @property
+    def EFFECTIVE_GEMINI_KEY(self) -> Optional[str]:
+        return self.GEMINI_API_KEY or self.VITE_GEMINI_API_KEY or self.VITE_FIREBASE_API_KEY or None
 
     # ------------------------------------------------------------------
     # RAG
@@ -390,7 +400,7 @@ class Settings(BaseSettings):
         return value
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "Backend/.env", "../Backend/.env", "frontend/.env", "../frontend/.env"),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
