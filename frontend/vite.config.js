@@ -64,4 +64,22 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    port: 5500,
+    proxy: {
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
+      "/ml-api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ml-api/, ""),
+      },
+      "/socket.io": {
+        target: "http://localhost:5000",
+        ws: true,
+      },
+    },
+  },
 });

@@ -17,7 +17,11 @@ const GEMINI_API_KEY =
   import.meta.env.VITE_FIREBASE_API_KEY ||
   "";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (typeof window !== "undefined" && window.location.origin
+    ? window.location.origin
+    : "http://localhost:5000");
 
 const SYSTEM_PROMPT = `
 You are the Official AI Disaster Management & Emergency Life-Safety Assistant for the Disaster Management Platform, developed by TeamSecure.
@@ -456,19 +460,24 @@ export async function askGemini(userMessage, history = []) {
     }
   }
 
-  // Step 8: Try Backend Chat API
+  // Step 8: Try Backend AI Copilot Chat API
   if (!finalEnglishResponse) {
     try {
-      const res = await fetch(`${API_URL}/api/chat`, {
+      const res = await fetch(`${API_URL}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: englishQuery }),
+        body: JSON.stringify({ message: englishQuery, query: englishQuery }),
       });
 
       if (res.ok) {
         const json = await res.json();
-        if (json.data?.message && !json.data?.fallback) {
-          finalEnglishResponse = json.data.message;
+        const candidate =
+          json.reply ||
+          json.data?.reply ||
+          json.data?.message ||
+          json.message;
+        if (candidate && !json.data?.fallback) {
+          finalEnglishResponse = candidate;
         }
       }
     } catch {}

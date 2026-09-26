@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
+const fs = require("fs");
+const axios = require("axios");
 const mongoose = require("mongoose");
 const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
@@ -64,7 +66,10 @@ app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : false);
 // ================================
 
 app.use(cors(corsOptions));
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+}));
 app.use(firewallMiddleware);
 app.use(requestLogger);
 app.use(generalLimiter);
@@ -94,8 +99,11 @@ app.use((req, res, next) => {
 });
 
 // ================================
-// STATIC FILES
+// STATIC & FRONTEND SPA SERVING
 // ================================
+
+const frontendDistPath = path.resolve(__dirname, "../frontend/dist");
+const hasFrontendBuild = fs.existsSync(frontendDistPath);
 
 app.use(
     "/uploads",
@@ -103,11 +111,18 @@ app.use(
     express.static(path.join(__dirname, environment.uploadDirectory))
 );
 
+if (hasFrontendBuild) {
+    app.use(express.static(frontendDistPath, { index: false }));
+}
+
 // ================================
 // HEALTH CHECK
 // ================================
 
 app.get("/", (req, res) => {
+    if (hasFrontendBuild && req.headers.accept && req.headers.accept.includes("text/html")) {
+        return res.sendFile(path.join(frontendDistPath, "index.html"));
+    }
     res.status(200).json({
         message: "Disaster Management API is running",
     });
@@ -181,6 +196,58 @@ app.use("/api/response", responseRoutes);
 
 // Unified AI & ML Bridge
 app.use("/api/ai", aiRoute);
+
+// ================================
+// AI / ML FASTAPI REVERSE PROXY
+// ================================
+app.use("/ml-api", async (req, res) => {
+    const targetBase = (environment.aiChatbotUrl || "http://localhost:8000").replace(/\/$/, "");
+    const targetPath = req.originalUrl.replace(/^\/ml-api/, "") || "/";
+    const targetUrl = `${targetBase}${targetPath}`;
+
+    try {
+        const response = await axios({
+            method: req.method,
+            url: targetUrl,
+            data: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+            params: req.query,
+            headers: {
+                "Content-Type": req.headers["content-type"] || "application/json",
+                "Accept": req.headers["accept"] || "application/json",
+            },
+            timeout: 30000,
+            validateStatus: () => true,
+        });
+
+        return res.status(response.status).json(response.data);
+    } catch (err) {
+        return res.status(503).json({
+            success: false,
+            message: "AI / ML Engine is currently initializing or unreachable",
+            error: err.message,
+            targetUrl,
+        });
+    }
+});
+
+// ================================
+// SPA CLIENT-SIDE ROUTING FALLBACK
+// ================================
+if (hasFrontendBuild) {
+    app.use((req, res, next) => {
+        if (req.method !== "GET" && req.method !== "HEAD") {
+            return next();
+        }
+        if (
+            req.path.startsWith("/api") ||
+            req.path.startsWith("/ml-api") ||
+            req.path.startsWith("/uploads")
+        ) {
+            return next();
+        }
+        res.sendFile(path.join(frontendDistPath, "index.html"));
+    });
+}
 
 // ================================
 // 404 HANDLER

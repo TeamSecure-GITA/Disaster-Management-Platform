@@ -1,0 +1,31 @@
+{
+  "name": "disaster-management-platform",
+  "version": "1.0.0",
+  "description": "Unified Zero-Latency Real-Time Disaster Management & Emergency Response Platform",
+  "private": true,
+  "scripts": {
+    "start": "node scripts/run_all.js",
+    "start:unified": "npm --prefix frontend run build && npm --prefix Backend start",
+    "dev": "node scripts/run_all.js",
+    "dev:backend": "npm --prefix Backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:ml": "cd ml_backend && .venv/bin/uvicorn app.main:app --reload --port 8000",
+    "dev:mobile": "npm --prefix mobile start",
+    "build": "npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "test": "node scripts/run_tests.js",
+    "test:backend": "npm --prefix Backend test",
+    "test:ml": "cd ml_backend && .venv/bin/pytest tests/",
+    "test:frontend": "npm --prefix frontend run build"
+  },
+  "keywords": [
+    "disaster-management",
+    "emergency-response",
+    "realtime-ai",
+    "geotechnical-ml",
+    "lora-mesh",
+    "offline-safety"
+  ],
+  "author": "TeamSecure-GITA",
+  "license": "MIT"
+}

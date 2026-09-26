@@ -193,6 +193,33 @@ class RiskEngineService {
       timestamp: new Date().toISOString(),
     };
   }
+
+  /**
+   * Get single zone risk assessment by ID
+   */
+  async getZoneAssessment(zoneId) {
+    const zones = await this.getAllZones();
+    const zone = zones.find((z) => z.id === zoneId) || zones[0];
+    const risk = this.calculateCompoundRisk({
+      hazardIntensity: (zone.overallRiskScore || 50) / 100,
+      forecastTrend: 1.15,
+      anomalyFactor: 1.08,
+      exposureFactor: 0.75,
+      vulnerabilityFactor: 0.70,
+    });
+
+    return {
+      zoneId: zone.id,
+      zoneName: zone.name,
+      level: risk.level,
+      overallRiskScore: risk.overallRiskScore,
+      components: risk.components,
+      primaryHazard: zone.primaryHazard,
+      populationAtRisk: zone.populationAtRisk,
+      assessedAt: new Date().toISOString(),
+      evacuationRecommended: risk.overallRiskScore >= 75,
+    };
+  }
 }
 
 module.exports = new RiskEngineService();

@@ -1,5 +1,40 @@
 services:
-  # ── Backend (Node.js / Express) ──────────────────────────────────────────
+  # ── Unified Single-Service Deployment (Frontend + Backend + AI/ML) ────────
+  - type: web
+    name: Disaster-Management-Platform-Unified
+    runtime: node
+    buildCommand: npm --prefix frontend install && npm --prefix frontend run build && npm --prefix Backend install
+    startCommand: node scripts/run_all.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        value: mongodb+srv://teamsecureproject_db_user:1ZUmjUV8dPgGD7dp@cluster0.0xz9hc6.mongodb.net/disaster_management?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: 8f6b2d0e9c4a7b1d5e3f6a8c0d2b4e6f9a1c3e5d7b9f2a4c6e8d0b3f5a7c9e1
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+  # ── AI / ML Subsystem (FastAPI / PyTorch / Scikit-Learn) ────────────────
+  - type: web
+    name: Disaster-Management-Platform-ML
+    runtime: python
+    rootDir: ml_backend
+    buildCommand: pip install -r ../requirements.txt 2>/dev/null || pip install fastapi uvicorn pydantic scikit-learn numpy pandas httpx
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: ENVIRONMENT
+        value: production
+      - key: ML_ENABLED
+        value: "true"
+      - key: AI_ENABLED
+        value: "true"
+
+  # ── Backend (Node.js / Express Core API) ─────────────────────────────────
   - type: web
     name: Disaster-Management-Platform-Backend
     runtime: node
@@ -17,8 +52,13 @@ services:
         value: 8f6b2d0e9c4a7b1d5e3f6a8c0d2b4e6f9a1c3e5d7b9f2a4c6e8d0b3f5a7c9e1
       - key: JWT_EXPIRES_IN
         value: 7d
+      - key: AI_CHATBOT_URL
+        fromService:
+          type: web
+          name: Disaster-Management-Platform-ML
+          property: host
 
-  # ── Frontend (Vite / React) ───────────────────────────────────────────────
+  # ── Frontend (Vite / React / PWA) ─────────────────────────────────────────
   - type: web
     name: Disaster-Management-Platform-Frontend
     runtime: static

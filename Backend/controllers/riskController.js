@@ -42,8 +42,22 @@ const getRiskSummary = async (req, res, next) => {
   }
 };
 
+const getZoneAssessment = async (req, res, next) => {
+  try {
+    const { zoneId } = req.params;
+    const assessment = await riskEngineService.getZoneAssessment(zoneId);
+    res.status(200).json({
+      success: true,
+      data: assessment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   assessRisk,
   getRiskZones,
   getRiskSummary,
+  getZoneAssessment,
 };

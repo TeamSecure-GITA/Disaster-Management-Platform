@@ -3,8 +3,27 @@
  */
 import { DisasterPlatformError } from '../utils/errors';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const ML_API_BASE_URL = process.env.NEXT_PUBLIC_ML_API_URL || 'http://localhost:8000';
+function getApiBaseUrl(): string {
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) {
+    const envUrl = String((import.meta as any).env.VITE_API_URL).replace(/\/$/, '');
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+  }
+  if (typeof window !== 'undefined') {
+    return '/api';
+  }
+  return 'http://localhost:5000/api';
+}
+
+function getMlApiBaseUrl(): string {
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_ML_API_URL) {
+    return String((import.meta as any).env.VITE_ML_API_URL).replace(/\/$/, '');
+  }
+  // Unified proxy: Backend and Vite dev proxy handle /ml-api transparently
+  if (typeof window !== 'undefined') {
+    return '/ml-api';
+  }
+  return 'http://localhost:8000';
+}
 
 interface RequestOptions extends RequestInit {
   useMlEngine?: boolean;
@@ -12,7 +31,7 @@ interface RequestOptions extends RequestInit {
 
 export async function apiClient<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { useMlEngine, headers, ...customConfig } = options;
-  const baseUrl = useMlEngine ? ML_API_BASE_URL : API_BASE_URL;
+  const baseUrl = useMlEngine ? getMlApiBaseUrl() : getApiBaseUrl();
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
   const config: RequestInit = {

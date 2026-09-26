@@ -1,0 +1,38 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# macOS
+.DS_Store
+
+# Local env files
+.env
+.env.local
+
+
+#deleteable folder name
+app 
+assets
+components
+config
+constants
+database
+hooks
+lora
+notifications
+offline
+permissions
+providers
+security
+services
+stores
+types
+utils

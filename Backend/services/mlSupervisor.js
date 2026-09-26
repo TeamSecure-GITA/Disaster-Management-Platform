@@ -27,9 +27,15 @@ const startMlBackendSupervisor = async () => {
     return null;
   }
 
-  const mlDir = path.resolve(__dirname, "../../ml_backend");
-  if (!fs.existsSync(mlDir)) {
-    console.warn(`[ML-Supervisor] ML directory not found at ${mlDir}, skipping auto-start`);
+  const possiblePaths = [
+    path.resolve(__dirname, "../../ml_backend"),
+    path.resolve(__dirname, "../ml_backend"),
+    path.resolve(process.cwd(), "ml_backend"),
+    path.resolve(process.cwd(), "../ml_backend"),
+  ];
+  const mlDir = possiblePaths.find((p) => fs.existsSync(p));
+  if (!mlDir) {
+    console.warn("[ML-Supervisor] ML directory not found in candidate paths, skipping auto-start");
     return null;
   }
 
@@ -84,8 +90,8 @@ const startMlBackendSupervisor = async () => {
       mlProcess = null;
     });
 
-    // Wait up to 5 seconds for health
-    for (let i = 0; i < 10; i++) {
+    // Wait up to 8 seconds for health check
+    for (let i = 0; i < 16; i++) {
       await new Promise((r) => setTimeout(r, 500));
       if (await isMlBackendHealthy()) {
         console.log("✅ [ML-Supervisor] AI/ML Backend verified healthy on http://localhost:8000");
