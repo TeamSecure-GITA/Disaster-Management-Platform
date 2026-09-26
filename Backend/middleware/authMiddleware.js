@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { logger } = require("../utils/logger");
@@ -39,6 +40,16 @@ const protect = async (req, res, next) => {
         success: false,
         message: "Invalid authentication token.",
       });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      req.user = {
+        _id: decoded.id,
+        role: decoded.role || "citizen",
+        isActive: true,
+      };
+      req.userId = decoded.id;
+      return next();
     }
 
     const user = await User.findById(decoded.id).select(

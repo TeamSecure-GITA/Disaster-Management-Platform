@@ -50,6 +50,8 @@ const wifiCsiRoutes = require("./routes/wifiCsiRoutes");
 const pqcLedgerRoutes = require("./routes/pqcLedgerRoutes");
 const bleSpitRoutes = require("./routes/bleSpitRoutes");
 const nfcTriageRoutes = require("./routes/nfcTriageRoutes");
+const riskRoutes = require("./routes/riskRoutes");
+const responseRoutes = require("./routes/responseRoutes");
 
 const app = express();
 
@@ -171,6 +173,10 @@ app.use("/api/wifi-csi", wifiCsiRoutes);
 app.use("/api/pqc-ledger", pqcLedgerRoutes);
 app.use("/api/ble-spit", bleSpitRoutes);
 app.use("/api/nfc-triage", nfcTriageRoutes);
+
+// Working Architecture Core: Risk Engine & Unified Response System
+app.use("/api/risk", riskRoutes);
+app.use("/api/response", responseRoutes);
 
 // ================================
 // 404 HANDLER
