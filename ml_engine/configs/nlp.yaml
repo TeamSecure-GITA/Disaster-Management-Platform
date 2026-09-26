@@ -1,0 +1,9 @@
+nlp:
+  embedding_model: all-MiniLM-L6-v2
+  max_sequence_length: 256
+  sentiment_analysis: true
+  entity_types:
+    - LOCATION
+    - HAZARD_TYPE
+    - CASUALTIES
+    - RESOURCE_NEEDED

@@ -1,0 +1,10 @@
+from __future__ import annotations
+from enum import Enum
+
+class IncidentLabel(str, Enum):
+    SEARCH_AND_RESCUE = "SEARCH_AND_RESCUE"
+    MEDICAL_EMERGENCY = "MEDICAL_EMERGENCY"
+    INFRASTRUCTURE_FAILURE = "INFRASTRUCTURE_FAILURE"
+    FLOOD_INUNDATION = "FLOOD_INUNDATION"
+    FIRE_OUTBREAK = "FIRE_OUTBREAK"
+    OTHER = "OTHER"

@@ -1,0 +1,10 @@
+environment: production
+debug: false
+log_level: INFO
+training:
+  epochs: 100
+  batch_size: 128
+  early_stopping_patience: 10
+monitoring:
+  alerts_enabled: true
+  slack_webhook: ""

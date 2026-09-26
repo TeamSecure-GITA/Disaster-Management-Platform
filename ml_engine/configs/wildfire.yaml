@@ -1,0 +1,12 @@
+hazard_type: wildfire
+features:
+  - drought_code
+  - fuel_moisture_content
+  - ambient_temperature_c
+  - wind_speed_kmh
+  - relative_humidity_pct
+model:
+  algorithm: lightgbm
+  learning_rate: 0.04
+  n_estimators: 220
+  threshold: 0.68

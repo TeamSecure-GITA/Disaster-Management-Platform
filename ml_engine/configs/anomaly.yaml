@@ -1,0 +1,8 @@
+anomaly:
+  contamination: 0.02
+  metric: euclidean
+algorithms:
+  sensor: isolation_forest
+  weather: one_class_svm
+  network: local_outlier_factor
+  infrastructure: mahalanobis_distance

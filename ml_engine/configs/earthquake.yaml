@@ -1,0 +1,12 @@
+hazard_type: earthquake
+features:
+  - hypocentral_depth_km
+  - peak_ground_acceleration_pga
+  - fault_distance_km
+  - shear_wave_velocity_vs30
+  - historical_seismicity_rate
+model:
+  algorithm: ensemble_neural_net
+  hidden_layers: [128, 64, 32]
+  activation: relu
+  dropout: 0.2

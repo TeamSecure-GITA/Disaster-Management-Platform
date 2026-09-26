@@ -1,0 +1,9 @@
+optimization:
+  solver: scip
+  time_limit_seconds: 60
+  evacuation:
+    capacity_penalty: 100.0
+    clearance_target_hours: 6.0
+  resource_allocation:
+    urgency_weight: 0.7
+    distance_weight: 0.3

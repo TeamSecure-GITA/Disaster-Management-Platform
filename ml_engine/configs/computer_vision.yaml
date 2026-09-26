@@ -1,0 +1,11 @@
+vision:
+  input_resolution: [512, 512]
+  backbone: resnet50
+  detection_confidence_threshold: 0.5
+tasks:
+  - damage_detection
+  - flood_detection
+  - road_blockage
+  - fire_detection
+  - debris_detection
+  - drone_analysis

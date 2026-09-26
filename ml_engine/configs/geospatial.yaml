@@ -1,0 +1,9 @@
+geospatial:
+  crs: EPSG:4326
+  target_crs: EPSG:3857
+  raster_resolution_meters: 30.0
+layers:
+  - hazard_mapping
+  - exposure_mapping
+  - vulnerability_mapping
+  - risk_zoning

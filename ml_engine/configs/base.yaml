@@ -1,0 +1,13 @@
+environment: base
+random_seed: 42
+data:
+  raw_dir: "datasets/raw"
+  processed_dir: "datasets/processed"
+  features_dir: "datasets/features"
+models:
+  trained_dir: "models/trained"
+  checkpoints_dir: "models/checkpoints"
+  registry_dir: "model_registry"
+monitoring:
+  drift_threshold: 0.05
+  latency_budget_ms: 200

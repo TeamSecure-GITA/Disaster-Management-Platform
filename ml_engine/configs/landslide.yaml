@@ -1,0 +1,15 @@
+hazard_type: landslide
+features:
+  - slope_angle
+  - elevation
+  - aspect
+  - rainfall_24h
+  - soil_moisture
+  - lithology_code
+  - vegetation_index_ndvi
+model:
+  algorithm: gradient_boosting
+  learning_rate: 0.05
+  max_depth: 6
+  n_estimators: 200
+  threshold: 0.65

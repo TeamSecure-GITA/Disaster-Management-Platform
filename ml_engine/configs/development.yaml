@@ -1,0 +1,9 @@
+environment: development
+debug: true
+log_level: DEBUG
+data:
+  sample_size: 1000
+training:
+  epochs: 10
+  batch_size: 32
+  early_stopping_patience: 3

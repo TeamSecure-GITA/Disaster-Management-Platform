@@ -1,0 +1,13 @@
+hazard_type: cyclone
+features:
+  - central_pressure_hpa
+  - max_sustained_wind_speed_knots
+  - sea_surface_temperature_c
+  - latitude
+  - longitude
+  - pressure_tendency_3h
+model:
+  algorithm: extreme_gradient_boost
+  n_estimators: 300
+  learning_rate: 0.03
+  threshold: 0.60

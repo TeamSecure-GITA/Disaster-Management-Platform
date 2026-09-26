@@ -1,0 +1,12 @@
+hazard_type: flood
+features:
+  - river_discharge_rate
+  - upstream_rainfall_72h
+  - water_level_gauge
+  - catchment_area_sqkm
+  - soil_saturation_ratio
+model:
+  algorithm: random_forest
+  n_estimators: 250
+  max_depth: 8
+  threshold: 0.70

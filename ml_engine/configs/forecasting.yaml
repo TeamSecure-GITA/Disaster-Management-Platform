@@ -1,0 +1,9 @@
+time_series:
+  horizon_hours: 48
+  frequency: 1h
+  lags: [1, 2, 3, 6, 12, 24, 48]
+  rolling_windows: [3, 6, 12, 24]
+model:
+  algorithm: lstm_seq2seq
+  hidden_units: 64
+  learning_rate: 0.001

@@ -1,0 +1,8 @@
+hazard_type: multi_hazard
+compound_hazards:
+  - [cyclone, flood]
+  - [rainfall, landslide]
+  - [earthquake, landslide]
+fusion_method: stacked_meta_classifier
+meta_model: logistic_regression
+calibration: isotonic
