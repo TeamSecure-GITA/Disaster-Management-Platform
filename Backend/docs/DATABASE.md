@@ -52,6 +52,7 @@ MONGO_URI=mongodb://localhost:27017/disaster_management
 |---|---|---|
 | `sensors` | `Sensor.js` | IoT slope, river, and weather station hardware profiles |
 | `sensorreadings` | `SensorReading.js` | Time-series telemetry: soil moisture %, pore-water pressure, MEMS tilt, and rainfall mm |
+| `rainfallrecords` | `RainfallRecord.js` | Gridded & station rainfall time-series: rolling 1h, 3h, 24h, 72h totals, IMD categories, and 72h forecast |
 | `drones` | `Drone.js` | UAV hardware inventory, battery health, and telemetry coordinates |
 | `dronemissions` | `DroneMission.js` | Autonomous search-and-rescue waypoints, delivery drops, and thermal scouting flights |
 | `satellitedata` | `SatelliteData.js` | Sentinel-1 SAR and ISRO optical satellite pass metadata, cloud cover %, and radar backscatter |

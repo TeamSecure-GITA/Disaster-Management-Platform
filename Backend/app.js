@@ -55,6 +55,7 @@ const nfcTriageRoutes = require("./routes/nfcTriageRoutes");
 const riskRoutes = require("./routes/riskRoutes");
 const responseRoutes = require("./routes/responseRoutes");
 const aiRoute = require("./routes/aiRoute");
+const weatherRoutes = require("./routes/weatherRoutes");
 
 const app = express();
 
@@ -193,6 +194,7 @@ app.use("/api/nfc-triage", nfcTriageRoutes);
 // Working Architecture Core: Risk Engine & Unified Response System
 app.use("/api/risk", riskRoutes);
 app.use("/api/response", responseRoutes);
+app.use("/api/weather", weatherRoutes);
 
 // Unified AI & ML Bridge
 app.use("/api/ai", aiRoute);

@@ -408,10 +408,35 @@ const recordFieldObservation = async (data) => {
   };
 };
 
+// Update State Rainfall dynamically from weatherService time-series ingestion
+function updateStateRainfallFromTimeseries({ state, rain24h, rain72h, rain1h, imdBand }) {
+  const stateObj = nerStateOverview.find(
+    (s) => s.state.toLowerCase() === (state || "").toLowerCase()
+  );
+  if (stateObj) {
+    if (rain24h !== undefined) stateObj.currentRainfall24hMm = Number(rain24h);
+    if (rain72h !== undefined) stateObj.currentRainfall72hMm = Number(rain72h);
+    if (rain1h !== undefined) stateObj.currentRainfall1hMm = Number(rain1h);
+    if (imdBand) stateObj.imdBand = `${imdBand} (IMD Standard)`;
+
+    // Recalculate dynamic LSI based on real ingested precipitation
+    const lsiResult = calculateLSI({
+      rainfall24h: stateObj.currentRainfall24hMm,
+      threshold: stateObj.rainfallThresholdMm,
+      soilSaturation: stateObj.soilSaturationPercent,
+      slopeAngle: stateObj.averageSlopeDeg,
+    });
+    stateObj.landslideSusceptibilityIndex = lsiResult.lsiScore;
+    stateObj.riskLevel = lsiResult.riskLevel;
+  }
+}
+
 module.exports = {
   getOverview,
   getCorridors,
   recordFieldObservation,
   calculateLSI,
-  getResponsePrioritization
+  getResponsePrioritization,
+  updateStateRainfallFromTimeseries,
 };
+

@@ -28,7 +28,7 @@ const SUSPICIOUS_PATTERNS = [
   /(\b(union|select|insert|update|delete|drop|alter|create|exec|execute)\b.*\b(from|into|table|database|where)\b)/i,
   /(\$gt|\$lt|\$ne|\$eq|\$regex|\$where|\$exists)/i,
   /(\.\.\/|\.\.\\|%2e%2e)/i,
-  /(<script|javascript:|on\w+\s*=)/i,
+  /(<script|javascript:|\bon\w+\s*=)/i,
   /(;\s*(ls|cat|rm|chmod|wget|curl|bash|sh|python|node|eval)\b)/i,
 ];
 

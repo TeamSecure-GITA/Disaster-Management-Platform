@@ -90,6 +90,16 @@ Authorization: Bearer <access-token>
 
 ---
 
+## Weather & Gridded Rainfall Time-Series APIs
+
+- `GET /api/weather/ner-rainfall` — Live NER rolling rainfall across 8 states and hill corridors (rolling 1h / 3h / 24h / 72h totals + forecasts).
+- `GET /api/weather/current` — Current weather conditions for coordinates (lat/lon) with Open-Meteo and OpenWeatherMap fallback.
+- `GET /api/weather/rainfall-series` — Historical rainfall time series points (by stationId, state, hours) for charts and analytics.
+- `POST /api/weather/sync-now` — On-demand manual trigger to ingest gridded rainfall across all monitored NER stations.
+- `GET /api/weather/imd-terms` — Official IMD data-access terms, NDSAP policy compliance summary, and multi-tier gap filling framework.
+
+---
+
 ## World-First Deep-Tech & Zero-Infrastructure APIs
 
 ### Atmospheric Wi-Fi "Bending" (CSI RF Ingestion)
