@@ -149,9 +149,13 @@ Authorization: Bearer <access-token>
 - `GET /api/drones/missions/:id` — Retrieve mission waypoint route
 - `PATCH /api/drones/missions/:id/status` — Update mission execution status
 
-### IoT Sensors & Satellite Imagery
+### IoT Sensors & Satellite Remote Sensing
 - `GET, POST /api/sensors` — IoT environmental sensor telemetry (soil moisture, rainfall, MEMS tilt)
 - `GET, POST /api/satellite` — Satellite radar and optical observation metadata
+- `GET /api/satellite/layers` — GeoJSON FeatureCollection for Leaflet/GIS map layers (InSAR displacement vectors, SAR flood inundation polygons, soil moisture grid)
+- `GET /api/satellite/insar-displacement` — Millimeter-level Line-of-Sight (LOS) displacement and annual velocity (mm/yr) for monitored Himalayan transit corridors
+- `GET /api/satellite/summary` — Satellite constellation telemetry summary (active scenes, critical deformation sites, flood inundation area)
+- `POST /api/satellite/sync-now` — Operator trigger for immediate remote sensing ingestion & processing cycle
 - `GET /api/predictions` — Machine learning early warning hazard predictions
 - `GET /api/analytics` — Platform-wide disaster trends and response performance metrics
 

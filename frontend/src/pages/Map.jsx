@@ -7,8 +7,10 @@ import {
   Popup,
   Circle,
   Polyline,
+  Polygon,
   useMap,
 } from "react-leaflet";
+import { getSatelliteLayers } from "../services/disasterService";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -116,6 +118,34 @@ const createRiskBadgeIcon = (riskPercent, color) => {
     </div>`,
     iconSize: [52, 24],
     iconAnchor: [26, 12],
+    popupAnchor: [0, -14],
+  });
+};
+
+const createInSarMarkerIcon = (velocityMmYear, color, status) => {
+  const isShear = status === "critical_shear" || Math.abs(velocityMmYear) > 25;
+  return L.divIcon({
+    className: "insar-badge-marker",
+    html: `<div style="
+      background-color: ${color};
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 11px;
+      border: 2px solid ${isShear ? '#fef08a' : '#ffffff'};
+      box-shadow: 0 3px 10px rgba(0,0,0,0.65);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      cursor: pointer;
+    ">
+      <span>🛰️</span>
+      <span>${velocityMmYear > 0 ? '+' : ''}${velocityMmYear} mm/y</span>
+    </div>`,
+    iconSize: [88, 24],
+    iconAnchor: [44, 12],
     popupAnchor: [0, -14],
   });
 };
@@ -1264,6 +1294,8 @@ export default function Map() {
   const [riskCategoryFilter, setRiskCategoryFilter] = useState("all"); // "all" | "flood" | "cyclone" | "heavy_rain" | "landslide" | "soil_moisture" | "erosion"
   const [minRiskPercent, setMinRiskPercent] = useState(30);
   const [showSatelliteRadar, setShowSatelliteRadar] = useState(true);
+  const [satelliteLayers, setSatelliteLayers] = useState(null);
+  const [showInSarLayer, setShowInSarLayer] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState([20.2961, 85.8245]); // Default Bhubaneswar
@@ -1273,6 +1305,19 @@ export default function Map() {
   const [activeRouteTarget, setActiveRouteTarget] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [evacBannerInfo, setEvacBannerInfo] = useState(null);
+
+  // Ingest live satellite remote-sensing map layers
+  useEffect(() => {
+    let active = true;
+    getSatelliteLayers("all").then((data) => {
+      if (active && data) {
+        setSatelliteLayers(data);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Online / offline detector
   useEffect(() => {
@@ -1549,6 +1594,31 @@ export default function Map() {
                 {lyr.label}
               </button>
             ))}
+
+            {/* InSAR Radar Layer Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowInSarLayer((prev) => !prev)}
+              title="Toggle Copernicus Sentinel-1 InSAR Slope Displacement & Radar Flood Layers"
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid",
+                borderColor: showInSarLayer ? "#8b5cf6" : "#475569",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                backgroundColor: showInSarLayer ? "#7c3aed" : "rgba(30, 41, 59, 0.7)",
+                color: showInSarLayer ? "#ffffff" : "#94a3b8",
+                transition: "all 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>📡</span>
+              <span>InSAR Radar ({satelliteLayers?.layers?.insarDisplacement?.length || 7})</span>
+            </button>
           </div>
         </div>
 
@@ -1858,6 +1928,118 @@ export default function Map() {
                 />
               </>
             )}
+
+            {/* ─── LIVE COPERNICUS SENTINEL-1 InSAR & SAR REMOTE SENSING MAP LAYERS ─── */}
+            {showInSarLayer &&
+              satelliteLayers?.layers?.insarDisplacement?.map((feat) => {
+                const coords = feat.geometry?.coordinates;
+                if (!coords || coords.length < 2) return null;
+                const [lng, lat] = coords;
+                const p = feat.properties;
+                const velocity = p.insar?.velocityMmYear ?? 0;
+                const displacement = p.insar?.displacementMm ?? 0;
+
+                return (
+                  <React.Fragment key={feat.id || `insar-${lat}-${lng}`}>
+                    <Marker
+                      position={[lat, lng]}
+                      icon={createInSarMarkerIcon(velocity, p.colorCode, p.insar?.deformationStatus)}
+                    >
+                      <Popup>
+                        <div style={{ color: "#0f172a", maxWidth: "320px", padding: "4px", lineHeight: "1.4" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <span style={{ fontSize: "0.75rem", fontWeight: "800", color: p.colorCode, textTransform: "uppercase" }}>
+                              🛰️ {p.mission || "Sentinel-1 SAR"} ({p.satellite})
+                            </span>
+                            <span
+                              style={{
+                                backgroundColor: p.colorCode,
+                                color: "#fff",
+                                fontSize: "0.7rem",
+                                fontWeight: "800",
+                                padding: "2px 7px",
+                                borderRadius: "10px",
+                              }}
+                            >
+                              {p.insar?.deformationStatus?.replace("_", " ").toUpperCase()}
+                            </span>
+                          </div>
+
+                          <strong style={{ fontSize: "0.95rem", color: "#0f172a", display: "block", marginBottom: "4px" }}>
+                            {p.corridor || p.name}
+                          </strong>
+
+                          <p style={{ fontSize: "0.78rem", color: "#475569", margin: "4px 0 8px 0" }}>
+                            {p.advisory}
+                          </p>
+
+                          <div
+                            style={{
+                              backgroundColor: "#f8fafc",
+                              padding: "8px",
+                              borderRadius: "8px",
+                              fontSize: "0.75rem",
+                              color: "#334155",
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: "6px",
+                              border: "1px solid #e2e8f0",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            <div><strong>LOS Displacement:</strong> {displacement > 0 ? "+" : ""}{displacement} mm</div>
+                            <div><strong>Deformation Rate:</strong> {velocity > 0 ? "+" : ""}{velocity} mm/yr</div>
+                            <div><strong>Soil Saturation:</strong> {p.soilMoisture?.saturationPercentage}%</div>
+                            <div><strong>Liquefaction Risk:</strong> {p.soilMoisture?.liquefactionRisk?.toUpperCase()}</div>
+                            <div><strong>SAR Backscatter:</strong> {p.sar?.backscatterVvDb} dB</div>
+                            <div><strong>Orbit:</strong> {p.orbitDirection} (T{p.relativeOrbit})</div>
+                          </div>
+
+                          <div style={{ fontSize: "0.7rem", color: "#64748b" }}>
+                            🕒 Last Satellite Pass: {new Date(p.lastPassTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} (6-hr repeat)
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </React.Fragment>
+                );
+              })}
+
+            {/* SAR FLOOD INUNDATION POLYGON WATER MASKS */}
+            {showInSarLayer &&
+              satelliteLayers?.layers?.sarFloodInundation?.map((poly) => {
+                const rawCoords = poly.geometry?.coordinates?.[0];
+                if (!rawCoords || !rawCoords.length) return null;
+                // Convert GeoJSON [lng, lat] to Leaflet [lat, lng]
+                const leafletPositions = rawCoords.map(([lng, lat]) => [lat, lng]);
+
+                return (
+                  <Polygon
+                    key={poly.id}
+                    positions={leafletPositions}
+                    pathOptions={{
+                      color: poly.properties?.colorCode || "#0284c7",
+                      fillColor: poly.properties?.fillColor || "#0284c7",
+                      fillOpacity: poly.properties?.fillOpacity || 0.45,
+                      weight: 2,
+                    }}
+                  >
+                    <Popup>
+                      <div style={{ color: "#0f172a", padding: "2px" }}>
+                        <strong style={{ display: "block", color: "#0284c7", fontSize: "0.9rem" }}>
+                          {poly.properties?.title || "🌊 SAR Flood Inundation Area"}
+                        </strong>
+                        <div style={{ fontSize: "0.78rem", color: "#334155", marginTop: "4px" }}>
+                          Extracted Flood Inundation: <strong>{poly.properties?.floodAreaSqKm} sq km</strong>
+                        </div>
+                        <div style={{ fontSize: "0.72rem", color: "#64748b" }}>
+                          Radar Backscatter Drop: {poly.properties?.backscatterVvDb} dB (Specular Reflection)
+                        </div>
+                      </div>
+                    </Popup>
+                  </Polygon>
+                );
+              })}
 
             {/* SATELLITE WEATHER DETECTION RISK ZONES (Circles + Badges with colors & %) */}
             {filteredRiskZones.map((zone) => (

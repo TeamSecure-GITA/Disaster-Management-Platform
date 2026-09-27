@@ -7,6 +7,10 @@ const dataTypes = [
   "fire",
   "vegetation",
   "disaster",
+  "insar_displacement",
+  "sar_backscatter",
+  "optical_multispectral",
+  "soil_moisture",
   "other",
 ];
 

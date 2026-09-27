@@ -55,7 +55,7 @@ MONGO_URI=mongodb://localhost:27017/disaster_management
 | `rainfallrecords` | `RainfallRecord.js` | Gridded & station rainfall time-series: rolling 1h, 3h, 24h, 72h totals, IMD categories, and 72h forecast |
 | `drones` | `Drone.js` | UAV hardware inventory, battery health, and telemetry coordinates |
 | `dronemissions` | `DroneMission.js` | Autonomous search-and-rescue waypoints, delivery drops, and thermal scouting flights |
-| `satellitedata` | `SatelliteData.js` | Sentinel-1 SAR and ISRO optical satellite pass metadata, cloud cover %, and radar backscatter |
+| `satellitedata` | `SatelliteData.js` | Sentinel-1 SAR C-band, InSAR millimeter displacement, Sentinel-2 MSI optical indices, SMAP soil moisture, and GeoJSON map layers |
 
 ### 5. Predictive Analytics & Crowd Intelligence
 | Collection | Model File | Purpose |

@@ -5,6 +5,10 @@ const {
   getSatelliteData,
   getSatelliteDataById,
   updateProcessingStatus,
+  getSatelliteMapLayers,
+  getInsarDisplacement,
+  getSatelliteSummary,
+  triggerSatelliteSync,
 } = require("../controllers/satelliteController");
 const { protect } = require("../middleware/authMiddleware");
 const { allowRoles } = require("../middleware/adminMiddleware");
@@ -17,16 +21,19 @@ const {
 
 const router = express.Router();
 
+// ─── Public GIS Map Layer & Telemetry Endpoints ──────────────────────────────
+router.get("/layers", getSatelliteMapLayers);
+router.get("/insar-displacement", getInsarDisplacement);
+router.get("/summary", getSatelliteSummary);
+
+// ─── Protected Operations & Ingest Endpoints ─────────────────────────────────
 router.use(protect);
 const operationsOnly = allowRoles("admin", "operator");
 
+router.post("/sync-now", operationsOnly, triggerSatelliteSync);
 router.post("/", operationsOnly, createSatelliteValidator, validate, saveSatelliteData);
 
-router.get(
-  "/",
-  getSatelliteData
-);
-
+router.get("/", getSatelliteData);
 router.get("/:id", satelliteIdValidator, validate, getSatelliteDataById);
 router.patch("/:id/status", operationsOnly, processingStatusValidator, validate, updateProcessingStatus);
 
