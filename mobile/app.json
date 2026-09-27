@@ -63,11 +63,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "disaster-sentinel-mobile-app"
-      }
     }
   }
 }

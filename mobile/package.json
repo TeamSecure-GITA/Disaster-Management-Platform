@@ -11,7 +11,10 @@
     "test": "jest",
     "type-check": "tsc --noEmit",
     "build:android": "eas build --platform android --profile production",
-    "build:apk": "eas build --platform android --profile preview"
+    "build:apk": "eas build --platform android --profile apk",
+    "build:apk:preview": "eas build --platform android --profile preview",
+    "build:apk:local": "eas build --platform android --profile apk --local",
+    "prebuild": "expo prebuild --clean"
   },
   "dependencies": {
     "expo": "~51.0.28",
