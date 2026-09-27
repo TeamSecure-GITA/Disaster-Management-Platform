@@ -857,6 +857,22 @@ export default function NERLandslideMonitor() {
       .catch(() => {
         // Keeps graceful fallback initial data
       });
+
+    // Directly fetch live in-situ sensor telemetry from /api/sensors/summary
+    fetch(`${API_BASE}/api/sensors/summary`)
+      .then((res) => res.json())
+      .then((sensorStats) => {
+        if (sensorStats && sensorStats.activeSensors !== undefined) {
+          setData((prev) => ({
+            ...prev,
+            metrics: {
+              ...prev.metrics,
+              totalActiveSensors: sensorStats.activeSensors,
+            },
+          }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Compute LSI locally or via API

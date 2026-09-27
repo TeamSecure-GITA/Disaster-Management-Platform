@@ -352,9 +352,25 @@ function getResponsePrioritization() {
 
 // API methods
 const getOverview = async () => {
+  // Dynamically sync active sensor counts from live sensor telemetry
+  try {
+    const sensorService = require("./sensorService");
+    const summary = await sensorService.getSensorSummary();
+    if (summary && summary.byState) {
+      for (const st of nerStateOverview) {
+        if (summary.byState[st.state] !== undefined) {
+          st.activeSensors = summary.byState[st.state];
+        }
+      }
+    }
+  } catch (e) {
+    // Graceful fallback
+  }
+
   const totalIsolatedVillages = nerStateOverview.reduce((sum, s) => sum + s.isolatedVillagesCount, 0);
   const criticalHighwaysCount = nerCorridors.filter(c => c.status === "Blocked").length;
   const highRiskStatesCount = nerStateOverview.filter(s => s.riskLevel === "Critical" || s.riskLevel === "High").length;
+  const totalActiveSensors = nerStateOverview.reduce((sum, s) => sum + s.activeSensors, 0);
 
   return {
     success: true,
@@ -362,7 +378,7 @@ const getOverview = async () => {
     timestamp: new Date().toISOString(),
     metrics: {
       monitoredStates: 8,
-      totalActiveSensors: nerStateOverview.reduce((sum, s) => sum + s.activeSensors, 0),
+      totalActiveSensors,
       highRiskStates: highRiskStatesCount,
       isolatedVillages: totalIsolatedVillages,
       blockedCorridors: criticalHighwaysCount,

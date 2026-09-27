@@ -153,11 +153,18 @@ class RiskEngineService {
 
         if (recentSensors.length > 0) {
           const hasWarning = recentSensors.some(
-            (s) => s.status === "warning" || s.status === "danger"
+            (s) =>
+              s.quality === "warning" ||
+              s.quality === "critical" ||
+              s.alertSeverity === "critical" ||
+              s.alertSeverity === "warning" ||
+              s.isThresholdExceeded ||
+              s.status === "warning" ||
+              s.status === "danger"
           );
           if (hasWarning) {
-            anomalyFactor = 1.25;
-            forecastTrend = 1.2;
+            anomalyFactor = 1.35;
+            forecastTrend = 1.25;
           }
         }
       } catch {

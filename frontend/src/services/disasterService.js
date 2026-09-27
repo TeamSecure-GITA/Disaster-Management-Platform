@@ -1070,3 +1070,64 @@ export async function createEvacuationPlan({
     generatedAt: new Date().toISOString(),
   };
 }
+
+// ─── Real-Time Environmental & In-Situ Geotechnical Sensors ──────────────────
+export async function getSensors(filters = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (filters.type) params.append("type", filters.type);
+    if (filters.status) params.append("status", filters.status);
+    if (filters.state) params.append("state", filters.state);
+    if (filters.corridor) params.append("corridor", filters.corridor);
+
+    const queryStr = params.toString() ? `?${params.toString()}` : "";
+    const res = await fetch(`${API_URL}/api/sensors${queryStr}`);
+    if (!res.ok) throw new Error("Sensor API error");
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    console.warn("[DisasterService] getSensors fallback:", err.message);
+    return [];
+  }
+}
+
+export async function getSensorSummary() {
+  try {
+    const res = await fetch(`${API_URL}/api/sensors/summary`);
+    if (!res.ok) throw new Error("Sensor summary API error");
+    return await res.json();
+  } catch (err) {
+    console.warn("[DisasterService] getSensorSummary fallback:", err.message);
+    return {
+      totalSensors: 13,
+      activeSensors: 13,
+      offlineSensors: 0,
+      alertSensors: 2,
+      meshHealthPct: 98.5,
+    };
+  }
+}
+
+export async function getSensorAnomalies() {
+  try {
+    const res = await fetch(`${API_URL}/api/sensors/anomalies`);
+    if (!res.ok) throw new Error("Sensor anomalies API error");
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    console.warn("[DisasterService] getSensorAnomalies fallback:", err.message);
+    return [];
+  }
+}
+
+export async function getSensorReadings(sensorId) {
+  try {
+    const res = await fetch(`${API_URL}/api/sensors/${sensorId}/readings`);
+    if (!res.ok) throw new Error("Sensor readings API error");
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    return [];
+  }
+}
+

@@ -26,9 +26,17 @@ const sensorSchema = new mongoose.Schema(
         "soil_moisture",
         "pressure",
         "air_quality",
+        // Landslide and geotechnical specific sensor types:
+        "tilt",
+        "mems_tilt",
+        "piezometer",
+        "rain_gauge",
+        "extensometer",
+        "geophone",
         "other",
       ],
       required: true,
+      index: true,
     },
 
     location: {
@@ -38,14 +46,14 @@ const sensorSchema = new mongoose.Schema(
         default: "Point",
       },
       coordinates: {
-        type: [Number],
+        type: [Number], // [longitude, latitude]
         required: true,
       },
     },
 
     status: {
       type: String,
-      enum: ["online", "offline", "maintenance", "error"],
+      enum: ["online", "offline", "maintenance", "error", "alert"],
       default: "offline",
       index: true,
     },
@@ -74,6 +82,77 @@ const sensorSchema = new mongoose.Schema(
     lastSeen: {
       type: Date,
       default: null,
+      index: true,
+    },
+
+    connectivity: {
+      protocol: {
+        type: String,
+        enum: [
+          "lora",
+          "lorawan",
+          "gsm_gprs",
+          "cellular_4g",
+          "satellite",
+          "ble_mesh",
+          "direct_ip",
+        ],
+        default: "lora",
+      },
+      gatewayId: {
+        type: String,
+        default: null,
+        index: true,
+      },
+      devEui: {
+        type: String,
+        default: null,
+      },
+      batteryVoltage: {
+        type: Number,
+        default: 3.8, // Volts
+      },
+      batteryPct: {
+        type: Number,
+        default: 100, // %
+      },
+      rssi: {
+        type: Number,
+        default: -75, // dBm
+      },
+      snr: {
+        type: Number,
+        default: 8.5, // dB
+      },
+    },
+
+    geotechProfile: {
+      state: {
+        type: String,
+        default: "Sikkim",
+        index: true,
+      },
+      district: {
+        type: String,
+        default: "",
+      },
+      corridor: {
+        type: String,
+        default: null, // e.g. "NH-10", "NH-29", "NH-6"
+        index: true,
+      },
+      slopeAngleDeg: {
+        type: Number,
+        default: 45,
+      },
+      installationDepthMeters: {
+        type: Number,
+        default: 2.5,
+      },
+      factorOfSafetyBaseline: {
+        type: Number,
+        default: 1.35,
+      },
     },
 
     metadata: {
@@ -87,5 +166,6 @@ const sensorSchema = new mongoose.Schema(
 );
 
 sensorSchema.index({ location: "2dsphere" });
+sensorSchema.index({ "geotechProfile.state": 1, status: 1 });
 
 module.exports = mongoose.model("Sensor", sensorSchema);

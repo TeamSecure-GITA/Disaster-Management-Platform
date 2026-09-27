@@ -37,6 +37,55 @@ const sensorReadingSchema = new mongoose.Schema(
       default: "good",
     },
 
+    isThresholdExceeded: {
+      type: Boolean,
+      default: false,
+    },
+
+    alertTriggered: {
+      type: Boolean,
+      default: false,
+    },
+
+    alertSeverity: {
+      type: String,
+      enum: ["normal", "warning", "critical"],
+      default: "normal",
+    },
+
+    gatewayId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+
+    protocol: {
+      type: String,
+      default: "lora",
+    },
+
+    batteryPct: {
+      type: Number,
+      default: null,
+    },
+
+    rssi: {
+      type: Number,
+      default: null,
+    },
+
+    snr: {
+      type: Number,
+      default: null,
+    },
+
+    geotechMetrics: {
+      porePressureRatio: { type: Number, default: null }, // Ru ratio
+      tiltRateDegPerDay: { type: Number, default: null },
+      crackOpeningRateMmPerHr: { type: Number, default: null },
+      estimatedFoS: { type: Number, default: null }, // Factor of Safety
+    },
+
     metadata: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
@@ -49,6 +98,11 @@ const sensorReadingSchema = new mongoose.Schema(
 
 sensorReadingSchema.index({
   sensor: 1,
+  timestamp: -1,
+});
+
+sensorReadingSchema.index({
+  deviceId: 1,
   timestamp: -1,
 });
 

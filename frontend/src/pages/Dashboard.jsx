@@ -44,6 +44,7 @@ import {
   REGION_VIEWPORTS,
   INDIA_RISK_ZONES
 } from "../Data/indiaRiskZones";
+import { getSensorSummary } from "../services/disasterService";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -60,6 +61,24 @@ export default function Dashboard() {
       setCurrentTime(d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // ─── DYNAMIC SENSOR NETWORK STATE ─────────────────────────────────────────
+  const [sensorSummary, setSensorSummary] = useState({
+    activeSensors: 13,
+    totalSensors: 13,
+    alertSensors: 0,
+    meshHealthPct: 98.5,
+  });
+
+  useEffect(() => {
+    getSensorSummary()
+      .then((data) => {
+        if (data && data.totalSensors) {
+          setSensorSummary(data);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // ─── MAP LAYERS TOGGLE STATE ──────────────────────────────────────────────
@@ -3014,7 +3033,11 @@ export default function Dashboard() {
               { name: "Socket IO", status: "ONLINE", ok: true },
               { name: "Weather API", status: "ONLINE", ok: true },
               { name: "Satellite Feed", status: "ONLINE", ok: true },
-              { name: "Sensor Network", status: "14/16 online", ok: true },
+              {
+                name: "Sensor Network",
+                status: `${sensorSummary.activeSensors}/${sensorSummary.totalSensors} online`,
+                ok: sensorSummary.activeSensors > 0,
+              },
             ].map((sys, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", color: "#cbd5e1" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
