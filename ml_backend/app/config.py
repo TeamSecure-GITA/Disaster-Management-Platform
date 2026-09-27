@@ -14,7 +14,7 @@ Centralized configuration for:
 """
 
 from functools import lru_cache
-from typing import List, Optional
+from typing import Any, List, Optional, Union
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     # CORS
     # ------------------------------------------------------------------
 
-    CORS_ORIGINS: List[str] = [
+    CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:3000",
@@ -397,6 +397,34 @@ class Settings(BaseSettings):
                 "Probability thresholds must be between 0 and 1."
             )
 
+        return value
+
+    @field_validator("PORT", mode="before")
+    @classmethod
+    def validate_port(cls, value: Any) -> int:
+        if isinstance(value, str):
+            try:
+                return int(value.strip())
+            except ValueError:
+                return 8000
+        return int(value) if value is not None else 8000
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def validate_cors_origins(cls, value: Any) -> List[str]:
+        if isinstance(value, str):
+            val = value.strip()
+            if val == "*":
+                return ["*"]
+            if val.startswith("[") and val.endswith("]"):
+                import json
+                try:
+                    parsed = json.loads(val)
+                    if isinstance(parsed, list):
+                        return [str(x).strip() for x in parsed]
+                except Exception:
+                    pass
+            return [origin.strip() for origin in val.split(",") if origin.strip()]
         return value
 
     model_config = SettingsConfigDict(

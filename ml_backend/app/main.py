@@ -17,11 +17,31 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-# Enable direct script execution (e.g. `python app/main.py`)
+# Ensure backend directory and parent are always accessible in sys.path
+backend_root = str(Path(__file__).resolve().parent.parent)
+backend_parent = str(Path(__file__).resolve().parent.parent.parent)
+if backend_root not in sys.path:
+    sys.path.insert(0, backend_root)
+if backend_parent not in sys.path:
+    sys.path.insert(0, backend_parent)
+
+# Register import hook so `from ml_backend.xxx import ...` works even when
+# ml_backend is the root directory (e.g. on Render with rootDir: ml_backend)
+if "ml_backend" not in sys.modules:
+    from importlib.machinery import ModuleSpec
+
+    class _MLBackendFinder:
+        @classmethod
+        def find_spec(cls, fullname, path=None, target=None):
+            if fullname == "ml_backend":
+                spec = ModuleSpec("ml_backend", None, is_package=True)
+                spec.submodule_search_locations = [backend_root]
+                return spec
+            return None
+
+    sys.meta_path.insert(0, _MLBackendFinder)
+
 if __package__ is None or __package__ == "":
-    backend_root = str(Path(__file__).resolve().parent.parent)
-    if backend_root not in sys.path:
-        sys.path.insert(0, backend_root)
     __package__ = "app"
 
 from fastapi import FastAPI, Request
@@ -162,10 +182,16 @@ app = FastAPI(
 # CORS
 # ============================================================
 
+cors_origins = list(settings.CORS_ORIGINS)
+cors_credentials = settings.CORS_ALLOW_CREDENTIALS
+# Starlette forbids allow_credentials=True when allow_origins contains '*'
+if "*" in cors_origins and cors_credentials:
+    cors_credentials = False
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+    allow_origins=cors_origins,
+    allow_credentials=cors_credentials,
     allow_methods=settings.CORS_ALLOW_METHODS,
     allow_headers=settings.CORS_ALLOW_HEADERS,
 )

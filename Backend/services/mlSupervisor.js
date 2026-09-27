@@ -16,8 +16,13 @@ const isMlBackendHealthy = async (url = "http://localhost:8000/health") => {
 };
 
 const startMlBackendSupervisor = async () => {
-  if (process.env.AUTO_START_ML === "false") {
-    console.log("[ML-Supervisor] AUTO_START_ML is disabled by configuration");
+  if (
+    process.env.AUTO_START_ML === "false" ||
+    (process.env.AI_CHATBOT_URL &&
+      !process.env.AI_CHATBOT_URL.includes("localhost") &&
+      !process.env.AI_CHATBOT_URL.includes("127.0.0.1"))
+  ) {
+    console.log("ℹ️ [ML-Supervisor] Remote ML backend configured or auto-start disabled");
     return null;
   }
 

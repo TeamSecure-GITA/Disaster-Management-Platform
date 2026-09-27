@@ -13,7 +13,10 @@ from typing import AsyncGenerator, Generator, Optional
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from ml_backend.database.models.base import Base
+try:
+    from database.models.base import Base
+except ImportError:
+    from ml_backend.database.models.base import Base
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +30,10 @@ DATABASE_URL: str = os.getenv(
     f"sqlite:///{DEFAULT_DB_PATH}",
 )
 
-# Convert async url to sync url if needed for sync engine
+# Convert async url or Render postgres url to sync url if needed for sync engine
 SYNC_DATABASE_URL = DATABASE_URL
+if SYNC_DATABASE_URL.startswith("postgres://"):
+    SYNC_DATABASE_URL = SYNC_DATABASE_URL.replace("postgres://", "postgresql://", 1)
 if SYNC_DATABASE_URL.startswith("sqlite+aiosqlite:"):
     SYNC_DATABASE_URL = SYNC_DATABASE_URL.replace("sqlite+aiosqlite:", "sqlite:")
 elif SYNC_DATABASE_URL.startswith("postgresql+asyncpg:"):

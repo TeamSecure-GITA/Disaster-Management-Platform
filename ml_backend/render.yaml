@@ -1,0 +1,34 @@
+services:
+  # ============================================================================
+  # Standalone Disaster Management Platform - AI/ML Microservice
+  # ============================================================================
+  - type: web
+    name: disaster-management-ml
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: ML_ENABLED
+        value: "true"
+      - key: AI_ENABLED
+        value: "true"
+      - key: PREDICTION_ENABLED
+        value: "true"
+      - key: WEBSOCKET_ENABLED
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: CORS_ALLOW_CREDENTIALS
+        value: "false"
+      - key: GEMINI_API_KEY
+        sync: false

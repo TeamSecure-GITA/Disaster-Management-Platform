@@ -29,10 +29,15 @@ const environment = {
   frontendUrl:
     process.env.FRONTEND_URL || "http://localhost:5500",
 
-  aiChatbotUrl:
-    process.env.AI_CHATBOT_URL && !process.env.AI_CHATBOT_URL.includes("ai-service")
-      ? process.env.AI_CHATBOT_URL
-      : "http://localhost:8000",
+  aiChatbotUrl: (() => {
+    const raw = process.env.AI_CHATBOT_URL;
+    if (raw && !raw.includes("ai-service")) {
+      return raw.startsWith("http://") || raw.startsWith("https://")
+        ? raw
+        : `https://${raw}`;
+    }
+    return "http://localhost:8000";
+  })(),
 
   satelliteApiUrl: process.env.SATELLITE_API_URL || "",
 

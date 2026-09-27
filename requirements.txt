@@ -1,0 +1,2 @@
+# Root requirements.txt for Disaster Management Platform (points to ml_backend requirements)
+-r ml_backend/requirements.txt

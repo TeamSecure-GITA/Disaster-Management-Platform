@@ -17,22 +17,36 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
 
-  # ── AI / ML Subsystem (FastAPI / PyTorch / Scikit-Learn) ────────────────
+  # ── AI / ML Subsystem (FastAPI / Scikit-Learn / Multi-Hazard Models) ──────
   - type: web
     name: Disaster-Management-Platform-ML
     runtime: python
     rootDir: ml_backend
-    buildCommand: pip install -r ../requirements.txt 2>/dev/null || pip install fastapi uvicorn pydantic scikit-learn numpy pandas httpx
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health
     envVars:
       - key: PORT
-        value: 8000
+        value: 10000
       - key: ENVIRONMENT
         value: production
+      - key: DEBUG
+        value: "false"
       - key: ML_ENABLED
         value: "true"
       - key: AI_ENABLED
         value: "true"
+      - key: PREDICTION_ENABLED
+        value: "true"
+      - key: WEBSOCKET_ENABLED
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: CORS_ALLOW_CREDENTIALS
+        value: "false"
+      - key: GEMINI_API_KEY
+        sync: false
 
   # ── Backend (Node.js / Express Core API) ─────────────────────────────────
   - type: web
