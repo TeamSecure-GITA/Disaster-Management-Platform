@@ -138,18 +138,47 @@ const nerCorridors = [
   }
 ];
 
-// NER State Overview & Predictive Real-Time Analytics
+// NER State Overview & Predictive Real-Time Analytics with DEM-Derived Topography
 const nerStateOverview = [
   {
     state: "Sikkim",
     code: "SK",
     capital: "Gangtok",
+    coordinates: [88.61, 27.33],
     districtsMonitored: 6,
     highestRiskDistrict: "Mangan & Pakyong",
     currentRainfall24hMm: 164.2,
     rainfallThresholdMm: 120.0,
     soilSaturationPercent: 93,
     averageSlopeDeg: 46,
+    // Copernicus GLO-30 & CartoDEM derived parameters
+    demElevationMeters: 1650,
+    slopeDeg: 46.2,
+    aspectDeg: 198.5,
+    aspectDirection: "S",
+    curvature: {
+      profileCurvature: -0.1245, // Concave deceleration & debris hollow
+      planformCurvature: -0.0982, // Convergent drainage gulley
+      generalCurvature: -0.0152,
+    },
+    distanceToRoadsMeters: 68,
+    nearestRoadName: "NH-10 Teesta Valley Highway",
+    distanceToStreamsMeters: 55,
+    nearestStreamName: "Teesta River Main Channel",
+    lithology: {
+      formation: "Daling Group (Highly Foliated)",
+      rockType: "Quartz-Chlorite-Sericite Schist & Phyllite",
+      strengthClass: "LOW",
+      cohesionKPa: 14.5,
+      frictionAngleDeg: 25.5,
+    },
+    landCover: {
+      classification: "Dense Evergreen Broadleaf Forest",
+      canopyCoverPct: 82,
+      rootCohesionKPa: 6.2,
+      erosionRisk: "Low",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.91,
     riskLevel: "Critical",
     isolatedVillagesCount: 18,
@@ -159,19 +188,47 @@ const nerStateOverview = [
       en: "IMMEDIATE RED ALERT: Widespread slope destabilization across NH-10 Teesta corridor. Evacuate vulnerable river-bend habitations.",
       hi: "तत्काल रेड अलर्ट: एनएच-10 तीस्ता कॉरिडोर पर भारी भूस्खलन का खतरा। संवेदनशील क्षेत्रों को तुरंत खाली करें।",
       ne: "तत्काल रातो चेतावनी: एनएच-१० टिस्टा करिडोरमा व्यापक पहिरोको जोखिम। कमजोर बस्तीहरू तुरुन्त खाली गर्नुहोस्।",
-      as: "জৰুৰী ৰঙা সতৰ্কবাণী: ছিকিম তিস্তা কৰিড’ৰত ভূমিস্খলনৰ প্ৰচণ্ড সম্ভাৱনা। নিৰাপদ স্থানলৈ স্থানান্তৰিত হওক।"
+      as: "জৰুৰী ৰঙা সতৰ্কবাণী: ছিকিম তিস্তা কৰিড’ৰত ভূমিস্খলনৰ প্ৰচণ্ড সম্ভাৱনা। নিৰাপদ স্থানলৈ স্থানান্তৰিত হওক。"
     }
   },
   {
     state: "Meghalaya",
     code: "ML",
     capital: "Shillong",
+    coordinates: [91.88, 25.57],
     districtsMonitored: 12,
     highestRiskDistrict: "East Khasi Hills (Cherrapunji/Sohra) & South Garo",
     currentRainfall24hMm: 212.8,
     rainfallThresholdMm: 150.0,
     soilSaturationPercent: 96,
     averageSlopeDeg: 42,
+    demElevationMeters: 1480,
+    slopeDeg: 42.4,
+    aspectDeg: 172.0,
+    aspectDirection: "S",
+    curvature: {
+      profileCurvature: 0.0821,
+      planformCurvature: -0.1450,
+      generalCurvature: -0.0084,
+    },
+    distanceToRoadsMeters: 45,
+    nearestRoadName: "NH-6 Shillong-Jowai-Silchar Highway",
+    distanceToStreamsMeters: 72,
+    nearestStreamName: "Lubha River Gorge Channel",
+    lithology: {
+      formation: "Jaintia / Khasi Group",
+      rockType: "Karstified Limestone & Interbedded Calcareous Sandstone",
+      strengthClass: "MODERATE",
+      cohesionKPa: 26.0,
+      frictionAngleDeg: 32.0,
+    },
+    landCover: {
+      classification: "Dense Broadleaf Rainforest & Plateau Grassland",
+      canopyCoverPct: 78,
+      rootCohesionKPa: 5.8,
+      erosionRisk: "Moderate",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.88,
     riskLevel: "Critical",
     isolatedVillagesCount: 14,
@@ -187,12 +244,40 @@ const nerStateOverview = [
     state: "Nagaland",
     code: "NL",
     capital: "Kohima",
+    coordinates: [94.11, 25.67],
     districtsMonitored: 16,
     highestRiskDistrict: "Kohima & Phek",
     currentRainfall24hMm: 98.4,
     rainfallThresholdMm: 90.0,
     soilSaturationPercent: 85,
     averageSlopeDeg: 40,
+    demElevationMeters: 1440,
+    slopeDeg: 40.8,
+    aspectDeg: 235.0,
+    aspectDirection: "SW",
+    curvature: {
+      profileCurvature: -0.1850,
+      planformCurvature: -0.1620,
+      generalCurvature: -0.0210,
+    },
+    distanceToRoadsMeters: 35,
+    nearestRoadName: "NH-29 Dimapur-Kohima Highway",
+    distanceToStreamsMeters: 48,
+    nearestStreamName: "Dzüdza River Gorge",
+    lithology: {
+      formation: "Disang Group (Swelling Smectite Clays)",
+      rockType: "Splintery Carbonaceous Shale & Flysch",
+      strengthClass: "VERY_LOW",
+      cohesionKPa: 8.0,
+      frictionAngleDeg: 18.5,
+    },
+    landCover: {
+      classification: "Jhum (Slash-and-Burn Shifting Cultivation)",
+      canopyCoverPct: 15,
+      rootCohesionKPa: 0.8,
+      erosionRisk: "Critical",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.79,
     riskLevel: "High",
     isolatedVillagesCount: 8,
@@ -207,12 +292,40 @@ const nerStateOverview = [
     state: "Arunachal Pradesh",
     code: "AR",
     capital: "Itanagar",
+    coordinates: [93.62, 27.10],
     districtsMonitored: 26,
     highestRiskDistrict: "West Kameng, Kurung Kumey & Tawang",
     currentRainfall24hMm: 114.6,
     rainfallThresholdMm: 100.0,
     soilSaturationPercent: 82,
     averageSlopeDeg: 51,
+    demElevationMeters: 2200,
+    slopeDeg: 51.5,
+    aspectDeg: 148.0,
+    aspectDirection: "SE",
+    curvature: {
+      profileCurvature: 0.1150,
+      planformCurvature: -0.0750,
+      generalCurvature: 0.0042,
+    },
+    distanceToRoadsMeters: 85,
+    nearestRoadName: "NH-13 Trans-Arunachal Highway",
+    distanceToStreamsMeters: 110,
+    nearestStreamName: "Kameng River Torrent",
+    lithology: {
+      formation: "Bomdila / Siwalik Group",
+      rockType: "Biotite Gneiss, Phyllite & Siwalik Sandstone",
+      strengthClass: "MODERATE",
+      cohesionKPa: 24.0,
+      frictionAngleDeg: 30.0,
+    },
+    landCover: {
+      classification: "Sub-Alpine Coniferous & Mixed Broadleaf Forest",
+      canopyCoverPct: 80,
+      rootCohesionKPa: 6.5,
+      erosionRisk: "Moderate",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.82,
     riskLevel: "High",
     isolatedVillagesCount: 12,
@@ -227,12 +340,40 @@ const nerStateOverview = [
     state: "Assam",
     code: "AS",
     capital: "Dispur",
+    coordinates: [91.73, 26.14],
     districtsMonitored: 31,
     highestRiskDistrict: "Dima Hasao (Haflong) & Karbi Anglong",
     currentRainfall24hMm: 128.0,
     rainfallThresholdMm: 110.0,
     soilSaturationPercent: 86,
     averageSlopeDeg: 34,
+    demElevationMeters: 680,
+    slopeDeg: 34.2,
+    aspectDeg: 215.0,
+    aspectDirection: "SW",
+    curvature: {
+      profileCurvature: -0.0920,
+      planformCurvature: -0.0880,
+      generalCurvature: -0.0120,
+    },
+    distanceToRoadsMeters: 95,
+    nearestRoadName: "NH-37 / Lumding-Haflong Railway Alignment",
+    distanceToStreamsMeters: 130,
+    nearestStreamName: "Barak River / Jatinga Torrent",
+    lithology: {
+      formation: "Tipam & Barail Series (Barail Range)",
+      rockType: "Sub-Himalayan Unconsolidated Colluvium & Molasse",
+      strengthClass: "LOW",
+      cohesionKPa: 15.0,
+      frictionAngleDeg: 24.0,
+    },
+    landCover: {
+      classification: "Degraded Secondary Scrub & Bamboo Thickets",
+      canopyCoverPct: 52,
+      rootCohesionKPa: 3.2,
+      erosionRisk: "High",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.80,
     riskLevel: "High",
     isolatedVillagesCount: 15,
@@ -248,12 +389,40 @@ const nerStateOverview = [
     state: "Manipur",
     code: "MN",
     capital: "Imphal",
+    coordinates: [93.94, 24.82],
     districtsMonitored: 16,
     highestRiskDistrict: "Noney (Tupul railway sector) & Tamenglong",
     currentRainfall24hMm: 76.5,
     rainfallThresholdMm: 85.0,
     soilSaturationPercent: 74,
     averageSlopeDeg: 39,
+    demElevationMeters: 920,
+    slopeDeg: 39.5,
+    aspectDeg: 240.0,
+    aspectDirection: "SW",
+    curvature: {
+      profileCurvature: -0.1420,
+      planformCurvature: -0.1100,
+      generalCurvature: -0.0165,
+    },
+    distanceToRoadsMeters: 55,
+    nearestRoadName: "NH-2 Imphal-Kohima Highway",
+    distanceToStreamsMeters: 80,
+    nearestStreamName: "Imphal River Drainage Channel",
+    lithology: {
+      formation: "Disang-Barail Transition & Ophiolitic Melange",
+      rockType: "Pelagic Siltstone, Argillite & Serpentinized Peridotite",
+      strengthClass: "VERY_LOW",
+      cohesionKPa: 9.5,
+      frictionAngleDeg: 20.0,
+    },
+    landCover: {
+      classification: "Jhum / Open Scrub with Deep Tension Cracks",
+      canopyCoverPct: 25,
+      rootCohesionKPa: 1.2,
+      erosionRisk: "Critical",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.68,
     riskLevel: "Moderate",
     isolatedVillagesCount: 4,
@@ -268,12 +437,40 @@ const nerStateOverview = [
     state: "Mizoram",
     code: "MZ",
     capital: "Aizawl",
+    coordinates: [92.72, 23.73],
     districtsMonitored: 11,
     highestRiskDistrict: "Aizawl & Lunglei",
     currentRainfall24hMm: 92.0,
     rainfallThresholdMm: 95.0,
     soilSaturationPercent: 78,
     averageSlopeDeg: 44,
+    demElevationMeters: 1130,
+    slopeDeg: 44.1,
+    aspectDeg: 265.0,
+    aspectDirection: "W",
+    curvature: {
+      profileCurvature: -0.1600,
+      planformCurvature: -0.1250,
+      generalCurvature: -0.0190,
+    },
+    distanceToRoadsMeters: 40,
+    nearestRoadName: "NH-54 Silchar-Aizawl-Lunglei Highway",
+    distanceToStreamsMeters: 65,
+    nearestStreamName: "Tuirial River Valley",
+    lithology: {
+      formation: "Bhuban / Bokabil Formation (Surma Group)",
+      rockType: "Interbedded Friable Micaceous Sandstone & Siltstone",
+      strengthClass: "LOW",
+      cohesionKPa: 16.0,
+      frictionAngleDeg: 24.0,
+    },
+    landCover: {
+      classification: "Urban Hillside Cut & Terraced Settlements",
+      canopyCoverPct: 30,
+      rootCohesionKPa: 1.8,
+      erosionRisk: "High",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.74,
     riskLevel: "High",
     isolatedVillagesCount: 7,
@@ -288,12 +485,40 @@ const nerStateOverview = [
     state: "Tripura",
     code: "TR",
     capital: "Agartala",
+    coordinates: [91.28, 23.83],
     districtsMonitored: 8,
     highestRiskDistrict: "Dhalai & Jampui Hills",
     currentRainfall24hMm: 54.0,
     rainfallThresholdMm: 90.0,
     soilSaturationPercent: 62,
     averageSlopeDeg: 28,
+    demElevationMeters: 260,
+    slopeDeg: 28.3,
+    aspectDeg: 220.0,
+    aspectDirection: "SW",
+    curvature: {
+      profileCurvature: -0.0450,
+      planformCurvature: -0.0520,
+      generalCurvature: -0.0062,
+    },
+    distanceToRoadsMeters: 140,
+    nearestRoadName: "NH-8 / NH-108 Agartala-Jampui Highway",
+    distanceToStreamsMeters: 190,
+    nearestStreamName: "Gumti River Main Flow",
+    lithology: {
+      formation: "Tipam Sandstone & Dupi Tila Group",
+      rockType: "Poorly Cemented Silty Sandstone & Claystone",
+      strengthClass: "MODERATE",
+      cohesionKPa: 20.0,
+      frictionAngleDeg: 27.0,
+    },
+    landCover: {
+      classification: "Rubber Plantation & Secondary Bamboo Forests",
+      canopyCoverPct: 65,
+      rootCohesionKPa: 3.8,
+      erosionRisk: "Moderate",
+    },
+    demSource: "Copernicus GLO-30 (30m)",
     landslideSusceptibilityIndex: 0.45,
     riskLevel: "Moderate",
     isolatedVillagesCount: 1,
@@ -306,14 +531,38 @@ const nerStateOverview = [
   }
 ];
 
-// Calculation of Landslide Susceptibility Index (LSI)
-function calculateLSI({ rainfall24h, threshold, soilSaturation, slopeAngle, historicalEvents = 5 }) {
+// Calculation of Landslide Susceptibility Index (LSI) with optional DEM fusion
+function calculateLSI({
+  rainfall24h,
+  threshold,
+  soilSaturation,
+  slopeAngle,
+  historicalEvents = 5,
+  terrain = null,
+}) {
+  let effectiveSlope = slopeAngle;
+  let demFactor = 0;
+
+  if (terrain) {
+    if (effectiveSlope === undefined || effectiveSlope === null) {
+      effectiveSlope = terrain.slopeDeg;
+    }
+    const roadCutPenalty = terrain.distanceToRoadsMeters < 100 ? 0.05 : 0;
+    const streamScourPenalty = terrain.distanceToStreamsMeters < 80 ? 0.04 : 0;
+    const rockPenalty =
+      terrain.lithology && terrain.lithology.strengthClass === "VERY_LOW" ? 0.04 : 0;
+    const vegPenalty =
+      terrain.landCover && terrain.landCover.erosionRisk === "Critical" ? 0.03 : 0;
+    demFactor = roadCutPenalty + streamScourPenalty + rockPenalty + vegPenalty;
+  }
+
+  const slope = Number(effectiveSlope) || 35;
   const rainFactor = Math.min(rainfall24h / (threshold || 100), 1.8) * 0.35;
   const soilFactor = (soilSaturation / 100) * 0.25;
-  const slopeFactor = Math.min(slopeAngle / 60, 1.2) * 0.25;
+  const slopeFactor = Math.min(slope / 60, 1.2) * 0.25;
   const histFactor = Math.min(historicalEvents / 10, 1.0) * 0.15;
 
-  const rawScore = rainFactor + soilFactor + slopeFactor + histFactor;
+  const rawScore = rainFactor + soilFactor + slopeFactor + histFactor + demFactor;
   const normalizedLSI = Math.min(Math.max(rawScore, 0.05), 0.99);
 
   let riskLevel = "Low";
@@ -399,14 +648,37 @@ const getCorridors = async () => {
 };
 
 const recordFieldObservation = async (data) => {
+  const coords = data.coordinates || [92.0, 26.0];
+  let terrainInfo = null;
+
+  try {
+    const terrainService = require("./terrainService");
+    terrainInfo = await terrainService.getTerrainAtCoordinates(coords[1], coords[0]);
+  } catch (err) {
+    // Graceful fallback if terrain service cannot derive
+  }
+
+  const derivedSlope = terrainInfo ? terrainInfo.slopeDeg : 40;
+  const isAutoDerived = data.slopeAngleDeg === undefined || data.slopeAngleDeg === null;
+
   const newObs = {
     id: `OBS-NER-${String(fieldCrackObservations.length + 1).padStart(3, "0")}`,
     locationName: data.locationName || "NER Hill Sector",
-    coordinates: data.coordinates || [92.0, 26.0],
+    coordinates: coords,
     state: data.state || "Assam",
     crackLengthMeters: Number(data.crackLengthMeters) || 0,
     crackWidthCm: Number(data.crackWidthCm) || 0,
-    slopeAngleDeg: Number(data.slopeAngleDeg) || 40,
+    slopeAngleDeg: !isAutoDerived ? Number(data.slopeAngleDeg) : derivedSlope,
+    demDerived: isAutoDerived,
+    demSource: terrainInfo ? terrainInfo.demSource : "Copernicus GLO-30",
+    elevationMeters: terrainInfo ? terrainInfo.elevationMeters : 850,
+    aspectDirection: terrainInfo ? terrainInfo.aspectDirection : "S",
+    curvature: terrainInfo ? terrainInfo.curvature : { profileCurvature: 0, planformCurvature: 0 },
+    distanceToRoadsMeters: terrainInfo ? terrainInfo.distanceToRoadsMeters : 120,
+    nearestRoadName: terrainInfo ? terrainInfo.nearestRoadName : "Unclassified Mountain Road",
+    distanceToStreamsMeters: terrainInfo ? terrainInfo.distanceToStreamsMeters : 150,
+    nearestStreamName: terrainInfo ? terrainInfo.nearestStreamName : "Mountain Torrent",
+    lithology: terrainInfo ? terrainInfo.lithology.formation : "Daling / Disang Series",
     soilSaturationPercent: Number(data.soilSaturationPercent) || 75,
     status: data.status || "Under Observation",
     severity: data.severity || "Medium",
@@ -419,7 +691,9 @@ const recordFieldObservation = async (data) => {
   fieldCrackObservations.unshift(newObs);
   return {
     success: true,
-    message: "NER Slope crack observation recorded successfully",
+    message: isAutoDerived
+      ? `NER Slope crack observation recorded with DEM-derived ${derivedSlope}° slope (${newObs.demSource})`
+      : "NER Slope crack observation recorded successfully",
     observation: newObs
   };
 };

@@ -835,12 +835,45 @@ export default function NERLandslideMonitor() {
   const [infrState, setInfrState] = useState("all");
   const [infrSearch, setInfrSearch] = useState("");
 
-  // Calculator State
+  // Calculator State & DEM Topography Derivation
   const [calcRain, setCalcRain] = useState(135);
   const [calcThreshold, setCalcThreshold] = useState(110);
   const [calcSoil, setCalcSoil] = useState(85);
   const [calcSlope, setCalcSlope] = useState(45);
   const [calcResult, setCalcResult] = useState(null);
+  const [demDerivedData, setDemDerivedData] = useState(null);
+  const [isDerivingDem, setIsDerivingDem] = useState(false);
+
+  const DEM_PRESETS = [
+    { name: "Sikkim (NH-10 Teesta)", coords: [88.61, 27.33], state: "Sikkim" },
+    { name: "Nagaland (NH-29 Dzüdza)", coords: [94.02, 25.70], state: "Nagaland" },
+    { name: "Meghalaya (NH-6 Lubha)", coords: [92.35, 25.25], state: "Meghalaya" },
+    { name: "Arunachal (NH-13 Sela)", coords: [92.10, 27.50], state: "Arunachal Pradesh" },
+    { name: "Mizoram (NH-54 Tuirial)", coords: [92.72, 23.73], state: "Mizoram" },
+    { name: "Assam (Dima Hasao)", coords: [93.04, 25.15], state: "Assam" },
+  ];
+
+  const handleDeriveFromDem = async (preset) => {
+    setIsDerivingDem(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/terrain/point?lat=${preset.coords[1]}&lng=${preset.coords[0]}&dem=Copernicus GLO-30`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.topography) {
+          setCalcSlope(Math.round(json.topography.slopeDeg));
+          setDemDerivedData({
+            ...json,
+            locationName: preset.name,
+            state: preset.state,
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("DEM fetch fallback:", e);
+    } finally {
+      setIsDerivingDem(false);
+    }
+  };
 
   // Fetch real-time data from backend
   useEffect(() => {
@@ -875,9 +908,46 @@ export default function NERLandslideMonitor() {
       .catch(() => {});
   }, []);
 
-  // Compute LSI locally or via API
-  const handleCalculateLsi = (e) => {
+  // Compute LSI locally or via API with multi-factor DEM integration
+  const handleCalculateLsi = async (e) => {
     e.preventDefault();
+
+    if (demDerivedData && demDerivedData.coordinates) {
+      try {
+        const res = await fetch(`${API_BASE}/api/terrain/calculate-lsi`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rainfall24h: calcRain,
+            threshold: calcThreshold,
+            soilSaturation: calcSoil,
+            slopeAngle: calcSlope,
+            lat: demDerivedData.coordinates[1],
+            lng: demDerivedData.coordinates[0],
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.result) {
+            const r = json.result;
+            let color = "#10b981";
+            if (r.lsiScore >= 0.8) color = "#ef4444";
+            else if (r.lsiScore >= 0.65) color = "#f97316";
+            else if (r.lsiScore >= 0.45) color = "#eab308";
+
+            setCalcResult({
+              lsi: r.lsiScore.toFixed(2),
+              riskLevel: `${r.riskLevel} (Copernicus DEM + GSI Lithology Analyzed)`,
+              color,
+              safetyFactor: r.safetyFactor.toFixed(2),
+              demTopography: r.derivedTerrain,
+            });
+            return;
+          }
+        }
+      } catch (err) {}
+    }
+
     const rainFactor = Math.min(calcRain / (calcThreshold || 100), 1.8) * 0.35;
     const soilFactor = (calcSoil / 100) * 0.25;
     const slopeFactor = Math.min(calcSlope / 60, 1.2) * 0.25;
@@ -1174,8 +1244,18 @@ export default function NERLandslideMonitor() {
                     </div>
 
                     <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "8px 10px", borderRadius: "8px" }}>
-                      <span style={{ fontSize: "0.72rem", color: "#94a3b8", display: "block" }}>Mean Slope Angle</span>
-                      <strong style={{ fontSize: "0.95rem", color: "#fbbf24" }}>{st.averageSlopeDeg}° Incline</strong>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>DEM Slope Angle</span>
+                        <span style={{ fontSize: "0.6rem", background: "rgba(56, 189, 248, 0.15)", color: "#38bdf8", padding: "1px 5px", borderRadius: "4px" }}>
+                          {st.demSource || "Copernicus GLO-30"}
+                        </span>
+                      </div>
+                      <strong style={{ fontSize: "0.95rem", color: "#fbbf24" }}>
+                        {st.slopeDeg || st.averageSlopeDeg}° ({st.aspectDirection || "S"}-Facing)
+                      </strong>
+                      <span style={{ fontSize: "0.68rem", color: "#94a3b8", display: "block" }}>
+                        {st.demElevationMeters ? `${st.demElevationMeters}m ASL` : "Ridge"} • {st.distanceToRoadsMeters ? `${st.distanceToRoadsMeters}m to road` : "Toe cut"}
+                      </span>
                     </div>
 
                     <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "8px 10px", borderRadius: "8px" }}>
@@ -1185,6 +1265,18 @@ export default function NERLandslideMonitor() {
                       </strong>
                     </div>
                   </div>
+
+                  {/* GSI Lithology & LULC Environmental Badges */}
+                  {st.lithology && (
+                    <div style={{ marginBottom: "10px", fontSize: "0.72rem", color: "#94a3b8", display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      <span style={{ background: "rgba(255, 255, 255, 0.04)", padding: "2px 8px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.08)", color: "#cbd5e1" }}>
+                        🪨 <strong style={{ color: "#f59e0b" }}>GSI:</strong> {st.lithology.formation} ({st.lithology.strengthClass} Strength)
+                      </span>
+                      <span style={{ background: "rgba(255, 255, 255, 0.04)", padding: "2px 8px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.08)", color: "#cbd5e1" }}>
+                        🌿 <strong style={{ color: "#34d399" }}>LULC:</strong> {st.landCover?.classification || "Dense Forest"} ({st.landCover?.rootCohesionKPa || 5.5} kPa)
+                      </span>
+                    </div>
+                  )}
 
                   {/* IMD Weather Alert Tag */}
                   <div style={{ marginBottom: "10px", fontSize: "0.78rem", color: "#cbd5e1" }}>
@@ -1393,9 +1485,40 @@ export default function NERLandslideMonitor() {
             <h2 style={{ fontSize: "1.25rem", fontWeight: "700", margin: "0 0 6px 0" }}>
               ⚡ Landslide Susceptibility Index (LSI) Simulator
             </h2>
-            <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: "0 0 18px 0" }}>
-              Simulate slope stability in real-time based on cumulative precipitation, saturation and terrain slope angle.
+            <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: "0 0 14px 0" }}>
+              Simulate slope stability in real-time based on cumulative precipitation, saturation, and DEM-derived topography (Copernicus GLO-30 / CartoDEM).
             </p>
+
+            {/* DEM Auto-Derive Bar */}
+            <div style={{ marginBottom: "16px", padding: "10px 12px", background: "rgba(30, 41, 59, 0.4)", borderRadius: "10px", border: "1px solid rgba(56, 189, 248, 0.2)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <span style={{ fontSize: "0.74rem", fontWeight: "700", color: "#38bdf8" }}>
+                  ⛰️ AUTO-DERIVE TERRAIN FROM DEM (COPERNICUS GLO-30)
+                </span>
+                {isDerivingDem && <span style={{ fontSize: "0.72rem", color: "#fbbf24" }}>Sampling 30m DEM grid...</span>}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                {DEM_PRESETS.map((p) => (
+                  <button
+                    key={p.name}
+                    type="button"
+                    onClick={() => handleDeriveFromDem(p)}
+                    style={{
+                      padding: "4px 8px",
+                      fontSize: "0.72rem",
+                      borderRadius: "6px",
+                      border: demDerivedData?.locationName === p.name ? "1px solid #38bdf8" : "1px solid rgba(255, 255, 255, 0.1)",
+                      background: demDerivedData?.locationName === p.name ? "rgba(56, 189, 248, 0.25)" : "rgba(15, 23, 42, 0.6)",
+                      color: demDerivedData?.locationName === p.name ? "#38bdf8" : "#94a3b8",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <form onSubmit={handleCalculateLsi}>
               <div style={{ marginBottom: "14px" }}>
@@ -1445,7 +1568,9 @@ export default function NERLandslideMonitor() {
 
               <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                  <label style={{ fontSize: "0.82rem", color: "#cbd5e1" }}>Terrain Slope Incline (°)</label>
+                  <label style={{ fontSize: "0.82rem", color: "#cbd5e1" }}>
+                    Terrain Slope Incline (°) {demDerivedData ? <span style={{ color: "#38bdf8", fontSize: "0.72rem" }}>• DEM Auto-Derived</span> : null}
+                  </label>
                   <strong style={{ color: "#f87171", fontSize: "0.85rem" }}>{calcSlope}°</strong>
                 </div>
                 <input
@@ -1486,20 +1611,41 @@ export default function NERLandslideMonitor() {
                 <div style={{ fontSize: "3.5rem", fontWeight: "900", color: calcResult.color, margin: "10px 0" }}>
                   {calcResult.lsi}
                 </div>
-                <div style={{ display: "inline-block", padding: "6px 14px", borderRadius: "999px", background: "rgba(255, 255, 255, 0.08)", fontSize: "0.95rem", fontWeight: "700", color: calcResult.color, marginBottom: "16px" }}>
+                <div style={{ display: "inline-block", padding: "6px 14px", borderRadius: "999px", background: "rgba(255, 255, 255, 0.08)", fontSize: "0.88rem", fontWeight: "700", color: calcResult.color, marginBottom: "16px" }}>
                   {calcResult.riskLevel}
                 </div>
                 <div style={{ background: "rgba(30, 41, 59, 0.6)", padding: "14px", borderRadius: "10px", textAlign: "left", fontSize: "0.85rem", color: "#cbd5e1" }}>
                   <div><strong>Factor of Safety (FoS):</strong> {calcResult.safetyFactor} {calcResult.safetyFactor < 1.0 ? "(Unstable Slope!)" : "(Stable)"}</div>
                   <div style={{ marginTop: "6px" }}><strong>Recommended Protocol:</strong> {calcResult.lsi >= 0.8 ? "Immediate evacuation of downslope habitations; sound siren and notify SDRF." : "Deploy drone patrol and monitor piezometric sensor logs."}</div>
                 </div>
+
+                {/* DEM Derived Topographic Factors Breakdown */}
+                {demDerivedData && (
+                  <div style={{ marginTop: "14px", background: "rgba(15, 23, 42, 0.6)", padding: "12px", borderRadius: "10px", textAlign: "left", fontSize: "0.78rem", border: "1px solid rgba(56, 189, 248, 0.2)" }}>
+                    <div style={{ color: "#38bdf8", fontWeight: "700", marginBottom: "8px", textTransform: "uppercase", fontSize: "0.72rem" }}>
+                      ⛰️ Copernicus GLO-30 & GSI Geotechnical Topography:
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", color: "#cbd5e1" }}>
+                      <div>Altitude: <strong style={{ color: "#f8fafc" }}>{demDerivedData.topography?.elevationMeters}m ASL</strong></div>
+                      <div>Aspect: <strong style={{ color: "#f8fafc" }}>{demDerivedData.topography?.aspectDirection} ({demDerivedData.topography?.aspectDeg}°)</strong></div>
+                      <div>Prof. Curvature: <strong style={{ color: "#f8fafc" }}>{demDerivedData.topography?.curvature?.profileCurvature}</strong></div>
+                      <div>Plan. Curvature: <strong style={{ color: "#f8fafc" }}>{demDerivedData.topography?.curvature?.planformCurvature}</strong></div>
+                      <div>Road Cut Dist: <strong style={{ color: "#f8fafc" }}>{demDerivedData.proximity?.distanceToRoadsMeters}m</strong></div>
+                      <div>Stream Scour Dist: <strong style={{ color: "#f8fafc" }}>{demDerivedData.proximity?.distanceToStreamsMeters}m</strong></div>
+                    </div>
+                    <div style={{ marginTop: "8px", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "6px" }}>
+                      <div>🪨 Formation: <strong style={{ color: "#fbbf24" }}>{demDerivedData.geology?.formation} ({demDerivedData.geology?.strengthClass} Strength)</strong></div>
+                      <div style={{ marginTop: "2px" }}>🌿 Land Cover: <strong style={{ color: "#34d399" }}>{demDerivedData.ecology?.classification} ({demDerivedData.ecology?.rootCohesionKPa} kPa root cohesion)</strong></div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div>
                 <span style={{ fontSize: "3rem", display: "block", marginBottom: "10px" }}>⛰️</span>
                 <h3 style={{ color: "#f8fafc", margin: "0 0 6px 0" }}>Ready for Computation</h3>
                 <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: 0 }}>
-                  Adjust parameters on the left and click 'Compute Real-Time Stability Index' to simulate slope failure probability.
+                  Select a DEM sector above or adjust parameters and click 'Compute Real-Time Stability Index' to simulate slope failure probability.
                 </p>
               </div>
             )}

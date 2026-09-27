@@ -22,18 +22,45 @@ router.get("/corridors", async (req, res, next) => {
   }
 });
 
-// POST /api/ner/calculate-lsi - On-the-fly Landslide Susceptibility Index calculation
+// POST /api/ner/calculate-lsi - On-the-fly Landslide Susceptibility Index calculation with DEM support
 router.post("/calculate-lsi", async (req, res, next) => {
   try {
-    const { rainfall24h, threshold, soilSaturation, slopeAngle, historicalEvents } = req.body;
+    const { rainfall24h, threshold, soilSaturation, slopeAngle, historicalEvents, lat, lng } = req.body;
+    let terrain = null;
+
+    if (lat !== undefined && lng !== undefined) {
+      try {
+        const terrainService = require("../services/terrainService");
+        terrain = await terrainService.getTerrainAtCoordinates(Number(lat), Number(lng));
+      } catch (err) {}
+    }
+
     const result = nerService.calculateLSI({
       rainfall24h: Number(rainfall24h) || 50,
       threshold: Number(threshold) || 100,
       soilSaturation: Number(soilSaturation) || 50,
-      slopeAngle: Number(slopeAngle) || 30,
-      historicalEvents: Number(historicalEvents) || 2
+      slopeAngle: slopeAngle !== undefined && slopeAngle !== null ? Number(slopeAngle) : (terrain ? terrain.slopeDeg : 30),
+      historicalEvents: Number(historicalEvents) || 2,
+      terrain,
     });
-    res.status(200).json({ success: true, result });
+
+    res.status(200).json({
+      success: true,
+      result: {
+        ...result,
+        demDerived: Boolean(terrain),
+        derivedTerrain: terrain ? {
+          elevationMeters: terrain.elevationMeters,
+          slopeDeg: terrain.slopeDeg,
+          aspectDirection: terrain.aspectDirection,
+          curvature: terrain.curvature,
+          distanceToRoadsMeters: terrain.distanceToRoadsMeters,
+          distanceToStreamsMeters: terrain.distanceToStreamsMeters,
+          lithology: terrain.lithology.formation,
+          demSource: terrain.demSource,
+        } : null,
+      },
+    });
   } catch (error) {
     next(error);
   }

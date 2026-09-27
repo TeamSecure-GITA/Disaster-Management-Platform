@@ -1178,4 +1178,66 @@ export async function getSatelliteSummary() {
   }
 }
 
+// ─── DEM & Topographic Derivations (Copernicus GLO-30 / CartoDEM) ─────────
+export async function getTerrainPoint(lat, lng, dem = "Copernicus GLO-30") {
+  try {
+    const res = await fetch(`${API_URL}/api/terrain/point?lat=${lat}&lng=${lng}&dem=${encodeURIComponent(dem)}`);
+    if (!res.ok) throw new Error("Terrain Point API error");
+    return await res.json();
+  } catch (err) {
+    console.warn("[DisasterService] getTerrainPoint fallback:", err.message);
+    return null;
+  }
+}
+
+export async function getTerrainGrid(bbox, resolution = 500) {
+  try {
+    const query = bbox ? `?bbox=${bbox}&resolution=${resolution}` : `?resolution=${resolution}`;
+    const res = await fetch(`${API_URL}/api/terrain/grid${query}`);
+    if (!res.ok) throw new Error("Terrain Grid API error");
+    return await res.json();
+  } catch (err) {
+    console.warn("[DisasterService] getTerrainGrid fallback:", err.message);
+    return null;
+  }
+}
+
+export async function getCorridorTerrainProfile(corridorId) {
+  try {
+    const res = await fetch(`${API_URL}/api/terrain/corridor/${encodeURIComponent(corridorId)}`);
+    if (!res.ok) throw new Error("Terrain Corridor API error");
+    return await res.json();
+  } catch (err) {
+    console.warn("[DisasterService] getCorridorTerrainProfile fallback:", err.message);
+    return null;
+  }
+}
+
+export async function getTerrainSources() {
+  try {
+    const res = await fetch(`${API_URL}/api/terrain/sources`);
+    if (!res.ok) throw new Error("Terrain Sources API error");
+    return await res.json();
+  } catch (err) {
+    console.warn("[DisasterService] getTerrainSources fallback:", err.message);
+    return null;
+  }
+}
+
+export async function calculateEnhancedLSI(params) {
+  try {
+    const res = await fetch(`${API_URL}/api/terrain/calculate-lsi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+    if (!res.ok) throw new Error("Calculate LSI API error");
+    return await res.json();
+  } catch (err) {
+    console.warn("[DisasterService] calculateEnhancedLSI fallback:", err.message);
+    return null;
+  }
+}
+
+
 
