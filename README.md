@@ -335,7 +335,9 @@ cp Backend/.env.example Backend/.env
 | `FIREBASE_PRIVATE_KEY` | Firebase service account private key | Optional |
 | `WEATHER_API_KEY` | Weather data provider API key | Optional |
 | `AI_CHATBOT_URL` | URL of the AI chatbot microservice | Optional |
-| `SATELLITE_API_URL` | Satellite imagery API base URL | Optional |
+| `SATELLITE_API_URL` | Copernicus Data Space Ecosystem (CDSE) OData endpoint (`https://catalogue.dataspace.copernicus.eu/odata/v1/Products`) | Optional / Pre-configured |
+| `COPERNICUS_STAC_URL` | Copernicus STAC search API (`https://catalogue.dataspace.copernicus.eu/stac/search`) | Optional |
+| `SATELLITE_SOIL_MOISTURE_API_URL` | Global satellite-assimilated soil moisture product (`https://api.open-meteo.com/v1/forecast`) | Optional / Pre-configured |
 
 ### Local Development
 

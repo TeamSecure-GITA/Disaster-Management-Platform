@@ -1178,6 +1178,18 @@ export async function getSatelliteSummary() {
   }
 }
 
+export async function getSatelliteSources() {
+  try {
+    const res = await fetch(`${API_URL}/api/satellite/sources`);
+    if (!res.ok) throw new Error("Satellite sources API error");
+    const json = await res.json();
+    return json.data || null;
+  } catch (err) {
+    console.warn("[DisasterService] getSatelliteSources fallback:", err.message);
+    return null;
+  }
+}
+
 // ─── DEM & Topographic Derivations (Copernicus GLO-30 / CartoDEM) ─────────
 export async function getTerrainPoint(lat, lng, dem = "Copernicus GLO-30") {
   try {

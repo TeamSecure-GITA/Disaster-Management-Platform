@@ -9,6 +9,8 @@ const {
   getInsarDisplacement,
   getSatelliteSummary,
   triggerSatelliteSync,
+  getSatelliteSources,
+  getRasterOverlay,
 } = require("../controllers/satelliteController");
 const { protect } = require("../middleware/authMiddleware");
 const { allowRoles } = require("../middleware/adminMiddleware");
@@ -22,7 +24,9 @@ const {
 const router = express.Router();
 
 // ─── Public GIS Map Layer & Telemetry Endpoints ──────────────────────────────
+router.get("/sources", getSatelliteSources);
 router.get("/layers", getSatelliteMapLayers);
+router.get("/layers/raster-overlay/:siteId", getRasterOverlay);
 router.get("/insar-displacement", getInsarDisplacement);
 router.get("/summary", getSatelliteSummary);
 

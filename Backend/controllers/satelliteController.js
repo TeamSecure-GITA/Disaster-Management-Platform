@@ -112,6 +112,39 @@ const triggerSatelliteSync = async (req, res, next) => {
   }
 };
 
+/**
+ * Return Catalog of Real Remote Sensing Satellite Sources
+ */
+const getSatelliteSources = async (req, res, next) => {
+  try {
+    const data = satelliteService.getSatelliteSources();
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Return Georeferenced Raster Overlay Image for Leaflet ImageOverlay
+ */
+const getRasterOverlay = async (req, res, next) => {
+  try {
+    const data = await satelliteService.getRasterOverlay(req.params.siteId);
+    if (!data) {
+      return res.status(404).json({ success: false, message: "Raster overlay not found for site" });
+    }
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   saveSatelliteData,
   getSatelliteData,
@@ -121,4 +154,6 @@ module.exports = {
   getInsarDisplacement,
   getSatelliteSummary,
   triggerSatelliteSync,
+  getSatelliteSources,
+  getRasterOverlay,
 };

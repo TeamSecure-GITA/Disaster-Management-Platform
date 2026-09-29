@@ -2041,6 +2041,75 @@ export default function Map() {
                 );
               })}
 
+            {/* SATELLITE SOIL MOISTURE SATURATION GRID LAYERS */}
+            {showInSarLayer &&
+              satelliteLayers?.layers?.soilMoistureGrid?.map((poly) => {
+                const rawCoords = poly.geometry?.coordinates?.[0];
+                if (!rawCoords || !rawCoords.length) return null;
+                const leafletPositions = rawCoords.map(([lng, lat]) => [lat, lng]);
+                return (
+                  <Polygon
+                    key={poly.id}
+                    positions={leafletPositions}
+                    pathOptions={{
+                      color: poly.properties?.colorCode || "#16a34a",
+                      fillColor: poly.properties?.colorCode || "#16a34a",
+                      fillOpacity: poly.properties?.fillOpacity || 0.35,
+                      weight: 1.5,
+                      dashArray: "3, 3",
+                    }}
+                  >
+                    <Popup>
+                      <div style={{ color: "#0f172a", padding: "2px" }}>
+                        <strong style={{ display: "block", color: poly.properties?.colorCode || "#16a34a", fontSize: "0.9rem" }}>
+                          {poly.properties?.title || "🌱 Soil Moisture Saturation Grid"}
+                        </strong>
+                        <div style={{ fontSize: "0.78rem", color: "#334155", marginTop: "4px" }}>
+                          Volumetric Saturation: <strong>{poly.properties?.saturationPercentage}%</strong>
+                        </div>
+                        <div style={{ fontSize: "0.72rem", color: "#64748b" }}>
+                          Liquefaction Risk: <strong style={{ color: poly.properties?.saturationPercentage > 80 ? "#dc2626" : "#16a34a" }}>{poly.properties?.liquefactionRisk?.toUpperCase()}</strong>
+                        </div>
+                      </div>
+                    </Popup>
+                  </Polygon>
+                );
+              })}
+
+            {/* OPTICAL NDVI VEGETATION LOSS & LANDSLIDE SCARP LAYERS */}
+            {showInSarLayer &&
+              satelliteLayers?.layers?.vegetationScars?.map((poly) => {
+                const rawCoords = poly.geometry?.coordinates?.[0];
+                if (!rawCoords || !rawCoords.length) return null;
+                const leafletPositions = rawCoords.map(([lng, lat]) => [lat, lng]);
+                return (
+                  <Polygon
+                    key={poly.id}
+                    positions={leafletPositions}
+                    pathOptions={{
+                      color: poly.properties?.colorCode || "#dc2626",
+                      fillColor: poly.properties?.fillColor || "#ea580c",
+                      fillOpacity: poly.properties?.fillOpacity || 0.40,
+                      weight: 2,
+                    }}
+                  >
+                    <Popup>
+                      <div style={{ color: "#0f172a", padding: "2px" }}>
+                        <strong style={{ display: "block", color: "#dc2626", fontSize: "0.9rem" }}>
+                          {poly.properties?.title || "🍂 Optical Landslide Scarp Strip"}
+                        </strong>
+                        <div style={{ fontSize: "0.78rem", color: "#334155", marginTop: "4px" }}>
+                          Vegetation Stripped: <strong>{poly.properties?.vegetationLossPercent}%</strong>
+                        </div>
+                        <div style={{ fontSize: "0.72rem", color: "#64748b" }}>
+                          NDVI Drop: {poly.properties?.ndviChange} (Sentinel-2 MSI Level-2A BOA)
+                        </div>
+                      </div>
+                    </Popup>
+                  </Polygon>
+                );
+              })}
+
             {/* SATELLITE WEATHER DETECTION RISK ZONES (Circles + Badges with colors & %) */}
             {filteredRiskZones.map((zone) => (
               <React.Fragment key={zone.id}>

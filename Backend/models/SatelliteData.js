@@ -182,6 +182,11 @@ const satelliteDataSchema = new mongoose.Schema(
       default: null,
     },
 
+    rasterOverlayUrl: {
+      type: String,
+      default: null,
+    },
+
     analysisResults: {
       type: mongoose.Schema.Types.Mixed,
       default: {},

@@ -165,6 +165,41 @@ describe("🛰️ Satellite Remote Sensing, InSAR Displacement & Map Layer Pipel
       expect(res.body.data.monitoredCorridors).toBeGreaterThanOrEqual(5);
     });
 
+    it("GET /api/satellite/sources should return catalog of real satellite sources and missions", async () => {
+      const res = await request(app)
+        .get("/api/satellite/sources")
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.data.dataSources)).toBe(true);
+      const s1 = res.body.data.dataSources.find(s => s.mission === "SENTINEL_1_SAR");
+      expect(s1).toBeDefined();
+      expect(s1.sensor).toContain("Synthetic Aperture Radar");
+    });
+
+    it("GET /api/satellite/layers/raster-overlay/:siteId should return raster overlay and georeferenced bounding box", async () => {
+      const res = await request(app)
+        .get("/api/satellite/layers/raster-overlay/SAT-S1-SK-01")
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.siteId).toBe("SAT-S1-SK-01");
+      expect(res.body.data.bounds).toBeDefined();
+      expect(res.body.data.rasterOverlayUrl).toBeDefined();
+    });
+
+    it("GET /api/satellite/layers should include vegetationScars optical layer and soilMoistureGrid", async () => {
+      const res = await request(app)
+        .get("/api/satellite/layers")
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.layers.vegetationScars).toBeDefined();
+      expect(res.body.data.layers.soilMoistureGrid).toBeDefined();
+      expect(res.body.data.layers.sarFloodInundation).toBeDefined();
+      expect(res.body.data.layers.insarDisplacement).toBeDefined();
+    });
+
     it("POST /api/satellite/sync-now should reject unauthenticated requests", async () => {
       await request(app)
         .post("/api/satellite/sync-now")

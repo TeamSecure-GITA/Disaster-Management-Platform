@@ -39,7 +39,14 @@ const environment = {
     return "http://localhost:8000";
   })(),
 
-  satelliteApiUrl: process.env.SATELLITE_API_URL || "",
+  satelliteApiUrl:
+    process.env.SATELLITE_API_URL || "https://catalogue.dataspace.copernicus.eu/odata/v1/Products",
+
+  copernicusStacUrl:
+    process.env.COPERNICUS_STAC_URL || "https://catalogue.dataspace.copernicus.eu/stac/search",
+
+  satelliteSoilMoistureApiUrl:
+    process.env.SATELLITE_SOIL_MOISTURE_API_URL || "https://api.open-meteo.com/v1/forecast",
 
   uploadDirectory:
     process.env.UPLOAD_DIRECTORY || "uploads",
