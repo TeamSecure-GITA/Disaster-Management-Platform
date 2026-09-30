@@ -544,6 +544,8 @@ function calculateLSI({
   return {
     lsiScore: Number(normalizedLSI.toFixed(2)),
     riskLevel,
+    slopeStabilityMargin: Number(Math.max(0.01, 1 - normalizedLSI).toFixed(2)),
+    slopeStabilityMarginPct: Number(Math.max(1, (1 - normalizedLSI) * 100).toFixed(1)),
     safetyFactor: Number((1 / (normalizedLSI + 0.1)).toFixed(2)),
     historicalEventsCount: effectiveHistoricalEvents,
     historicalAnalysis,
@@ -551,6 +553,7 @@ function calculateLSI({
 }
 
 // Emergency Response Prioritization Algorithm
+
 function getResponsePrioritization() {
   return nerStateOverview.map(s => {
     // Priority formula combining LSI, isolated villages, and rainfall excess

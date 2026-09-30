@@ -933,9 +933,12 @@ def calculate_enhanced_lsi(
     return {
         "lsi_score": round(normalized_lsi, 2),
         "risk_level": risk_level,
+        "slope_stability_margin": round(max(0.01, 1.0 - normalized_lsi), 2),
+        "slope_stability_margin_pct": round(max(1.0, (1.0 - normalized_lsi) * 100), 1),
         "safety_factor": round(1.0 / (normalized_lsi + 0.1), 2),
         "dem_derived": terrain is not None,
         "derived_terrain": terrain,
         "historical_events_count": effective_historical_events,
         "historical_inventory_analysis": historical_stats,
     }
+

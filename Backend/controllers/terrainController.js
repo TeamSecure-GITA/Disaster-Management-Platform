@@ -197,10 +197,45 @@ const getTerrainSources = (req, res) => {
   });
 };
 
+// GET /api/terrain/model-validation
+
+const getModelValidation = async (req, res, next) => {
+  try {
+    const report = await terrainService.getModelValidationBenchmark();
+    return res.status(200).json(report);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/terrain/predict-grid-cells
+const predictGridCells = async (req, res, next) => {
+  try {
+    const result = await terrainService.predictGridCells(req.body);
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/terrain/predict-road-segments
+const predictRoadSegments = async (req, res, next) => {
+  try {
+    const result = await terrainService.predictRoadSegments(req.body);
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPointTerrain,
   getGridTerrain,
   getCorridorProfile,
   calculateEnhancedLSI,
   getTerrainSources,
+  getModelValidation,
+  predictGridCells,
+  predictRoadSegments,
 };
+
