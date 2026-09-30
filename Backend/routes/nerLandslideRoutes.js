@@ -22,6 +22,22 @@ router.get("/corridors", async (req, res, next) => {
   }
 });
 
+// GET /api/ner/districts - Monitored district-level drill-down data with computed telemetry
+router.get("/districts", async (req, res, next) => {
+  try {
+    const { state } = req.query;
+    const districts = nerService.getDistricts(state);
+    res.status(200).json({
+      success: true,
+      count: districts.length,
+      state: state || "All NER",
+      districts,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET /api/ner/inventory - Query geocoded historical landslide inventory (NASA GLC, GSI, BRO, SDMA)
 router.get("/inventory", async (req, res, next) => {
   try {

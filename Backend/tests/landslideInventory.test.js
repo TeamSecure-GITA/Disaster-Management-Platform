@@ -161,5 +161,59 @@ describe("Geocoded Historical Landslide Inventory Service & Endpoints", () => {
       expect(res.body.result.historicalAnalysis).toBeDefined();
       expect(res.body.result.demDerived).toBe(true);
     });
+
+    test("GET /api/ner/overview returns computed weather forecast, trends, and district drill-down", async () => {
+      const res = await request(app).get("/api/ner/overview");
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.states).toBeDefined();
+      expect(res.body.states.length).toBe(8);
+
+      const sikkim = res.body.states.find(s => s.state === "Sikkim");
+      expect(sikkim).toBeDefined();
+      expect(sikkim.forecast).toBeDefined();
+      expect(typeof sikkim.forecast.rain24hForecastMm).toBe("number");
+      expect(sikkim.forecast.leadTimeFormatted).toBeDefined();
+      expect(sikkim.trends).toBeDefined();
+      expect(Array.isArray(sikkim.trends.dates)).toBe(true);
+      expect(Array.isArray(sikkim.trends.rainfallHistory)).toBe(true);
+      expect(sikkim.districts).toBeDefined();
+      expect(sikkim.districts.length).toBeGreaterThanOrEqual(4);
+
+      // Verify corridors are populated and synced
+      expect(res.body.corridors).toBeDefined();
+      expect(res.body.corridors.length).toBeGreaterThanOrEqual(6);
+    });
+
+    test("GET /api/ner/districts returns full monitored hill districts and filters by state", async () => {
+      // 1. All districts
+      const resAll = await request(app).get("/api/ner/districts");
+      expect(resAll.status).toBe(200);
+      expect(resAll.body.success).toBe(true);
+      expect(resAll.body.count).toBeGreaterThanOrEqual(40);
+      expect(Array.isArray(resAll.body.districts)).toBe(true);
+
+      const sample = resAll.body.districts[0];
+      expect(sample.district).toBeDefined();
+      expect(sample.state).toBeDefined();
+      expect(typeof sample.currentRainfall24hMm).toBe("number");
+      expect(typeof sample.thresholdMm).toBe("number");
+      expect(typeof sample.soilSaturationPercent).toBe("number");
+      expect(typeof sample.landslideSusceptibilityIndex).toBe("number");
+      expect(sample.riskLevel).toBeDefined();
+      expect(sample.tacticalAdvisory).toBeDefined();
+
+      // 2. Filter by Sikkim
+      const resSK = await request(app).get("/api/ner/districts?state=Sikkim");
+      expect(resSK.status).toBe(200);
+      expect(resSK.body.count).toBe(6);
+      resSK.body.districts.forEach(d => expect(d.state).toBe("Sikkim"));
+
+      // 3. Filter by Meghalaya
+      const resML = await request(app).get("/api/ner/districts?state=Meghalaya");
+      expect(resML.status).toBe(200);
+      expect(resML.body.count).toBe(7);
+      resML.body.districts.forEach(d => expect(d.state).toBe("Meghalaya"));
+    });
   });
 });
