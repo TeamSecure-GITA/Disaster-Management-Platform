@@ -198,33 +198,49 @@ router.post("/layers", protect, operationsOnly, async (req, res, next) => {
 // SUMMARY
 // ---------------------------------------------------------------------------
 
+const mongoose = require("mongoose");
+
 /**
  * GET /api/gis/summary
  * Quick stats for dashboard cards
  */
 router.get("/summary", async (req, res, next) => {
   try {
-    const [
-      riskSummary,
-      totalRoads,
-      blockedRoads,
-      restrictedRoads,
-      infraCount,
-      villageCount,
-    ] = await Promise.all([
-      gisService.getRiskHeatmapGeoJSON(),
-      RoadSegment.countDocuments(),
-      RoadSegment.countDocuments({ status: "blocked" }),
-      RoadSegment.countDocuments({ status: "restricted" }),
-      GisLayer.countDocuments({ layerType: "infrastructure", isActive: true }),
-      GisLayer.countDocuments({ layerType: "village", isActive: true }),
-    ]);
+    const isDbConnected = mongoose.connection.readyState === 1;
+
+    let totalRoads = gisService.NER_CORRIDOR_SEED.length;
+    let blockedRoads = gisService.NER_CORRIDOR_SEED.filter((s) => s.status === "blocked").length;
+    let restrictedRoads = gisService.NER_CORRIDOR_SEED.filter((s) => s.status === "restricted").length;
+    let infraCount = gisService.INFRA_SEED.length;
+    let villageCount = gisService.VILLAGE_SEED.length;
+
+    const riskSummary = await gisService.getRiskHeatmapGeoJSON();
+
+    if (isDbConnected) {
+      try {
+        const counts = await Promise.all([
+          RoadSegment.countDocuments(),
+          RoadSegment.countDocuments({ status: "blocked" }),
+          RoadSegment.countDocuments({ status: "restricted" }),
+          GisLayer.countDocuments({ layerType: "infrastructure", isActive: true }),
+          GisLayer.countDocuments({ layerType: "village", isActive: true }),
+        ]);
+        if (counts[0] > 0) {
+          totalRoads = counts[0];
+          blockedRoads = counts[1];
+          restrictedRoads = counts[2];
+          infraCount = counts[3];
+          villageCount = counts[4];
+        }
+      } catch (_e) {}
+    }
 
     res.status(200).json({
       success: true,
       data: {
-        riskZones:          riskSummary.summary.zones,
-        activeIncidents:    riskSummary.summary.incidents,
+        riskZones:          riskSummary.summary?.zones || 0,
+        activeIncidents:    riskSummary.summary?.incidents || 0,
+        modelRiskHotspots:  riskSummary.summary?.modelOutputs || 0,
         totalRoadSegments:  totalRoads,
         blockedRoads,
         restrictedRoads,

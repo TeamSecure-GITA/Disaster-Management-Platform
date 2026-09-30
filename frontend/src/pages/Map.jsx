@@ -1309,6 +1309,12 @@ export default function Map() {
   const [liveVillageFeatures, setLiveVillageFeatures] = useState([]); // GeoJSON villages
   const [gisLoading, setGisLoading] = useState(true);
 
+  // Live GIS layer visibility toggles
+  const [showLiveRiskHeatmap, setShowLiveRiskHeatmap] = useState(true);
+  const [showLiveRoadSegments, setShowLiveRoadSegments] = useState(true);
+  const [showLiveInfrastructure, setShowLiveInfrastructure] = useState(true);
+  const [showLiveVillages, setShowLiveVillages] = useState(true);
+
   // In-app navigation state (No external Google Maps redirect)
   const [activeRouteTarget, setActiveRouteTarget] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -1694,6 +1700,106 @@ export default function Map() {
             >
               <span>📡</span>
               <span>InSAR Radar ({satelliteLayers?.layers?.insarDisplacement?.length || 7})</span>
+            </button>
+
+            {/* Live Model Risk Heatmap Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowLiveRiskHeatmap((prev) => !prev)}
+              title="Toggle Live ML Model Risk Heatmap & Incident Layers (Backend GIS)"
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid",
+                borderColor: showLiveRiskHeatmap ? "#ef4444" : "#475569",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                backgroundColor: showLiveRiskHeatmap ? "#dc2626" : "rgba(30, 41, 59, 0.7)",
+                color: showLiveRiskHeatmap ? "#ffffff" : "#94a3b8",
+                transition: "all 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>🛡️</span>
+              <span>Model Risk ({liveRiskFeatures.length})</span>
+            </button>
+
+            {/* Live Road Status Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowLiveRoadSegments((prev) => !prev)}
+              title="Toggle Live Per-Segment Road Status (Open / Restricted / Blocked)"
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid",
+                borderColor: showLiveRoadSegments ? "#eab308" : "#475569",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                backgroundColor: showLiveRoadSegments ? "#ca8a04" : "rgba(30, 41, 59, 0.7)",
+                color: showLiveRoadSegments ? "#ffffff" : "#94a3b8",
+                transition: "all 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>🛣️</span>
+              <span>Roads ({liveRoadSegments.length})</span>
+            </button>
+
+            {/* Live Infrastructure Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowLiveInfrastructure((prev) => !prev)}
+              title="Toggle GIS Infrastructure Layer (Hospitals, Shelters, EOCs)"
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid",
+                borderColor: showLiveInfrastructure ? "#3b82f6" : "#475569",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                backgroundColor: showLiveInfrastructure ? "#2563eb" : "rgba(30, 41, 59, 0.7)",
+                color: showLiveInfrastructure ? "#ffffff" : "#94a3b8",
+                transition: "all 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>🏥</span>
+              <span>Infra ({liveInfraFeatures.length})</span>
+            </button>
+
+            {/* Live Village Layer Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowLiveVillages((prev) => !prev)}
+              title="Toggle GIS Village Vulnerability Layer (Census / Bhuvan)"
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid",
+                borderColor: showLiveVillages ? "#10b981" : "#475569",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                backgroundColor: showLiveVillages ? "#059669" : "rgba(30, 41, 59, 0.7)",
+                color: showLiveVillages ? "#ffffff" : "#94a3b8",
+                transition: "all 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>🏘️</span>
+              <span>Villages ({liveVillageFeatures.length})</span>
             </button>
           </div>
         </div>
@@ -2387,6 +2493,349 @@ export default function Map() {
                 </Marker>
               );
             })}
+
+            {/* ── BACKEND GIS: PER-SEGMENT ROAD NETWORK STATUS ── */}
+            {showLiveRoadSegments &&
+              liveRoadSegments.map((seg, idx) => {
+                if (seg.geometry?.type !== "LineString" || !seg.geometry.coordinates?.length) return null;
+                const positions = seg.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+                const status = seg.properties?.status || "unknown";
+                const color = roadStatusToColor(status);
+                const isBlocked = status === "blocked";
+                const isRestricted = status === "restricted";
+                const dashArray = isBlocked ? "8, 6" : isRestricted ? "4, 4" : null;
+                const weight = seg.properties?.isEvacuationRoute ? 5.5 : 4;
+
+                return (
+                  <Polyline
+                    key={seg.properties?.id || `live-road-${idx}`}
+                    positions={positions}
+                    pathOptions={{
+                      color: color,
+                      weight: weight,
+                      opacity: isBlocked ? 0.95 : 0.85,
+                      dashArray: dashArray,
+                    }}
+                  >
+                    <Popup>
+                      <div style={{ color: "#0f172a", maxWidth: "320px", padding: "4px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <span
+                            style={{
+                              backgroundColor: isBlocked ? "#dc2626" : isRestricted ? "#d97706" : "#16a34a",
+                              color: "#fff",
+                              fontSize: "0.72rem",
+                              fontWeight: "800",
+                              padding: "2px 8px",
+                              borderRadius: "10px",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {status}
+                          </span>
+                          {seg.properties?.highwayCode && (
+                            <span style={{ fontSize: "0.78rem", fontWeight: "700", color: "#1e293b", backgroundColor: "#f1f5f9", padding: "1px 6px", borderRadius: "4px" }}>
+                              {seg.properties.highwayCode}
+                            </span>
+                          )}
+                        </div>
+                        <strong style={{ fontSize: "0.95rem", color: "#0f172a", display: "block", marginBottom: "4px" }}>
+                          {seg.properties?.name}
+                        </strong>
+                        {seg.properties?.statusNote && (
+                          <p style={{ fontSize: "0.78rem", color: "#475569", margin: "4px 0 6px 0", backgroundColor: "#f8fafc", padding: "6px", borderRadius: "6px", borderLeft: `3px solid ${color}` }}>
+                            ℹ️ {seg.properties.statusNote}
+                          </p>
+                        )}
+                        <div style={{ fontSize: "0.74rem", color: "#64748b", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", margin: "6px 0" }}>
+                          <div>Risk Score: <strong style={{ color: color }}>{seg.properties?.riskScore || 50}%</strong></div>
+                          <div>Hazard: <strong style={{ textTransform: "capitalize" }}>{seg.properties?.hazardType || "landslide"}</strong></div>
+                          {seg.properties?.authority && <div style={{ gridColumn: "span 2" }}>Authority: <strong>{seg.properties.authority}</strong></div>}
+                          {seg.properties?.isEvacuationRoute && (
+                            <div style={{ gridColumn: "span 2", color: "#15803d", fontWeight: "700" }}>
+                              🚑 Primary Evacuation Corridor
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleStartInAppNavigation({
+                              name: seg.properties?.name,
+                              lat: positions[0][0],
+                              lng: positions[0][1],
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "7px",
+                            backgroundColor: isBlocked ? "#dc2626" : "#2563eb",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontWeight: "700",
+                            fontSize: "0.78rem",
+                            cursor: "pointer",
+                            marginTop: "4px",
+                          }}
+                        >
+                          {isBlocked ? "🚨 Route Around Blocked Corridor" : "📍 Set Road Waypoint / Destination"}
+                        </button>
+                      </div>
+                    </Popup>
+                  </Polyline>
+                );
+              })}
+
+            {/* ── BACKEND GIS: ML MODEL RISK HEATMAP & ACTIVE INCIDENTS ── */}
+            {showLiveRiskHeatmap &&
+              liveRiskFeatures.map((f, idx) => {
+                const riskScore = f.properties?.riskScore || 50;
+                const color = riskScoreToColor(riskScore);
+                const isPolygon = f.geometry?.type === "Polygon";
+                const isPoint = f.geometry?.type === "Point";
+
+                if (isPolygon) {
+                  const rawCoords = f.geometry.coordinates?.[0];
+                  if (!rawCoords?.length) return null;
+                  const positions = rawCoords.map(([lng, lat]) => [lat, lng]);
+                  const center = positions[0];
+
+                  return (
+                    <React.Fragment key={f.properties?.id || `live-poly-${idx}`}>
+                      <Polygon
+                        positions={positions}
+                        pathOptions={{
+                          color: color,
+                          fillColor: color,
+                          fillOpacity: riskScore > 80 ? 0.45 : 0.32,
+                          weight: 2,
+                        }}
+                      >
+                        <Popup>
+                          <div style={{ color: "#0f172a", maxWidth: "310px", padding: "2px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                              <span style={{ fontSize: "0.75rem", fontWeight: "800", color: "#4338ca", textTransform: "uppercase" }}>
+                                {f.properties?.modelType ? "🤖 ML MODEL OUTPUT" : "RISK ZONE"}
+                              </span>
+                              <span style={{ backgroundColor: color, color: "#fff", fontSize: "0.72rem", fontWeight: "800", padding: "2px 7px", borderRadius: "10px" }}>
+                                {riskScore}% Risk
+                              </span>
+                            </div>
+                            <strong style={{ fontSize: "0.92rem", color: "#0f172a", display: "block", marginBottom: "6px" }}>
+                              {f.properties?.name}
+                            </strong>
+                            {f.properties?.modelType && (
+                              <div style={{ fontSize: "0.72rem", color: "#475569", marginBottom: "6px", fontStyle: "italic" }}>
+                                Engine: {f.properties.modelType}
+                              </div>
+                            )}
+                            <div style={{ backgroundColor: "#f8fafc", padding: "8px", borderRadius: "8px", fontSize: "0.74rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", marginBottom: "8px" }}>
+                              {f.properties?.slopeStabilityMargin && (
+                                <div>Stability Margin: <strong style={{ color: riskScore > 75 ? "#dc2626" : "#16a34a" }}>{f.properties.slopeStabilityMargin}</strong></div>
+                              )}
+                              {f.properties?.slopeAngle && (
+                                <div>Slope Angle: <strong>{f.properties.slopeAngle}°</strong></div>
+                              )}
+                              {f.properties?.warningLeadTimeHours && (
+                                <div>Lead Time: <strong>{f.properties.warningLeadTimeHours}h</strong></div>
+                              )}
+                              {f.properties?.rain24h && (
+                                <div>Rain 24h: <strong>{f.properties.rain24h} mm</strong></div>
+                              )}
+                              {f.properties?.soilMoistureSaturation && (
+                                <div>Saturation: <strong>{f.properties.soilMoistureSaturation}</strong></div>
+                              )}
+                              {f.properties?.demElevationMeters && (
+                                <div>DEM Elev: <strong>{f.properties.demElevationMeters}m</strong></div>
+                              )}
+                            </div>
+                            {f.properties?.recommendedAction && (
+                              <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", padding: "6px", borderRadius: "6px", fontSize: "0.73rem", color: "#b91c1c", marginBottom: "8px" }}>
+                                <strong>Action:</strong> {f.properties.recommendedAction}
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleStartInAppNavigation({
+                                  name: f.properties?.name,
+                                  lat: center[0],
+                                  lng: center[1],
+                                })
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "7px",
+                                backgroundColor: "#2563eb",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "6px",
+                                fontWeight: "700",
+                                fontSize: "0.78rem",
+                                cursor: "pointer",
+                              }}
+                            >
+                              📍 Navigate Safe Perimeter Inside App
+                            </button>
+                          </div>
+                        </Popup>
+                      </Polygon>
+                      <Marker position={center} icon={createRiskBadgeIcon(riskScore, color)} />
+                    </React.Fragment>
+                  );
+                }
+
+                if (isPoint) {
+                  const lat = f.geometry.coordinates[1];
+                  const lng = f.geometry.coordinates[0];
+                  return (
+                    <React.Fragment key={f.properties?.id || `live-pt-${idx}`}>
+                      <Circle
+                        center={[lat, lng]}
+                        radius={Math.max(600, riskScore * 50)}
+                        pathOptions={{ color: color, fillColor: color, fillOpacity: 0.35, weight: 2 }}
+                      />
+                      <Marker position={[lat, lng]} icon={createRiskBadgeIcon(riskScore, color)}>
+                        <Popup>
+                          <div style={{ color: "#0f172a", maxWidth: "290px", padding: "2px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                              <span style={{ fontSize: "0.75rem", fontWeight: "700", color: color, textTransform: "uppercase" }}>
+                                {f.properties?.incidentType || f.properties?.hazardType || "INCIDENT"}
+                              </span>
+                              <span style={{ backgroundColor: color, color: "#fff", fontSize: "0.7rem", fontWeight: "800", padding: "1px 6px", borderRadius: "8px" }}>
+                                {riskScore}% Risk
+                              </span>
+                            </div>
+                            <strong style={{ fontSize: "0.9rem", color: "#0f172a", display: "block", marginBottom: "4px" }}>
+                              {f.properties?.name}
+                            </strong>
+                            <div style={{ fontSize: "0.74rem", color: "#64748b", marginBottom: "6px" }}>
+                              Status: <strong>{f.properties?.status || "Active"}</strong> • {f.properties?.district || f.properties?.state}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleStartInAppNavigation({ name: f.properties?.name, lat, lng })}
+                              style={{ width: "100%", padding: "7px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "700", fontSize: "0.78rem", cursor: "pointer" }}
+                            >
+                              📍 Navigate on Live Map
+                            </button>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    </React.Fragment>
+                  );
+                }
+
+                return null;
+              })}
+
+            {/* ── BACKEND GIS: CRITICAL INFRASTRUCTURE LAYER ── */}
+            {showLiveInfrastructure &&
+              liveInfraFeatures.map((f, idx) => {
+                if (f.geometry?.type !== "Point" || !f.geometry.coordinates?.length) return null;
+                const lat = f.geometry.coordinates[1];
+                const lng = f.geometry.coordinates[0];
+                const type = f.properties?.type || "shelter";
+                const icon =
+                  type === "hospital" ? hospitalIcon :
+                  type === "shelter" ? shelterIcon :
+                  type === "control_room" ? officeIcon :
+                  type === "fire" ? fireIcon :
+                  shelterIcon;
+
+                return (
+                  <Marker key={f.properties?.id || `live-infra-${idx}`} position={[lat, lng]} icon={icon}>
+                    <Popup>
+                      <div style={{ color: "#0f172a", maxWidth: "290px", padding: "2px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                          <span style={{ fontSize: "1.1rem" }}>
+                            {type === "hospital" ? "🏥" : type === "shelter" ? "⛺" : type === "control_room" ? "🏛️" : "🚒"}
+                          </span>
+                          <strong style={{ fontSize: "0.92rem", color: "#0f172a" }}>{f.properties?.name}</strong>
+                        </div>
+                        <div style={{ fontSize: "0.74rem", color: "#1d4ed8", fontWeight: "700", marginBottom: "4px" }}>
+                          {type.toUpperCase()} • {f.properties?.state || "NER"}
+                        </div>
+                        {f.properties?.capacity && (
+                          <div style={{ fontSize: "0.76rem", color: "#334155", marginBottom: "3px" }}>
+                            👥 <strong>Capacity:</strong> {f.properties.capacity}
+                          </div>
+                        )}
+                        {f.properties?.phone && (
+                          <div style={{ fontSize: "0.76rem", color: "#b91c1c", marginBottom: "6px" }}>
+                            📞 <strong>Helpline:</strong> <a href={`tel:${f.properties.phone}`} style={{ color: "#dc2626" }}>{f.properties.phone}</a>
+                          </div>
+                        )}
+                        {f.properties?.status && (
+                          <div style={{ fontSize: "0.72rem", color: "#16a34a", fontWeight: "600", marginBottom: "8px" }}>
+                            Status: {f.properties.status}
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleStartInAppNavigation({ name: f.properties?.name, lat, lng })}
+                          style={{ width: "100%", padding: "7px", backgroundColor: "#16a34a", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "700", fontSize: "0.78rem", cursor: "pointer" }}
+                        >
+                          <Navigation size={13} style={{ display: "inline", verticalAlign: "middle", marginRight: "4px" }} />
+                          Navigate to Facility
+                        </button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
+
+            {/* ── BACKEND GIS: VILLAGES AT RISK LAYER ── */}
+            {showLiveVillages &&
+              liveVillageFeatures.map((f, idx) => {
+                if (f.geometry?.type !== "Point" || !f.geometry.coordinates?.length) return null;
+                const lat = f.geometry.coordinates[1];
+                const lng = f.geometry.coordinates[0];
+                const risk = f.properties?.riskLevel || "MODERATE";
+                const color = risk === "CRITICAL" ? "#dc2626" : risk === "HIGH" ? "#ea580c" : "#16a34a";
+
+                return (
+                  <Marker key={f.properties?.id || `live-village-${idx}`} position={[lat, lng]} icon={createEmojiIcon("🏘️", color)}>
+                    <Popup>
+                      <div style={{ color: "#0f172a", maxWidth: "290px", padding: "2px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                          <span style={{ fontSize: "0.75rem", fontWeight: "800", color: color }}>
+                            🏘️ VILLAGE GIS LAYER
+                          </span>
+                          <span style={{ backgroundColor: color, color: "#fff", fontSize: "0.7rem", fontWeight: "800", padding: "1px 6px", borderRadius: "8px" }}>
+                            {risk} RISK
+                          </span>
+                        </div>
+                        <strong style={{ fontSize: "0.95rem", color: "#0f172a", display: "block", marginBottom: "4px" }}>
+                          {f.properties?.name}
+                        </strong>
+                        <div style={{ fontSize: "0.75rem", color: "#475569", marginBottom: "6px" }}>
+                          📍 {f.properties?.district}, {f.properties?.state}
+                        </div>
+                        <div style={{ backgroundColor: "#f8fafc", padding: "6px 8px", borderRadius: "6px", fontSize: "0.74rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px", marginBottom: "8px" }}>
+                          {f.properties?.population && <div>Pop: <strong>{Number(f.properties.population).toLocaleString()}</strong></div>}
+                          {f.properties?.altitude_m && <div>Alt: <strong>{f.properties.altitude_m}m</strong></div>}
+                          {f.properties?.primaryHazard && <div>Hazard: <strong style={{ textTransform: "capitalize" }}>{f.properties.primaryHazard}</strong></div>}
+                          {f.properties?.vulnerabilityScore && <div>Vuln Index: <strong style={{ color: color }}>{f.properties.vulnerabilityScore}/100</strong></div>}
+                        </div>
+                        {f.properties?.focalPoint && (
+                          <div style={{ fontSize: "0.72rem", color: "#334155", marginBottom: "6px" }}>
+                            👤 <strong>Focal:</strong> {f.properties.focalPoint}
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleStartInAppNavigation({ name: f.properties?.name, lat, lng })}
+                          style={{ width: "100%", padding: "7px", backgroundColor: "#059669", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "700", fontSize: "0.78rem", cursor: "pointer" }}
+                        >
+                          📍 Set as Evacuation Target
+                        </button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
           </MapContainer>
 
           {/* ── FLOATING IN-MAP ROUTE HUD (WHEN A DESTINATION IS SELECTED) ── */}
