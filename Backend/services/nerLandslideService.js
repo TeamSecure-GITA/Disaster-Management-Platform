@@ -709,12 +709,13 @@ function updateStateRainfallFromTimeseries({ state, rain24h, rain72h, rain1h, im
     if (rain1h !== undefined) stateObj.currentRainfall1hMm = Number(rain1h);
     if (imdBand) stateObj.imdBand = `${imdBand} (IMD Standard)`;
 
-    // Recalculate dynamic LSI based on real ingested precipitation
+    // Recalculate dynamic LSI based on real ingested precipitation and DEM slope
     const lsiResult = calculateLSI({
       rainfall24h: stateObj.currentRainfall24hMm,
       threshold: stateObj.rainfallThresholdMm,
       soilSaturation: stateObj.soilSaturationPercent,
-      slopeAngle: stateObj.averageSlopeDeg,
+      slopeAngle: stateObj.slopeDeg !== undefined ? stateObj.slopeDeg : stateObj.averageSlopeDeg,
+      terrain: stateObj,
     });
     stateObj.landslideSusceptibilityIndex = lsiResult.lsiScore;
     stateObj.riskLevel = lsiResult.riskLevel;

@@ -18,6 +18,7 @@ from app.api.v1.resources import router as resources_router
 from app.api.v1.shelters import router as shelters_router
 from app.api.v1.sensors import router as sensors_router
 from app.api.v1.models import router as models_router
+from app.api.v1.terrain import router as terrain_router
 
 api_v1_router = APIRouter()
 
@@ -29,6 +30,9 @@ api_v1_router.include_router(prediction_router)
 
 # ── Environmental & Sensor Forecasting ──────────────────────
 api_v1_router.include_router(forecast_router)
+
+# ── Geospatial & DEM Topography ─────────────────────────────
+api_v1_router.include_router(terrain_router)
 
 # ── AI & Copilot ────────────────────────────────────────────
 api_v1_router.include_router(ai_router)
@@ -52,6 +56,7 @@ __all__ = [
     "simulation_router",
     "prediction_router",
     "forecast_router",
+    "terrain_router",
     "ai_router",
     "analytics_router",
     "incidents_router",
@@ -61,3 +66,4 @@ __all__ = [
     "sensors_router",
     "models_router",
 ]
+

@@ -18,19 +18,25 @@ _engine = create_operational_landslide_engine()
 _model = _engine.model
 
 
+from app.geospatial.terrain_dem import get_terrain_at_coordinates
+
+
 class LandslidePredictRequest(BaseModel):
     rainfall_1h_mm: Optional[float] = Field(None, description="Rainfall in past 1 hour (mm)")
     rainfall_6h_mm: Optional[float] = Field(None, description="Rainfall in past 6 hours (mm)")
     rainfall_24h_mm: Optional[float] = Field(None, description="Rainfall in past 24 hours (mm)")
     rainfall_7d_mm: Optional[float] = Field(None, description="Cumulative rainfall in past 7 days (mm)")
-    slope_angle_deg: Optional[float] = Field(None, description="Slope inclination in degrees")
-    elevation_m: Optional[float] = Field(None, description="Elevation above sea level in meters")
+    slope_angle_deg: Optional[float] = Field(None, description="Slope inclination in degrees (auto-derived from DEM if omitted and coordinates provided)")
+    elevation_m: Optional[float] = Field(None, description="Elevation above sea level in meters (auto-derived from DEM if omitted)")
     soil_moisture_pct: Optional[float] = Field(None, description="Volumetric soil water content (%)")
     pore_water_pressure_kpa: Optional[float] = Field(None, description="Soil pore water pressure (kPa)")
     ndvi: Optional[float] = Field(None, description="Normalized Difference Vegetation Index (-1 to 1)")
-    distance_to_road_m: Optional[float] = Field(None, description="Proximity to nearest road cut (m)")
-    distance_to_drainage_m: Optional[float] = Field(None, description="Proximity to nearest drainage stream (m)")
+    distance_to_road_m: Optional[float] = Field(None, description="Proximity to nearest road cut in meters (auto-derived if coordinates provided)")
+    distance_to_drainage_m: Optional[float] = Field(None, description="Proximity to nearest drainage stream in meters (auto-derived if coordinates provided)")
     ground_displacement_mm: Optional[float] = Field(None, description="InSAR/ground sensor displacement (mm)")
+    latitude: Optional[float] = Field(None, description="Latitude for DEM derivation (e.g. 27.33 for Sikkim)")
+    longitude: Optional[float] = Field(None, description="Longitude for DEM derivation (e.g. 88.61)")
+    dem_source: Optional[str] = Field("Copernicus GLO-30", description="DEM source (Copernicus GLO-30, SRTM 30m, CartoDEM 30m)")
     features: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional custom features")
 
 
@@ -43,6 +49,8 @@ class LandslidePredictResponse(BaseModel):
     model_name: str
     model_version: str
     timestamp: str
+    dem_derived: bool = False
+    derived_terrain: Optional[Dict[str, Any]] = None
     feature_contributions: Dict[str, float] = {}
     missing_features: list[str] = []
     warnings: list[str] = []
@@ -55,9 +63,31 @@ async def predict_landslide(request: LandslidePredictRequest):
     features = payload.pop("features", {}) or {}
     payload.update(features)
 
+    lat = payload.get("latitude")
+    lng = payload.get("longitude")
+    dem_source = payload.get("dem_source", "Copernicus GLO-30")
+    dem_derived = False
+    derived_terrain = None
+
+    if lat is not None and lng is not None:
+        try:
+            terrain = get_terrain_at_coordinates(float(lat), float(lng), dem_source=dem_source)
+            derived_terrain = terrain
+            dem_derived = True
+
+            if payload.get("slope_angle_deg") is None:
+                payload["slope_angle_deg"] = terrain["slope_deg"]
+            if payload.get("elevation_m") is None:
+                payload["elevation_m"] = float(terrain["elevation_meters"])
+            if payload.get("distance_to_road_m") is None:
+                payload["distance_to_road_m"] = float(terrain["distance_to_roads_meters"])
+            if payload.get("distance_to_drainage_m") is None:
+                payload["distance_to_drainage_m"] = float(terrain["distance_to_streams_meters"])
+        except Exception:
+            pass
+
     try:
         result = _engine.predict(payload)
-        res_dict = result.to_dict()
         return LandslidePredictResponse(
             success=result.status in ("success", "partial_prediction", "missing_features", "ok"),
             status=result.status,
@@ -67,6 +97,8 @@ async def predict_landslide(request: LandslidePredictRequest):
             model_name=result.model_name,
             model_version=result.model_version,
             timestamp=result.timestamp,
+            dem_derived=dem_derived,
+            derived_terrain=derived_terrain,
             feature_contributions=result.feature_contributions,
             missing_features=result.missing_features,
             warnings=result.warnings,

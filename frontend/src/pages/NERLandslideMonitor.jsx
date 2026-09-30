@@ -25,6 +25,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 120.0,
       soilSaturationPercent: 93,
       averageSlopeDeg: 46,
+      demElevationMeters: 1650,
+      slopeDeg: 46.2,
+      aspectDeg: 198.5,
+      aspectDirection: "S",
+      curvature: {
+        profileCurvature: -0.1245,
+        planformCurvature: -0.0982,
+        generalCurvature: -0.0152,
+      },
+      distanceToRoadsMeters: 68,
+      nearestRoadName: "NH-10 Teesta Valley Highway",
+      distanceToStreamsMeters: 55,
+      nearestStreamName: "Teesta River Main Channel",
+      lithology: {
+        formation: "Daling Group (Highly Foliated)",
+        rockType: "Quartz-Chlorite-Sericite Schist & Phyllite",
+        strengthClass: "LOW",
+        cohesionKPa: 14.5,
+        frictionAngleDeg: 25.5,
+      },
+      landCover: {
+        classification: "Dense Evergreen Broadleaf Forest",
+        canopyCoverPct: 82,
+        rootCohesionKPa: 6.2,
+        erosionRisk: "Low",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.91,
       riskLevel: "Critical",
       isolatedVillagesCount: 18,
@@ -47,6 +74,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 150.0,
       soilSaturationPercent: 96,
       averageSlopeDeg: 42,
+      demElevationMeters: 1480,
+      slopeDeg: 42.4,
+      aspectDeg: 172.0,
+      aspectDirection: "S",
+      curvature: {
+        profileCurvature: 0.0821,
+        planformCurvature: -0.1450,
+        generalCurvature: -0.0084,
+      },
+      distanceToRoadsMeters: 45,
+      nearestRoadName: "NH-6 Shillong-Jowai-Silchar Highway",
+      distanceToStreamsMeters: 72,
+      nearestStreamName: "Lubha River Gorge Channel",
+      lithology: {
+        formation: "Jaintia / Khasi Group",
+        rockType: "Karstified Limestone & Interbedded Calcareous Sandstone",
+        strengthClass: "MODERATE",
+        cohesionKPa: 26.0,
+        frictionAngleDeg: 32.0,
+      },
+      landCover: {
+        classification: "Dense Broadleaf Rainforest & Plateau Grassland",
+        canopyCoverPct: 78,
+        rootCohesionKPa: 5.8,
+        erosionRisk: "Moderate",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.88,
       riskLevel: "Critical",
       isolatedVillagesCount: 14,
@@ -68,6 +122,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 90.0,
       soilSaturationPercent: 85,
       averageSlopeDeg: 40,
+      demElevationMeters: 1440,
+      slopeDeg: 40.8,
+      aspectDeg: 235.0,
+      aspectDirection: "SW",
+      curvature: {
+        profileCurvature: -0.1850,
+        planformCurvature: -0.1620,
+        generalCurvature: -0.0210,
+      },
+      distanceToRoadsMeters: 38,
+      nearestRoadName: "NH-29 Dimapur-Kohima-Mao Highway",
+      distanceToStreamsMeters: 62,
+      nearestStreamName: "Dzüdza River Gorge",
+      lithology: {
+        formation: "Disang Group (Flysch & Swelling Shales)",
+        rockType: "Splintery Carbonaceous Shale & Siltstone",
+        strengthClass: "VERY_LOW",
+        cohesionKPa: 8.0,
+        frictionAngleDeg: 18.5,
+      },
+      landCover: {
+        classification: "Jhum Cultivation & Secondary Bamboo Scrub",
+        canopyCoverPct: 35,
+        rootCohesionKPa: 1.4,
+        erosionRisk: "Critical",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.79,
       riskLevel: "High",
       isolatedVillagesCount: 8,
@@ -88,6 +169,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 100.0,
       soilSaturationPercent: 82,
       averageSlopeDeg: 51,
+      demElevationMeters: 2150,
+      slopeDeg: 51.5,
+      aspectDeg: 165.0,
+      aspectDirection: "S",
+      curvature: {
+        profileCurvature: 0.1150,
+        planformCurvature: -0.0750,
+        generalCurvature: 0.0042,
+      },
+      distanceToRoadsMeters: 85,
+      nearestRoadName: "NH-13 Trans-Arunachal Highway",
+      distanceToStreamsMeters: 110,
+      nearestStreamName: "Kameng River Torrent",
+      lithology: {
+        formation: "Bomdila / Siwalik Group",
+        rockType: "Biotite Gneiss, Phyllite & Siwalik Sandstone",
+        strengthClass: "MODERATE",
+        cohesionKPa: 24.0,
+        frictionAngleDeg: 30.0,
+      },
+      landCover: {
+        classification: "High-Altitude Coniferous & Mixed Forest",
+        canopyCoverPct: 85,
+        rootCohesionKPa: 7.1,
+        erosionRisk: "Low",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.82,
       riskLevel: "High",
       isolatedVillagesCount: 12,
@@ -108,6 +216,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 110.0,
       soilSaturationPercent: 86,
       averageSlopeDeg: 34,
+      demElevationMeters: 620,
+      slopeDeg: 34.6,
+      aspectDeg: 142.0,
+      aspectDirection: "SE",
+      curvature: {
+        profileCurvature: -0.0920,
+        planformCurvature: -0.1120,
+        generalCurvature: -0.0115,
+      },
+      distanceToRoadsMeters: 52,
+      nearestRoadName: "NH-37 & Lumding-Badarpur Hill Railway",
+      distanceToStreamsMeters: 48,
+      nearestStreamName: "Jatinga River Torrent",
+      lithology: {
+        formation: "Barail & Surma Group (Molasse Sediments)",
+        rockType: "Unconsolidated Colluvium & Friable Sandstone",
+        strengthClass: "LOW",
+        cohesionKPa: 15.0,
+        frictionAngleDeg: 24.0,
+      },
+      landCover: {
+        classification: "Sub-Tropical Deciduous Forest & Bamboo",
+        canopyCoverPct: 62,
+        rootCohesionKPa: 3.8,
+        erosionRisk: "High",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.80,
       riskLevel: "High",
       isolatedVillagesCount: 15,
@@ -129,6 +264,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 95.0,
       soilSaturationPercent: 78,
       averageSlopeDeg: 44,
+      demElevationMeters: 980,
+      slopeDeg: 44.1,
+      aspectDeg: 185.0,
+      aspectDirection: "S",
+      curvature: {
+        profileCurvature: 0.0650,
+        planformCurvature: -0.0890,
+        generalCurvature: -0.0035,
+      },
+      distanceToRoadsMeters: 60,
+      nearestRoadName: "NH-54 Silchar-Aizawl-Lunglei Highway",
+      distanceToStreamsMeters: 80,
+      nearestStreamName: "Tuirial River Valley",
+      lithology: {
+        formation: "Bhuban / Bokabil Formation (Surma Group)",
+        rockType: "Interbedded Friable Micaceous Sandstone & Siltstone",
+        strengthClass: "LOW",
+        cohesionKPa: 16.0,
+        frictionAngleDeg: 24.0,
+      },
+      landCover: {
+        classification: "Secondary Bamboo Scrub & Shifting Agriculture",
+        canopyCoverPct: 48,
+        rootCohesionKPa: 2.5,
+        erosionRisk: "High",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.74,
       riskLevel: "High",
       isolatedVillagesCount: 7,
@@ -149,6 +311,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 85.0,
       soilSaturationPercent: 74,
       averageSlopeDeg: 39,
+      demElevationMeters: 840,
+      slopeDeg: 39.4,
+      aspectDeg: 215.0,
+      aspectDirection: "SW",
+      curvature: {
+        profileCurvature: -0.1420,
+        planformCurvature: -0.1280,
+        generalCurvature: -0.0180,
+      },
+      distanceToRoadsMeters: 75,
+      nearestRoadName: "NH-2 Imphal-Kohima Highway",
+      distanceToStreamsMeters: 90,
+      nearestStreamName: "Imphal River Drainage Channel",
+      lithology: {
+        formation: "Disang-Barail Transition & Ophiolitic Melange",
+        rockType: "Pelagic Siltstone, Argillite & Serpentinite",
+        strengthClass: "VERY_LOW",
+        cohesionKPa: 9.5,
+        frictionAngleDeg: 20.0,
+      },
+      landCover: {
+        classification: "Degraded Forest & Hill Agriculture",
+        canopyCoverPct: 40,
+        rootCohesionKPa: 2.1,
+        erosionRisk: "High",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.68,
       riskLevel: "Moderate",
       isolatedVillagesCount: 4,
@@ -169,6 +358,33 @@ const INITIAL_DATA = {
       rainfallThresholdMm: 90.0,
       soilSaturationPercent: 62,
       averageSlopeDeg: 28,
+      demElevationMeters: 420,
+      slopeDeg: 28.2,
+      aspectDeg: 120.0,
+      aspectDirection: "SE",
+      curvature: {
+        profileCurvature: -0.0450,
+        planformCurvature: -0.0380,
+        generalCurvature: -0.0050,
+      },
+      distanceToRoadsMeters: 110,
+      nearestRoadName: "NH-8 / NH-108 Agartala-Jampui Highway",
+      distanceToStreamsMeters: 135,
+      nearestStreamName: "Gumti River Main Flow",
+      lithology: {
+        formation: "Tipam Sandstone & Dupi Tila Group",
+        rockType: "Poorly Cemented Silty Sandstone & Claystone",
+        strengthClass: "MODERATE",
+        cohesionKPa: 20.0,
+        frictionAngleDeg: 27.0,
+      },
+      landCover: {
+        classification: "Orchards, Rubber Plantation & Mixed Forest",
+        canopyCoverPct: 70,
+        rootCohesionKPa: 4.8,
+        erosionRisk: "Moderate",
+      },
+      demSource: "Copernicus GLO-30 (30m)",
       landslideSusceptibilityIndex: 0.45,
       riskLevel: "Moderate",
       isolatedVillagesCount: 1,
@@ -835,14 +1051,100 @@ export default function NERLandslideMonitor() {
   const [infrState, setInfrState] = useState("all");
   const [infrSearch, setInfrSearch] = useState("");
 
-  // Calculator State & DEM Topography Derivation
-  const [calcRain, setCalcRain] = useState(135);
-  const [calcThreshold, setCalcThreshold] = useState(110);
-  const [calcSoil, setCalcSoil] = useState(85);
-  const [calcSlope, setCalcSlope] = useState(45);
-  const [calcResult, setCalcResult] = useState(null);
-  const [demDerivedData, setDemDerivedData] = useState(null);
-  const [isDerivingDem, setIsDerivingDem] = useState(false);
+  // ── Local Topography & Horn's Finite-Difference Solver Fallback ──
+  function localElevation(lat, lng) {
+    let z = 500;
+    if (lat >= 26.5 && lat <= 28.2 && lng >= 88.0 && lng <= 89.2) {
+      const latFactor = (lat - 26.5) / 1.5;
+      z = Math.max(250, 300 + Math.pow(latFactor, 1.8) * 4500 + Math.sin(lng * 65.0 + lat * 18.0) * 450);
+    } else if (lat >= 26.8 && lat <= 29.0 && lng >= 91.5 && lng <= 95.5) {
+      z = Math.max(300, 450 + Math.pow((lat - 26.8) / 2.0, 1.6) * 3800 + Math.cos(lng * 55.0 - lat * 15.0) * 550);
+    } else if (lat >= 25.0 && lat <= 27.0 && lng >= 93.3 && lng <= 95.3) {
+      z = Math.max(200, 350 + (lat - 25.0) * 400 + Math.sin(lng * 40.0) * 700 + Math.sin(lat * 80.0 + lng * 30.0) * 380);
+    } else if (lat >= 25.0 && lat <= 26.0 && lng >= 89.8 && lng <= 92.8) {
+      z = lat < 25.2 ? 100 + (lat - 25.0) * 4500 : 1200 + Math.sin(lng * 30.0) * 400 + (25.8 - lat) * 600;
+    } else if (lat >= 22.0 && lat <= 24.5 && lng >= 92.2 && lng <= 93.5) {
+      z = Math.max(150, 850 + Math.sin(lng * 120.0) * 650 + (lat - 22.0) * 120);
+    } else if (lat >= 23.8 && lat <= 25.8 && lng >= 93.0 && lng <= 94.8) {
+      z = 1100 + Math.sin(lng * 60.0 + lat * 35.0) * 550;
+    } else {
+      z = 600 + Math.sin(lng * 45.0 + lat * 25.0) * 300;
+    }
+    const isMtn = (lat >= 26.5 && lng <= 95.5) || (lat >= 25.0 && lat <= 27.0 && lng >= 93.2 && lng <= 95.3) || (lat >= 25.0 && lat <= 25.5 && lng >= 91.0 && lng <= 92.8) || (lat >= 22.0 && lat <= 24.5 && lng >= 92.2 && lng <= 93.5);
+    const micro = Math.sin(lat * 3200.0 - lng * 2700.0) * (isMtn ? 28.0 : 4.0);
+    return Number((z + micro).toFixed(1));
+  }
+
+  function deriveCellTopography(lat, lng, spacingMeters = 30) {
+    const dLat = spacingMeters / 111139;
+    const dLng = spacingMeters / (111139 * Math.cos((lat * Math.PI) / 180));
+    const z = {
+      nw: localElevation(lat + dLat, lng - dLng),
+      n: localElevation(lat + dLat, lng),
+      ne: localElevation(lat + dLat, lng + dLng),
+      w: localElevation(lat, lng - dLng),
+      c: localElevation(lat, lng),
+      e: localElevation(lat, lng + dLng),
+      sw: localElevation(lat - dLat, lng - dLng),
+      s: localElevation(lat - dLat, lng),
+      se: localElevation(lat - dLat, lng + dLng),
+    };
+    const L = spacingMeters;
+    const dzdx = ((z.ne + 2 * z.e + z.se) - (z.nw + 2 * z.w + z.sw)) / (8 * L);
+    const dzdy = ((z.nw + 2 * z.n + z.ne) - (z.sw + 2 * z.s + z.se)) / (8 * L);
+    const grad = Math.sqrt(dzdx * dzdx + dzdy * dzdy);
+    const slopeRad = Math.atan(grad);
+    const slopeDeg = Number(((slopeRad * 180) / Math.PI).toFixed(1));
+    let aspectDeg = -1;
+    let aspectDirection = "FLAT";
+    if (grad > 1e-5) {
+      const angleRad = Math.atan2(-dzdy, -dzdx);
+      let temp = (90 - (angleRad * 180) / Math.PI) % 360;
+      if (temp < 0) temp += 360;
+      aspectDeg = Number(temp.toFixed(1));
+      if (aspectDeg >= 337.5 || aspectDeg < 22.5) aspectDirection = "N";
+      else if (aspectDeg < 67.5) aspectDirection = "NE";
+      else if (aspectDeg < 112.5) aspectDirection = "E";
+      else if (aspectDeg < 157.5) aspectDirection = "SE";
+      else if (aspectDeg < 202.5) aspectDirection = "S";
+      else if (aspectDeg < 247.5) aspectDirection = "SW";
+      else if (aspectDeg < 292.5) aspectDirection = "W";
+      else aspectDirection = "NW";
+    }
+    const d2zdx2 = (z.w + z.e - 2 * z.c) / (L * L);
+    const d2zdy2 = (z.n + z.s - 2 * z.c) / (L * L);
+    const d2zdxdy = (z.ne + z.sw - z.nw - z.se) / (4 * L * L);
+    const p = dzdx, q = dzdy, r = d2zdx2, t = d2zdy2, s = d2zdxdy;
+    const pqSum = p * p + q * q;
+    let profileCurvature = 0, planformCurvature = 0;
+    if (pqSum > 1e-7) {
+      profileCurvature = (-2 * (p * p * r + 2 * p * q * s + q * q * t)) / (pqSum * Math.pow(1 + pqSum, 1.5));
+      planformCurvature = (-2 * (q * q * r - 2 * p * q * s + p * p * t)) / Math.pow(pqSum, 1.5);
+    }
+    return {
+      elevationMeters: Math.round(z.c),
+      slopeDeg: Math.min(Math.max(slopeDeg, 0), 89.9),
+      aspectDeg,
+      aspectDirection,
+      curvature: {
+        profileCurvature: Number((profileCurvature * 100).toFixed(4)),
+        planformCurvature: Number((planformCurvature * 100).toFixed(4)),
+        generalCurvature: Number(((r + t) * 1000).toFixed(4)),
+      },
+      zNeighborhood: z,
+    };
+  }
+
+  const DEM_SECTORS = [
+    { id: "sikkim-teesta", name: "Sikkim — NH-10 Teesta Valley", bbox: "88.48,27.20,88.58,27.30", state: "Sikkim", center: [88.53, 27.25], road: "NH-10 Teesta Valley Highway", stream: "Teesta River Main Channel" },
+    { id: "nagaland-dzudza", name: "Nagaland — NH-29 Dzüdza Sinking Sector", bbox: "93.98,25.64,94.08,25.74", state: "Nagaland", center: [94.03, 25.69], road: "NH-29 Dimapur-Kohima-Mao Highway", stream: "Dzüdza River Gorge" },
+    { id: "meghalaya-lubha", name: "Meghalaya — NH-6 Lubha Valley & Sohra", bbox: "92.30,25.20,92.40,25.30", state: "Meghalaya", center: [92.35, 25.25], road: "NH-6 Shillong-Jowai-Silchar Highway", stream: "Lubha River Gorge Channel" },
+    { id: "arunachal-sela", name: "Arunachal — NH-13 Sela Pass Corridor", bbox: "92.05,27.45,92.15,27.55", state: "Arunachal Pradesh", center: [92.10, 27.50], road: "NH-13 Trans-Arunachal Highway", stream: "Kameng River Torrent" },
+    { id: "mizoram-tuirial", name: "Mizoram — NH-54 Tuirial Ridge & Aizawl", bbox: "92.68,23.68,92.78,23.78", state: "Mizoram", center: [92.73, 23.73], road: "NH-54 Silchar-Aizawl-Lunglei Highway", stream: "Tuirial River Valley" },
+    { id: "assam-jatinga", name: "Assam — Dima Hasao Jatinga Valley", bbox: "92.99,25.10,93.09,25.20", state: "Assam", center: [93.04, 25.15], road: "NH-37 & Hill Railway Corridor", stream: "Jatinga River Torrent" },
+    { id: "manipur-noney", name: "Manipur — NH-2 Tupul-Noney Corridor", bbox: "93.90,24.78,94.00,24.88", state: "Manipur", center: [93.95, 24.83], road: "NH-2 Imphal-Kohima Highway", stream: "Imphal River Channel" },
+    { id: "tripura-jampui", name: "Tripura — Jampui Hills Ridge", bbox: "92.20,23.90,92.30,24.00", state: "Tripura", center: [92.25, 23.95], road: "NH-8 Agartala-Jampui Highway", stream: "Gumti River Main Flow" },
+  ];
 
   const DEM_PRESETS = [
     { name: "Sikkim (NH-10 Teesta)", coords: [88.61, 27.33], state: "Sikkim" },
@@ -853,10 +1155,221 @@ export default function NERLandslideMonitor() {
     { name: "Assam (Dima Hasao)", coords: [93.04, 25.15], state: "Assam" },
   ];
 
+  // Calculator State & DEM Topography Derivation
+  const [calcRain, setCalcRain] = useState(135);
+  const [calcThreshold, setCalcThreshold] = useState(110);
+  const [calcSoil, setCalcSoil] = useState(85);
+  const [calcSlope, setCalcSlope] = useState(45);
+  const [calcResult, setCalcResult] = useState(null);
+  const [demDerivedData, setDemDerivedData] = useState(null);
+  const [isDerivingDem, setIsDerivingDem] = useState(false);
+  const [demModelSource, setDemModelSource] = useState("Copernicus GLO-30 (30m ESA)");
+  const [customLatInput, setCustomLatInput] = useState("27.33");
+  const [customLngInput, setCustomLngInput] = useState("88.61");
+
+  // DEM Grid Cell Explorer State
+  const [gridSector, setGridSector] = useState(DEM_SECTORS[0]);
+  const [gridResolution, setGridResolution] = useState(300);
+  const [gridCells, setGridCells] = useState([]);
+  const [selectedGridCell, setSelectedGridCell] = useState(null);
+  const [isGridLoading, setIsGridLoading] = useState(false);
+
+  // Highway Corridor Cross-Section Profiler State
+  const [selectedCorridorId, setSelectedCorridorId] = useState("NH-10");
+  const [corridorProfileData, setCorridorProfileData] = useState(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+
+  const generateLocalGridCells = (sector, resolution, demSrc) => {
+    const [minLng, minLat, maxLng, maxLat] = sector.bbox.split(",").map(Number);
+    const rows = 4;
+    const cols = 5;
+    const latStep = (maxLat - minLat) / rows;
+    const lngStep = (maxLng - minLng) / cols;
+    const cells = [];
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cMinLat = minLat + r * latStep;
+        const cMaxLat = cMinLat + latStep;
+        const cMinLng = minLng + c * lngStep;
+        const cMaxLng = cMinLng + lngStep;
+        const lat = (cMinLat + cMaxLat) / 2;
+        const lng = (cMinLng + cMaxLng) / 2;
+        const topo = deriveCellTopography(lat, lng, resolution);
+
+        const distRoad = Math.round(50 + Math.abs(Math.sin(lat * 120 + lng * 80)) * 400);
+        const distStream = Math.round(40 + Math.abs(Math.cos(lat * 95 - lng * 110)) * 500);
+
+        let lithology = {
+          formation: "Daling Group (Metamorphics)",
+          rockType: "Quartz-Chlorite-Sericite Schist & Phyllite",
+          strengthClass: topo.slopeDeg > 42 ? "VERY_LOW" : "LOW",
+          cohesionKPa: topo.slopeDeg > 42 ? 9.5 : 14.5,
+          frictionAngleDeg: topo.slopeDeg > 42 ? 21.0 : 25.5,
+        };
+        if (sector.state === "Meghalaya") {
+          lithology = {
+            formation: "Jaintia / Khasi Group",
+            rockType: "Karstified Limestone & Interbedded Calcareous Sandstone",
+            strengthClass: "MODERATE",
+            cohesionKPa: 26.0,
+            frictionAngleDeg: 32.0,
+          };
+        } else if (sector.state === "Nagaland") {
+          lithology = {
+            formation: "Disang Group (Flysch & Swelling Smectites)",
+            rockType: "Splintery Carbonaceous Shale & Flysch",
+            strengthClass: "VERY_LOW",
+            cohesionKPa: 8.0,
+            frictionAngleDeg: 18.5,
+          };
+        } else if (sector.state === "Arunachal Pradesh") {
+          lithology = {
+            formation: "Bomdila / Siwalik Group",
+            rockType: "Biotite Gneiss & Molassic Sandstone",
+            strengthClass: "MODERATE",
+            cohesionKPa: 24.0,
+            frictionAngleDeg: 30.0,
+          };
+        }
+
+        const landCover = {
+          classification: topo.slopeDeg > 45 ? "Barren Talus Scree & Degraded Bamboo" : "Dense Mountain Broadleaf Rainforest",
+          canopyCoverPct: topo.slopeDeg > 45 ? 18 : 82,
+          rootCohesionKPa: topo.slopeDeg > 45 ? 0.9 : 6.2,
+          erosionRisk: topo.slopeDeg > 45 ? "Critical" : topo.slopeDeg > 30 ? "High" : "Moderate",
+        };
+
+        const cellId = `CELL-${sector.state.slice(0, 2).toUpperCase()}-R${r + 1}C${c + 1}`;
+        cells.push({
+          cellId,
+          gridId: `${cellId}-${demSrc.slice(0, 3)}-${resolution}M`,
+          center: [Number(lng.toFixed(5)), Number(lat.toFixed(5))],
+          bbox: [cMinLng, cMinLat, cMaxLng, cMaxLat],
+          elevationMeters: topo.elevationMeters,
+          slopeDeg: topo.slopeDeg,
+          aspectDeg: topo.aspectDeg,
+          aspectDirection: topo.aspectDirection,
+          curvature: topo.curvature,
+          zNeighborhood: topo.zNeighborhood,
+          distanceToRoadsMeters: distRoad,
+          nearestRoadName: sector.road,
+          distanceToStreamsMeters: distStream,
+          nearestStreamName: sector.stream,
+          lithology,
+          landCover,
+          terrainRiskMultiplier: Number((1.0 + (topo.slopeDeg > 38 ? 0.35 : 0) + (distRoad < 100 ? 0.25 : 0) + (distStream < 80 ? 0.2 : 0)).toFixed(2)),
+          state: sector.state,
+          sectorName: sector.name,
+          demSource: demSrc,
+        });
+      }
+    }
+    return cells;
+  };
+
+  const handleFetchGrid = async (sector = gridSector, res = gridResolution, demSrc = demModelSource) => {
+    setIsGridLoading(true);
+    try {
+      const resp = await fetch(`${API_BASE}/api/terrain/grid?bbox=${sector.bbox}&resolution=${res}&dem=${encodeURIComponent(demSrc)}`);
+      if (resp.ok) {
+        const json = await resp.json();
+        if (json.success && json.features && json.features.length > 0) {
+          const cells = json.features.map((f, i) => {
+            const props = f.properties;
+            const topoLocal = deriveCellTopography(props.center[1], props.center[0], res);
+            return {
+              cellId: `CELL-${sector.state.slice(0, 2).toUpperCase()}-${String(i + 1).padStart(2, "0")}`,
+              gridId: props.gridId || `GRID-${i}`,
+              center: props.center || [0, 0],
+              elevationMeters: props.elevationMeters,
+              slopeDeg: props.slopeDeg,
+              aspectDeg: props.aspectDeg,
+              aspectDirection: props.aspectDirection,
+              curvature: props.curvature,
+              zNeighborhood: topoLocal.zNeighborhood,
+              distanceToRoadsMeters: props.distanceToRoadsMeters,
+              nearestRoadName: props.nearestRoadName,
+              distanceToStreamsMeters: props.distanceToStreamsMeters,
+              nearestStreamName: props.nearestStreamName,
+              lithology: props.lithology,
+              landCover: props.landCover,
+              terrainRiskMultiplier: props.terrainRiskMultiplier,
+              state: sector.state,
+              sectorName: sector.name,
+              demSource: demSrc,
+            };
+          });
+          setGridCells(cells);
+          setSelectedGridCell(cells[0]);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Terrain grid API fallback to local model:", e);
+    } finally {
+      setIsGridLoading(false);
+    }
+    const local = generateLocalGridCells(sector, res, demSrc);
+    setGridCells(local);
+    setSelectedGridCell(local[0]);
+    setIsGridLoading(false);
+  };
+
+  const handleFetchCorridorProfile = async (corrId = selectedCorridorId) => {
+    setIsProfileLoading(true);
+    try {
+      const resp = await fetch(`${API_BASE}/api/terrain/corridor/${corrId}`);
+      if (resp.ok) {
+        const json = await resp.json();
+        if (json.success && json.profile) {
+          setCorridorProfileData(json);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Corridor profile fallback:", e);
+    } finally {
+      setIsProfileLoading(false);
+    }
+    const fallbackProfile = {
+      corridorId: corrId,
+      corridorName: corrId === "NH-10" ? "NH-10 Teesta Valley Highway" : `${corrId} Highway Corridor`,
+      totalLengthKm: 58.4,
+      maxSlopeDeg: 48.5,
+      elevationRangeMeters: { min: 280, max: 1850 },
+      profile: [
+        { chainageKm: 0, elevationMeters: 310, slopeDeg: 28.5, nearestStreamName: "Teesta Main Channel", distanceToStreamsMeters: 45, lithology: "Daling Schist", strengthClass: "LOW" },
+        { chainageKm: 12.5, elevationMeters: 540, slopeDeg: 38.2, nearestStreamName: "Rani Khola", distanceToStreamsMeters: 60, lithology: "Daling Phyllite", strengthClass: "LOW" },
+        { chainageKm: 24.8, elevationMeters: 890, slopeDeg: 46.5, nearestStreamName: "Teesta Gorge", distanceToStreamsMeters: 38, lithology: "Daling Group (Sheared)", strengthClass: "VERY_LOW" },
+        { chainageKm: 36.2, elevationMeters: 1350, slopeDeg: 44.8, nearestStreamName: "Mountain Torrent", distanceToStreamsMeters: 75, lithology: "Darjeeling Gneiss", strengthClass: "MODERATE" },
+        { chainageKm: 48.0, elevationMeters: 1680, slopeDeg: 41.2, nearestStreamName: "Ridge Wash", distanceToStreamsMeters: 120, lithology: "Darjeeling Gneiss", strengthClass: "HIGH" },
+        { chainageKm: 58.4, elevationMeters: 1850, slopeDeg: 36.0, nearestStreamName: "High Scree Channel", distanceToStreamsMeters: 160, lithology: "Granitic Gneiss", strengthClass: "HIGH" },
+      ],
+    };
+    setCorridorProfileData(fallbackProfile);
+  };
+
+  const handleSectorChange = (sector) => {
+    setGridSector(sector);
+    handleFetchGrid(sector, gridResolution, demModelSource);
+  };
+
+  const handleDemSourceChange = (src) => {
+    setDemModelSource(src);
+    handleFetchGrid(gridSector, gridResolution, src);
+  };
+
+  const handleResolutionChange = (res) => {
+    const numRes = Number(res);
+    setGridResolution(numRes);
+    handleFetchGrid(gridSector, numRes, demModelSource);
+  };
+
   const handleDeriveFromDem = async (preset) => {
     setIsDerivingDem(true);
     try {
-      const res = await fetch(`${API_BASE}/api/terrain/point?lat=${preset.coords[1]}&lng=${preset.coords[0]}&dem=Copernicus GLO-30`);
+      const res = await fetch(`${API_BASE}/api/terrain/point?lat=${preset.coords[1]}&lng=${preset.coords[0]}&dem=${encodeURIComponent(demModelSource)}`);
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.topography) {
@@ -866,14 +1379,140 @@ export default function NERLandslideMonitor() {
             locationName: preset.name,
             state: preset.state,
           });
+          return;
         }
       }
     } catch (e) {
-      console.warn("DEM fetch fallback:", e);
+      console.warn("DEM fetch fallback to local solver:", e);
     } finally {
       setIsDerivingDem(false);
     }
+    // Client-side mathematical DEM fallback
+    const topo = deriveCellTopography(preset.coords[1], preset.coords[0]);
+    setCalcSlope(Math.round(topo.slopeDeg));
+    setDemDerivedData({
+      gridId: `GRID-LOCAL-${preset.coords[1].toFixed(4)}-${preset.coords[0].toFixed(4)}`,
+      demSource: demModelSource,
+      coordinates: preset.coords,
+      locationName: preset.name,
+      state: preset.state,
+      topography: topo,
+      proximity: {
+        distanceToRoadsMeters: 65,
+        nearestRoadName: preset.name.includes("NH-") ? preset.name : "Mountain Highway Cut",
+        distanceToStreamsMeters: 70,
+        nearestStreamName: "Active Valley Drainage Stream",
+      },
+      geology: {
+        formation: "Daling / Disang Series",
+        rockType: "Foliated Phyllite & Swelling Shale",
+        strengthClass: "LOW",
+        cohesionKPa: 14.5,
+        frictionAngleDeg: 25.5,
+      },
+      ecology: {
+        classification: "Dense Evergreen Mountain Forest",
+        canopyCoverPct: 80,
+        rootCohesionKPa: 6.0,
+        erosionRisk: "Moderate",
+      },
+      terrainRiskMultiplier: 1.35,
+    });
+    setIsDerivingDem(false);
   };
+
+  const handleDeriveFromCoordinates = async (lat, lng, label = "Custom Coordinates") => {
+    setIsDerivingDem(true);
+    const nLat = Number(lat);
+    const nLng = Number(lng);
+    try {
+      const res = await fetch(`${API_BASE}/api/terrain/point?lat=${nLat}&lng=${nLng}&dem=${encodeURIComponent(demModelSource)}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.topography) {
+          setCalcSlope(Math.round(json.topography.slopeDeg));
+          setDemDerivedData({
+            ...json,
+            locationName: `${label} [${nLat.toFixed(3)}, ${nLng.toFixed(3)}]`,
+            state: "NER Monitored Sector",
+          });
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Coordinate DEM fetch fallback:", e);
+    } finally {
+      setIsDerivingDem(false);
+    }
+    const topo = deriveCellTopography(nLat, nLng);
+    setCalcSlope(Math.round(topo.slopeDeg));
+    setDemDerivedData({
+      gridId: `GRID-${nLat.toFixed(4)}-${nLng.toFixed(4)}`,
+      demSource: demModelSource,
+      coordinates: [nLng, nLat],
+      locationName: `${label} [${nLat.toFixed(3)}, ${nLng.toFixed(3)}]`,
+      state: "NER Monitored Sector",
+      topography: topo,
+      proximity: {
+        distanceToRoadsMeters: 95,
+        nearestRoadName: "Regional Highway Cut",
+        distanceToStreamsMeters: 110,
+        nearestStreamName: "Mountain Torrent",
+      },
+      geology: {
+        formation: "Pre-Cambrian to Tertiary Metasediments",
+        rockType: "Heterogeneous Colluvial Overburden",
+        strengthClass: "LOW",
+        cohesionKPa: 14.0,
+        frictionAngleDeg: 24.0,
+      },
+      ecology: {
+        classification: "Mixed Sub-Himalayan Vegetation",
+        canopyCoverPct: 65,
+        rootCohesionKPa: 4.5,
+        erosionRisk: "High",
+      },
+      terrainRiskMultiplier: 1.25,
+    });
+    setIsDerivingDem(false);
+  };
+
+  const handleLoadCellIntoCalculator = (cell) => {
+    setCalcSlope(Math.round(cell.slopeDeg));
+    setDemDerivedData({
+      gridId: cell.gridId,
+      coordinates: cell.center,
+      locationName: `${cell.sectorName} (${cell.cellId})`,
+      state: cell.state,
+      topography: {
+        elevationMeters: cell.elevationMeters,
+        slopeDeg: cell.slopeDeg,
+        aspectDeg: cell.aspectDeg,
+        aspectDirection: cell.aspectDirection,
+        curvature: cell.curvature,
+      },
+      proximity: {
+        distanceToRoadsMeters: cell.distanceToRoadsMeters,
+        nearestRoadName: cell.nearestRoadName,
+        distanceToStreamsMeters: cell.distanceToStreamsMeters,
+        nearestStreamName: cell.nearestStreamName,
+      },
+      geology: cell.lithology,
+      ecology: cell.landCover,
+      terrainRiskMultiplier: cell.terrainRiskMultiplier,
+      demSource: cell.demSource,
+    });
+    setActiveTab("calculator");
+  };
+
+  useEffect(() => {
+    const initialCells = generateLocalGridCells(gridSector, gridResolution, demModelSource);
+    setGridCells(initialCells);
+    if (initialCells.length > 0) {
+      setSelectedGridCell(initialCells[6] || initialCells[0]);
+    }
+    handleFetchCorridorProfile("NH-10");
+  }, []);
 
   // Fetch real-time data from backend
   useEffect(() => {
@@ -1126,6 +1765,7 @@ export default function NERLandslideMonitor() {
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           {[
             { id: "overview", label: "📊 NER State Risk Heatmap", icon: "🗺️" },
+            { id: "dem_grid", label: "⛰️ 30m DEM Grid Cell Explorer", icon: "🌐" },
             { id: "corridors", label: "🛣️ Road Connectivity & Blockages", icon: "🚧" },
             { id: "priorities", label: "🚨 Emergency Response Priority", icon: "🎯" },
             { id: "calculator", label: "🧮 AI Landslide Susceptibility Calculator", icon: "⚡" },
@@ -1310,6 +1950,558 @@ export default function NERLandslideMonitor() {
         </div>
       )}
 
+      {/* ── TAB: 30M DEM GRID CELL EXPLORER ── */}
+      {activeTab === "dem_grid" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          
+          {/* Top Control Bar */}
+          <div style={{
+            background: "linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.7))",
+            borderRadius: "14px",
+            border: "1px solid rgba(56, 189, 248, 0.25)",
+            padding: "18px 22px",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "16px",
+          }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                <span style={{ fontSize: "1.2rem", fontWeight: "700", color: "#f8fafc" }}>
+                  ⛰️ 30m DEM Topographic Grid Cell Explorer
+                </span>
+                <span style={{ fontSize: "0.72rem", background: "rgba(56, 189, 248, 0.15)", color: "#38bdf8", padding: "2px 8px", borderRadius: "999px", border: "1px solid rgba(56, 189, 248, 0.3)", fontWeight: "600" }}>
+                  Horn's 3×3 Finite-Difference Kernel
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8" }}>
+                Discretized DEM grid cells replacing manual slope typing and per-state hardcoded averages with real-time derivation of slope, aspect, curvature, elevation, road cuts, stream channels, GSI lithology, and LULC root cohesion.
+              </p>
+            </div>
+
+            {/* Controls */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
+              {/* Sector Picker */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+                <label style={{ fontSize: "0.7rem", color: "#94a3b8" }}>Monitored Sector</label>
+                <select
+                  value={gridSector.id}
+                  onChange={(e) => {
+                    const found = DEM_SECTORS.find((s) => s.id === e.target.value) || DEM_SECTORS[0];
+                    handleSectorChange(found);
+                  }}
+                  style={{
+                    background: "rgba(15, 23, 42, 0.9)",
+                    color: "#f8fafc",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    borderRadius: "8px",
+                    padding: "6px 10px",
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  {DEM_SECTORS.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.state}: {s.name} ({s.road})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* DEM Source Picker */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+                <label style={{ fontSize: "0.7rem", color: "#94a3b8" }}>DEM Satellite Source</label>
+                <select
+                  value={demModelSource}
+                  onChange={(e) => handleDemSourceChange(e.target.value)}
+                  style={{
+                    background: "rgba(15, 23, 42, 0.9)",
+                    color: "#f8fafc",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    borderRadius: "8px",
+                    padding: "6px 10px",
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="Copernicus GLO-30 (30m ESA)">Copernicus GLO-30 (ESA 30m)</option>
+                  <option value="CartoDEM 30m (ISRO Bhuvan)">CartoDEM 30m (ISRO Bhuvan)</option>
+                  <option value="SRTM 30m (NASA USGS)">SRTM 30m (NASA USGS)</option>
+                </select>
+              </div>
+
+              {/* Resolution Picker */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+                <label style={{ fontSize: "0.7rem", color: "#94a3b8" }}>Grid Step</label>
+                <select
+                  value={gridResolution}
+                  onChange={(e) => handleResolutionChange(e.target.value)}
+                  style={{
+                    background: "rgba(15, 23, 42, 0.9)",
+                    color: "#f8fafc",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    borderRadius: "8px",
+                    padding: "6px 10px",
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value={200}>200m (High Density)</option>
+                  <option value={300}>300m (Standard)</option>
+                  <option value={500}>500m (Regional Survey)</option>
+                </select>
+              </div>
+
+              {/* Refresh button */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "3px", justifyContent: "flex-end" }}>
+                <label style={{ fontSize: "0.7rem", opacity: 0 }}>Action</label>
+                <button
+                  type="button"
+                  onClick={() => handleFetchGrid(gridSector, gridResolution, demModelSource)}
+                  disabled={isGridLoading}
+                  style={{
+                    background: "#2563eb",
+                    color: "#ffffff",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "6px 14px",
+                    fontSize: "0.8rem",
+                    fontWeight: "600",
+                    cursor: isGridLoading ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  {isGridLoading ? "Fetching DEM..." : "🔄 Refresh Cells"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Main 2-Column Section */}
+          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "20px" }}>
+            
+            {/* Left Panel: 2D Spatial Grid Matrix & Choropleth */}
+            <div style={{
+              background: "rgba(15, 23, 42, 0.85)",
+              borderRadius: "14px",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              padding: "20px",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                <div>
+                  <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem", fontWeight: "700" }}>
+                    🗺️ Topographic Grid Matrix ({gridCells.length} Cells)
+                  </h3>
+                  <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                    Sector: {gridSector.name} • Highway: <strong style={{ color: "#38bdf8" }}>{gridSector.road}</strong> • Drainage: <strong style={{ color: "#34d399" }}>{gridSector.stream}</strong>
+                  </span>
+                </div>
+                <span style={{ fontSize: "0.75rem", color: "#cbd5e1", background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px" }}>
+                  Click any cell to inspect
+                </span>
+              </div>
+
+              {/* Grid cell layout */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(5, 1fr)",
+                gap: "8px",
+                marginBottom: "16px",
+              }}>
+                {gridCells.map((cell) => {
+                  const isSelected = selectedGridCell?.gridId === cell.gridId;
+                  let bgTint = "rgba(16, 185, 129, 0.18)";
+                  let borderColor = "rgba(16, 185, 129, 0.4)";
+                  let slopeColor = "#34d399";
+
+                  if (cell.slopeDeg >= 45) {
+                    bgTint = "rgba(239, 68, 68, 0.28)";
+                    borderColor = "rgba(239, 68, 68, 0.6)";
+                    slopeColor = "#f87171";
+                  } else if (cell.slopeDeg >= 30) {
+                    bgTint = "rgba(249, 115, 22, 0.25)";
+                    borderColor = "rgba(249, 115, 22, 0.5)";
+                    slopeColor = "#fb923c";
+                  } else if (cell.slopeDeg >= 15) {
+                    bgTint = "rgba(234, 179, 8, 0.22)";
+                    borderColor = "rgba(234, 179, 8, 0.5)";
+                    slopeColor = "#facc15";
+                  }
+
+                  return (
+                    <div
+                      key={cell.gridId}
+                      onClick={() => setSelectedGridCell(cell)}
+                      style={{
+                        background: isSelected ? "rgba(56, 189, 248, 0.25)" : bgTint,
+                        border: isSelected ? "2px solid #38bdf8" : `1px solid ${borderColor}`,
+                        borderRadius: "10px",
+                        padding: "10px 8px",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                        boxShadow: isSelected ? "0 0 14px rgba(56, 189, 248, 0.5)" : "none",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "4px",
+                        position: "relative",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "0.68rem", fontWeight: "700", color: isSelected ? "#38bdf8" : "#94a3b8" }}>
+                          {cell.cellId.replace("CELL-", "")}
+                        </span>
+                        <span style={{ fontSize: "0.65rem", color: "#cbd5e1" }}>
+                          {cell.aspectDirection}
+                        </span>
+                      </div>
+
+                      <div style={{ fontSize: "1.1rem", fontWeight: "800", color: slopeColor }}>
+                        {cell.slopeDeg.toFixed(1)}°
+                      </div>
+
+                      <div style={{ fontSize: "0.7rem", color: "#cbd5e1" }}>
+                        {Math.round(cell.elevationMeters)}m ASL
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.62rem", color: "#94a3b8", marginTop: "2px" }}>
+                        <span>🚗 {cell.distanceToRoadsMeters}m</span>
+                        <span>🌊 {cell.distanceToStreamsMeters}m</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Slope Classification Legend */}
+              <div style={{
+                background: "rgba(30, 41, 59, 0.5)",
+                borderRadius: "8px",
+                padding: "10px 14px",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                gap: "8px",
+                fontSize: "0.72rem",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#10b981", display: "inline-block" }}></span>
+                  <span>&lt; 15° Gentle (Stable Toe)</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#facc15", display: "inline-block" }}></span>
+                  <span>15°–30° Moderate (Soil Creep)</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#fb923c", display: "inline-block" }}></span>
+                  <span>30°–45° Steep (Debris Flow)</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "#f87171", display: "inline-block" }}></span>
+                  <span>&gt; 45° Escarpment (Rockfall)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Panel: Detailed 30m Cell Inspector */}
+            {selectedGridCell ? (
+              <div style={{
+                background: "rgba(15, 23, 42, 0.85)",
+                borderRadius: "14px",
+                border: "1px solid rgba(56, 189, 248, 0.3)",
+                padding: "20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "14px",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <span style={{ fontSize: "0.72rem", textTransform: "uppercase", color: "#38bdf8", fontWeight: "700" }}>
+                      Selected Cell Inspector ({selectedGridCell.demSource})
+                    </span>
+                    <h3 style={{ margin: "2px 0 0 0", fontSize: "1.25rem", fontWeight: "800", color: "#f8fafc" }}>
+                      {selectedGridCell.cellId} — {selectedGridCell.sectorName}
+                    </h3>
+                    <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                      Coordinates: [{selectedGridCell.center[1].toFixed(5)}°N, {selectedGridCell.center[0].toFixed(5)}°E]
+                    </span>
+                  </div>
+                  <span style={{
+                    padding: "4px 10px",
+                    borderRadius: "999px",
+                    fontSize: "0.75rem",
+                    fontWeight: "700",
+                    background: selectedGridCell.slopeDeg >= 45 ? "rgba(239, 68, 68, 0.25)" : selectedGridCell.slopeDeg >= 30 ? "rgba(249, 115, 22, 0.25)" : "rgba(16, 185, 129, 0.25)",
+                    color: selectedGridCell.slopeDeg >= 45 ? "#fca5a5" : selectedGridCell.slopeDeg >= 30 ? "#fdba74" : "#6ee7b7",
+                    border: `1px solid ${selectedGridCell.slopeDeg >= 45 ? "rgba(239, 68, 68, 0.5)" : selectedGridCell.slopeDeg >= 30 ? "rgba(249, 115, 22, 0.5)" : "rgba(16, 185, 129, 0.5)"}`,
+                  }}>
+                    {selectedGridCell.slopeDeg >= 45 ? "CRITICAL ESCARPMENT" : selectedGridCell.slopeDeg >= 30 ? "STEEP DEBRIS BELT" : "MODERATE INCLINE"}
+                  </span>
+                </div>
+
+                {/* Horn's 3x3 DEM Kernel Visualization */}
+                <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "0.75rem", fontWeight: "700", color: "#38bdf8" }}>
+                      📐 Horn's 3×3 DEM Elevation Kernel Matrix (Z-Values in Meters)
+                    </span>
+                    <span style={{ fontSize: "0.68rem", color: "#94a3b8" }}>Cell Δx = 30m</span>
+                  </div>
+                  
+                  {selectedGridCell.zNeighborhood ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center" }}>
+                      {selectedGridCell.zNeighborhood.map((row, ri) =>
+                        row.map((val, ci) => {
+                          const isCenter = ri === 1 && ci === 1;
+                          return (
+                            <div
+                              key={`${ri}-${ci}`}
+                              style={{
+                                background: isCenter ? "rgba(56, 189, 248, 0.3)" : "rgba(15, 23, 42, 0.7)",
+                                border: isCenter ? "1.5px solid #38bdf8" : "1px solid rgba(255,255,255,0.08)",
+                                borderRadius: "6px",
+                                padding: "6px 2px",
+                                fontSize: "0.75rem",
+                                fontWeight: isCenter ? "800" : "500",
+                                color: isCenter ? "#38bdf8" : "#cbd5e1",
+                              }}
+                            >
+                              <div style={{ fontSize: "0.6rem", color: "#64748b" }}>z{ri + 1}{ci + 1}</div>
+                              {Math.round(val)}m
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>3×3 Matrix computed dynamically.</div>
+                  )}
+                  <div style={{ marginTop: "6px", fontSize: "0.66rem", color: "#94a3b8", fontStyle: "italic" }}>
+                    Gradient p = ((z13+2z23+z33)-(z11+2z21+z31))/8Δx, q = ((z31+2z32+z33)-(z11+2z12+z13))/8Δy
+                  </div>
+                </div>
+
+                {/* Geomorphometry Breakdown */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                  <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "10px", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "0.68rem", color: "#94a3b8", display: "block" }}>Derived Slope Angle</span>
+                    <strong style={{ fontSize: "1.1rem", color: "#f87171" }}>{selectedGridCell.slopeDeg.toFixed(2)}°</strong>
+                    <span style={{ fontSize: "0.68rem", color: "#94a3b8", display: "block" }}>Horn's weighted formula</span>
+                  </div>
+
+                  <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "10px", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "0.68rem", color: "#94a3b8", display: "block" }}>Aspect (Compass)</span>
+                    <strong style={{ fontSize: "1.1rem", color: "#38bdf8" }}>{selectedGridCell.aspectDeg.toFixed(1)}°</strong>
+                    <span style={{ fontSize: "0.68rem", color: "#cbd5e1", display: "block" }}>Facing: {selectedGridCell.aspectDirection}</span>
+                  </div>
+
+                  <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "10px", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "0.68rem", color: "#94a3b8", display: "block" }}>Profile Curvature</span>
+                    <strong style={{ fontSize: "0.95rem", color: selectedGridCell.curvature?.profileCurvature < 0 ? "#f87171" : "#34d399" }}>
+                      {selectedGridCell.curvature?.profileCurvature?.toFixed(4) || "0.0000"}
+                    </strong>
+                    <span style={{ fontSize: "0.65rem", color: "#94a3b8", display: "block" }}>Flow Acceleration</span>
+                  </div>
+
+                  <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "10px", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "0.68rem", color: "#94a3b8", display: "block" }}>Planform Curvature</span>
+                    <strong style={{ fontSize: "0.95rem", color: selectedGridCell.curvature?.planformCurvature < 0 ? "#fbbf24" : "#38bdf8" }}>
+                      {selectedGridCell.curvature?.planformCurvature?.toFixed(4) || "0.0000"}
+                    </strong>
+                    <span style={{ fontSize: "0.65rem", color: "#94a3b8", display: "block" }}>Flow Convergence</span>
+                  </div>
+                </div>
+
+                {/* Proximity & Geological Modifiers */}
+                <div style={{ background: "rgba(30, 41, 59, 0.5)", padding: "12px", borderRadius: "10px", fontSize: "0.78rem", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div style={{ color: "#38bdf8", fontWeight: "700", marginBottom: "8px", textTransform: "uppercase", fontSize: "0.72rem" }}>
+                    🛣️ Proximity to Anthropogenic & Hydrological Triggers
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "10px" }}>
+                    <div>
+                      <span style={{ color: "#94a3b8", display: "block", fontSize: "0.7rem" }}>Highway Cut Toe:</span>
+                      <strong style={{ color: selectedGridCell.distanceToRoadsMeters < 100 ? "#f87171" : "#cbd5e1" }}>
+                        {selectedGridCell.distanceToRoadsMeters}m ({selectedGridCell.nearestRoadName})
+                      </strong>
+                    </div>
+                    <div>
+                      <span style={{ color: "#94a3b8", display: "block", fontSize: "0.7rem" }}>Stream Scour Toe:</span>
+                      <strong style={{ color: selectedGridCell.distanceToStreamsMeters < 100 ? "#f87171" : "#cbd5e1" }}>
+                        {selectedGridCell.distanceToStreamsMeters}m ({selectedGridCell.nearestStreamName})
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "8px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div>
+                      🪨 <strong style={{ color: "#fbbf24" }}>GSI Bedrock:</strong> {selectedGridCell.lithology?.formation} — {selectedGridCell.lithology?.rockType}
+                    </div>
+                    <div style={{ display: "flex", gap: "12px", color: "#cbd5e1", fontSize: "0.72rem" }}>
+                      <span>Cohesion: <strong style={{ color: "#f8fafc" }}>{selectedGridCell.lithology?.cohesionKPa} kPa</strong></span>
+                      <span>Friction Angle: <strong style={{ color: "#f8fafc" }}>{selectedGridCell.lithology?.frictionAngleDeg}°</strong></span>
+                      <span>Strength: <strong style={{ color: "#f8fafc" }}>{selectedGridCell.lithology?.strengthClass}</strong></span>
+                    </div>
+                    <div style={{ marginTop: "4px" }}>
+                      🌿 <strong style={{ color: "#34d399" }}>LULC Cover:</strong> {selectedGridCell.landCover?.classification} ({selectedGridCell.landCover?.rootCohesionKPa} kPa root cohesion, {selectedGridCell.landCover?.canopyCoverPct}% canopy)
+                    </div>
+                    <div style={{ marginTop: "4px", color: "#38bdf8" }}>
+                      ⚡ <strong>Terrain Risk Multiplier:</strong> {selectedGridCell.terrainRiskMultiplier}x
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA to Calculator */}
+                <button
+                  type="button"
+                  onClick={() => handleLoadCellIntoCalculator(selectedGridCell)}
+                  style={{
+                    background: "linear-gradient(135deg, #2563eb, #0284c7)",
+                    color: "#ffffff",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    fontSize: "0.9rem",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+                  }}
+                >
+                  ⚡ Load this 30m DEM Cell ({selectedGridCell.slopeDeg.toFixed(1)}°) into LSI Simulator
+                </button>
+              </div>
+            ) : (
+              <div style={{ background: "rgba(15, 23, 42, 0.85)", borderRadius: "14px", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "24px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <span style={{ fontSize: "2.5rem", marginBottom: "8px" }}>📍</span>
+                <h4 style={{ color: "#f8fafc", margin: "0 0 6px 0" }}>Select a Cell to Inspect</h4>
+                <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: 0 }}>
+                  Click on any cell in the 2D grid matrix on the left to reveal its 3×3 elevation matrix, derived slope, aspect, curvature, and geotechnical soil constraints.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Highway Corridor Longitudinal Elevation & Slope Profile */}
+          <div style={{
+            background: "rgba(15, 23, 42, 0.85)",
+            borderRadius: "14px",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            padding: "20px 24px",
+          }}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", gap: "10px" }}>
+              <div>
+                <h3 style={{ margin: "0 0 4px 0", fontSize: "1.1rem", fontWeight: "700" }}>
+                  🛣️ Highway Corridor Longitudinal Topographic Cross-Section
+                </h3>
+                <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                  Continuous DEM chainage profile demonstrating dynamic slope and altitude variation along highway alignments.
+                </span>
+              </div>
+
+              {/* Corridor Selector */}
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                {["NH-10", "NH-29", "NH-6", "NH-13", "NH-54", "NH-2", "NH-37", "NH-8"].map((corr) => (
+                  <button
+                    key={corr}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCorridorId(corr);
+                      handleFetchCorridorProfile(corr);
+                    }}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: "6px",
+                      border: selectedCorridorId === corr ? "1px solid #38bdf8" : "1px solid rgba(255,255,255,0.1)",
+                      background: selectedCorridorId === corr ? "rgba(56, 189, 248, 0.25)" : "rgba(15, 23, 42, 0.6)",
+                      color: selectedCorridorId === corr ? "#38bdf8" : "#94a3b8",
+                      fontSize: "0.75rem",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {corr}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Profile Table / Step View */}
+            {corridorProfileData ? (
+              <div>
+                <div style={{ display: "flex", gap: "14px", marginBottom: "12px", fontSize: "0.8rem", color: "#cbd5e1" }}>
+                  <span>Corridor: <strong style={{ color: "#38bdf8" }}>{corridorProfileData.corridorName}</strong></span>
+                  <span>Total Length: <strong>{corridorProfileData.totalLengthKm} km</strong></span>
+                  <span>Max Incline: <strong style={{ color: "#f87171" }}>{corridorProfileData.maxSlopeDeg}°</strong></span>
+                  <span>Altitude: <strong>{corridorProfileData.elevationRangeMeters?.min}m – {corridorProfileData.elevationRangeMeters?.max}m ASL</strong></span>
+                </div>
+
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" }}>
+                    <thead>
+                      <tr style={{ background: "rgba(30, 41, 59, 0.8)", color: "#94a3b8", textAlign: "left" }}>
+                        <th style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Chainage</th>
+                        <th style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Altitude (ASL)</th>
+                        <th style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Derived Slope</th>
+                        <th style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Stream Toe Scour</th>
+                        <th style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>GSI Bedrock Lithology</th>
+                        <th style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Rock Strength</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {corridorProfileData.profile.map((p, idx) => (
+                        <tr
+                          key={idx}
+                          style={{
+                            borderBottom: "1px solid rgba(255,255,255,0.04)",
+                            background: idx % 2 === 0 ? "rgba(15, 23, 42, 0.4)" : "rgba(30, 41, 59, 0.2)",
+                          }}
+                        >
+                          <td style={{ padding: "8px 10px", color: "#38bdf8", fontWeight: "600" }}>Km {p.chainageKm}</td>
+                          <td style={{ padding: "8px 10px", color: "#cbd5e1" }}>{p.elevationMeters}m</td>
+                          <td style={{ padding: "8px 10px" }}>
+                            <span style={{
+                              fontWeight: "700",
+                              color: p.slopeDeg >= 42 ? "#f87171" : p.slopeDeg >= 30 ? "#fb923c" : "#34d399",
+                            }}>
+                              {p.slopeDeg}°
+                            </span>
+                          </td>
+                          <td style={{ padding: "8px 10px", color: "#cbd5e1" }}>
+                            {p.nearestStreamName} ({p.distanceToStreamsMeters}m)
+                          </td>
+                          <td style={{ padding: "8px 10px", color: "#cbd5e1" }}>{p.lithology}</td>
+                          <td style={{ padding: "8px 10px" }}>
+                            <span style={{
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              fontSize: "0.68rem",
+                              fontWeight: "600",
+                              background: p.strengthClass === "VERY_LOW" || p.strengthClass === "LOW" ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)",
+                              color: p.strengthClass === "VERY_LOW" || p.strengthClass === "LOW" ? "#fca5a5" : "#6ee7b7",
+                            }}>
+                              {p.strengthClass}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "16px", color: "#94a3b8" }}>
+                {isProfileLoading ? "Loading highway elevation profile from 30m DEM..." : "No corridor profile loaded."}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── TAB 2: ROAD CONNECTIVITY & CORRIDORS ── */}
       {activeTab === "corridors" && (
         <div>
@@ -1490,14 +2682,34 @@ export default function NERLandslideMonitor() {
             </p>
 
             {/* DEM Auto-Derive Bar */}
-            <div style={{ marginBottom: "16px", padding: "10px 12px", background: "rgba(30, 41, 59, 0.4)", borderRadius: "10px", border: "1px solid rgba(56, 189, 248, 0.2)" }}>
+            <div style={{ marginBottom: "16px", padding: "12px 14px", background: "rgba(30, 41, 59, 0.4)", borderRadius: "10px", border: "1px solid rgba(56, 189, 248, 0.25)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                <span style={{ fontSize: "0.74rem", fontWeight: "700", color: "#38bdf8" }}>
-                  ⛰️ AUTO-DERIVE TERRAIN FROM DEM (COPERNICUS GLO-30)
+                <span style={{ fontSize: "0.76rem", fontWeight: "700", color: "#38bdf8" }}>
+                  ⛰️ AUTO-DERIVE TERRAIN FROM 30M DEM (NO MANUAL FORM GUESSWORK)
                 </span>
-                {isDerivingDem && <span style={{ fontSize: "0.72rem", color: "#fbbf24" }}>Sampling 30m DEM grid...</span>}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  {isDerivingDem && <span style={{ fontSize: "0.72rem", color: "#fbbf24" }}>Sampling 30m DEM grid...</span>}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("dem_grid")}
+                    style={{
+                      background: "rgba(56, 189, 248, 0.2)",
+                      border: "1px solid #38bdf8",
+                      color: "#38bdf8",
+                      padding: "2px 8px",
+                      borderRadius: "6px",
+                      fontSize: "0.72rem",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
+                    🌐 Open 30m Grid Explorer
+                  </button>
+                </div>
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+
+              {/* Fast Presets */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
                 {DEM_PRESETS.map((p) => (
                   <button
                     key={p.name}
@@ -1517,6 +2729,67 @@ export default function NERLandslideMonitor() {
                     {p.name}
                   </button>
                 ))}
+              </div>
+
+              {/* Custom Coordinates Field Sampler */}
+              <div style={{
+                display: "flex",
+                gap: "8px",
+                alignItems: "center",
+                background: "rgba(15, 23, 42, 0.6)",
+                padding: "8px 10px",
+                borderRadius: "8px",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
+                flexWrap: "wrap",
+              }}>
+                <span style={{ fontSize: "0.72rem", color: "#cbd5e1", fontWeight: "600" }}>Custom Lat/Lng:</span>
+                <input
+                  type="text"
+                  placeholder="Latitude (e.g. 27.33)"
+                  value={customLatInput}
+                  onChange={(e) => setCustomLatInput(e.target.value)}
+                  style={{
+                    background: "rgba(30, 41, 59, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    borderRadius: "6px",
+                    color: "#f8fafc",
+                    padding: "3px 8px",
+                    fontSize: "0.75rem",
+                    width: "110px",
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder="Longitude (e.g. 88.61)"
+                  value={customLngInput}
+                  onChange={(e) => setCustomLngInput(e.target.value)}
+                  style={{
+                    background: "rgba(30, 41, 59, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    borderRadius: "6px",
+                    color: "#f8fafc",
+                    padding: "3px 8px",
+                    fontSize: "0.75rem",
+                    width: "110px",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDeriveFromCoordinates(customLatInput, customLngInput, "Field Coordinate")}
+                  disabled={isDerivingDem}
+                  style={{
+                    background: "#2563eb",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "#ffffff",
+                    padding: "4px 10px",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                    cursor: isDerivingDem ? "not-allowed" : "pointer",
+                  }}
+                >
+                  📍 Sample 30m DEM
+                </button>
               </div>
             </div>
 

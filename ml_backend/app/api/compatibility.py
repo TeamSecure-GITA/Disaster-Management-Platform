@@ -132,8 +132,21 @@ async def generic_predict_endpoint(payload: Dict[str, Any]):
 
     try:
         if hazard in ("landslide", "rockfall", "debris_flow"):
+            derived_slope = None
+            try:
+                from app.geospatial.terrain_dem import get_terrain_at_coordinates
+                coords = location.get("coordinates", [91.73, 25.27])
+                terrain_data = get_terrain_at_coordinates(coords[1], coords[0])
+                derived_slope = terrain_data["slope_deg"]
+            except Exception:
+                derived_slope = 36.0
+
+            slope_val = payload.get("slope_angle_deg")
+            if slope_val is None:
+                slope_val = derived_slope
+
             features = {
-                "slope_angle_deg": float(payload.get("slope_angle_deg", 36.0)),
+                "slope_angle_deg": float(slope_val),
                 "rainfall_24h_mm": float(payload.get("rainfall_24h_mm", payload.get("rainfallPast24hMm", 120.0))),
                 "soil_moisture_pct": float(payload.get("soil_moisture_pct", payload.get("soilSaturationPct", 78.0))),
                 "pore_water_pressure_kpa": float(payload.get("pore_water_pressure_kpa", 28.0)),

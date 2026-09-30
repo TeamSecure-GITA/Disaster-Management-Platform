@@ -51,7 +51,13 @@ logger = logging.getLogger("disaster-management.models.factory")
 
 # ─── Landslide Factory ─────────────────────────────────────────────────────────
 
+_cached_landslide_engine: Optional[LandslideInferenceEngine] = None
+
 def create_operational_landslide_engine() -> LandslideInferenceEngine:
+    global _cached_landslide_engine
+    if _cached_landslide_engine is not None:
+        return _cached_landslide_engine
+
     imputation_defaults = {
         "rainfall_1h_mm": 5.0,
         "rainfall_6h_mm": 20.0,
@@ -73,32 +79,53 @@ def create_operational_landslide_engine() -> LandslideInferenceEngine:
         "ground_displacement_mm": 1.2,
     }
 
-    # Generate synthetic domain samples representing Mohr-Coulomb stability
-    rng = np.random.default_rng(42)
-    n_samples = 120
-    X = rng.uniform(5.0, 95.0, (n_samples, len(LANDSLIDE_FEATURE_NAMES)))
-    
-    # Bishop / Mohr-Coulomb physics condition: slope > 35° + rainfall_24h > 70mm + soil_moisture > 60%
-    rainfall_24h_idx = LANDSLIDE_FEATURE_NAMES.index("rainfall_24h_mm")
-    slope_idx = LANDSLIDE_FEATURE_NAMES.index("slope_angle_deg")
-    moisture_idx = LANDSLIDE_FEATURE_NAMES.index("soil_moisture_pct")
-    y = ((X[:, rainfall_24h_idx] > 60) & (X[:, slope_idx] > 32) & (X[:, moisture_idx] > 45)).astype(int)
+    try:
+        from app.geospatial.landslide_inventory import train_inventory_landslide_model
+        trained_bundle = train_inventory_landslide_model()
+        clf = trained_bundle["estimator"]
+        metrics = trained_bundle["metrics"]
+        notes = (
+            f"Trained on geocoded NER landslide inventory (NASA GLC, GSI Bhukosh, BRO, SDMAs).",
+            f"Dataset size: {metrics['dataset_size']} (Positives: {metrics['positive_events_count']}, Controls: {metrics['negative_controls_count']}).",
+            f"CV ROC-AUC: {metrics['cv_roc_auc_mean']:.4f}, Accuracy: {metrics['cv_accuracy_mean']:.4f}.",
+            f"Top features: {list(metrics['top_features'].keys())[:4]}",
+        )
+        meta = LandslideModelMetadata(
+            name="ner-historical-inventory-ensemble",
+            version="2.0.0",
+            model_type="gradient_boosting_inventory_calibrated",
+            trained=True,
+            calibrated=True,
+            feature_names=LANDSLIDE_FEATURE_NAMES,
+            description="Operational supervised landslide hazard model trained on geocoded NASA GLC, GSI, and BRO historical inventory.",
+            training_dataset="NER-Historical-Landslide-Inventory-v1",
+            notes=notes,
+        )
+    except Exception as exc:
+        logging.warning("Failed training on historical inventory, using fallback: %s", exc)
+        rng = np.random.default_rng(42)
+        n_samples = 120
+        X = rng.uniform(5.0, 95.0, (n_samples, len(LANDSLIDE_FEATURE_NAMES)))
+        rainfall_24h_idx = LANDSLIDE_FEATURE_NAMES.index("rainfall_24h_mm")
+        slope_idx = LANDSLIDE_FEATURE_NAMES.index("slope_angle_deg")
+        moisture_idx = LANDSLIDE_FEATURE_NAMES.index("soil_moisture_pct")
+        y = ((X[:, rainfall_24h_idx] > 60) & (X[:, slope_idx] > 32) & (X[:, moisture_idx] > 45)).astype(int)
+        clf = GradientBoostingClassifier(n_estimators=30, max_depth=3, random_state=42)
+        clf.fit(X, y)
+        meta = LandslideModelMetadata(
+            name="mohr-coulomb-landslide-ensemble",
+            version="1.2.0",
+            model_type="gradient_boosting_calibrated",
+            trained=True,
+            calibrated=True,
+            feature_names=LANDSLIDE_FEATURE_NAMES,
+            description="Operational geotechnical and precipitation-driven landslide hazard predictor.",
+        )
 
-    clf = GradientBoostingClassifier(n_estimators=30, max_depth=3, random_state=42)
-    clf.fit(X, y)
-
-    meta = LandslideModelMetadata(
-        name="mohr-coulomb-landslide-ensemble",
-        version="1.2.0",
-        model_type="gradient_boosting_calibrated",
-        trained=True,
-        calibrated=True,
-        feature_names=LANDSLIDE_FEATURE_NAMES,
-        description="Operational geotechnical and precipitation-driven landslide hazard predictor.",
-    )
     model = LandslideModel(estimator=clf, metadata=meta)
     fe = LandslideFeatureEngineer(allow_imputation=True, imputation_values=imputation_defaults)
-    return LandslideInferenceEngine(model=model, feature_engineer=fe)
+    _cached_landslide_engine = LandslideInferenceEngine(model=model, feature_engineer=fe)
+    return _cached_landslide_engine
 
 
 # ─── Flood Factory ─────────────────────────────────────────────────────────────
