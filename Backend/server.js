@@ -25,6 +25,7 @@ const {
   startMlBackendSupervisor,
   stopMlBackendSupervisor,
 } = require("./services/mlSupervisor");
+const gisService = require("./services/gisService");
 
 const PORT = process.env.PORT || 5000;
 
@@ -125,6 +126,11 @@ const start = async () => {
 
     // Connect MongoDB Atlas
     await connectDatabase();
+
+    // Seed GIS baseline data (NER corridors, infrastructure, villages) if DB is empty
+    gisService.seedAll().catch((err) => {
+      console.warn("[GIS] Seed warning:", err.message);
+    });
 
     // Start Socket.IO and background jobs
     startServerRuntime();

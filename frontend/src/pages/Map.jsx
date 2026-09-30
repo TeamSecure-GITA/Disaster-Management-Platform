@@ -11,6 +11,7 @@ import {
   useMap,
 } from "react-leaflet";
 import { getSatelliteLayers } from "../services/disasterService";
+import { fetchRiskHeatmap, fetchRoadSegments, fetchGisLayer, riskScoreToColor, roadStatusToColor } from "../services/gisService";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -1301,10 +1302,51 @@ export default function Map() {
   const [mapCenter, setMapCenter] = useState([20.2961, 85.8245]); // Default Bhubaneswar
   const [mapZoom, setMapZoom] = useState(11);
 
+  // Live GIS data from backend
+  const [liveRiskFeatures, setLiveRiskFeatures] = useState([]);   // GeoJSON risk heatmap features
+  const [liveRoadSegments, setLiveRoadSegments] = useState([]);   // GeoJSON road segments
+  const [liveInfraFeatures, setLiveInfraFeatures] = useState([]); // GeoJSON infrastructure
+  const [liveVillageFeatures, setLiveVillageFeatures] = useState([]); // GeoJSON villages
+  const [gisLoading, setGisLoading] = useState(true);
+
   // In-app navigation state (No external Google Maps redirect)
   const [activeRouteTarget, setActiveRouteTarget] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [evacBannerInfo, setEvacBannerInfo] = useState(null);
+
+  // ── Live GIS data (backend-fed) ─────────────────────────────────────────────
+  useEffect(() => {
+    let mounted = true;
+    let intervalId = null;
+
+    async function loadGisData() {
+      try {
+        const stateFilter = selectedRegion === "ner" ? undefined : undefined; // extend per region
+        const [heatmapFC, roadsFC, infraFC, villageFC] = await Promise.all([
+          fetchRiskHeatmap({ state: stateFilter }),
+          fetchRoadSegments({ state: stateFilter }),
+          fetchGisLayer("infrastructure", { state: stateFilter }),
+          fetchGisLayer("village", { state: stateFilter }),
+        ]);
+        if (!mounted) return;
+        if (heatmapFC.features)  setLiveRiskFeatures(heatmapFC.features);
+        if (roadsFC.features)    setLiveRoadSegments(roadsFC.features);
+        if (infraFC.features)    setLiveInfraFeatures(infraFC.features);
+        if (villageFC.features)  setLiveVillageFeatures(villageFC.features);
+      } catch (_e) {
+        // silent – keep showing hard-coded fallback data
+      } finally {
+        if (mounted) setGisLoading(false);
+      }
+    }
+
+    loadGisData();
+    intervalId = setInterval(loadGisData, 60_000); // refresh every 60 s
+    return () => {
+      mounted = false;
+      clearInterval(intervalId);
+    };
+  }, [selectedRegion]);
 
   // Ingest live satellite remote-sensing map layers
   useEffect(() => {
@@ -1456,6 +1498,40 @@ export default function Map() {
       zone.advisory.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesRisk && matchesSearch;
   });
+
+
+  // ── Live backend risk features (GeoJSON Points from heatmap API) ─────────
+  const liveRiskCircles = liveRiskFeatures
+    .filter((f) => f.geometry?.type === 'Point' && f.properties?.riskScore >= minRiskPercent)
+    .filter((f) => {
+      if (riskCategoryFilter === 'all') return true;
+      const h = (f.properties?.hazardType || f.properties?.incidentType || '').toLowerCase();
+      return h.includes(riskCategoryFilter);
+    })
+    .map((f) => ({
+      lat: f.geometry.coordinates[1],
+      lng: f.geometry.coordinates[0],
+      riskScore: f.properties.riskScore || 50,
+      name: f.properties.name || 'Risk Zone',
+      hazardType: f.properties.hazardType || f.properties.incidentType || 'unknown',
+      featureType: f.properties.featureType,
+      color: riskScoreToColor(f.properties.riskScore),
+      radius: Math.max(800, (f.properties.riskScore || 50) * 60),
+    }));
+
+  // ── Live road segments (GeoJSON LineStrings) ─────────────────────────────
+  const liveRoadLines = liveRoadSegments
+    .filter((f) => f.geometry?.type === 'LineString')
+    .map((f) => ({
+      positions: f.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+      status: f.properties.status || 'unknown',
+      name: f.properties.name || 'Road',
+      riskScore: f.properties.riskScore,
+      statusNote: f.properties.statusNote,
+      color: roadStatusToColor(f.properties.status),
+      weight: f.properties.isEvacuationRoute ? 5 : 3,
+      dashArray: f.properties.status === 'blocked' ? '8 6' : f.properties.status === 'restricted' ? '4 4' : null,
+    }));
 
   // Distance & Bearing calculations for active route
   const routeDistance =
