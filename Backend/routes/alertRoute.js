@@ -14,6 +14,8 @@ const {
   getFeedHealth,
   getCrowdSignals,
   verifyCrowdSignalAction,
+  acknowledgeAlertHandler,
+  getAlertEscalations,
 } = require("../controllers/alertController");
 
 const {
@@ -52,5 +54,12 @@ router.get("/:id", getAlert);
 router.put("/:id", protect, operationsOnly, updateAlert);
 
 router.delete("/:id", protect, operationsOnly, deleteAlert);
+
+// ── Acknowledgement & escalation tracking ────────────────────────────────────
+/** POST /api/alerts/:id/acknowledge  – any authenticated authority user */
+router.post("/:id/acknowledge", protect, acknowledgeAlertHandler);
+
+/** GET  /api/alerts/:id/escalations  – admins and operators only */
+router.get("/:id/escalations", protect, operationsOnly, getAlertEscalations);
 
 module.exports = router;

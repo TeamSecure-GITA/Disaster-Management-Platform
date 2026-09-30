@@ -1,4 +1,5 @@
-const alertService = require("../services/alertService");
+const alertService        = require("../services/alertService");
+const { acknowledgeAlert } = require("../services/alertEscalationService");
 
 const createAlert = async (req, res, next) => {
   try {
@@ -178,6 +179,69 @@ const verifyCrowdSignalAction = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/alerts/:id/acknowledge
+ * Allows an authenticated authority user to acknowledge a landslide/disaster alert.
+ */
+const acknowledgeAlertHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { remarks = "" } = req.body;
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+
+    const alert = await acknowledgeAlert(id, user, remarks);
+
+    res.status(200).json({
+      success: true,
+      message: "Alert acknowledged",
+      data: {
+        alertId:           alert._id,
+        acknowledgedBy:    user._id,
+        role:              user.role,
+        acknowledgedAt:    new Date(),
+        acknowledgedRoles: alert.acknowledgedRoles,
+        totalAcks:         alert.acknowledgements?.length || 0,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/alerts/:id/escalations
+ * Returns the escalation and acknowledgement history for an alert.
+ */
+const getAlertEscalations = async (req, res, next) => {
+  try {
+    const alert = await alertService.getAlertById(req.params.id);
+
+    if (!alert) {
+      return res.status(404).json({ success: false, message: "Alert not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        alertId:           alert._id,
+        severity:          alert.severity,
+        targetRoles:       alert.targetRoles,
+        acknowledgedRoles: alert.acknowledgedRoles,
+        acknowledgements:  alert.acknowledgements,
+        escalations:       alert.escalations,
+        ackSlaMinutes:     alert.ackSlaMinutes,
+        lastEscalatedAt:   alert.lastEscalatedAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createAlert,
   getAlerts,
@@ -190,4 +254,6 @@ module.exports = {
   getFeedHealth,
   getCrowdSignals,
   verifyCrowdSignalAction,
+  acknowledgeAlertHandler,
+  getAlertEscalations,
 };

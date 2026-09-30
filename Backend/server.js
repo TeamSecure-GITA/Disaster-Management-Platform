@@ -19,7 +19,8 @@ const startWeatherUpdateJob = require("./jobs/weatherUpdateJob");
 const startGovtDisasterAlertJob = require("./jobs/govtDisasterAlertJob");
 const startCrowdSignalJob = require("./jobs/crowdSignalJob");
 const { startNewsFetcherJob } = require("./jobs/newsFetcher");
-const { startMeshHealthJob } = require("./jobs/meshHealthJob");
+const { startMeshHealthJob }  = require("./jobs/meshHealthJob");
+const startLandslideAlertJob  = require("./jobs/landslideAlertJob");
 const {
   startMlBackendSupervisor,
   stopMlBackendSupervisor,
@@ -56,6 +57,11 @@ const startServerRuntime = () => {
 
   // Start LoRa mesh beacon health monitoring (every 5 min)
   startMeshHealthJob();
+
+  // Landslide risk threshold watcher + authority escalation engine (every 5 min)
+  const { alertTask, escTask } = startLandslideAlertJob();
+  if (alertTask) jobTasks.push(alertTask);
+  if (escTask)   jobTasks.push(escTask);
 
   // Auto-supervise AI / ML FastAPI engine
   startMlBackendSupervisor().catch((err) => {

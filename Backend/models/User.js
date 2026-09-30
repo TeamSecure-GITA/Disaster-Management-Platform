@@ -82,7 +82,7 @@ const userSchema = new mongoose.Schema(
 
     preferredLanguage: {
       type: String,
-      enum: ["en", "hi", "od"],
+      enum: ["en", "hi", "as", "bn", "ne", "kha"],
       default: "en",
     },
 
@@ -106,6 +106,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
       trim: true,
+      index: true,
+    },
+
+    /** District name (e.g. "East Khasi Hills") for targeted alert dispatch */
+    district: {
+      type: String,
+      trim: true,
+      default: null,
       index: true,
     },
 
