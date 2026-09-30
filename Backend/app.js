@@ -57,6 +57,7 @@ const responseRoutes = require("./routes/responseRoutes");
 const aiRoute = require("./routes/aiRoute");
 const weatherRoutes = require("./routes/weatherRoutes");
 const terrainRoutes = require("./routes/terrainRoutes");
+const smsRoutes     = require("./routes/smsRoutes");
 
 const app = express();
 
@@ -197,6 +198,7 @@ app.use("/api/risk", riskRoutes);
 app.use("/api/response", responseRoutes);
 app.use("/api/weather", weatherRoutes);
 app.use("/api/terrain", terrainRoutes);
+app.use("/api/sms",     smsRoutes);
 
 // Unified AI & ML Bridge
 app.use("/api/ai", aiRoute);
