@@ -22,6 +22,57 @@ router.get("/corridors", async (req, res, next) => {
   }
 });
 
+// GET /api/ner/inventory - Query geocoded historical landslide inventory (NASA GLC, GSI, BRO, SDMA)
+router.get("/inventory", async (req, res, next) => {
+  try {
+    const { state, source, highway, fatalOnly, limit } = req.query;
+    const result = nerService.getInventory({
+      state,
+      source,
+      highway,
+      fatalOnly: fatalOnly === "true",
+      limit: limit ? Number(limit) : undefined,
+    });
+    res.status(200).json({
+      success: true,
+      count: result.events ? result.events.length : 0,
+      inventory: result.events || [],
+      catalogs: result.catalogs,
+      totalRecords: result.totalRecords,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/ner/inventory/stats - Aggregate stats of historical records across NER
+router.get("/inventory/stats", async (req, res, next) => {
+  try {
+    const stats = nerService.getInventoryStats();
+    res.status(200).json({
+      success: true,
+      stats,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/ner/field-observations - Retrieve geocoded field crack observations
+router.get("/field-observations", async (req, res, next) => {
+  try {
+    const { state } = req.query;
+    const observations = nerService.getFieldObservations(state);
+    res.status(200).json({
+      success: true,
+      count: observations.length,
+      observations,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // POST /api/ner/calculate-lsi - On-the-fly Landslide Susceptibility Index calculation with DEM support
 router.post("/calculate-lsi", async (req, res, next) => {
   try {
@@ -40,7 +91,9 @@ router.post("/calculate-lsi", async (req, res, next) => {
       threshold: Number(threshold) || 100,
       soilSaturation: Number(soilSaturation) || 50,
       slopeAngle: slopeAngle !== undefined && slopeAngle !== null ? Number(slopeAngle) : (terrain ? terrain.slopeDeg : 30),
-      historicalEvents: Number(historicalEvents) || 2,
+      historicalEvents: historicalEvents !== undefined && historicalEvents !== null ? Number(historicalEvents) : null,
+      lat: lat !== undefined ? Number(lat) : undefined,
+      lng: lng !== undefined ? Number(lng) : undefined,
       terrain,
     });
 
@@ -56,7 +109,7 @@ router.post("/calculate-lsi", async (req, res, next) => {
           curvature: terrain.curvature,
           distanceToRoadsMeters: terrain.distanceToRoadsMeters,
           distanceToStreamsMeters: terrain.distanceToStreamsMeters,
-          lithology: terrain.lithology.formation,
+          lithology: terrain.lithology ? terrain.lithology.formation : null,
           demSource: terrain.demSource,
         } : null,
       },

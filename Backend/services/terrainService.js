@@ -1023,12 +1023,28 @@ async function calculateEnhancedLSI({
   slopeAngle = null,
   lat = null,
   lng = null,
-  historicalEvents = 3,
+  historicalEvents = null,
 }) {
   let terrain = null;
+  let historicalAnalysis = null;
+  let effectiveHistoricalEvents = historicalEvents;
+  let histFactor = 0.05;
 
   if (lat !== null && lng !== null) {
     terrain = await getTerrainAtCoordinates(Number(lat), Number(lng));
+    const inventoryService = require("./landslideInventoryService");
+    historicalAnalysis = inventoryService.calculateHistoricalLandslideDensity(Number(lat), Number(lng));
+
+    if (historicalEvents === 3 || historicalEvents === null || historicalEvents === undefined) {
+      effectiveHistoricalEvents = historicalAnalysis.historicalEventsCount;
+      histFactor = historicalAnalysis.historicalRiskFactor * 0.12;
+    } else {
+      effectiveHistoricalEvents = Number(historicalEvents);
+      histFactor = Math.min(effectiveHistoricalEvents / 10, 1.0) * 0.10;
+    }
+  } else {
+    effectiveHistoricalEvents = Number(historicalEvents) || 3;
+    histFactor = Math.min(effectiveHistoricalEvents / 10, 1.0) * 0.10;
   }
 
   // Derive slope from DEM if not provided explicitly, or use DEM-derived slope
@@ -1038,7 +1054,6 @@ async function calculateEnhancedLSI({
   const rainFactor = Math.min(rainfall24h / (threshold || 100), 1.8) * 0.30;
   const soilFactor = (soilSaturation / 100) * 0.20;
   const slopeFactor = Math.min(effectiveSlope / 60, 1.3) * 0.25;
-  const histFactor = Math.min(historicalEvents / 10, 1.0) * 0.10;
 
   // Additional DEM spatial factors
   let demFactor = 0.15; // baseline weight for geotechnical parameters
@@ -1067,6 +1082,8 @@ async function calculateEnhancedLSI({
     lsiScore: Number(normalizedLSI.toFixed(2)),
     riskLevel,
     safetyFactor: Number((1 / (normalizedLSI + 0.1)).toFixed(2)),
+    historicalEventsCount: effectiveHistoricalEvents,
+    historicalAnalysis,
     derivedTerrain: terrain
       ? {
           elevationMeters: terrain.elevationMeters,

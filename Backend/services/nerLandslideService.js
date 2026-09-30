@@ -4,57 +4,8 @@
  * Assam, Meghalaya, Sikkim, Arunachal Pradesh, Nagaland, Manipur, Mizoram, and Tripura.
  */
 
-// In-memory or persisted store for field crack & slope movement observations
-let fieldCrackObservations = [
-  {
-    id: "OBS-NER-001",
-    locationName: "NH-29 Dzüdza Slope, Kohima-Dimapur corridor",
-    coordinates: [94.0256, 25.6741],
-    state: "Nagaland",
-    crackLengthMeters: 14.5,
-    crackWidthCm: 8.2,
-    slopeAngleDeg: 48,
-    soilSaturationPercent: 88,
-    status: "Active Movement",
-    severity: "Critical",
-    roadStatus: "Partially Blocked (One-way only)",
-    reportedBy: "Field Geologist T. Ao (State Disaster Authority)",
-    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-    photoUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=60"
-  },
-  {
-    id: "OBS-NER-002",
-    locationName: "29th Mile, NH-10 Teesta Valley, Kalimpong-Sikkim border",
-    coordinates: [88.4612, 27.0654],
-    state: "Sikkim",
-    crackLengthMeters: 22.0,
-    crackWidthCm: 12.5,
-    slopeAngleDeg: 54,
-    soilSaturationPercent: 94,
-    status: "Immediate Collapse Risk",
-    severity: "Critical",
-    roadStatus: "Fully Blocked (Debris Clearance underway)",
-    reportedBy: "BRO Task Force / District Control Room",
-    timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
-    photoUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=60"
-  },
-  {
-    id: "OBS-NER-003",
-    locationName: "Jatinga Slopes, Dima Hasao railway bypass",
-    coordinates: [92.9867, 25.1321],
-    state: "Assam",
-    crackLengthMeters: 9.0,
-    crackWidthCm: 4.5,
-    slopeAngleDeg: 38,
-    soilSaturationPercent: 79,
-    status: "Under Observation",
-    severity: "High",
-    roadStatus: "Caution - Heavy Vehicles Restricted",
-    reportedBy: "N.F. Railway Patrol Team",
-    timestamp: new Date(Date.now() - 3600000 * 12).toISOString(),
-    photoUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=60"
-  }
-];
+// Geocoded Historical Landslide Inventory & Field Observations Service
+const inventoryService = require("./landslideInventoryService");
 
 // Live monitoring state for NER Highways & critical corridors
 const nerCorridors = [
@@ -531,17 +482,27 @@ const nerStateOverview = [
   }
 ];
 
-// Calculation of Landslide Susceptibility Index (LSI) with optional DEM fusion
+// Calculation of Landslide Susceptibility Index (LSI) with DEM & geocoded inventory fusion
 function calculateLSI({
   rainfall24h,
   threshold,
   soilSaturation,
   slopeAngle,
-  historicalEvents = 5,
+  historicalEvents = null,
+  lat = null,
+  lng = null,
   terrain = null,
 }) {
   let effectiveSlope = slopeAngle;
   let demFactor = 0;
+  let historicalAnalysis = null;
+
+  const targetLat = lat !== null && lat !== undefined ? Number(lat) : (terrain && terrain.coordinates ? terrain.coordinates[1] : null);
+  const targetLng = lng !== null && lng !== undefined ? Number(lng) : (terrain && terrain.coordinates ? terrain.coordinates[0] : null);
+
+  if (targetLat !== null && targetLng !== null) {
+    historicalAnalysis = inventoryService.calculateHistoricalLandslideDensity(targetLat, targetLng);
+  }
 
   if (terrain) {
     if (effectiveSlope === undefined || effectiveSlope === null) {
@@ -560,7 +521,17 @@ function calculateLSI({
   const rainFactor = Math.min(rainfall24h / (threshold || 100), 1.8) * 0.35;
   const soilFactor = (soilSaturation / 100) * 0.25;
   const slopeFactor = Math.min(slope / 60, 1.2) * 0.25;
-  const histFactor = Math.min(historicalEvents / 10, 1.0) * 0.15;
+
+  let histFactor = 0.07;
+  let effectiveHistoricalEvents = historicalEvents;
+
+  if (historicalAnalysis && (historicalEvents === null || historicalEvents === undefined || historicalEvents === 5 || historicalEvents === 3 || historicalEvents === 2)) {
+    effectiveHistoricalEvents = historicalAnalysis.historicalEventsCount;
+    histFactor = historicalAnalysis.historicalRiskFactor * 0.15;
+  } else {
+    effectiveHistoricalEvents = Number(historicalEvents) || 2;
+    histFactor = Math.min(effectiveHistoricalEvents / 10, 1.0) * 0.15;
+  }
 
   const rawScore = rainFactor + soilFactor + slopeFactor + histFactor + demFactor;
   const normalizedLSI = Math.min(Math.max(rawScore, 0.05), 0.99);
@@ -573,7 +544,9 @@ function calculateLSI({
   return {
     lsiScore: Number(normalizedLSI.toFixed(2)),
     riskLevel,
-    safetyFactor: Number((1 / (normalizedLSI + 0.1)).toFixed(2))
+    safetyFactor: Number((1 / (normalizedLSI + 0.1)).toFixed(2)),
+    historicalEventsCount: effectiveHistoricalEvents,
+    historicalAnalysis,
   };
 }
 
@@ -631,12 +604,12 @@ const getOverview = async () => {
       highRiskStates: highRiskStatesCount,
       isolatedVillages: totalIsolatedVillages,
       blockedCorridors: criticalHighwaysCount,
-      activeFieldObservations: fieldCrackObservations.length,
+      activeFieldObservations: inventoryService.getFieldObservations().length,
     },
     states: nerStateOverview,
     corridors: nerCorridors,
     prioritization: getResponsePrioritization(),
-    recentObservations: fieldCrackObservations
+    recentObservations: inventoryService.getFieldObservations()
   };
 };
 
@@ -658,43 +631,26 @@ const recordFieldObservation = async (data) => {
     // Graceful fallback if terrain service cannot derive
   }
 
-  const derivedSlope = terrainInfo ? terrainInfo.slopeDeg : 40;
+  const derivedSlope = terrainInfo ? terrainInfo.slopeDeg : (Number(data.slopeAngleDeg) || 40);
   const isAutoDerived = data.slopeAngleDeg === undefined || data.slopeAngleDeg === null;
 
-  const newObs = {
-    id: `OBS-NER-${String(fieldCrackObservations.length + 1).padStart(3, "0")}`,
-    locationName: data.locationName || "NER Hill Sector",
+  const obsPayload = {
+    ...data,
     coordinates: coords,
-    state: data.state || "Assam",
-    crackLengthMeters: Number(data.crackLengthMeters) || 0,
-    crackWidthCm: Number(data.crackWidthCm) || 0,
     slopeAngleDeg: !isAutoDerived ? Number(data.slopeAngleDeg) : derivedSlope,
     demDerived: isAutoDerived,
     demSource: terrainInfo ? terrainInfo.demSource : "Copernicus GLO-30",
-    elevationMeters: terrainInfo ? terrainInfo.elevationMeters : 850,
-    aspectDirection: terrainInfo ? terrainInfo.aspectDirection : "S",
-    curvature: terrainInfo ? terrainInfo.curvature : { profileCurvature: 0, planformCurvature: 0 },
-    distanceToRoadsMeters: terrainInfo ? terrainInfo.distanceToRoadsMeters : 120,
-    nearestRoadName: terrainInfo ? terrainInfo.nearestRoadName : "Unclassified Mountain Road",
-    distanceToStreamsMeters: terrainInfo ? terrainInfo.distanceToStreamsMeters : 150,
-    nearestStreamName: terrainInfo ? terrainInfo.nearestStreamName : "Mountain Torrent",
-    lithology: terrainInfo ? terrainInfo.lithology.formation : "Daling / Disang Series",
-    soilSaturationPercent: Number(data.soilSaturationPercent) || 75,
-    status: data.status || "Under Observation",
-    severity: data.severity || "Medium",
-    roadStatus: data.roadStatus || "Open",
-    reportedBy: data.reportedBy || "Field Official / Citizen",
-    timestamp: new Date().toISOString(),
-    photoUrl: data.photoUrl || null
+    demElevationMeters: terrainInfo ? terrainInfo.elevationMeters : null,
+    lithology: terrainInfo ? terrainInfo.lithology.formation : null,
   };
 
-  fieldCrackObservations.unshift(newObs);
+  const newObs = inventoryService.addFieldObservation(obsPayload);
   return {
     success: true,
     message: isAutoDerived
       ? `NER Slope crack observation recorded with DEM-derived ${derivedSlope}° slope (${newObs.demSource})`
       : "NER Slope crack observation recorded successfully",
-    observation: newObs
+    observation: newObs,
   };
 };
 
@@ -729,5 +685,8 @@ module.exports = {
   calculateLSI,
   getResponsePrioritization,
   updateStateRainfallFromTimeseries,
+  getInventory: inventoryService.getInventory,
+  getInventoryStats: inventoryService.getInventoryStats,
+  getFieldObservations: inventoryService.getFieldObservations,
 };
 

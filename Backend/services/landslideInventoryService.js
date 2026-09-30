@@ -850,19 +850,23 @@ function calculateHistoricalLandslideDensity(lat, lng, radiusKm = 30.0, bandwidt
     densityCategory = "Moderate Historical Activity";
   }
 
+  const nearestEvent = {
+    id: nearby[0].id,
+    name: nearby[0].name,
+    location: nearby[0].name,
+    year: nearby[0].year,
+    state: nearby[0].state,
+    trigger: nearby[0].trigger,
+    source: nearby[0].source,
+  };
+
   return {
     historicalEventsCount: count,
     spatialDensityScore: Number(densityScore.toFixed(3)),
     historicalRiskFactor: Number(historicalFactor.toFixed(3)),
     nearestHistoricalDistanceKm: nearby[0].distanceKm,
-    nearestHistoricalEvent: {
-      id: nearby[0].id,
-      name: nearby[0].name,
-      year: nearby[0].year,
-      state: nearby[0].state,
-      trigger: nearby[0].trigger,
-      source: nearby[0].source,
-    },
+    nearestHistoricalEvent: nearestEvent,
+    nearestEvent,
     nearbyEventsSummary: nearby.slice(0, 5).map((e) => ({
       id: e.id,
       name: e.name,
@@ -872,6 +876,7 @@ function calculateHistoricalLandslideDensity(lat, lng, radiusKm = 30.0, bandwidt
     })),
     radiusKm,
     densityCategory,
+    densityLevel: densityCategory,
   };
 }
 
@@ -898,6 +903,12 @@ function getInventory(filters = {}) {
   if (filters.minYear) {
     list = list.filter((e) => e.year >= Number(filters.minYear));
   }
+  if (filters.fatalOnly) {
+    list = list.filter((e) => (e.fatalities || 0) > 0);
+  }
+  if (filters.limit) {
+    list = list.slice(0, Number(filters.limit));
+  }
 
   return {
     success: true,
@@ -918,6 +929,8 @@ function getInventoryStats() {
   const byCategory = {};
   let totalFatalities = 0;
   let totalBlockageDays = 0;
+  let minYear = 3000;
+  let maxYear = 0;
 
   for (const e of HISTORICAL_LANDSLIDE_INVENTORY) {
     byState[e.state] = (byState[e.state] || 0) + 1;
@@ -925,16 +938,24 @@ function getInventoryStats() {
     byCategory[e.category] = (byCategory[e.category] || 0) + 1;
     totalFatalities += e.fatalities || 0;
     totalBlockageDays += e.roadBlockageDays || 0;
+    if (e.year < minYear) minYear = e.year;
+    if (e.year > maxYear) maxYear = e.year;
   }
 
   return {
     success: true,
+    totalEvents: HISTORICAL_LANDSLIDE_INVENTORY.length,
     totalDocumentedLandslides: HISTORICAL_LANDSLIDE_INVENTORY.length,
+    totalFatalities,
+    totalDocumentedFatalities: totalFatalities,
+    totalRoadBlockageDays: totalBlockageDays,
+    dateRange: {
+      earliest: minYear,
+      latest: maxYear,
+    },
     byState,
     bySource,
     byCategory,
-    totalDocumentedFatalities: totalFatalities,
-    totalRoadBlockageDays: totalBlockageDays,
   };
 }
 
@@ -964,8 +985,12 @@ function addFieldObservation(data) {
     reportedBy: data.reportedBy || "Field Reporter",
     timestamp: new Date().toISOString(),
     photoUrl: data.photoUrl || "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=60",
+    demDerived: data.demDerived !== undefined ? Boolean(data.demDerived) : false,
+    demSource: data.demSource || "Copernicus GLO-30",
     demElevationMeters: data.demElevationMeters || null,
     lithology: data.lithology || null,
+    nearestRoadName: data.nearestRoadName || null,
+    nearestStreamName: data.nearestStreamName || null,
   };
   liveFieldObservations.unshift(newObs);
   return newObs;
