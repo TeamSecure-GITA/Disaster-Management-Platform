@@ -3,17 +3,24 @@ const path = require("path");
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
-const DEFAULT_MONGO_URI =
-  "mongodb+srv://teamsecureproject_db_user:1ZUmjUV8dPgGD7dp@cluster0.0xz9hc6.mongodb.net/disaster_management?retryWrites=true&w=majority";
-
-const DEFAULT_JWT_SECRET =
-  "8f6b2d0e9c4a7b1d5e3f6a8c0d2b4e6f9a1c3e5d7b9f2a4c6e8d0b3f5a7c9e1";
+const isProd = (process.env.NODE_ENV || "development") === "production";
 
 const mongoUri =
-  process.env.MONGO_URI || process.env.MONGODB_URI || DEFAULT_MONGO_URI;
+  process.env.MONGO_URI ||
+  process.env.MONGODB_URI ||
+  (isProd ? undefined : "mongodb://127.0.0.1:27017/disaster_management");
+
+if (isProd && !mongoUri) {
+  throw new Error("MONGO_URI must be provided in production environment.");
+}
 
 const jwtSecret =
-  process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
+  process.env.JWT_SECRET ||
+  (isProd ? undefined : "dev-only-jwt-secret-not-for-production-min32chars");
+
+if (isProd && !jwtSecret) {
+  throw new Error("JWT_SECRET must be provided in production environment.");
+}
 
 const environment = {
   nodeEnv: process.env.NODE_ENV || "development",
@@ -31,12 +38,12 @@ const environment = {
 
   aiChatbotUrl: (() => {
     const raw = process.env.AI_CHATBOT_URL;
-    if (raw && !raw.includes("ai-service")) {
+    if (raw) {
       return raw.startsWith("http://") || raw.startsWith("https://")
         ? raw
-        : `https://${raw}`;
+        : `http://${raw}`;
     }
-    return "http://localhost:8000";
+    return "http://ai-service:8000";
   })(),
 
   satelliteApiUrl:

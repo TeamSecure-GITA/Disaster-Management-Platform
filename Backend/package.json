@@ -6,11 +6,12 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
+    "worker": "node worker.js",
     "dev": "nodemon server.js",
-    "build": "node --check server.js && node --check app.js",
+    "build": "node --check server.js && node --check app.js && node --check worker.js",
     "test": "jest --runInBand --forceExit",
     "test:ci": "jest --runInBand --coverage --forceExit",
-    "check": "node --check server.js && node --check app.js"
+    "check": "node --check server.js && node --check app.js && node --check worker.js"
   },
   "keywords": [
     "disaster",

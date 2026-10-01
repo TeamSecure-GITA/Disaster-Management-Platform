@@ -11,9 +11,9 @@ services:
       - key: PORT
         value: 10000
       - key: MONGO_URI
-        value: mongodb+srv://teamsecureproject_db_user:1ZUmjUV8dPgGD7dp@cluster0.0xz9hc6.mongodb.net/disaster_management?retryWrites=true&w=majority
+        sync: false
       - key: JWT_SECRET
-        value: 8f6b2d0e9c4a7b1d5e3f6a8c0d2b4e6f9a1c3e5d7b9f2a4c6e8d0b3f5a7c9e1
+        generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
 
@@ -63,9 +63,9 @@ services:
       - key: PORT
         value: 10000
       - key: MONGO_URI
-        value: mongodb+srv://teamsecureproject_db_user:1ZUmjUV8dPgGD7dp@cluster0.0xz9hc6.mongodb.net/disaster_management?retryWrites=true&w=majority
+        sync: false
       - key: JWT_SECRET
-        value: 8f6b2d0e9c4a7b1d5e3f6a8c0d2b4e6f9a1c3e5d7b9f2a4c6e8d0b3f5a7c9e1
+        generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: AI_CHATBOT_URL

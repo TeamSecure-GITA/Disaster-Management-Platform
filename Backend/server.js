@@ -36,33 +36,40 @@ let jobTasks = [];
 let shuttingDown = false;
 
 
-// ================================
-// START SERVER RUNTIME
-// ================================
+const { alertQueue } = require("./services/alertQueue");
 
 const startServerRuntime = () => {
   io = initializeSocket(server);
 
-  jobTasks = [
-    startNotificationJob(),
-    startPredictionJob(),
-    startAlertExpiryJob(),
-    startSatelliteUpdateJob(),
-    startWeatherUpdateJob(),
-    startGovtDisasterAlertJob(),
-    startCrowdSignalJob(),
-  ];
+  const shouldRunCrons = process.env.RUN_CRON_JOBS !== "false";
 
-  // Start news RSS fetcher (runs every 6h + immediately on startup)
-  startNewsFetcherJob();
+  if (shouldRunCrons) {
+    console.log("[Server] Background cron jobs enabled on this instance.");
+    jobTasks = [
+      startNotificationJob(),
+      startPredictionJob(),
+      startAlertExpiryJob(),
+      startSatelliteUpdateJob(),
+      startWeatherUpdateJob(),
+      startGovtDisasterAlertJob(),
+      startCrowdSignalJob(),
+    ];
 
-  // Start LoRa mesh beacon health monitoring (every 5 min)
-  startMeshHealthJob();
+    // Start news RSS fetcher (runs every 6h + immediately on startup)
+    startNewsFetcherJob();
 
-  // Landslide risk threshold watcher + authority escalation engine (every 5 min)
-  const { alertTask, escTask } = startLandslideAlertJob();
-  if (alertTask) jobTasks.push(alertTask);
-  if (escTask)   jobTasks.push(escTask);
+    // Start LoRa mesh beacon health monitoring (every 5 min)
+    startMeshHealthJob();
+
+    // Landslide risk threshold watcher + authority escalation engine (every 5 min)
+    const { alertTask, escTask } = startLandslideAlertJob();
+    if (alertTask) jobTasks.push(alertTask);
+    if (escTask)   jobTasks.push(escTask);
+
+    alertQueue.startProcessing();
+  } else {
+    console.log("[Server] RUN_CRON_JOBS=false: Scheduled jobs disabled on this API replica (managed by dedicated worker).");
+  }
 
   // Auto-supervise AI / ML FastAPI engine
   startMlBackendSupervisor().catch((err) => {
@@ -91,6 +98,7 @@ const stopServer = async (signal) => {
   jobTasks.forEach((task) => {
     task?.stop?.();
   });
+  alertQueue.stopProcessing();
 
   // Close Socket.IO
   io?.close?.();

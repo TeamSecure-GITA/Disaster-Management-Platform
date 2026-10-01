@@ -1,20 +1,16 @@
 const mongoose = require("mongoose");
 
-const ATLAS_MONGO_URI =
-  "mongodb+srv://teamsecureproject_db_user:1ZUmjUV8dPgGD7dp@cluster0.0xz9hc6.mongodb.net/disaster_management?retryWrites=true&w=majority";
+const DEFAULT_LOCAL_URI = "mongodb://127.0.0.1:27017/disaster_management";
 
 const getPreferredUri = () => {
   const envUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  if (envUri) return envUri;
 
-  if (
-    envUri &&
-    !envUri.includes("127.0.0.1") &&
-    !envUri.includes("localhost")
-  ) {
-    return envUri;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("MONGO_URI environment variable is required in production mode.");
   }
 
-  return ATLAS_MONGO_URI;
+  return DEFAULT_LOCAL_URI;
 };
 
 const connectDatabase = async () => {
@@ -36,28 +32,8 @@ const connectDatabase = async () => {
 
     return mongoose.connection;
   } catch (error) {
-    console.warn(
-      `Primary connection failed (${error.message}). Retrying with MongoDB Atlas...`
-    );
-
-    // Disconnect stale handle before retrying
-    try { await mongoose.disconnect(); } catch (_) {}
-
-    try {
-      await mongoose.connect(ATLAS_MONGO_URI, {
-        serverSelectionTimeoutMS: 15000,
-      });
-
-      console.log("MongoDB connected successfully via Atlas fallback");
-      console.log(`Database: ${mongoose.connection.name}`);
-      return mongoose.connection;
-    } catch (fallbackError) {
-      console.error(
-        "MongoDB Atlas fallback connection failed:",
-        fallbackError.message
-      );
-      throw fallbackError;
-    }
+    console.error("MongoDB connection failed:", error.message);
+    throw error;
   }
 };
 

@@ -18,8 +18,8 @@
 "use strict";
 
 const Alert    = require("../models/Alert");
-const User     = require("../models/User");
 const { createNotification } = require("./notificationService");
+const { alertQueue } = require("./alertQueue");
 const { buildLocalizedContent } = require("../utils/alertI18n");
 const { emitNewAlert }          = require("../sockets/alertSocket");
 
@@ -302,39 +302,19 @@ async function generateAlertForZone(zone) {
   const channels = CHANNEL_MAP[level];
 
   console.log(
-    `[LandslideAlert] Zone: ${zone.name} | Level: ${level} | Score: ${riskScore} | Targeting ${users.length} users`
+    `[LandslideAlert] Zone: ${zone.name} | Level: ${level} | Score: ${riskScore} | Enqueueing fan-out to ${users.length} users`
   );
 
-  for (const user of users) {
-    const lang = user.preferredLanguage || "en";
-    const localised = localizedContent.find((c) => c.lang === lang)
-      || localizedContent.find((c) => c.lang === "en")
-      || defaultLang;
-
-    try {
-      await createNotification({
-        recipient:    user._id,
-        isBroadcast:  false,
-        title:        localised.title,
-        message:      localised.message,
-        type:         "disaster_alert",
-        priority:     level === "CRITICAL" ? "critical" : level === "HIGH" ? "high" : "normal",
-        channels,
-        relatedId:    alert._id,
-        relatedModel: "Alert",
-        metadata: {
-          alertId:   alert._id,
-          alertType: "landslide",
-          severity:  level,
-          district:  primaryDistrict,
-          riskScore,
-          lang,
-        },
-      });
-    } catch (err) {
-      console.error(`[LandslideAlert] Notification failed for user ${user._id}:`, err.message);
-    }
-  }
+  // Enqueue to asynchronous alert fanout queue
+  await alertQueue.enqueueFanout({
+    alertId: alert._id,
+    alertType: "disaster_alert",
+    severity: level,
+    users,
+    localizedContent,
+    channels,
+    priority: level === "CRITICAL" ? "critical" : level === "HIGH" ? "high" : "normal",
+  });
 
   return {
     alertId:      alert._id,
