@@ -112,13 +112,17 @@ function _toDataUrl(file) {
  */
 export async function saveOfflineReport(reportData, mediaFiles = []) {
   try {
-    const operationId = genId();
+    const operationId = reportData.operationId || genId();
     const media = await compressMediaFiles(mediaFiles);
     const entry = {
-      ...reportData, media, operationId,
+      ...reportData,
+      media: (reportData.media && reportData.media.length) ? reportData.media : media,
+      operationId,
       deviceId: DEVICE_ID,
-      clientCreatedAt: new Date().toISOString(),
-      resource: 'incident', action: 'create', status: 'pending',
+      clientCreatedAt: reportData.clientCreatedAt || new Date().toISOString(),
+      resource: reportData.resource || (reportData.type === 'sos' ? 'sos' : 'incident'),
+      action: reportData.action || 'create',
+      status: 'pending',
     };
     const queue = (await reportStore.getItem('queue')) || [];
     queue.push(entry);
@@ -132,11 +136,13 @@ export const getOfflineReports = async () => {
   catch (e) { console.error('[OfflineStorage] getOfflineReports:', e); return []; }
 };
 
-/** Remove reports whose operationIds are in `ids`. */
+/** Remove reports whose operationIds or ids are in `ids`. */
 export async function removeOfflineReports(ids = []) {
   try {
-    const s = new Set(ids);
-    const remaining = ((await reportStore.getItem('queue')) || []).filter((r) => !s.has(r.operationId));
+    const s = new Set((ids || []).filter(Boolean));
+    const remaining = ((await reportStore.getItem('queue')) || []).filter(
+      (r) => !s.has(r.operationId) && !s.has(r.id)
+    );
     await reportStore.setItem('queue', remaining);
   } catch (e) { console.error('[OfflineStorage] removeOfflineReports:', e); }
 }

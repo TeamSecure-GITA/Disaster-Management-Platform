@@ -135,10 +135,20 @@ router.post("/calculate-lsi", async (req, res, next) => {
   }
 });
 
+const { optionalAuth } = require("../middleware/authMiddleware");
+
 // POST /api/ner/report-crack - Field reporting for slope cracks, soil slippage & road blockages
-router.post("/report-crack", async (req, res, next) => {
+router.post("/report-crack", optionalAuth, async (req, res, next) => {
   try {
-    const result = await nerService.recordFieldObservation(req.body);
+    // Role check: If user token is provided, verify role authorization
+    if (req.user && req.user.role && !["citizen", "volunteer", "responder", "operator", "admin", "super_admin"].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: role unauthorized to submit field observations.",
+      });
+    }
+
+    const result = await nerService.recordFieldObservation(req.body, req.user);
     res.status(201).json(result);
   } catch (error) {
     next(error);

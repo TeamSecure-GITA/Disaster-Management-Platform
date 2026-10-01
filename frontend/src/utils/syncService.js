@@ -33,6 +33,7 @@ import {
   cacheApiResponse,
   DEVICE_ID,
 } from './offlineStorage';
+import { flushOfflineSOSQueue } from './sosService';
 
 /** Background Sync tag names — must match the SW listener */
 export const SYNC_TAG_INCIDENTS = 'offline-incident-sync';
@@ -250,9 +251,10 @@ export async function pullServerChanges(authToken) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function flushAllQueues(authToken) {
-  const [incResult, famResult] = await Promise.allSettled([
+  const [incResult, famResult, sosResult] = await Promise.allSettled([
     flushIncidentQueue(authToken),
     flushFamilyOpsQueue(authToken),
+    flushOfflineSOSQueue(),
   ]);
 
   // Pull latest updates for 2-way sync
@@ -264,6 +266,7 @@ export async function flushAllQueues(authToken) {
   const result = {
     incidents: incResult.status === 'fulfilled' ? incResult.value : { uploaded: [], failed: [] },
     family: famResult.status === 'fulfilled' ? famResult.value : { accepted: [], rejected: [] },
+    sos: sosResult.status === 'fulfilled' ? sosResult.value : 0,
     serverChanges,
   };
 

@@ -162,3 +162,59 @@ export function roadStatusToColor(status) {
     default:           return "#94a3b8";
   }
 }
+
+// ── Live Incident Reports & Operator Verification ───────────────────────────
+
+/**
+ * Fetch live incidents GeoJSON FeatureCollection from /api/incidents/heatmap
+ */
+export async function fetchIncidentHeatmap({ incidentType, severity, from, to } = {}) {
+  const qs = new URLSearchParams();
+  if (incidentType) qs.set("incidentType", incidentType);
+  if (severity)     qs.set("severity", severity);
+  if (from)         qs.set("from", from);
+  if (to)           qs.set("to", to);
+
+  try {
+    const res = await fetch(`${API_BASE}/api/incidents/heatmap?${qs}`, {
+      headers: { ..._authHeaders() },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.data || data;
+  } catch (err) {
+    console.warn("[GIS] fetchIncidentHeatmap failed:", err.message);
+    return _emptyFC();
+  }
+}
+
+/**
+ * Fetch all incidents with pagination and filtering (for operator verification screen)
+ */
+export async function fetchIncidents(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v != null && v !== "") qs.set(k, v);
+  });
+  const res = await fetch(`${API_BASE}/api/incidents?${qs}`, {
+    headers: { ..._authHeaders() },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+/**
+ * Update incident status (verify, escalate, resolve, reject)
+ */
+export async function updateIncidentStatus(id, { status, remarks } = {}) {
+  const res = await fetch(`${API_BASE}/api/incidents/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ..._authHeaders(),
+    },
+    body: JSON.stringify({ status, remarks }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}

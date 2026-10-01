@@ -60,7 +60,11 @@ venv/
 
 # Coverage
 coverage/
+**/coverage/
 .nyc_output/
+
+# Duplicate / Stale directories
+frontend/frontend/
 
 # Build files
 dist/

@@ -23,6 +23,7 @@ import {
 } from "../utils/adminAuth";
 import { getOfflineSession } from "../utils/offlineStorage";
 import { dispatchLocalUnsafeAlarm } from "../services/socketService";
+import OperatorIncidentManager from "../components/admin/OperatorIncidentManager";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -481,6 +482,7 @@ export default function AdministratorHub() {
       <div style={{ display: "flex", gap: "8px", borderBottom: "1px solid #334155", paddingBottom: "12px", marginBottom: "20px", flexWrap: "wrap" }}>
         {[
           { id: "analytics", label: "📊 Live Logins & Active Users", icon: "🟢" },
+          { id: "incidents", label: "🛡️ Field Incidents & Verification", icon: "⚠️" },
           { id: "sirenDispatch", label: "🚨 Citizen Siren & Evacuation Dispatch", icon: "📢" },
           { id: "members", label: "🔑 Access Delegation (Add Members)", icon: "👥" },
           { id: "requests", label: `📋 Permission Requests (${requests.filter(r => r.status === "Pending").length})`, icon: "⏳" },
@@ -1548,6 +1550,11 @@ export default function AdministratorHub() {
             </div>
           )}
         </div>
+      )}
+
+      {/* ── TAB 5: FIELD INCIDENTS & VERIFICATION ── */}
+      {activeTab === "incidents" && (
+        <OperatorIncidentManager />
       )}
 
     </div>

@@ -148,9 +148,50 @@ const incidentSchema = new mongoose.Schema(
             default: false,
         },
 
+        roadStatus: {
+            type: String,
+            default: "Clear",
+        },
+
         affectedVillages: {
             type: [String],
             default: [],
+        },
+
+        // ── Geotechnical Slope & Crack Dynamics ──────────────────────────────
+        crackWidth: {
+            type: Number, // in cm
+            default: null,
+        },
+
+        crackLength: {
+            type: Number, // in metres
+            default: null,
+        },
+
+        slopeTrend: {
+            type: String,
+            default: "Stationary",
+        },
+
+        demDerived: {
+            type: Boolean,
+            default: false,
+        },
+
+        demSource: {
+            type: String,
+            default: null,
+        },
+
+        demElevationMeters: {
+            type: Number,
+            default: null,
+        },
+
+        lithology: {
+            type: String,
+            default: null,
         },
 
         // ── Auto-computed risk score 0–100 (set by pre-save hook) ─────────────
@@ -241,8 +282,17 @@ incidentSchema.pre("save", function (next) {
             ? Math.min((this.locationMeta.slopeAngle / 90) * 10, 10)
             : 0;
 
+    // Crack widening amplifier: cracks > 5cm or active slippage indicate critical instability
+    let crackBoost = 0;
+    if (this.crackWidth != null) {
+        crackBoost += Math.min((this.crackWidth / 10) * 8, 10);
+    }
+    if (this.slopeTrend === "Active Slippage" || this.slopeTrend === "Accelerating") {
+        crackBoost += 10;
+    }
+
     this.riskScore = Math.min(
-        Math.round(base + witnessBoost + roadBoost + slopeBoost),
+        Math.round(base + witnessBoost + roadBoost + slopeBoost + crackBoost),
         100
     );
 

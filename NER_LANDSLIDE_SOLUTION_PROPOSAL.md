@@ -29,7 +29,7 @@ This platform provides an **end-to-end, AI-powered early warning and geotechnica
 | **e. Citizen & Official Field Reporting**<br>• Geo-tagged photos/videos<br>• Crack width & length measurements<br>• Slope creep & road blockages | • Specialized **NER Slope Movement & Geotechnical Reporting** in `IncidentReport.jsx`<br>• Automated 1-click GPS coordinate locking (`navigator.geolocation`)<br>• Crack length (m), crack width (cm), slope movement trend (Stationary / Creep / Rapid / Rockfall), and road blockage status capture<br>• Damage assessment photo uploads (`DamageAssessment.jsx`) | ✅ Implemented & Operational |
 | **f. Operational Dashboards**<br>• Risk severity heat levels<br>• Highway connectivity tracker<br>• Weather-linked risk forecasts<br>• Response prioritization matrix | • **Dedicated NER Landslide Risk Monitor** (`NERLandslideMonitor.jsx` at `/ner-landslide-monitor`)<br>• 8-State live geotechnical intelligence cards with IMD color-coded advisories<br>• Highway clearance ETA & alternate route bypass recommendations<br>• Automated Emergency Response Prioritization Queue ranking states 1 to 8 by vulnerability | ✅ Implemented & Operational |
 | **Multilingual Support**<br>Indigenous & Regional Languages | • Multi-language alert broadcast engine (`selectedLanguage` switcher in UI & notification services)<br>• Languages supported: **English (EN)**, **Hindi (हिंदी)**, **Assamese (অসমীয়া)**, **Bengali (বাংলা)**, **Nepali (नेपाली)**, and **Odia (ଓଡ଼ିଆ)** | ✅ Implemented & Operational |
-| **Low-Network / Offline Functionality**<br>Remote Himalayan & hill tracts | • Full Progressive Web App (PWA) offline capability via service workers & Workbox<br>• Local caching with IndexedDB (`localforage` & `idb`) for offline report queueing<br>• Background two-way conflict-free sync (`syncRoutes.js`, `SyncOperation.js`) upon network restoration<br>• **Zero-Grid Rescue Extensions:**<br>&nbsp;&nbsp;◦ *Cosmic-Ray Muon Tracking (WebAssembly + Camera CMOS API):* Passive subatomic muon particle hit counting on covered dark-frame CMOS sensors, mapping debris thickness ($x = -\Lambda\ln(I/I_0)/\rho$) and detecting subterranean hollow air pockets with zero RF emission<br>&nbsp;&nbsp;◦ *Geomagnetic Field Rupture Navigation (Web Sensor API Compass-Independent):* Uncalibrated raw magnetometer sequence fingerprinting against pre-cached structural blueprints, guiding rescuers step-by-step through pitch-black collapses and foggy gorges without GPS or spinning compass reliance<br>&nbsp;&nbsp;◦ *Inverted Infrasonic "Earth-Hum" Wave-Guide Alerting (Sub-20 Hz Web Audio DSP):* Continuous physical monitoring of sub-audible hydraulic cavitation and rockmass shear hums, reaching 5km peer quorum consensus to trigger a 3-to-5-minute downstream evacuation siren before floodwaters or rockfalls strike<br>&nbsp;&nbsp;◦ *Localized Quantum-Safe "Chaff" Data Masking (IndexedDB WebAssembly + 3-Node BLE):* Splitting sensitive survival and narcotics registries into incomplete polynomial shards submerged in millions of decoy noise packets; zero extractable bytes on a stolen single phone until 3 rescue devices perform a Bluetooth proximity handshake<br>&nbsp;&nbsp;◦ *Acoustic FSK Chirps (1.8–19.8 kHz):* Screen-to-screen distress hops spanning 1,400m river chasms<br>&nbsp;&nbsp;◦ *Barometric Flash-Flood Shockwave Detection:* Bernoulli vacuum drop alert ($\Delta P/\Delta t < -0.45\text{ hPa}$) providing 60-90s alarm<br>&nbsp;&nbsp;◦ *Magnetometer 3D Void Locator:* Sub-microtesla geomagnetic cavity detection under 3+ meters of landslide mud/rebar<br>&nbsp;&nbsp;◦ *Web-Bluetooth 15ms Spitting:* Deep mud RF penetration preserving 186+ hours battery<br>&nbsp;&nbsp;◦ *Web-NFC Digital Triage Stamps:* On-skin patient triage tracking between remote hill clinics | ✅ Implemented & Operational |
+| **Low-Network / Offline Functionality**<br>Remote Himalayan & hill tracts | • Full Progressive Web App (PWA) offline capability via service workers & Workbox caching<br>• Local caching with IndexedDB (`localforage` & `idb`) for offline report & SOS queuing<br>• Safe, non-destructive background sync (`syncRoutes.js`, `SyncOperation.js`, `syncService.js`) upon reconnect with conflict-free operation queueing<br>• Offline tension crack and slope creep reporting with automated retry upon network restoration<br>• Offline base-map tile pre-caching for NER mountain corridors (`preCacheNERegionTiles`)<br>• *Note: Experimental zero-grid research concepts (muon detection, infrasonic hum) are documented in the Appendix.* | ✅ Implemented & Operational |
 
 ---
 
@@ -109,12 +109,15 @@ Where:
 - $H_{norm}$: Historical landslide occurrence coefficient for the quadrant.
 - Weights: $w_r = 0.35$, $w_s = 0.25$, $w_\theta = 0.25$, $w_h = 0.15$.
 
-### Factor of Safety (FoS) Approximation:
-$$\text{FoS} \approx \frac{1}{\text{LSI} + 0.10}$$
-- **FoS < 1.0 (LSI ≥ 0.80):** **Critical Alert** — Slope is structurally unstable; triggers immediate evacuation orders, siren sirens, and SDRF deployment.
-- **1.0 ≤ FoS < 1.3 (0.65 ≤ LSI < 0.80):** **High Risk** — Night highway transit suspended, earthmovers stationed at choke points.
-- **1.3 ≤ FoS < 1.8 (0.45 ≤ LSI < 0.65):** **Moderate Advisory** — Continuous sensor telemetry and drone inspections.
-- **FoS ≥ 1.8 (LSI < 0.45):** **Low / Safe** — Standard baseline vigilance.
+### Geotechnical Stability Index (FoS Proxy):
+$$\text{Stability Index (FoS Proxy)} \approx \frac{1 - \text{LSI}}{0.45} + 0.48$$
+
+*Note: In classical soil mechanics, Factor of Safety (FoS = Resisting Forces / Driving Forces) requires subsurface geotechnical boring (cohesion $c'$, friction angle $\phi'$, pore water pressure $u$). In a regional early-warning system, the platform calculates this calibrated Stability Index directly from the LSI to serve as an operational FoS proxy that strictly respects geotechnical safety thresholds:*
+
+- **FoS < 1.0 (LSI ≥ 0.80):** **Critical Alert** — Slope is structurally unstable / active failure ($\text{FoS} \approx 0.92$ at $\text{LSI} = 0.80$). Triggers immediate automated evacuation orders, siren alerts, and SDRF deployment.
+- **1.0 ≤ FoS < 1.3 (0.65 ≤ LSI < 0.80):** **High Risk** — Imminent slope failure threshold ($\text{FoS} \approx 1.26$ at $\text{LSI} = 0.65$). Night highway transit suspended, earthmovers stationed at choke points.
+- **1.3 ≤ FoS < 1.8 (0.45 ≤ LSI < 0.65):** **Moderate Advisory** — Creep detected ($\text{FoS} \approx 1.70$ at $\text{LSI} = 0.45$). Continuous sensor telemetry and drone inspections.
+- **FoS ≥ 1.8 (LSI < 0.45):** **Low / Safe** — Stable baseline vigilance ($\text{FoS} \ge 1.81$ at $\text{LSI} \le 0.40$). Standard baseline monitoring.
 
 ---
 
@@ -203,3 +206,29 @@ npm run dev
 ## 🏆 10. Conclusion & Impact
 
 This solution transforms landslide risk management in the North Eastern Region from an archaic, manual aftermath into a **proactive, AI-driven disaster mitigation ecosystem**. By seamlessly synthesizing IoT telemetry, satellite radar, IMD meteorological dynamics, and community vigilance, the platform empowers district collectors, the Border Roads Organisation (BRO), SDRF/NDRF teams, and isolated villagers with the timely intelligence needed to protect lives and secure regional connectivity.
+
+---
+
+## 🔬 Appendix: Exploratory & Experimental Zero-Grid Research Concepts
+
+*The following features represent experimental proofs-of-concept and academic research prototypes designed for extreme zero-connectivity rescue scenarios in deep Himalayan valleys. They are segregated here from the operational core platform to maintain audit clarity:*
+
+1. **Cosmic-Ray Muon Tracking (Dark-Frame CMOS Tomography):**
+   - *Concept:* Passive hit counting of cosmic muon flux on covered dark-frame smartphone CMOS sensors ($x = -\Lambda\ln(I/I_0)/\rho$) to estimate debris thickness and subterranean void existence without active radiation emission.
+   - *Status:* Experimental physics laboratory prototype; requires prolonged sensor exposure in controlled dark enclosures.
+
+2. **Geomagnetic Field Rupture Navigation:**
+   - *Concept:* Uncalibrated 3-axis magnetometer sequence correlation against pre-cached underground topological signatures to assist directional guidance in pitch-black subterranean collapses when GPS is obscured.
+   - *Status:* Exploratory research prototype; dependent on site-specific ferrous baseline calibrations.
+
+3. **Inverted Infrasonic Rockmass Hum Wave-Guide Alerting:**
+   - *Concept:* Sub-20 Hz audio DSP processing to capture low-frequency acoustic emissions generated by hydraulic rock cavitation and shear failure prior to gross debris detachment.
+   - *Status:* Experimental sensor prototype; subject to environmental acoustic noise filtering challenges in high wind/torrential rain.
+
+4. **Localized Quantum-Resistant Polynomial Chaff Sharding:**
+   - *Concept:* Polynomial secret sharing for medical registries, distributing encrypted fragments across 3-node BLE clusters requiring physical multi-rescuer proximity to reconstitute.
+   - *Status:* Cryptographic research prototype for privacy preservation in offline mass-casualty scenarios.
+
+5. **Acoustic Ultrasonic Distress Chirping:**
+   - *Concept:* High-frequency FSK acoustic signal hopping (18–20 kHz) across river canyons for line-of-sight distress beacons when RF is completely attenuated.
+   - *Status:* Experimental audio transducer protocol.

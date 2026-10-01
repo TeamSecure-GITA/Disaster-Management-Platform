@@ -140,6 +140,14 @@ const applyIncidentOperation = async (userId, operation) => {
       },
       witnessCount: Number(payload.witnessCount || payload.affectedPeople) || 1,
       isRoadBlocked: Boolean(payload.isRoadBlocked || payload.roadStatus === "Completely Blocked"),
+      roadStatus: payload.roadStatus || (payload.isRoadBlocked ? "Completely Blocked" : "Clear"),
+      crackWidth: payload.crackWidth != null ? Number(payload.crackWidth) : null,
+      crackLength: payload.crackLength != null ? Number(payload.crackLength) : null,
+      slopeTrend: payload.slopeTrend || "Stationary",
+      demDerived: Boolean(payload.demDerived),
+      demSource: payload.demSource || null,
+      demElevationMeters: payload.demElevationMeters != null ? Number(payload.demElevationMeters) : null,
+      lithology: payload.lithology || null,
       affectedVillages: Array.isArray(payload.affectedVillages)
         ? payload.affectedVillages
         : payload.affectedVillages

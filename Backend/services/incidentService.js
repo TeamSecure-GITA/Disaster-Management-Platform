@@ -129,6 +129,30 @@ const createIncident = async (bodyData, files = [], userId) => {
             .filter(Boolean);
     }
 
+    let slopeAngle = locationMeta.slopeAngle != null ? Number(locationMeta.slopeAngle) : null;
+    let demDerived = bodyData.demDerived === true || bodyData.demDerived === "true";
+    let demSource = bodyData.demSource || null;
+    let demElevationMeters = bodyData.demElevationMeters != null ? Number(bodyData.demElevationMeters) : null;
+    let lithology = bodyData.lithology || null;
+
+    if (slopeAngle == null && geoLocation && Array.isArray(geoLocation.coordinates)) {
+        try {
+            const terrainService = require("./terrainService");
+            const terrainInfo = await terrainService.getTerrainAtCoordinates(
+                geoLocation.coordinates[1],
+                geoLocation.coordinates[0]
+            );
+            if (terrainInfo) {
+                slopeAngle = terrainInfo.slopeDeg;
+                locationMeta.slopeAngle = slopeAngle;
+                demDerived = true;
+                demSource = terrainInfo.demSource || "Copernicus GLO-30";
+                demElevationMeters = terrainInfo.elevationMeters;
+                lithology = terrainInfo.lithology ? terrainInfo.lithology.formation : null;
+            }
+        } catch {}
+    }
+
     const incident = await Incident.create({
         reportedBy: userId,
         incidentType: bodyData.incidentType,
@@ -137,8 +161,16 @@ const createIncident = async (bodyData, files = [], userId) => {
         location: geoLocation,
         locationMeta,
         witnessCount: Number(bodyData.witnessCount) || 1,
-        isRoadBlocked: bodyData.isRoadBlocked === "true" || bodyData.isRoadBlocked === true,
+        isRoadBlocked: bodyData.isRoadBlocked === "true" || bodyData.isRoadBlocked === true || bodyData.roadStatus === "Completely Blocked",
+        roadStatus: bodyData.roadStatus || (bodyData.isRoadBlocked ? "Completely Blocked" : "Clear"),
         affectedVillages,
+        crackWidth: bodyData.crackWidth != null ? Number(bodyData.crackWidth) : null,
+        crackLength: bodyData.crackLength != null ? Number(bodyData.crackLength) : null,
+        slopeTrend: bodyData.slopeTrend || "Stationary",
+        demDerived,
+        demSource,
+        demElevationMeters,
+        lithology,
         media,
         offlineId: bodyData.offlineId || null,
         syncedAt: new Date(),

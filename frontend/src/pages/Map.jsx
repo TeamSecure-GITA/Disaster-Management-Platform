@@ -11,7 +11,7 @@ import {
   useMap,
 } from "react-leaflet";
 import { getSatelliteLayers } from "../services/disasterService";
-import { fetchRiskHeatmap, fetchRoadSegments, fetchGisLayer, riskScoreToColor, roadStatusToColor } from "../services/gisService";
+import { fetchRiskHeatmap, fetchIncidentHeatmap, fetchRoadSegments, fetchGisLayer, riskScoreToColor, roadStatusToColor } from "../services/gisService";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -120,6 +120,36 @@ const createRiskBadgeIcon = (riskPercent, color) => {
     </div>`,
     iconSize: [52, 24],
     iconAnchor: [26, 12],
+    popupAnchor: [0, -14],
+  });
+};
+
+const createIncidentMarkerIcon = (status, severity) => {
+  const isEscalated = status === "Escalated" || severity === "critical";
+  const isVerified = status === "Verified";
+  const bg = isEscalated ? "#dc2626" : isVerified ? "#ea580c" : "#6366f1";
+  return L.divIcon({
+    className: "incident-badge-marker",
+    html: `<div style="
+      background-color: ${bg};
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 11px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      cursor: pointer;
+    ">
+      <span>🚨</span>
+      <span>${status || "Incident"}</span>
+    </div>`,
+    iconSize: [64, 24],
+    iconAnchor: [32, 12],
     popupAnchor: [0, -14],
   });
 };
@@ -1308,6 +1338,7 @@ export default function Map() {
   const [liveRoadSegments, setLiveRoadSegments] = useState([]);   // GeoJSON road segments
   const [liveInfraFeatures, setLiveInfraFeatures] = useState([]); // GeoJSON infrastructure
   const [liveVillageFeatures, setLiveVillageFeatures] = useState([]); // GeoJSON villages
+  const [liveIncidents, setLiveIncidents] = useState([]);         // GeoJSON field incidents
   const [gisLoading, setGisLoading] = useState(true);
 
   // Live GIS layer visibility toggles
@@ -1315,6 +1346,7 @@ export default function Map() {
   const [showLiveRoadSegments, setShowLiveRoadSegments] = useState(true);
   const [showLiveInfrastructure, setShowLiveInfrastructure] = useState(true);
   const [showLiveVillages, setShowLiveVillages] = useState(true);
+  const [showLiveIncidents, setShowLiveIncidents] = useState(true);
 
   // In-app navigation state (No external Google Maps redirect)
   const [activeRouteTarget, setActiveRouteTarget] = useState(null);
@@ -1350,17 +1382,19 @@ export default function Map() {
     async function loadGisData() {
       try {
         const stateFilter = selectedRegion === "ner" ? undefined : undefined; // extend per region
-        const [heatmapFC, roadsFC, infraFC, villageFC] = await Promise.all([
+        const [heatmapFC, roadsFC, infraFC, villageFC, incidentFC] = await Promise.all([
           fetchRiskHeatmap({ state: stateFilter }),
           fetchRoadSegments({ state: stateFilter }),
           fetchGisLayer("infrastructure", { state: stateFilter }),
           fetchGisLayer("village", { state: stateFilter }),
+          fetchIncidentHeatmap().catch(() => ({ type: "FeatureCollection", features: [] })),
         ]);
         if (!mounted) return;
         if (heatmapFC.features)  setLiveRiskFeatures(heatmapFC.features);
         if (roadsFC.features)    setLiveRoadSegments(roadsFC.features);
         if (infraFC.features)    setLiveInfraFeatures(infraFC.features);
         if (villageFC.features)  setLiveVillageFeatures(villageFC.features);
+        if (incidentFC?.features) setLiveIncidents(incidentFC.features);
       } catch (_e) {
         // silent – keep showing hard-coded fallback data
       } finally {
@@ -1775,6 +1809,31 @@ export default function Map() {
             >
               <span>🛡️</span>
               <span>Model Risk ({liveRiskFeatures.length})</span>
+            </button>
+
+            {/* Live Field Incidents Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowLiveIncidents((prev) => !prev)}
+              title="Toggle Live Verified & Field Reported Incidents (/api/incidents/heatmap)"
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid",
+                borderColor: showLiveIncidents ? "#f97316" : "#475569",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                backgroundColor: showLiveIncidents ? "#ea580c" : "rgba(30, 41, 59, 0.7)",
+                color: showLiveIncidents ? "#ffffff" : "#94a3b8",
+                transition: "all 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span>🚨</span>
+              <span>Field Incidents ({liveIncidents.length})</span>
             </button>
 
             {/* Live Road Status Toggle */}
@@ -2778,6 +2837,92 @@ export default function Map() {
                 }
 
                 return null;
+              })}
+
+            {/* ── BACKEND GIS: FIELD INCIDENTS LAYER (/api/incidents/heatmap) ── */}
+            {showLiveIncidents &&
+              liveIncidents.map((f, idx) => {
+                if (f.geometry?.type !== "Point" || !f.geometry?.coordinates?.length) return null;
+                const lng = f.geometry.coordinates[0];
+                const lat = f.geometry.coordinates[1];
+                const props = f.properties || {};
+                const status = props.status || "Reported";
+                const severity = props.severity || "medium";
+                const isCritical = severity === "critical" || status === "Escalated";
+                const circleColor = isCritical ? "#ef4444" : status === "Verified" ? "#ea580c" : "#6366f1";
+
+                return (
+                  <React.Fragment key={props.id || `incident-f-${idx}`}>
+                    <Circle
+                      center={[lat, lng]}
+                      radius={isCritical ? 800 : 400}
+                      pathOptions={{
+                        color: circleColor,
+                        fillColor: circleColor,
+                        fillOpacity: 0.25,
+                        weight: 2,
+                        dashArray: status === "Reported" ? "4, 4" : undefined,
+                      }}
+                    />
+                    <Marker
+                      position={[lat, lng]}
+                      icon={createIncidentMarkerIcon(status, severity)}
+                    >
+                      <Popup>
+                        <div style={{ color: "#0f172a", maxWidth: "300px", padding: "2px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <span style={{ fontSize: "0.72rem", fontWeight: "800", color: circleColor, textTransform: "uppercase" }}>
+                              FIELD INCIDENT • {props.type || "Landslide"}
+                            </span>
+                            <span style={{ backgroundColor: circleColor, color: "#fff", fontSize: "0.68rem", fontWeight: "800", padding: "2px 6px", borderRadius: "8px" }}>
+                              {status}
+                            </span>
+                          </div>
+                          <strong style={{ fontSize: "0.9rem", color: "#0f172a", display: "block", marginBottom: "4px" }}>
+                            {props.title || "Reported Slope Movement"}
+                          </strong>
+                          <p style={{ fontSize: "0.75rem", color: "#475569", margin: "0 0 6px 0" }}>
+                            {props.description || "Field inspection requested."}
+                          </p>
+                          <div style={{ backgroundColor: "#f8fafc", padding: "6px 8px", borderRadius: "6px", fontSize: "0.72rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", marginBottom: "8px" }}>
+                            {props.crackWidth && (
+                              <div>Crack Width: <strong>{props.crackWidth} cm</strong></div>
+                            )}
+                            {props.crackLength && (
+                              <div>Crack Length: <strong>{props.crackLength} m</strong></div>
+                            )}
+                            {props.slopeTrend && (
+                              <div>Slope Trend: <strong style={{ color: "#dc2626" }}>{props.slopeTrend}</strong></div>
+                            )}
+                            {props.roadStatus && (
+                              <div>Road: <strong>{props.roadStatus}</strong></div>
+                            )}
+                          </div>
+                          {props.photos && props.photos.length > 0 && (
+                            <div style={{ marginBottom: "8px" }}>
+                              <img
+                                src={props.photos[0]}
+                                alt="Incident observation"
+                                style={{ width: "100%", maxHeight: "120px", objectFit: "cover", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+                              />
+                            </div>
+                          )}
+                          <div style={{ fontSize: "0.68rem", color: "#94a3b8", display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                            <span>Severity: <strong style={{ textTransform: "capitalize" }}>{severity}</strong></span>
+                            <span>{new Date(props.createdAt || Date.now()).toLocaleDateString()}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleStartInAppNavigation({ name: props.title || "Field Incident", lat, lng })}
+                            style={{ width: "100%", padding: "7px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "700", fontSize: "0.78rem", cursor: "pointer" }}
+                          >
+                            📍 Navigate to Incident Site
+                          </button>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </React.Fragment>
+                );
               })}
 
             {/* ── BACKEND GIS: CRITICAL INFRASTRUCTURE LAYER ── */}

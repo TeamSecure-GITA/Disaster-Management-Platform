@@ -28,7 +28,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { auth } from "../firebase";
-import { saveOfflineReport, getOfflineReports, clearOfflineReports } from "./offlineStorage";
+import { saveOfflineReport, getOfflineReports, removeOfflineReports } from "./offlineStorage";
 
 // CERT-In (Indian Computer Emergency Response Team) portal — used as the
 // official redirect destination when a security threat is detected.
@@ -248,43 +248,39 @@ const sendDataToBackend = async (payload, { skipAuth = false } = {}) => {
  * Flush any SOS reports queued while offline.
  * Call this once on app load after the network-online event fires.
  *
- * BUG FIX: Previously cleared the ENTIRE queue after attempting syncs, so any
- * record that failed to sync was permanently lost. Now only removes records
- * that were successfully synced; failed records stay in the queue for the next
- * online event.
+ * SECURE FIX: Only removes records that were successfully synced via their specific
+ * operationId / id. Never calls clearOfflineReports(), preserving all pending
+ * incident reports and failed records safely in IndexedDB for subsequent retry.
  *
  * @returns {Promise<number>} Number of records successfully synced
  */
 const flushOfflineSOSQueue = async () => {
   const pending = await getOfflineReports();
-  const sosPending = pending.filter((r) => r.type === "sos");
+  const sosPending = pending.filter((r) => r.type === "sos" || r.resource === "sos");
 
   if (sosPending.length === 0) return 0;
 
   let synced = 0;
-  const failed = [];
+  const successfulIds = [];
 
   for (const record of sosPending) {
-    const result = await sendDataToBackend(record.payload);
-    if (result.success) {
-      synced++;
-    } else {
-      // Keep failed records — they will be retried on the next online event.
-      // Strip the offline-specific wrapper and preserve the original payload.
-      failed.push(record);
+    try {
+      const result = await sendDataToBackend(record.payload || record);
+      if (result && result.success) {
+        synced++;
+        successfulIds.push(record.operationId || record.id);
+      }
+    } catch (err) {
+      console.warn("[sosService] Failed to flush SOS item:", err);
     }
   }
 
-  // Remove ALL SOS records from the queue…
-  await clearOfflineReports();
-
-  // …then re-add the ones that still failed (preserving non-SOS records
-  // implicitly because clearOfflineReports only removes 'pending_reports').
-  for (const record of failed) {
-    await saveOfflineReport(record);
+  // Remove ONLY the successfully synced SOS records by ID
+  if (successfulIds.length > 0) {
+    await removeOfflineReports(successfulIds);
   }
 
-  console.log(`[sosService] Offline flush complete — ${synced}/${sosPending.length} synced, ${failed.length} re-queued.`);
+  console.log(`[sosService] Offline flush complete — ${synced}/${sosPending.length} synced.`);
   return synced;
 };
 
