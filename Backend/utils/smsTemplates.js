@@ -9,8 +9,9 @@
  *  - Max 160 chars per single SMS; multi-part allowed for disaster alerts.
  *  - Sender ID (header): 6-char, DLT-registered (e.g. NERDMP – "NER Disaster Mgmt Platform").
  *
- * Languages supported: en, hi, as, bn, ne
+ * Languages supported: en, hi, as, bn, ne, or, mni, lus, nag, grt
  * (Khasi uses Latin script → en template is acceptable for now)
+ * Templates marked [PLACEHOLDER] need native-speaker review before production.
  *
  * To register new templates:
  *   1. Login to your telecom operator's DLT portal (Vodafone Idea / Airtel / BSNL).
@@ -122,6 +123,96 @@ const TEMPLATES = {
       `हेल्पलाइन: ${helpline || "1077"}. -NERDMP`,
   },
 
+  // ── Odia (or) ──────────────────────────────────────────────────────────────
+  landslide_critical_or: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_CRITICAL_OR || "1234567890123456793",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `ସତର୍କ: ${district}ରେ ଗୁରୁତ୍ୱ ଭୂସ୍ଖଳନ (ସ୍କୋର ${riskScore}/100). ` +
+      `24ଘ. ବର୍ଷା: ${rain24h}ମି.ମି. ତୁରନ୍ତ ଢ଼ାଲ ଛାଡ଼ନ୍ତୁ. ` +
+      `ହେଲ୍ପଲାଇନ: ${helpline || "1077"}. -NERDMP`,
+  },
+  landslide_high_or: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_HIGH_OR || "1234567890123456794",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `ସତର୍କ: ${district}ରେ ଉଚ୍ଚ ଭୂସ୍ଖଳନ (${riskScore}/100). ` +
+      `24ଘ. ବର୍ଷା: ${rain24h}ମି.ମି. ଢ଼ାଲ ଓ ନଦୀରୁ ଦୂରେ ରୁହନ୍ତୁ. ` +
+      `ହେଲ୍ପଲାଇନ: ${helpline || "1077"}. -NERDMP`,
+  },
+
+  // ── Manipuri/Meitei (mni) – [PLACEHOLDER] ─────────────────────────────────
+  landslide_critical_mni: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_CRITICAL_MNI || "1234567890123456795",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Alert: ${district} lakpada CRITICAL landslide (score ${riskScore}/100). ` +
+      `24h rain: ${rain24h}mm. Slope-da haina yumna. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+  landslide_high_mni: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_HIGH_MNI || "1234567890123456796",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Warning: ${district} lakpada HIGH landslide (${riskScore}/100). ` +
+      `24h rain: ${rain24h}mm. Slope ama turel sinai. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+
+  // ── Mizo/Lushai (lus) – [PLACEHOLDER] ─────────────────────────────────────
+  landslide_critical_lus: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_CRITICAL_LUS || "1234567890123456797",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Harsatna: ${district} CRITICAL leilung tlan (score ${riskScore}/100). ` +
+      `24h rain: ${rain24h}mm. Chawl hnai lamah chhuak ang che. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+  landslide_high_lus: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_HIGH_LUS || "1234567890123456798",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Huat rawh: ${district} HIGH leilung tlan (${riskScore}/100). ` +
+      `24h rain: ${rain24h}mm. Chawl hnai lam leh tuikhur atang huat rawh. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+
+  // ── Nagamese (nag) – [PLACEHOLDER] ────────────────────────────────────────
+  landslide_critical_nag: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_CRITICAL_NAG || "1234567890123456799",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Alert: ${district} laage CRITICAL bhumi khisibo (score ${riskScore}/100). ` +
+      `24 ghanta rain: ${rain24h}mm. Ekhoni dheere phere chhado. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+  landslide_high_nag: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_HIGH_NAG || "1234567890123456800",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Khabar: ${district} laage HIGH bhumi khisibo (${riskScore}/100). ` +
+      `24 ghanta rain: ${rain24h}mm. Dheere phere aru nodi atka. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+
+  // ── Garo (grt) – [PLACEHOLDER] ────────────────────────────────────────────
+  landslide_critical_grt: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_CRITICAL_GRT || "1234567890123456801",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Alert: ${district} lakka CRITICAL mite khisa (score ${riskScore}/100). ` +
+      `24 sora rain: ${rain24h}mm. Agana mite-ko chhik\u00b7a. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+  landslide_high_grt: {
+    dltTemplateId: process.env.DLT_TMPL_LANDSLIDE_HIGH_GRT || "1234567890123456802",
+    maxLen: 320,
+    build: ({ district, riskScore, rain24h, helpline }) =>
+      `Khabar: ${district} lakka HIGH mite khisa (${riskScore}/100). ` +
+      `24 sora rain: ${rain24h}mm. Dik\u00b7gre rasta aro pul-ko cha\u00b7a. ` +
+      `Helpline: ${helpline || "1077"}. -NERDMP`,
+  },
+
   // ── Generic disaster alert ────────────────────────────────────────────────
   generic_alert_en: {
     dltTemplateId: process.env.DLT_TMPL_GENERIC_EN || "1234567890123456789",
@@ -177,7 +268,8 @@ function getTemplate(key) {
  * @returns {{ body: string, dltTemplateId: string }}
  */
 function buildSmsBody({ alertType = "generic", severity = "HIGH", lang = "en", vars = {} }) {
-  const normLang = ["en", "hi", "as", "bn", "ne"].includes(lang) ? lang : "en";
+  const ALL_LANGS = ["en", "hi", "as", "bn", "ne", "or", "mni", "lus", "nag", "grt"];
+  const normLang = ALL_LANGS.includes(lang) ? lang : "en";
   const normSeverity = severity.toLowerCase();
 
   let key;

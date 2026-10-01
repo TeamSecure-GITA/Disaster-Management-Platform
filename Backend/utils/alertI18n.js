@@ -9,16 +9,94 @@
  * Supported languages:
  *   en  – English (default)
  *   hi  – Hindi
+ *   or  – Odia
  *   as  – Assamese
  *   bn  – Bengali
- *   ne  – Nepali (Sikkim / parts of Meghalaya)
+ *   mni – Manipuri / Meitei
+ *   lus – Mizo (Lushai)
  *   kha – Khasi (Meghalaya)
+ *   nag – Nagamese (Nagaland Creole)
+ *   ne  – Nepali (Sikkim / parts of Meghalaya)
+ *   grt – Garo (Meghalaya)
+ *
+ * NOTE: Templates marked "// [PLACEHOLDER – native-speaker review needed]"
+ * are machine-derived approximations and MUST be reviewed by a fluent
+ * speaker before production use.
  */
+
+"use strict";
 
 // ---------------------------------------------------------------------------
 // Static template catalogue
 // Each entry: { [lang]: { titleFn(ctx), messageFn(ctx), instructionsFn(ctx) } }
 // ctx = { alertType, severity, district, riskScore, rain24h, rain72h }
+// ---------------------------------------------------------------------------
+
+// Helper: capitalise first letter
+function _cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
+
+// ---------------------------------------------------------------------------
+// Escalation message templates – for alertEscalationService
+// ctx = { title, message, fromRole, toRole, slaMinutes }
+// ---------------------------------------------------------------------------
+const ESCALATION_TEMPLATES = {
+  en: {
+    escalatedTitle: (c) => `[ESCALATED] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `No acknowledgement from ${c.fromRole.toUpperCase()} within ${c.slaMinutes} min. Escalated to ${c.toRole.toUpperCase()}.\n\n${c.message}`,
+  },
+  hi: {
+    escalatedTitle: (c) => `[बढ़ाया गया] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.slaMinutes} मिनट के भीतर ${c.fromRole.toUpperCase()} से कोई पावती नहीं मिली। ${c.toRole.toUpperCase()} को भेजा गया।\n\n${c.message}`,
+  },
+  or: {
+    escalatedTitle: (c) => `[ଉନ୍ନୀତ] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.slaMinutes} ମିନିଟ ମଧ୍ୟରେ ${c.fromRole.toUpperCase()}ରୁ ସ୍ୱୀକୃତି ମିଳିଲା ନାହିଁ। ${c.toRole.toUpperCase()}କୁ ଉନ୍ନୀତ।\n\n${c.message}`,
+  },
+  as: {
+    escalatedTitle: (c) => `[উন্নীত] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.slaMinutes} মিনিটৰ ভিতৰত ${c.fromRole.toUpperCase()}ৰ পৰা কোনো স্বীকৃতি পোৱা নগ'ল। ${c.toRole.toUpperCase()}লৈ উন্নীত।\n\n${c.message}`,
+  },
+  bn: {
+    escalatedTitle: (c) => `[এস্কেলেটেড] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.slaMinutes} মিনিটের মধ্যে ${c.fromRole.toUpperCase()} থেকে কোনো স্বীকৃতি পাওয়া যায়নি। ${c.toRole.toUpperCase()}-এ এস্কেলেট করা হয়েছে।\n\n${c.message}`,
+  },
+  mni: { // [PLACEHOLDER – native-speaker review needed]
+    escalatedTitle: (c) => `[Escalated] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.slaMinutes} minute nung ${c.fromRole.toUpperCase()} gi acknowledge toubara. ${c.toRole.toUpperCase()}-da escalate tounai.\n\n${c.message}`,
+  },
+  lus: { // [PLACEHOLDER – native-speaker review needed]
+    escalatedTitle: (c) => `[Chhuahsan] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.fromRole.toUpperCase()} hnenah ${c.slaMinutes} min chhung acknowledge nei lo. ${c.toRole.toUpperCase()} hnenah thawn a ni.\n\n${c.message}`,
+  },
+  kha: {
+    escalatedTitle: (c) => `[Escalated] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `Katto acknowledge noh ${c.fromRole.toUpperCase()} ha ${c.slaMinutes} min. Escalate sha ${c.toRole.toUpperCase()}.\n\n${c.message}`,
+  },
+  nag: { // [PLACEHOLDER – native-speaker review needed]
+    escalatedTitle: (c) => `[Barra pathabo] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.fromRole.toUpperCase()} theke ${c.slaMinutes} min bhitore kono jawab nai. ${c.toRole.toUpperCase()}-ke pathano hoise.\n\n${c.message}`,
+  },
+  ne: {
+    escalatedTitle: (c) => `[उठाइएको] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.slaMinutes} मिनेटभित्र ${c.fromRole.toUpperCase()} बाट कुनै स्वीकृति छैन। ${c.toRole.toUpperCase()}मा उठाइयो।\n\n${c.message}`,
+  },
+  grt: { // [PLACEHOLDER – native-speaker review needed]
+    escalatedTitle: (c) => `[Ong·chikan] ${c.title}`,
+    escalatedMsg:   (c) =>
+      `${c.slaMinutes} minute ong·de ${c.fromRole.toUpperCase()} begen acknowledge man·a. ${c.toRole.toUpperCase()}-ko pathabo.\n\n${c.message}`,
+  },
+};
+
 // ---------------------------------------------------------------------------
 
 const LANDSLIDE_TEMPLATES = {
@@ -82,6 +160,18 @@ const LANDSLIDE_TEMPLATES = {
       "जिल्ला आपत्कालीन हेल्पलाइन: 1077।",
     ],
   },
+  or: {
+    title: (c) =>
+      `⚠️ ଭୂସ୍ଖଳନ ଆଶଙ୍କା ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district} ନିକଟ ଭୂସ୍ଖଳନ ଆଶଙ୍କା ${c.severity.toUpperCase()} (ସ୍କୋର ${c.riskScore}/100) ଚିହ୍ନଟ ହୋଇଛି। ଗତ 24 ଘଣ୍ଟାରେ ବର୍ଷା: ${c.rain24h} ମି.ମି.। 72 ଘଣ୍ଟାର ସଞ୍ଚିତ ବର୍ଷା: ${c.rain72h} ମି.ମି.।`,
+    instructions: () => [
+      "ନିର୍ଦ୍ଦେଶ ମିଳିଲେ ତୁରନ୍ତ ଢ଼ାଲ ଅଞ୍ଚଳ ଛାଡ଼ନ୍ତୁ।",
+      "ନଦୀ ନିକଟ ସ଼ଡ଼କ ଓ ପୋଲ ଏଡ଼ାନ୍ତୁ।",
+      "ଅଲ ଇଣ୍ଡିଆ ରେଡ଼ିଓ ଶୁଣନ୍ତୁ।",
+      "ଜିଲ୍ଲା ଜରୁରୀ ହେଲ୍ପଲାଇନ: 1077।",
+    ],
+  },
   kha: {
     title: (c) =>
       `⚠️ Saiñ Landslide ${c.severity.toUpperCase()} – ${c.district}`,
@@ -92,6 +182,54 @@ const LANDSLIDE_TEMPLATES = {
       "Shim ha ïew bad ïing na maw.",
       "Sngewbha AIR.",
       "Helpline jingim: 1077.",
+    ],
+  },
+  mni: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) =>
+      `⚠️ Landslide anishuba ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district} lakpada landslide anishuba ${c.severity.toUpperCase()} (score ${c.riskScore}/100) thengnanai. 24 chana rain: ${c.rain24h} mm. 72 chana: ${c.rain72h} mm.`,
+    instructions: () => [
+      "Ningthou thambal oirakle mateng slope yi leibak chatlaga yumna.",
+      "Makhol khongchat ama turel sinai pakhangba.",
+      "All India Radio kangba.",
+      "District emergency helpline: 1077.",
+    ],
+  },
+  lus: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) =>
+      `⚠️ Leilung Tlan Harsatna ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district} chhanchhuahna leilung tlan harsatna ${c.severity.toUpperCase()} (score ${c.riskScore}/100) hmu tawh. Rain 24h: ${c.rain24h} mm. 72h: ${c.rain72h} mm.`,
+    instructions: () => [
+      "Thupui dawn chuan chawl hnai lamah chhuak ang che.",
+      "Tuikhur hnai lam leh khawih atang huat rawh.",
+      "All India Radio ziak ang che.",
+      "District emergency helpline: 1077.",
+    ],
+  },
+  nag: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) =>
+      `⚠️ Bhumi Khisibo Risk ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district} laage bhumi khisibo risk ${c.severity.toUpperCase()} (score ${c.riskScore}/100) paisa. 24 ghanta rain: ${c.rain24h} mm. 72 ghanta: ${c.rain72h} mm.`,
+    instructions: () => [
+      "Aadesher pore dheere phere bhumi chhado.",
+      "Nodi laage rasta aru pul atka.",
+      "All India Radio suno.",
+      "District emergency helpline: 1077.",
+    ],
+  },
+  grt: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) =>
+      `⚠️ Mite Khisa Risk ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district} lakka mite khisa risk ${c.severity.toUpperCase()} (score ${c.riskScore}/100) gipil·a. 24 sora rain: ${c.rain24h} mm. 72 sora: ${c.rain72h} mm.`,
+    instructions: () => [
+      "Ong·de man·a agana mite-ko chhik·a.",
+      "Dik·gre rasta aro pul-ko cha·a.",
+      "All India Radio gimin·a.",
+      "District emergency helpline: 1077.",
     ],
   },
 };
@@ -136,15 +274,45 @@ const GENERIC_TEMPLATES = {
       `${c.district}मा ${c.alertType} को ${c.severity} स्तरको अलर्ट जारी गरिएको छ।`,
     instructions: () => ["स्थानीय अधिकारीको निर्देशन पालना गर्नुस्।", "हेल्पलाइन: 1077।"],
   },
+  or: {
+    title: (c) => `⚠️ ${_cap(c.alertType)} ସତର୍କତା ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district}ରେ ${c.alertType} ସ୍ତର ${c.severity} ସତର୍କତା ଜାରି ହୋଇଛି। ସ୍ଥାନୀୟ ପ୍ରଶାସନ ନିର୍ଦ୍ଦେଶ ଅନୁସରଣ କରନ୍ତୁ।`,
+    instructions: () => ["ସ୍ଥାନୀୟ ଅଧିକାରୀଙ୍କ ନିର୍ଦ୍ଦେଶ ପାଳନ କରନ୍ତୁ।", "ଜିଲ୍ଲା ଜରୁରୀ ହେଲ୍ପଲାଇନ: 1077।"],
+  },
   kha: {
     title: (c) => `⚠️ ${_cap(c.alertType)} Alert ${c.severity.toUpperCase()} – ${c.district}`,
     message: (c) =>
       `${c.district} da ${c.alertType} alert ${c.severity} da jingmut.`,
     instructions: () => ["Sngewbha ia ki bynta jong ki shynrang.", "Helpline: 1077."],
   },
+  mni: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) => `⚠️ ${_cap(c.alertType)} Alert ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district}-da ${c.alertType} alert ${c.severity} otoknai. Thounarang thambal panba.`,
+    instructions: () => ["Thounarang ningba awang panba.", "Helpline: 1077."],
+  },
+  lus: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) => `⚠️ ${_cap(c.alertType)} Harsatna ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district}-ah ${c.alertType} harsatna ${c.severity} ban puan a ni.`,
+    instructions: () => ["Khua leh tui hruai te thu ziak ang che.", "Helpline: 1077."],
+  },
+  nag: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) => `⚠️ ${_cap(c.alertType)} Alert ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district}-t ${c.alertType} alert ${c.severity} dibo hoise. Local authority-ke follow koro.`,
+    instructions: () => ["Local authority-ke follow koro.", "Helpline: 1077."],
+  },
+  grt: { // [PLACEHOLDER – native-speaker review needed]
+    title: (c) => `⚠️ ${_cap(c.alertType)} Alert ${c.severity.toUpperCase()} – ${c.district}`,
+    message: (c) =>
+      `${c.district}-ko ${c.alertType} alert ${c.severity} dibo. Local authority-ko manasen·a.`,
+    instructions: () => ["Local authority-ko manasen·a.", "Helpline: 1077."],
+  },
 };
 
-const SUPPORTED_LANGS = ["en", "hi", "as", "bn", "ne", "kha"];
+const SUPPORTED_LANGS = ["en", "hi", "or", "as", "bn", "mni", "lus", "kha", "nag", "ne", "grt"];
 
 function _cap(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
@@ -194,4 +362,30 @@ function resolveForRecipient(localizedContent = [], preferredLang = "en") {
   return { title: found.title, message: found.message, instructions: found.instructions };
 }
 
-module.exports = { buildLocalizedContent, resolveForRecipient, SUPPORTED_LANGS };
+/**
+ * Build a localised escalation title and message for a specific recipient.
+ * Used by alertEscalationService to avoid hardcoded English escalation text.
+ *
+ * @param {string} preferredLang   – e.g. "as"
+ * @param {{ title: string, message: string }} originalContent – resolved alert content
+ * @param {string} fromRole        – role that failed to acknowledge
+ * @param {string} toRole          – next escalation tier
+ * @param {number} slaMinutes      – original SLA window
+ * @returns {{ escalatedTitle: string, escalatedMsg: string }}
+ */
+function buildEscalationMessage(preferredLang = "en", originalContent = {}, fromRole, toRole, slaMinutes) {
+  const tpl = ESCALATION_TEMPLATES[preferredLang] || ESCALATION_TEMPLATES["en"];
+  const ctx = {
+    title: originalContent.title || "",
+    message: originalContent.message || "",
+    fromRole: fromRole || "unknown",
+    toRole: toRole || "unknown",
+    slaMinutes: slaMinutes || 0,
+  };
+  return {
+    escalatedTitle: tpl.escalatedTitle(ctx),
+    escalatedMsg:   tpl.escalatedMsg(ctx),
+  };
+}
+
+module.exports = { buildLocalizedContent, resolveForRecipient, buildEscalationMessage, SUPPORTED_LANGS };

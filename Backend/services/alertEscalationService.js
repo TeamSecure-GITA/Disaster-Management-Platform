@@ -17,7 +17,7 @@
 const Alert    = require("../models/Alert");
 const User     = require("../models/User");
 const { createNotification } = require("./notificationService");
-const { resolveForRecipient } = require("../utils/alertI18n");
+const { resolveForRecipient, buildEscalationMessage } = require("../utils/alertI18n");
 const { emitAlertUpdated }   = require("../sockets/alertSocket");
 
 // Escalation ladder (each step escalates to higher authority)
@@ -110,8 +110,13 @@ async function runEscalationPass() {
     for (const user of nextTierUsers) {
       const lang = user.preferredLanguage || "en";
       const localised = resolveForRecipient(locContent, lang);
-      const escalatedTitle = `[ESCALATED] ${localised.title || alert.title}`;
-      const escalatedMsg   = `No acknowledgement from ${highestPending.toUpperCase()} within ${alert.ackSlaMinutes} min. Escalated to ${nextTier.toUpperCase()}.\n\n${localised.message || alert.message}`;
+      const { escalatedTitle, escalatedMsg } = buildEscalationMessage(
+        lang,
+        localised,
+        highestPending,
+        nextTier,
+        alert.ackSlaMinutes
+      );
 
       try {
         await createNotification({

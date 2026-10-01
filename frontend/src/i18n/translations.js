@@ -2,7 +2,9 @@
 // src/i18n/translations.js
 //
 // Translation strings for the Disaster Management Platform
-// Languages: English (en) | Hindi (hi) | Odia (or)
+// Languages: English (en) | Hindi (hi) | Odia (or) | Bengali (bn) | Assamese (as)
+//           | Manipuri (mni) | Mizo (lus) | Bodo (brx) | Khasi (kha)
+//           | Nagamese (nag) | Nepali (ne) | Garo (grt) | Santali (sat)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const translations = {
@@ -1216,6 +1218,14 @@ export const translations = {
     sos_button: "SOS",
     alerts_title: "দুৰ্যোগ সতৰ্কতা",
     map_title: "দুৰ্যোগ প্ৰতিক্ৰিয়া মানচিত্ৰ",
+    notif_title: "জাননী",
+    notif_mark_read: "সকলো পঢ়া চিহ্নিত কৰক",
+    notif_clear: "সকলো মচক",
+    notif_no_notif: "এতিয়ালৈ কোনো জাননী নাই।",
+    notif_enable: "জাননী সক্ষম কৰক",
+    notif_enabled: "জাননী সক্ষম",
+    dash_report_hazard: "বিপদ ৰিপ'ৰ্ট কৰক",
+    dash_emergency_contacts: "জৰুৰীকালীন যোগাযোগ",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1255,6 +1265,16 @@ export const translations = {
     dash_active_alerts: "মথৌ তাবা এলার্ট",
     sos_title: "ইমার্জেন্সি SOS সেন্টর",
     sos_button: "SOS",
+    alerts_title: "দুর্যোগ এলার্ট",
+    map_title: "দুর্যোগ রেসপন্স মেপ",
+    notif_title: "নোটিফিকেশন",
+    notif_mark_read: "ওইবা লেপখিবা তৌ",
+    notif_clear: "শেমগৎ",
+    notif_no_notif: "নোটিফিকেশন অমাসু অদুনা অদুনা।",
+    notif_enable: "নোটিফিকেশন চালু তৌ",
+    notif_enabled: "নোটিফিকেশন চালু",
+    dash_report_hazard: "বিপদ রিপোর্ট",
+    dash_emergency_contacts: "ইমার্জেন্সি কন্টাক্ট",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1294,6 +1314,16 @@ export const translations = {
     dash_active_alerts: "Alert mawh tak",
     sos_title: "Emergency SOS Centre",
     sos_button: "SOS",
+    alerts_title: "Harsatna Vaukhanna",
+    map_title: "Harsatna Chhanna Map",
+    notif_title: "Thilpuitu",
+    notif_mark_read: "Zawng zawng chhiar tihlan",
+    notif_clear: "Zawng zawng hawng sak",
+    notif_no_notif: "Thilpuitu a awm lo.",
+    notif_enable: "Thilpuitu allow",
+    notif_enabled: "Thilpuitu allow tawh",
+    dash_report_hazard: "Harsatna report",
+    dash_emergency_contacts: "Emergency hriattirna",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1331,6 +1361,16 @@ export const translations = {
     dash_welcome: "स्वागतम",
     sos_title: "जरुरी SOS सेन्टार",
     sos_button: "SOS",
+    alerts_title: "गोसोखान्थि सोंथि",
+    map_title: "गोसोखान्थि फिननाय मेप",
+    notif_title: "सोंथि",
+    notif_mark_read: "सोमजानायफोर गथायनो",
+    notif_clear: "सोमजायो",
+    notif_no_notif: "सोंथि एबा नाय।",
+    notif_enable: "सोंथि सकारनाय",
+    notif_enabled: "सोंथि सकार",
+    dash_report_hazard: "जाखिर रिपर्ट",
+    dash_emergency_contacts: "जरुरी रबाफोर",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1368,6 +1408,16 @@ export const translations = {
     dash_welcome: "Khublei",
     sos_title: "Emergency SOS Centre",
     sos_button: "SOS",
+    alerts_title: "Ka Kynmaw Disaster",
+    map_title: "Ka Map Disaster Response",
+    notif_title: "Notification",
+    notif_mark_read: "Kynmaw ia ki hangseh",
+    notif_clear: "Chem ia ki pat",
+    notif_no_notif: "Ymdon notification.",
+    notif_enable: "Enable Notification",
+    notif_enabled: "Notification enabled",
+    dash_report_hazard: "Report Jingmut",
+    dash_emergency_contacts: "Ki Contact Emergency",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1405,6 +1455,16 @@ export const translations = {
     dash_welcome: "Namaskar! Aapuni ahise",
     sos_title: "Emergency SOS Centre",
     sos_button: "SOS",
+    alerts_title: "Disaster Alert khan",
+    map_title: "Disaster Response Map",
+    notif_title: "Notification khan",
+    notif_mark_read: "Sob pora dhoribo",
+    notif_clear: "Sob sahabo",
+    notif_no_notif: "Abhi kono notification nai.",
+    notif_enable: "Notification on koribo",
+    notif_enabled: "Notification on",
+    dash_report_hazard: "Bipoddor khabar dibo",
+    dash_emergency_contacts: "Emergency contact",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1457,6 +1517,14 @@ export const translations = {
     sos_button: "SOS",
     alerts_title: "विपद् चेतावनी",
     map_title: "विपद् प्रतिक्रिया नक्सा",
+    notif_title: "सूचनाहरू",
+    notif_mark_read: "सबै पढिएको चिन्ह लगाउनुस्",
+    notif_clear: "सबै हटाउनुस्",
+    notif_no_notif: "अहिलेसम्म कुनै सूचना छैन।",
+    notif_enable: "सूचना सक्षम गर्नुस्",
+    notif_enabled: "सूचना सक्षम",
+    dash_report_hazard: "खतरा रिपोर्ट गर्नुस्",
+    dash_emergency_contacts: "आपतकालीन सम्पर्क",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1551,6 +1619,16 @@ export const translations = {
     dash_welcome: "Nangni naam ong·ade",
     sos_title: "Emergency SOS Centre",
     sos_button: "SOS",
+    alerts_title: "Disaster Alert-ko",
+    map_title: "Disaster Response Map",
+    notif_title: "Notification-ko",
+    notif_mark_read: "Sobko pora on·a",
+    notif_clear: "Sobko sahabo",
+    notif_no_notif: "Abhi kono notification man·a.",
+    notif_enable: "Notification on on·a",
+    notif_enabled: "Notification on",
+    dash_report_hazard: "Bipadgiri khabar dibo",
+    dash_emergency_contacts: "Emergency contact-ko",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -1588,6 +1666,16 @@ export const translations = {
     dash_welcome: "ᱡᱚᱦᱟᱨ",
     sos_title: "ᱡᱟᱹᱨᱩᱨᱤ SOS ᱠᱮᱱᱫᱨᱚ",
     sos_button: "SOS",
+    alerts_title: "ᱡᱚᱠᱷᱚᱱ ᱥᱟᱵᱫᱟᱱ",
+    map_title: "ᱡᱚᱠᱷᱚᱱ ᱢᱮᱯ",
+    notif_title: "ᱡᱟᱱᱟᱣ",
+    notif_mark_read: "ᱥᱚᱵᱚ ᱯᱚᱲᱟ ᱪᱤᱧᱮᱫ",
+    notif_clear: "ᱥᱚᱵᱚ ᱵᱟᱫ ᱡᱟᱣ",
+    notif_no_notif: "ᱟᱹᱰᱤ ᱠᱟᱹᱴᱤᱧ ᱡᱟᱱᱟᱣ ᱵᱟᱝ ᱠᱟᱱᱟ᱾",
+    notif_enable: "ᱡᱟᱱᱟᱣ ᱪᱮᱫ",
+    notif_enabled: "ᱡᱟᱱᱟᱣ ᱪᱮᱫ ᱠᱟᱱᱟ",
+    dash_report_hazard: "ᱵᱤᱯᱚᱫ ᱨᱤᱯᱚᱨᱴ",
+    dash_emergency_contacts: "ᱡᱟᱹᱨᱩᱨᱤ ᱡᱚᱜᱟᱣ",
   },
 };
 
