@@ -74,19 +74,101 @@ router.post("/dlr/msg91", _webhookGuard, async (req, res) => {
   }
 });
 
+const mongoose = require("mongoose");
+const Incident = require("../models/Incident");
+const User = require("../models/User");
+
 // ---------------------------------------------------------------------------
-// Inbound SMS – STOP / START handling
+// Inbound SMS – STOP / START / DISASTER REPORT handling
 // ---------------------------------------------------------------------------
+
+async function _parseAndSaveSmsReport(rawBody, phone) {
+  const text = (rawBody || "").trim();
+  const parts = text.split(/\s+/);
+  const keyword = parts[0]?.toUpperCase();
+  if (!["REPORT", "DISASTER", "INCIDENT", "SOS", "LANDSLIDE", "FLOOD"].includes(keyword)) {
+    return null;
+  }
+
+  let user = null;
+  const cleanPhone = String(phone).replace(/\D/g, "").slice(-10);
+  if (cleanPhone) {
+    user = await User.findOne({ phone: new RegExp(cleanPhone + "$") });
+  }
+  if (!user) {
+    user = await User.findOne({ role: "admin" });
+  }
+
+  let type = "other";
+  let severity = "high";
+  let remaining = parts.slice(1);
+
+  if (["LANDSLIDE", "FLOOD"].includes(keyword)) {
+    type = keyword === "LANDSLIDE" ? "slope_movement" : "flooding";
+  } else if (remaining[0]) {
+    const candidateType = remaining[0].toLowerCase();
+    if (candidateType.includes("landslide")) {
+      type = "slope_movement";
+      remaining.shift();
+    } else if (candidateType.includes("flood")) {
+      type = "flooding";
+      remaining.shift();
+    } else if (candidateType.includes("road") || candidateType.includes("block")) {
+      type = "blocked_road";
+      remaining.shift();
+    } else if (candidateType.includes("bridge")) {
+      type = "bridge_damage";
+      remaining.shift();
+    } else if (candidateType.includes("crack")) {
+      type = "landslide_crack";
+      remaining.shift();
+    }
+  }
+
+  if (remaining[0] && ["low", "medium", "high", "critical"].includes(remaining[0].toLowerCase())) {
+    severity = remaining[0].toLowerCase();
+    remaining.shift();
+  }
+
+  let coordinates = [91.7362, 26.1445];
+  let address = "";
+  if (remaining[0] && remaining[0].includes(",")) {
+    const [latStr, lngStr] = remaining[0].split(",");
+    const lat = parseFloat(latStr);
+    const lng = parseFloat(lngStr);
+    if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      coordinates = [lng, lat];
+      remaining.shift();
+    }
+  }
+
+  const description = remaining.join(" ") || `Emergency incident reported via SMS from ${phone}`;
+  if (!address) address = `Reported via SMS (${phone})`;
+
+  const incident = await Incident.create({
+    reportedBy: user?._id || new mongoose.Types.ObjectId(),
+    incidentType: type,
+    severity,
+    description: `[SMS Inbound Fallback]: ${description}`,
+    location: { type: "Point", coordinates },
+    locationMeta: { address, district: "", state: "" },
+    witnessCount: 1,
+    offlineId: `sms-${cleanPhone || "anon"}-${Date.now()}`,
+    syncedAt: new Date(),
+  });
+
+  return incident;
+}
 
 /**
  * POST /api/sms/inbound
- * Handles STOP (opt-out) and START (opt-in) replies from users.
+ * Handles STOP (opt-out), START (opt-in), and SMS fallback disaster incident reports.
  * Twilio and MSG91 both POST inbound messages to a webhook URL.
  */
 router.post("/inbound", _webhookGuard, async (req, res) => {
   try {
-    // Twilio: Body / From fields; MSG91: message / mobile fields
-    const body  = (req.body.Body || req.body.message || "").trim().toUpperCase();
+    const rawBody = (req.body.Body || req.body.message || "").trim();
+    const bodyUpper = rawBody.toUpperCase();
     const phone = req.body.From || req.body.mobile || req.body.from;
 
     if (!phone) {
@@ -95,15 +177,29 @@ router.post("/inbound", _webhookGuard, async (req, res) => {
 
     const ip = req.ip || null;
 
-    if (body === "STOP" || body === "UNSUBSCRIBE" || body === "OPT-OUT") {
+    if (bodyUpper === "STOP" || bodyUpper === "UNSUBSCRIBE" || bodyUpper === "OPT-OUT") {
       await handleConsentChange(phone, false, "sms_reply_start", ip);
       console.log(`[SMS Inbound] STOP from ${phone}`);
-    } else if (body === "START" || body === "SUBSCRIBE" || body === "OPT-IN" || body === "YES") {
+      res.set("Content-Type", "text/xml");
+      return res.status(200).send("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>You have opted out of DMP alerts.</Message></Response>");
+    } else if (bodyUpper === "START" || bodyUpper === "SUBSCRIBE" || bodyUpper === "OPT-IN" || bodyUpper === "YES") {
       await handleConsentChange(phone, true, "sms_reply_start", ip);
       console.log(`[SMS Inbound] START from ${phone}`);
+      res.set("Content-Type", "text/xml");
+      return res.status(200).send("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>You are subscribed to DMP emergency alerts.</Message></Response>");
     }
 
-    // Return empty TwiML (Twilio expects this)
+    // Check for incident reporting SMS fallback
+    const incident = await _parseAndSaveSmsReport(rawBody, phone);
+    if (incident) {
+      console.log(`[SMS Inbound] Disaster report logged from ${phone}: ${incident._id}`);
+      res.set("Content-Type", "text/xml");
+      return res.status(200).send(
+        `<?xml version="1.0" encoding="UTF-8"?><Response><Message>DMP Alert: Report received &amp; logged (ID: ${incident._id.toString().slice(-6)}). Emergency teams notified.</Message></Response>`
+      );
+    }
+
+    // Default reply
     res.set("Content-Type", "text/xml");
     res.status(200).send("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>");
   } catch (err) {

@@ -105,3 +105,41 @@ self.addEventListener("notificationclick", (event) => {
       })
   );
 });
+
+// ─── Background Sync handler ─────────────────────────────────────────────────
+// Fired by the browser when connectivity is restored, for any tag registered
+// via navigator.serviceWorker.ready.then(r => r.sync.register('tag')).
+//
+// Because Service Workers cannot import ES modules or localforage, we delegate
+// the actual queue flush to the open app window via postMessage. If no window
+// is open, the browser will retry this sync event on next window open.
+// ─────────────────────────────────────────────────────────────────────────────
+const SYNC_TAGS = ['offline-incident-sync', 'offline-family-sync'];
+
+self.addEventListener('sync', (event) => {
+  if (!SYNC_TAGS.includes(event.tag)) return;
+
+  console.log('[SW] Background Sync fired:', event.tag);
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      if (windowClients.length === 0) {
+        // No app window open — the sync will retry automatically.
+        console.log('[SW] No window clients available for sync. Will retry when window opens.');
+        return;
+      }
+
+      // Post to the focused window (or first available) so it can run flushAllQueues()
+      const target = windowClients.find((c) => c.focused) || windowClients[0];
+      target.postMessage({ type: 'DMP_BACKGROUND_SYNC', tag: event.tag });
+      console.log('[SW] Delegated sync to window client.');
+    })
+  );
+});
+
+// ─── Push-to-window: relay sync complete ack ─────────────────────────────────
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'DMP_SYNC_ACK') {
+    console.log('[SW] Sync acknowledged by window:', event.data);
+  }
+});

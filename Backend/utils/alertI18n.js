@@ -314,9 +314,6 @@ const GENERIC_TEMPLATES = {
 
 const SUPPORTED_LANGS = ["en", "hi", "or", "as", "bn", "mni", "lus", "kha", "nag", "ne", "grt"];
 
-function _cap(s) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
-}
 
 /**
  * Build a localizedContent array for all supported languages.

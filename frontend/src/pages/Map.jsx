@@ -17,6 +17,7 @@ import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { preCacheNERegionTiles } from "../utils/offlineStorage";
 import {
   Layers,
   CloudRain,
@@ -1319,6 +1320,27 @@ export default function Map() {
   const [activeRouteTarget, setActiveRouteTarget] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [evacBannerInfo, setEvacBannerInfo] = useState(null);
+  const [cachingTiles, setCachingTiles] = useState(false);
+  const [tileProgress, setTileProgress] = useState(null);
+  const [tilesReady, setTilesReady] = useState(false);
+
+  const handlePrecacheTiles = async () => {
+    setCachingTiles(true);
+    setTileProgress("0%");
+    try {
+      await preCacheNERegionTiles((loaded, total) => {
+        const pct = Math.round((loaded / total) * 100);
+        setTileProgress(`${pct}% (${loaded}/${total})`);
+      }, 8);
+      setTilesReady(true);
+      setTimeout(() => setTileProgress(null), 4000);
+    } catch (err) {
+      console.warn("Tile caching error:", err);
+      setTileProgress("Cached available");
+    } finally {
+      setCachingTiles(false);
+    }
+  };
 
   // ── Live GIS data (backend-fed) ─────────────────────────────────────────────
   useEffect(() => {
@@ -1611,6 +1633,34 @@ export default function Map() {
             }}
           >
             <Crosshair size={16} /> 📍 Locate My GPS
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrecacheTiles}
+            disabled={cachingTiles}
+            title="Download OSM map tiles covering North-East Region for full offline navigation without internet"
+            style={{
+              padding: "9px 15px",
+              backgroundColor: tilesReady ? "#059669" : "#0284c7",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "10px",
+              fontWeight: "700",
+              fontSize: "0.84rem",
+              cursor: cachingTiles ? "wait" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 2px 10px rgba(2, 132, 199, 0.4)",
+            }}
+          >
+            <span>{cachingTiles ? "⏳" : tilesReady ? "✅" : "💾"}</span>
+            {cachingTiles
+              ? `Caching NER Map: ${tileProgress}`
+              : tilesReady
+              ? "NER Tiles Pre-cached"
+              : "Pre-cache NER Offline Map"}
           </button>
         </div>
       </div>

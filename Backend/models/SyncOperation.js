@@ -22,12 +22,22 @@ const syncOperationSchema = new mongoose.Schema(
     },
     resource: {
       type: String,
-      enum: ["family"],
+      enum: ["family", "incident"],
       required: true,
     },
     action: {
       type: String,
-      enum: ["upsert", "add_member", "update_member", "delete_member", "update_safety"],
+      enum: [
+        "upsert",
+        "add_member",
+        "update_member",
+        "delete_member",
+        "update_safety",
+        "create",
+        "update",
+        "resolve",
+        "delete",
+      ],
       required: true,
     },
     payload: {
@@ -36,8 +46,17 @@ const syncOperationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["applied", "rejected"],
+      enum: ["applied", "rejected", "conflict"],
       required: true,
+    },
+    conflictResolution: {
+      type: String,
+      enum: ["none", "server_wins", "client_wins", "merged"],
+      default: "none",
+    },
+    conflictDetails: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
     resourceId: {
       type: mongoose.Schema.Types.ObjectId,

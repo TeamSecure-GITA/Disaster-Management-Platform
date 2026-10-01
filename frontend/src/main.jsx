@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
 import { registerSW } from 'virtual:pwa-register';
-import { setupAutoSync } from './utils/syncService';
+import { setupAutoSync, flushAllQueues } from './utils/syncService';
 import { initFCM } from './services/fcmService';
 
 // Initialize offline auto-sync listener for queued reports and tickets
@@ -20,6 +20,25 @@ const updateSW = registerSW({
   },
   immediate: true,
 });
+
+// ── Background Sync relay ────────────────────────────────────────────────────
+// The SW cannot run localforage directly, so it postMessages us when the
+// browser fires its 'sync' event, and we perform the actual queue flush here.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', async (event) => {
+    if (event.data?.type === 'DMP_BACKGROUND_SYNC') {
+      console.log('[App] SW-delegated Background Sync received:', event.data.tag);
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token') || null;
+      const result = await flushAllQueues(token);
+
+      // Acknowledge to SW
+      event.source?.postMessage({ type: 'DMP_SYNC_ACK', result });
+
+      // Notify UI components (toast / status bar)
+      window.dispatchEvent(new CustomEvent('dmp:sync-complete', { detail: result }));
+    }
+  });
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

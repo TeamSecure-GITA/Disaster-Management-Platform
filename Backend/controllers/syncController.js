@@ -17,4 +17,21 @@ const syncBatch = async (req, res, next) => {
   }
 };
 
-module.exports = { syncBatch };
+const getChanges = async (req, res, next) => {
+  try {
+    const data = await syncService.getChangesSince(
+      req.user._id,
+      req.query.since,
+      req.query.resource
+    );
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { syncBatch, getChanges };

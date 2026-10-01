@@ -15,10 +15,20 @@ const syncValidator = [
     .isLength({ min: 1, max: 120 })
     .withMessage("Each operation requires an operation ID"),
   body("operations.*.resource")
-    .equals("family")
-    .withMessage("Only family synchronization is supported"),
+    .isIn(["family", "incident"])
+    .withMessage("Only family and incident synchronization are supported"),
   body("operations.*.action")
-    .isIn(["upsert", "add_member", "update_member", "delete_member", "update_safety"])
+    .isIn([
+      "upsert",
+      "add_member",
+      "update_member",
+      "delete_member",
+      "update_safety",
+      "create",
+      "update",
+      "resolve",
+      "delete",
+    ])
     .withMessage("Unsupported synchronization action"),
   body("operations.*.payload")
     .optional()
@@ -31,19 +41,30 @@ const syncValidator = [
   body("operations").custom((operations) => {
     for (const operation of operations) {
       const payload = operation.payload || {};
-      if (["update_member", "delete_member", "update_safety"].includes(operation.action) &&
-          typeof payload.memberId !== "string") {
-        throw new Error(`${operation.action} requires memberId`);
-      }
-      if (operation.action === "update_safety" && typeof payload.isSafe !== "boolean") {
-        throw new Error("update_safety requires a boolean isSafe value");
-      }
-      if (operation.action === "add_member" && (!payload.name || !payload.relation)) {
-        throw new Error("add_member requires name and relation");
-      }
-      if (operation.action === "update_member" &&
-          (!payload.member || typeof payload.member !== "object")) {
-        throw new Error("update_member requires a member object");
+      if (operation.resource === "family") {
+        if (["update_member", "delete_member", "update_safety"].includes(operation.action) &&
+            typeof payload.memberId !== "string") {
+          throw new Error(`${operation.action} requires memberId`);
+        }
+        if (operation.action === "update_safety" && typeof payload.isSafe !== "boolean") {
+          throw new Error("update_safety requires a boolean isSafe value");
+        }
+        if (operation.action === "add_member" && (!payload.name || !payload.relation)) {
+          throw new Error("add_member requires name and relation");
+        }
+        if (operation.action === "update_member" &&
+            (!payload.member || typeof payload.member !== "object")) {
+          throw new Error("update_member requires a member object");
+        }
+      } else if (operation.resource === "incident") {
+        if (operation.action === "create") {
+          if (!payload.description && !payload.desc) {
+            throw new Error("Incident create requires description");
+          }
+        }
+        if (["update", "resolve"].includes(operation.action) && !payload.incidentId && !payload._id && !payload.id) {
+          throw new Error(`${operation.action} requires incidentId or _id`);
+        }
       }
     }
     return true;

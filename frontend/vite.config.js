@@ -40,13 +40,14 @@ export default defineConfig({
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
-          // OpenStreetMap tiles — cache-first, 30 days
+          // OpenStreetMap tiles — cache-first, 90 days, large regional budget for offline NER maps
           {
             urlPattern: /^https:\/\/.*\.tile\.openstreetmap\.org\/.*$/,
             handler: "CacheFirst",
             options: {
               cacheName: "offline-map-tiles",
-              expiration: { maxEntries: 500, maxAgeSeconds: 86400 * 30 },
+              expiration: { maxEntries: 3500, maxAgeSeconds: 86400 * 90 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           // Backend API — network-first with short timeout
