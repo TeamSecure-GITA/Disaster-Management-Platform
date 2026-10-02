@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: 'Release version tag (e.g. v1.0.0)'
+        description: 'Release version tag (e.g. v1.0.1)'
         required: true
-        default: 'v1.0.0'
+        default: 'v1.0.1'
       release_notes:
         description: 'Release notes / changelog'
         required: false
@@ -22,9 +22,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'mobile/**'
-      - '!mobile/**/*.md'
+    tags:
+      - 'v*'
 
 jobs:
   build-and-release:
@@ -48,13 +47,16 @@ jobs:
       # ── 3. Android SDK ──────────────────────────────────────
       - name: 📱 Set up Android SDK
         run: |
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "Using Android SDK at: $SDK_ROOT"
+          yes | $SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+          $SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
             "platform-tools" \
             "build-tools;34.0.0" \
-            "platforms;android-34" > /dev/null 2>&1
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+            "platforms;android-34" > /dev/null 2>&1 || true
+          echo "ANDROID_HOME=$SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> $GITHUB_ENV
+          echo "$SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
       # ── 4. Node ─────────────────────────────────────────────
       - name: 🟢 Set up Node.js
@@ -73,11 +75,12 @@ jobs:
       - name: ⚙️ Expo Prebuild (generate Android project)
         working-directory: mobile
         env:
+          CI: '1'
           EXPO_PUBLIC_ENVIRONMENT: 'production'
           EXPO_PUBLIC_API_URL: 'https://disaster-management-platform-backend.onrender.com/api'
           EXPO_PUBLIC_ML_API_URL: 'https://disaster-management-platform-ml.onrender.com'
           EXPO_PUBLIC_WS_URL: 'wss://disaster-management-platform-backend.onrender.com'
-        run: npx expo prebuild --platform android --clean --non-interactive
+        run: npx expo prebuild --platform android --clean
 
       # ── 7. Gradle build ─────────────────────────────────────
       - name: 🔨 Build APK with Gradle
@@ -109,7 +112,17 @@ jobs:
           APK_SIZE=$(du -sh "$APK_PATH" | cut -f1)
           echo "Found APK: $APK_PATH ($APK_SIZE)"
           cp "$APK_PATH" Disaster-Sentinel-Mobile.apk
+          mkdir -p mobile
+          cp "$APK_PATH" mobile/Disaster-Sentinel-Mobile.apk
           echo "apk_size=$APK_SIZE" >> $GITHUB_OUTPUT
+
+      # ── 8b. Upload APK Artifact ─────────────────────────────
+      - name: 💾 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Disaster-Sentinel-Mobile-APK
+          path: Disaster-Sentinel-Mobile.apk
+          if-no-files-found: error
 
       # ── 9. Determine tag ────────────────────────────────────
       - name: 🏷️ Determine release tag
@@ -117,6 +130,8 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.version_tag }}" ]; then
             TAG="${{ github.event.inputs.version_tag }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
           else
             TAG="v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}"
           fi
