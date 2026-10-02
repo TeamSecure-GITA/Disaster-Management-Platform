@@ -1,106 +1,177 @@
-name: Build Android APK
+name: 🚀 Build & Release Android APK (EAS Cloud)
 
 on:
   workflow_dispatch:
     inputs:
-      build_type:
-        description: 'Build Type (release or debug)'
+      version_tag:
+        description: 'Release version tag (e.g. v1.0.0)'
         required: true
-        default: 'release'
+        default: 'v1.0.0'
+      release_notes:
+        description: 'Release notes / changelog'
+        required: false
+        default: 'New build of Disaster Sentinel Mobile'
+      eas_profile:
+        description: 'EAS build profile'
+        required: true
+        default: 'apk'
         type: choice
         options:
-          - release
-          - debug
-      api_url:
-        description: 'Backend API URL (Render)'
-        required: false
-        default: 'https://disaster-management-platform-backend.onrender.com/api'
-      ml_api_url:
-        description: 'ML API URL (Render)'
-        required: false
-        default: 'https://disaster-management-platform-ml.onrender.com'
+          - apk
+          - preview
   push:
     branches:
       - main
     paths:
       - 'mobile/**'
+      - '!mobile/**/*.md'
 
 jobs:
-  build-apk:
-    name: Build Android APK
+  # ─────────────────────────────────────────────────────────────
+  # JOB 1: Trigger EAS Cloud build and capture the APK URL
+  # ─────────────────────────────────────────────────────────────
+  eas-build:
+    name: 📦 EAS Cloud Build
     runs-on: ubuntu-latest
+    outputs:
+      apk_url: ${{ steps.get-apk-url.outputs.apk_url }}
+      build_id: ${{ steps.eas-build.outputs.build_id }}
 
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-
-      - name: ☕ Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: 📱 Set up Android SDK
-        run: |
-          # Use the pre-installed SDK on ubuntu-latest runners
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-
-          # Accept all licenses non-interactively
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-
-          # Install required SDK components (skipping deprecated 'tools' package)
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "build-tools;34.0.0" \
-            "platforms;android-34" > /dev/null 2>&1
-
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
       - name: 🟢 Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: 'mobile/package.json'
+          cache-dependency-path: mobile/package.json
 
       - name: 📦 Install dependencies
         working-directory: mobile
         run: npm install --legacy-peer-deps
 
-      - name: ⚙️ Generate Native Android Project
+      - name: 🔧 Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: 🏗️ Trigger EAS Build and wait for completion
+        id: eas-build
         working-directory: mobile
         env:
-          EXPO_PUBLIC_ENVIRONMENT: 'production'
-          EXPO_PUBLIC_API_URL: ${{ github.event.inputs.api_url || 'https://disaster-management-platform-backend.onrender.com/api' }}
-          EXPO_PUBLIC_ML_API_URL: ${{ github.event.inputs.ml_api_url || 'https://disaster-management-platform-ml.onrender.com' }}
-        run: npx expo prebuild --platform android --clean
-
-      - name: 🔨 Build Android APK with Gradle
-        working-directory: mobile/android
-        env:
-          EXPO_PUBLIC_ENVIRONMENT: 'production'
-          EXPO_PUBLIC_API_URL: ${{ github.event.inputs.api_url || 'https://disaster-management-platform-backend.onrender.com/api' }}
-          EXPO_PUBLIC_ML_API_URL: ${{ github.event.inputs.ml_api_url || 'https://disaster-management-platform-ml.onrender.com' }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          chmod +x gradlew
-          if [ "${{ github.event.inputs.build_type }}" = "debug" ]; then
-            ./gradlew assembleDebug --no-daemon
-          else
-            ./gradlew assembleRelease --no-daemon
+          PROFILE="${{ github.event.inputs.eas_profile || 'apk' }}"
+          echo "Building with EAS profile: $PROFILE"
+
+          # Run build and capture JSON output
+          BUILD_JSON=$(eas build \
+            --platform android \
+            --profile "$PROFILE" \
+            --non-interactive \
+            --wait \
+            --json 2>/dev/null)
+
+          BUILD_ID=$(echo "$BUILD_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['id'] if isinstance(d,list) else d['id'])" 2>/dev/null || \
+                     echo "$BUILD_JSON" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "Build ID: $BUILD_ID"
+
+      - name: 🔗 Get APK download URL
+        id: get-apk-url
+        working-directory: mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          BUILD_ID="${{ steps.eas-build.outputs.build_id }}"
+
+          APK_URL=$(eas build:view "$BUILD_ID" --json | \
+            python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('artifacts',{}).get('buildUrl',''))")
+
+          if [ -z "$APK_URL" ]; then
+            echo "ERROR: Could not extract APK URL from EAS build $BUILD_ID"
+            exit 1
           fi
 
-      - name: 🔍 Locate APK
-        id: find-apk
-        run: |
-          APK_PATH=$(find mobile/android/app/build/outputs/apk -name "*.apk" | head -n 1)
-          echo "Found APK: $APK_PATH"
-          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "apk_url=$APK_URL" >> $GITHUB_OUTPUT
+          echo "APK URL: $APK_URL"
 
-      - name: 🚀 Upload APK Artifact
-        uses: actions/upload-artifact@v4
+  # ─────────────────────────────────────────────────────────────
+  # JOB 2: Download APK and publish as GitHub Release
+  # ─────────────────────────────────────────────────────────────
+  github-release:
+    name: 🚀 Publish GitHub Release
+    runs-on: ubuntu-latest
+    needs: eas-build
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⬇️ Download APK from EAS
+        run: |
+          APK_URL="${{ needs.eas-build.outputs.apk_url }}"
+          echo "Downloading APK from EAS..."
+          curl -L -o Disaster-Sentinel-Mobile.apk "$APK_URL"
+          ls -lh Disaster-Sentinel-Mobile.apk
+
+      - name: 🏷️ Determine release tag
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.version_tag }}" ]; then
+            TAG="${{ github.event.inputs.version_tag }}"
+          else
+            TAG="v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Release tag: $TAG"
+
+      - name: 📝 Generate release body
+        run: |
+          NOTES="${{ github.event.inputs.release_notes }}"
+          if [ -z "$NOTES" ]; then
+            NOTES="Automated build from commit \`${GITHUB_SHA::7}\`"
+          fi
+          cat > release_notes.md << MARKDOWN
+          ## 📱 Disaster Sentinel Mobile — ${{ steps.tag.outputs.tag }}
+
+          $NOTES
+
+          ### 🔨 Build Details
+          | Field | Value |
+          |-------|-------|
+          | Commit | \`${GITHUB_SHA::7}\` |
+          | Branch | \`${GITHUB_REF_NAME}\` |
+          | EAS Build ID | \`${{ needs.eas-build.outputs.build_id }}\` |
+          | EAS Profile | \`${{ github.event.inputs.eas_profile || 'apk' }}\` |
+          | Built at | $(date -u +'%Y-%m-%d %H:%M UTC') |
+
+          ### 📲 How to Install
+          1. Download **Disaster-Sentinel-Mobile.apk** below
+          2. Transfer to your Android device
+          3. Enable *Install from unknown sources* in Settings → Security
+          4. Open the APK file and tap **Install**
+          MARKDOWN
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: disaster-sentinel-${{ github.event.inputs.build_type || 'release' }}-apk
-          path: ${{ steps.find-apk.outputs.apk_path }}
-          retention-days: 30
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "Disaster Sentinel Mobile ${{ steps.tag.outputs.tag }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: Disaster-Sentinel-Mobile.apk
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ✅ Print release summary
+        run: |
+          echo "## Release Published" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ steps.tag.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **EAS Build:** ${{ needs.eas-build.outputs.build_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **APK:** Disaster-Sentinel-Mobile.apk" >> $GITHUB_STEP_SUMMARY
