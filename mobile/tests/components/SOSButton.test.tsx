@@ -16,4 +16,4 @@ describe('SOSButton Component', () => {
     fireEvent.press(btn);
     expect(onPress).toHaveBeenCalled();
   });
-});\n
+});

@@ -11,6 +11,14 @@ on:
         options:
           - release
           - debug
+      api_url:
+        description: 'Backend API URL (Render)'
+        required: false
+        default: 'https://disaster-management-platform-backend.onrender.com/api'
+      ml_api_url:
+        description: 'ML API URL (Render)'
+        required: false
+        default: 'https://disaster-management-platform-ml.onrender.com'
   push:
     branches:
       - main
@@ -48,10 +56,18 @@ jobs:
 
       - name: ⚙️ Generate Native Android Project
         working-directory: mobile
+        env:
+          EXPO_PUBLIC_ENVIRONMENT: 'production'
+          EXPO_PUBLIC_API_URL: ${{ github.event.inputs.api_url || 'https://disaster-management-platform-backend.onrender.com/api' }}
+          EXPO_PUBLIC_ML_API_URL: ${{ github.event.inputs.ml_api_url || 'https://disaster-management-platform-ml.onrender.com' }}
         run: npx expo prebuild --platform android --clean
 
       - name: 🔨 Build Android APK with Gradle
         working-directory: mobile/android
+        env:
+          EXPO_PUBLIC_ENVIRONMENT: 'production'
+          EXPO_PUBLIC_API_URL: ${{ github.event.inputs.api_url || 'https://disaster-management-platform-backend.onrender.com/api' }}
+          EXPO_PUBLIC_ML_API_URL: ${{ github.event.inputs.ml_api_url || 'https://disaster-management-platform-ml.onrender.com' }}
         run: |
           chmod +x gradlew
           if [ "${{ github.event.inputs.build_type }}" = "debug" ]; then

@@ -26,4 +26,4 @@ describe('SOS Service', () => {
 
     expect(packet.byteLength).toBeLessThanOrEqual(256);
   });
-});\n
+});

@@ -11,17 +11,35 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production",
+        "EXPO_PUBLIC_API_URL": "https://disaster-management-platform-backend.onrender.com/api",
+        "EXPO_PUBLIC_ML_API_URL": "https://disaster-management-platform-ml.onrender.com",
+        "EXPO_PUBLIC_WS_URL": "wss://disaster-management-platform-backend.onrender.com"
       }
     },
     "apk": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production",
+        "EXPO_PUBLIC_API_URL": "https://disaster-management-platform-backend.onrender.com/api",
+        "EXPO_PUBLIC_ML_API_URL": "https://disaster-management-platform-ml.onrender.com",
+        "EXPO_PUBLIC_WS_URL": "wss://disaster-management-platform-backend.onrender.com"
       }
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production",
+        "EXPO_PUBLIC_API_URL": "https://disaster-management-platform-backend.onrender.com/api",
+        "EXPO_PUBLIC_ML_API_URL": "https://disaster-management-platform-ml.onrender.com",
+        "EXPO_PUBLIC_WS_URL": "wss://disaster-management-platform-backend.onrender.com"
       }
     }
   },

@@ -28,4 +28,4 @@ describe('Auth Store', () => {
     expect(updated.user?.name).toBe('Jane Doe');
     expect(updated.accessToken).toBe('access_token_xyz');
   });
-});\n
+});

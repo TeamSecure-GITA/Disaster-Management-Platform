@@ -32,4 +32,4 @@ describe('Emergency End-to-End Flow Integration', () => {
 
     expect(useOfflineStore.getState().pendingQueueCount).toBeGreaterThanOrEqual(1);
   });
-});\n
+});

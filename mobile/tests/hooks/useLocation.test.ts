@@ -7,4 +7,4 @@ describe('useLocation Hook', () => {
     expect(result.current.hasPermission).toBeDefined();
     expect(result.current.isLoading).toBeDefined();
   });
-});\n
+});

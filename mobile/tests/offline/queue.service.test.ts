@@ -33,4 +33,4 @@ describe('Offline Queue Service', () => {
     const pending = await queue.getPendingItems();
     expect(pending.length).toBeGreaterThan(0);
   });
-});\n
+});

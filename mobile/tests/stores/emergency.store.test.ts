@@ -23,4 +23,4 @@ describe('Emergency Store', () => {
     expect(useEmergencyStore.getState().isCountdownActive).toBe(false);
     expect(useEmergencyStore.getState().sosStatus).toBe('idle');
   });
-});\n
+});

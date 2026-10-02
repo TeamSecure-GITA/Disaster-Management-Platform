@@ -10,4 +10,4 @@ describe('ApiClient', () => {
     const client = new ApiClient({ baseURL: 'http://localhost:5000/api' });
     expect(client.getBaseURL()).toContain('5000');
   });
-});\n
+});
