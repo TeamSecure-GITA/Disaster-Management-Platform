@@ -3038,7 +3038,13 @@ html[data-desktop-mode="true"] .app-main-content-scroll,
 }
 
 /* ── Mobile Header Adaptations ── */
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
+  .header-emergency-card {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
   .header-status-chip-text {
     display: none !important;
   }
@@ -3046,14 +3052,39 @@ html[data-desktop-mode="true"] .app-main-content-scroll,
     display: none !important;
   }
   .header-container {
-    padding: 8px 12px !important;
+    padding: 6px 10px !important;
+  }
+  .header-brand-subtitle {
+    display: none !important;
+  }
+  .header-brand-title {
+    font-size: 0.84rem !important;
+  }
+  .header-profile-text {
+    display: none !important;
+  }
+  .header-profile-pill {
+    padding: 3px !important;
+  }
+  .header-online-badge {
+    display: none !important;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 580px) {
+  .header-live-clock {
+    display: none !important;
+  }
+  .header-sos-btn span:last-child {
+    display: none !important;
+  }
+  .header-sos-btn {
+    padding: 5px 9px !important;
+    font-size: 0.7rem !important;
+  }
   .header-lang-select {
-    max-width: 82px !important;
-    font-size: 0.72rem !important;
+    max-width: 70px !important;
+    font-size: 0.70rem !important;
   }
 }
 
@@ -3163,6 +3194,160 @@ html[data-desktop-mode="true"] .app-main-content-scroll,
 @media (min-width: 1024px) {
   .dashboard-main-grid {
     grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE MAP & TELEMETRY LAYOUTS:
+   Desktop (>= 1024px): Side-by-side (Left Map, Right Data)
+   Mobile (< 1024px): Top-to-bottom (Top Map, Bottom Data)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* 1. Live GIS Map Page (/map) */
+.map-main-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.map-left-frame {
+  height: 480px;
+  min-height: 420px;
+  width: 100%;
+}
+
+.map-right-frame {
+  height: auto;
+  max-height: 620px;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .map-main-layout-grid {
+    grid-template-columns: minmax(0, 1.8fr) minmax(360px, 1.2fr) !important;
+    gap: 18px !important;
+  }
+  .map-left-frame {
+    height: 720px !important;
+  }
+  .map-right-frame {
+    height: 720px !important;
+  }
+}
+
+/* In-Map Weather Scale Legend */
+@media (max-width: 768px) {
+  .map-weather-legend {
+    top: auto !important;
+    bottom: 14px !important;
+    right: 14px !important;
+    padding: 6px 10px !important;
+    font-size: 0.68rem !important;
+    max-width: 170px !important;
+    background: rgba(15, 23, 42, 0.94) !important;
+  }
+}
+
+/* 2. Live Rescue Centers & Shelters Page (/rescue-centers) */
+.rescue-main-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.rescue-map-canvas {
+  height: 440px !important;
+}
+
+.rescue-info-frame {
+  height: auto;
+  max-height: 650px;
+}
+
+@media (min-width: 1024px) {
+  .rescue-main-layout-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(370px, 1fr) !important;
+  }
+  .rescue-map-canvas {
+    height: 580px !important;
+  }
+}
+
+/* 3. Anti-Herd Dynamic Evacuation Router Page (/dynamic-evacuation) */
+.dynamic-router-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.dynamic-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 1024px) {
+  .dynamic-router-layout-grid {
+    grid-template-columns: 1fr 340px !important;
+    gap: 20px !important;
+  }
+  .dynamic-compare-grid {
+    grid-template-columns: 1fr 1.2fr !important;
+  }
+}
+
+/* 4. Community Reconstruction Map Page (/reconstruction) */
+.reconstruction-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .reconstruction-layout-grid {
+    grid-template-columns: 260px 1fr !important;
+    gap: 20px !important;
+  }
+}
+
+/* 5. Decentralized Resilience Suite Page (/decentralized-resilience) */
+.decentralized-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.decentralized-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .decentralized-main-grid {
+    grid-template-columns: minmax(0, 1fr) 340px !important;
+  }
+  .decentralized-hero-grid {
+    grid-template-columns: 1fr 340px !important;
+    gap: 24px !important;
+  }
+}
+
+/* Mobile Touch & Resolution Polish */
+@media (max-width: 768px) {
+  .app-main-content-scroll {
+    padding: 10px 12px 90px 12px !important;
+  }
+  .custom-leaflet-marker {
+    transform: scale(0.92);
+  }
+  .leaflet-popup-content-wrapper {
+    max-width: 85vw !important;
   }
 }
 

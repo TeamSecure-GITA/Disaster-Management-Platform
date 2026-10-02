@@ -579,7 +579,64 @@ export default function Sidebar({ isOpen = false, isDesktopMode = false, onClose
       )}
 
       {/* ── Navigation Links Container ─────────────────────── */}
-      <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
+      <div style={{ padding: "8px 10px 90px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
+
+        {/* Quick Menu Search / Filter for fast navigation on mobile & desktop */}
+        <div style={{ marginBottom: "12px", position: "relative" }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search all menus & modules..."
+            aria-label="Filter navigation menus"
+            style={{
+              width: "100%",
+              padding: "7px 28px 7px 10px",
+              backgroundColor: "rgba(15, 23, 42, 0.8)",
+              border: "1px solid rgba(56, 189, 248, 0.25)",
+              borderRadius: "8px",
+              color: "#f8fafc",
+              fontSize: "0.78rem",
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+          {searchQuery ? (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              style={{
+                position: "absolute",
+                right: "6px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "transparent",
+                border: "none",
+                color: "#94a3b8",
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                padding: "2px 4px",
+              }}
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          ) : (
+            <span
+              style={{
+                position: "absolute",
+                right: "8px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#64748b",
+                fontSize: "0.7rem",
+                pointerEvents: "none",
+              }}
+            >
+              🔍
+            </span>
+          )}
+        </div>
 
         {/* Administrator command badge — shown if authorized */}
         {isAdmin && (

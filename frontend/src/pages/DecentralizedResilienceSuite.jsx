@@ -515,9 +515,9 @@ export default function DecentralizedResilienceSuite() {
 
       {/* ── 2-COLUMN MAIN DASHBOARD GRID ── */}
       <div
+        className="decentralized-main-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 340px",
           gap: "16px",
           alignItems: "start",
         }}
@@ -527,6 +527,7 @@ export default function DecentralizedResilienceSuite() {
 
           {/* ── 1. HERO BANNER CARD ── */}
           <div
+            className="decentralized-hero-grid"
             style={{
               position: "relative",
               borderRadius: "20px",
@@ -536,7 +537,6 @@ export default function DecentralizedResilienceSuite() {
               padding: "24px 28px",
               boxShadow: "0 10px 30px rgba(0, 0, 0, 0.6)",
               display: "grid",
-              gridTemplateColumns: "1fr 340px",
               gap: "24px",
               alignItems: "center",
             }}
@@ -802,7 +802,7 @@ export default function DecentralizedResilienceSuite() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
               gap: "12px",
             }}
           >
@@ -989,7 +989,7 @@ export default function DecentralizedResilienceSuite() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                 gap: "12px",
               }}
             >
@@ -1111,7 +1111,7 @@ export default function DecentralizedResilienceSuite() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(6, 1fr)",
+                gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
                 gap: "8px",
                 position: "relative",
               }}

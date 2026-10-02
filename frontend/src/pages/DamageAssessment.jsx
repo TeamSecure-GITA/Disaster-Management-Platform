@@ -326,7 +326,7 @@ export default function DamageAssessment() {
 
       {activeTab === "bot" ? (
         /* ── WhatsApp / Telegram Bot Section ── */
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "26px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", marginBottom: "26px" }}>
           {/* Bot Phone Simulator */}
           <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "18px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {/* Bot Header */}
@@ -621,7 +621,7 @@ export default function DamageAssessment() {
           </div>
 
           {/* ── Upload & Analysis Card ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "26px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", marginBottom: "26px" }}>
             {/* Upload Box */}
             <div style={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "16px", padding: "24px" }}>
               <h3 style={{ margin: "0 0 14px 0", fontSize: "1.1rem", fontWeight: "700" }}>

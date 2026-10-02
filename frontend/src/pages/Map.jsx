@@ -191,9 +191,23 @@ const hazardIcon   = createCustomIcon("#dc2626", "⚠️");
 // Component to dynamically pan and zoom the map
 function MapController({ center, zoom }) {
   const map = useMap();
+
+  useEffect(() => {
+    // Invalidate size on mount / resize so tiles render sharply with full resolution
+    const timer = setTimeout(() => {
+      try {
+        map.invalidateSize();
+      } catch (_) {}
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [map]);
+
   useEffect(() => {
     if (center) {
       map.flyTo(center, zoom || 13, { duration: 1.2 });
+      try {
+        map.invalidateSize();
+      } catch (_) {}
     }
   }, [center, zoom, map]);
   return null;
@@ -2127,25 +2141,25 @@ export default function Map() {
         </div>
       )}
 
-      {/* ── 2-Column Responsive Layout: Map on the LEFT, Scrollable Telemetry Bar on the RIGHT ── */}
+      {/* ── Responsive Layout: Desktop side-by-side (Map Left, Telemetry Right), Mobile top-to-bottom (Map Top, Telemetry Bottom) ── */}
       <div
+        className="map-main-layout-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1.8fr) minmax(360px, 1.2fr)",
           gap: "18px",
           alignItems: "stretch",
           marginBottom: "20px",
         }}
       >
-        {/* ── LEFT FRAME: RESPONSE MAP ── */}
+        {/* ── LEFT / TOP FRAME: RESPONSE MAP ── */}
         <div
+          className="map-left-frame"
           style={{
             position: "relative",
             borderRadius: "16px",
             overflow: "hidden",
             border: "1px solid #334155",
             boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
-            height: "720px",
             display: "flex",
             flexDirection: "column",
           }}
@@ -3100,6 +3114,7 @@ export default function Map() {
 
           {/* ── GOOGLE WEATHER MAP STYLE COLOR SCALE LEGEND ── */}
           <div
+            className="map-weather-legend"
             style={{
               position: "absolute",
               top: "16px",
@@ -3140,8 +3155,9 @@ export default function Map() {
           </div>
         </div>
 
-        {/* ── RIGHT FRAME: SCROLLABLE TELEMETRY & HAZARDS DIRECTORY BAR ── */}
+        {/* ── RIGHT / BOTTOM FRAME: SCROLLABLE TELEMETRY & HAZARDS DIRECTORY BAR ── */}
         <div
+          className="map-right-frame"
           style={{
             backgroundColor: "#0f172a",
             border: "1px solid #1e293b",
@@ -3149,7 +3165,6 @@ export default function Map() {
             padding: "16px 18px",
             display: "flex",
             flexDirection: "column",
-            height: "720px",
             boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
             boxSizing: "border-box",
           }}

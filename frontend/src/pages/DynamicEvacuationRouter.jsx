@@ -195,7 +195,7 @@ export default function DynamicEvacuationRouter() {
       </div>
 
       {/* Anti-Herd Banner & Personal Assignment Card */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "14px", marginBottom: "20px" }}>
+      <div className="dynamic-compare-grid" style={{ display: "grid", gap: "14px", marginBottom: "20px" }}>
         {/* Anti-Herd Comparison */}
         <div style={{ backgroundColor: "rgba(15,23,42,0.7)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", padding: "14px 18px" }}>
           <div style={{ fontSize: "0.78rem", fontWeight: "800", color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
@@ -235,7 +235,7 @@ export default function DynamicEvacuationRouter() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "14px", marginBottom: "24px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "14px", marginBottom: "24px" }}>
         {[
           { label: "Total Evacuated",   value: totalEvacuated.toLocaleString(), icon: "👥", color: "#34d399" },
           { label: "Anti-Herd Reroutes",value: reassignments,                    icon: "🔀", color: "#fbbf24" },
@@ -250,7 +250,8 @@ export default function DynamicEvacuationRouter() {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "20px" }}>
+      {/* ── Main Layout: Map (Top on Mobile, Left on Desktop) and Traffic Load (Bottom on Mobile, Right on Desktop) ── */}
+      <div className="dynamic-router-layout-grid" style={{ display: "grid", gap: "20px" }}>
         {/* MAP */}
         <div style={{ background: "rgba(15,23,42,0.7)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", backdropFilter: "blur(10px)" }}>
           <h3 style={{ margin: "0 0 14px", fontSize: "0.85rem", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em" }}>🗺️ Live Route Map</h3>

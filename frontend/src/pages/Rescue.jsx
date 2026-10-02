@@ -503,17 +503,18 @@ export default function Rescue() {
         </div>
       </div>
 
-      {/* ── 3. MAIN SECTION: MAP ON LEFT & INFO SCROLLBAR ON RIGHT ───────────── */}
+      {/* ── 3. MAIN SECTION: RESPONSIVE MAP (TOP ON MOBILE, LEFT ON DESKTOP) & INFO LIST (BOTTOM ON MOBILE, RIGHT ON DESKTOP) ───────────── */}
       <div
+        className="rescue-main-layout-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1.4fr) minmax(370px, 1fr)",
           gap: "16px",
           alignItems: "start",
         }}
       >
-        {/* ────────────── LEFT: LIVE RESCUE CENTERS MAP (DASHBOARD FRAME) ────────────── */}
+        {/* ────────────── LEFT / TOP: LIVE RESCUE CENTERS MAP (DASHBOARD FRAME) ────────────── */}
         <div
+          className="rescue-map-frame"
           style={{
             backgroundColor: "#070e1c",
             borderRadius: "16px",
@@ -696,6 +697,7 @@ export default function Rescue() {
 
           {/* Map Viewport Canvas with Topo Imagery & Vector SVG Pins */}
           <div
+            className="rescue-map-canvas"
             style={{
               position: "relative",
               height: "580px",
@@ -1326,8 +1328,9 @@ export default function Rescue() {
           </div>
         </div>
 
-        {/* ────────────── RIGHT: INFO BAR WITH SCROLLING OPTION ────────────── */}
+        {/* ────────────── RIGHT / BOTTOM: INFO BAR WITH SCROLLING OPTION ────────────── */}
         <div
+          className="rescue-info-frame"
           style={{
             backgroundColor: "#0b1222",
             borderRadius: "16px",

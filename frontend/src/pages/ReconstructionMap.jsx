@@ -134,7 +134,7 @@ export default function ReconstructionMap() {
       </div>
 
       {/* Summary Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "14px", marginBottom: "24px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "14px", marginBottom: "24px" }}>
         {[
           { label: "Total Affected Families", value: DISTRICTS.reduce((acc, d) => acc + d.affectedFamilies, 0).toLocaleString(), icon: "👨‍👩‍👧", color: "#f97316" },
           { label: "Districts Recovering",    value: `${DISTRICTS.length} / ${DISTRICTS.length}`, icon: "🗺️", color: "#60a5fa" },
@@ -149,7 +149,7 @@ export default function ReconstructionMap() {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: "20px" }}>
+      <div className="reconstruction-layout-grid" style={{ display: "grid", gap: "20px" }}>
         {/* District list */}
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {DISTRICTS.map(d => {

@@ -288,6 +288,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
             </div>
             <div style={{ display: "flex", flexDirection: "column", lineHeight: "1.15" }}>
               <span
+                className="header-brand-title"
                 style={{
                   fontSize: "0.96rem",
                   fontWeight: "900",
@@ -299,6 +300,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                 Disaster Management Platform
               </span>
               <span
+                className="header-brand-subtitle"
                 style={{
                   fontSize: "0.64rem",
                   color: "#38bdf8",
@@ -427,6 +429,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
           {/* Quick 1-Tap Emergency SOS Beacon Shortcut */}
           <Link
             to="/emergency-sos"
+            className="header-sos-btn"
             style={{
               display: "flex",
               alignItems: "center",
@@ -543,6 +546,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
           {loggedIn && (
             <Link
               to="/profile"
+              className="header-profile-pill"
               title={`View Profile (${displayName})`}
               style={{
                 display: "flex",
@@ -596,7 +600,7 @@ export default function HeaderTopBar({ onToggleSidebar, isDesktopMode = false })
                   }}
                 />
               </div>
-              <div style={{ display: "flex", flexDirection: "column", textAlign: "left", lineHeight: "1.2" }}>
+              <div className="header-profile-text" style={{ display: "flex", flexDirection: "column", textAlign: "left", lineHeight: "1.2" }}>
                 <span style={{ fontSize: "0.8rem", fontWeight: "700", color: "#f8fafc" }}>
                   {displayName.length > 14 ? `${displayName.substring(0, 14)}...` : displayName}
                 </span>
