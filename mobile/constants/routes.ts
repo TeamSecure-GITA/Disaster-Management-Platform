@@ -89,6 +89,10 @@ export const ROUTES = {
       DYNAMIC_EVACUATION: '/(main)/features/dynamic-evacuation',
       FAQ: '/(main)/features/faq',
       REVIEWS: '/(main)/features/reviews',
+      HYPER_SPEED_RESCUE: '/(main)/features/hyper-speed-rescue',
+      VULNERABILITY_MAP: '/(main)/features/vulnerability-map',
+      RESCUE_CENTERS: '/(main)/features/rescue-centers',
+      ADMINISTRATOR_HUB: '/(main)/features/administrator-hub',
     },
   },
   MODAL: {

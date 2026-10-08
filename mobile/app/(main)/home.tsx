@@ -47,7 +47,7 @@ export default function HomeScreen() {
           <View style={styles.hubBannerLeft}>
             <Text style={styles.hubBannerIcon}>⚡</Text>
             <View>
-              <Text style={styles.hubBannerTitle}>All Platform Features (35+ Modules)</Text>
+              <Text style={styles.hubBannerTitle}>All Platform Features (40+ Modules)</Text>
               <Text style={styles.hubBannerSubtitle}>
                 Complete tactical toolchain matching full web platform
               </Text>
@@ -113,6 +113,35 @@ export default function HomeScreen() {
             <Text style={styles.cardIcon}>🏃</Text>
             <Text style={styles.cardLabel}>Anti-Herd Evac</Text>
             <Text style={styles.cardSub}>Flow balance</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.gridRow}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.FEATURES.RESCUE_CENTERS as any)}
+          >
+            <Text style={styles.cardIcon}>🏥</Text>
+            <Text style={styles.cardLabel}>Rescue Centers</Text>
+            <Text style={styles.cardSub}>NDRF Base Camps</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.RISK.SAFE_ZONES as any)}
+          >
+            <Text style={styles.cardIcon}>🛡️</Text>
+            <Text style={styles.cardLabel}>Safe Zones</Text>
+            <Text style={styles.cardSub}>Geotech green</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.EMERGENCY.CONTACTS as any)}
+          >
+            <Text style={styles.cardIcon}>📞</Text>
+            <Text style={styles.cardLabel}>Helplines</Text>
+            <Text style={styles.cardSub}>1078, 112, 108</Text>
           </TouchableOpacity>
         </View>
 
@@ -356,9 +385,47 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.gridRow}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.FEATURES.HYPER_SPEED_RESCUE as any)}
+          >
+            <Text style={styles.cardIcon}>⚡</Text>
+            <Text style={styles.cardLabel}>Hyper Rescue</Text>
+            <Text style={styles.cardSub}>Sub-3m swarm</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.FEATURES.VULNERABILITY_MAP as any)}
+          >
+            <Text style={styles.cardIcon}>🌉</Text>
+            <Text style={styles.cardLabel}>Infra Vulnerability</Text>
+            <Text style={styles.cardSub}>GIS Heatmap</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.FEATURES.AID_LEDGER as any)}
+          >
+            <Text style={styles.cardIcon}>📦</Text>
+            <Text style={styles.cardLabel}>Aid Ledger</Text>
+            <Text style={styles.cardSub}>Crypto supply</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* ── 8. System, Protocols & Support ── */}
         <Text style={styles.sectionTitle}>⚙️ PROTOCOLS & PLATFORM SUPPORT</Text>
         <View style={styles.gridRow}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.FEATURES.ADMINISTRATOR_HUB as any)}
+          >
+            <Text style={styles.cardIcon}>🛡️</Text>
+            <Text style={styles.cardLabel}>Admin Hub</Text>
+            <Text style={styles.cardSub}>Threat override</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.gridCard}
             onPress={() => router.push(ROUTES.MAIN.FEATURES.FAQ as any)}
@@ -376,6 +443,17 @@ export default function HomeScreen() {
             <Text style={styles.cardLabel}>Feedback</Text>
             <Text style={styles.cardSub}>Field reviews</Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.gridRow}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.FEATURES.RECONSTRUCTION as any)}
+          >
+            <Text style={styles.cardIcon}>🏗️</Text>
+            <Text style={styles.cardLabel}>Rebuild Map</Text>
+            <Text style={styles.cardSub}>Recovery status</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.gridCard}
@@ -384,6 +462,15 @@ export default function HomeScreen() {
             <Text style={styles.cardIcon}>⚙️</Text>
             <Text style={styles.cardLabel}>Settings</Text>
             <Text style={styles.cardSub}>Preferences</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push(ROUTES.MAIN.PROFILE.DETAILS as any)}
+          >
+            <Text style={styles.cardIcon}>👤</Text>
+            <Text style={styles.cardLabel}>Profile</Text>
+            <Text style={styles.cardSub}>Responder ID</Text>
           </TouchableOpacity>
         </View>
 

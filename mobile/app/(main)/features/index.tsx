@@ -117,6 +117,16 @@ const ALL_FEATURES: FeatureItem[] = [
     badge: 'SAFE',
     badgeColor: COLORS.success,
   },
+  {
+    id: 'rescue-centers',
+    title: 'Rescue Centers & Base Camps',
+    subtitle: 'NDRF, SDRF & Army field depots, dive squads & ambulance hubs',
+    category: 'Crisis',
+    icon: '🏥',
+    route: ROUTES.MAIN.FEATURES.RESCUE_CENTERS,
+    badge: 'FIELD BASE',
+    badgeColor: COLORS.success,
+  },
 
   // ── 2. Intelligence & Telemetry
   {
@@ -407,8 +417,38 @@ const ALL_FEATURES: FeatureItem[] = [
     badge: 'AR SCAN',
     badgeColor: '#14B8A6',
   },
+  {
+    id: 'hyper-speed-rescue',
+    title: 'Hyper-Speed Rescue Suite',
+    subtitle: 'Autonomous drone swarms, AR HUD, acoustic screams & LEO links',
+    category: 'Innovation',
+    icon: '⚡',
+    route: ROUTES.MAIN.FEATURES.HYPER_SPEED_RESCUE,
+    badge: 'SUB-3 MIN',
+    badgeColor: '#EF4444',
+  },
+  {
+    id: 'vulnerability-map',
+    title: 'Infrastructure Vulnerability Heatmap',
+    subtitle: 'Bridge, road, drainage & hospital structural hazard GIS',
+    category: 'Innovation',
+    icon: '🌉',
+    route: ROUTES.MAIN.FEATURES.VULNERABILITY_MAP,
+    badge: 'INFRA GIS',
+    badgeColor: '#F97316',
+  },
 
   // ── 7. System, Protocols & Support
+  {
+    id: 'admin-hub',
+    title: 'Administrator Command Hub',
+    subtitle: 'High command incident triage, threat levels & regional siren',
+    category: 'System',
+    icon: '🛡️',
+    route: ROUTES.MAIN.FEATURES.ADMINISTRATOR_HUB,
+    badge: 'HIGH CMD',
+    badgeColor: '#EF4444',
+  },
   {
     id: 'faq',
     title: 'Help, SOP Protocols & FAQ',
@@ -483,7 +523,7 @@ export default function FeaturesIndexScreen() {
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search all 35+ features..."
+            placeholder="Search all 40+ platform features..."
             placeholderTextColor={COLORS.textMuted}
             value={search}
             onChangeText={setSearch}
