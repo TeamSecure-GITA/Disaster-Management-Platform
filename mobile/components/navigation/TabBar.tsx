@@ -13,7 +13,7 @@ export const TabBar: React.FC = () => {
     { label: 'Alerts', route: ROUTES.MAIN.EMERGENCY.ALERTS, icon: '🚨' },
     { label: 'SOS', route: ROUTES.MAIN.EMERGENCY.SOS, icon: '🆘', isSOS: true },
     { label: 'Live Map', route: ROUTES.MAIN.MAPS.LIVE, icon: '🗺️' },
-    { label: 'AI Copilot', route: ROUTES.MAIN.AI.CHAT, icon: '🤖' },
+    { label: 'All Hub', route: ROUTES.MAIN.FEATURES.INDEX, icon: '⚡' },
   ];
 
   return (
